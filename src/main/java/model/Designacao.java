@@ -6,18 +6,12 @@ import java.util.Objects;
 public class Designacao {
     private final LocalDate data;
     private final Parte parte;
-    private final Pessoa responsavel;
-    private final Pessoa ajudante;
+    private final Pessoa pessoa;
 
-    public Designacao(LocalDate data, Parte parte, Pessoa responsavel) {
-        this(data, parte, responsavel, null);
-    }
-
-    public Designacao(LocalDate data, Parte parte, Pessoa responsavel, Pessoa ajudante) {
+    public Designacao(LocalDate data, Parte parte, Pessoa pessoa) {
         this.data = Objects.requireNonNull(data, "data não pode ser nula");
         this.parte = Objects.requireNonNull(parte, "parte não pode ser nula");
-        this.responsavel = Objects.requireNonNull(responsavel, "responsável não pode ser nulo");
-        this.ajudante = ajudante;
+        this.pessoa = Objects.requireNonNull(pessoa, "pessoa não pode ser nula");
     }
 
     public LocalDate getData() {
@@ -28,20 +22,12 @@ public class Designacao {
         return parte;
     }
 
-    public Pessoa getResponsavel() {
-        return responsavel;
-    }
-
-    public Pessoa getAjudante() {
-        return ajudante;
+    public Pessoa getPessoa() {
+        return pessoa;
     }
 
     @Override
     public String toString() {
-        if (ajudante == null) {
-            return data + " - " + parte + ": " + responsavel;
-        }
-
-        return data + " - " + parte + ": " + responsavel + " / Ajudante: " + ajudante;
+        return data + " - " + parte + ": " + pessoa;
     }
 }
