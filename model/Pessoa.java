@@ -4,50 +4,57 @@ import java.util.Objects;
 
 public class Pessoa {
     private final String nome;
-    private final String sexo;
-    private final boolean podeResponsavel;
-    private final boolean podeAjudante;
-    private final boolean podeLeitura;
-    private final boolean podeDiscurso;
+    private final Sexo sexo;
+    private final boolean ativo;
+    private final boolean podeSerResponsavel;
+    private final boolean podeSerAjudante;
+    private final boolean podeFazerLeitura;
+    private final boolean podeFazerDiscurso;
 
     public Pessoa(
             String nome,
-            String sexo,
-            boolean podeResponsavel,
-            boolean podeAjudante,
-            boolean podeLeitura,
-            boolean podeDiscurso
+            Sexo sexo,
+            boolean ativo,
+            boolean podeSerResponsavel,
+            boolean podeSerAjudante,
+            boolean podeFazerLeitura,
+            boolean podeFazerDiscurso
     ) {
         this.nome = Objects.requireNonNull(nome, "nome não pode ser nulo");
         this.sexo = Objects.requireNonNull(sexo, "sexo não pode ser nulo");
-        this.podeResponsavel = podeResponsavel;
-        this.podeAjudante = podeAjudante;
-        this.podeLeitura = podeLeitura;
-        this.podeDiscurso = podeDiscurso;
+        this.ativo = ativo;
+        this.podeSerResponsavel = podeSerResponsavel;
+        this.podeSerAjudante = podeSerAjudante;
+        this.podeFazerLeitura = podeFazerLeitura;
+        this.podeFazerDiscurso = podeFazerDiscurso;
     }
 
     public String getNome() {
         return nome;
     }
 
-    public String getSexo() {
+    public Sexo getSexo() {
         return sexo;
     }
 
-    public boolean isPodeResponsavel() {
-        return podeResponsavel;
+    public boolean isAtivo() {
+        return ativo;
     }
 
-    public boolean isPodeAjudante() {
-        return podeAjudante;
+    public boolean podeSerResponsavel() {
+        return podeSerResponsavel;
     }
 
-    public boolean isPodeLeitura() {
-        return podeLeitura;
+    public boolean podeSerAjudante() {
+        return podeSerAjudante;
     }
 
-    public boolean isPodeDiscurso() {
-        return podeDiscurso;
+    public boolean podeFazerLeitura() {
+        return podeFazerLeitura;
+    }
+
+    public boolean podeFazerDiscurso() {
+        return podeFazerDiscurso;
     }
 
     @Override
