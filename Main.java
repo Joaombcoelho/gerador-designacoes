@@ -16,6 +16,7 @@ public class Main {
         pessoaRepository.adicionar(new Pessoa("Beatriz", Sexo.FEMININO, true, false, true, true, false));
         pessoaRepository.adicionar(new Pessoa("Bruno", Sexo.MASCULINO, true, true, true, true, true));
         pessoaRepository.adicionar(new Pessoa("Carlos", Sexo.MASCULINO, true, true, false, false, true));
+        
 
         List<Parte> partes = List.of(
                 new Parte("Demonstração 1", TipoParte.DEMONSTRACAO),
