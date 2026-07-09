@@ -1,17 +1,17 @@
-package service;
+package br.com.geradordesignacoes.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import model.Designacao;
-import model.Parte;
-import model.Pessoa;
-import model.TipoParte;
+import br.com.geradordesignacoes.model.Designacao;
+import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.TipoParte;
 
 public class GeradorEscala {
     private final RegrasService regrasService;
 
-    public GeradorEscala(RegrasService regrasService) {
+    public GeradorEscala(br.com.geradordesignacoes.service.RegrasService regrasService) {
         this.regrasService = regrasService;
     }
 

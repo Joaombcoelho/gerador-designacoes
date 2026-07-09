@@ -1,9 +1,10 @@
-package service;
+package br.com.geradordesignacoes.service;
 
 import java.util.List;
-import model.Parte;
-import model.Pessoa;
-import model.TipoParte;
+import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.Pessoa;
+
+import static br.com.geradordesignacoes.model.TipoParte.*;
 
 public class RegrasService {
     public boolean podeDesignar(Pessoa pessoa, Parte parte, List<Pessoa> pessoasJaDesignadas) {
