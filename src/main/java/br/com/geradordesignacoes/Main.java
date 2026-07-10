@@ -1,15 +1,8 @@
-import java.time.LocalDate;
-import java.util.List;
-import model.Designacao;
-import model.Parte;
-import model.Pessoa;
-import model.Sexo;
-import model.TipoParte;
-import repository.PessoaRepository;
-import service.GeradorEscala;
-import service.RegrasService;
 
-public class Main {
+package br.com.geradordesignacoes;
+import br.com.geradordesignacoes.database.ConnectionFactory;
+
+/*public class Main {
     public static void main(String[] args) {
         PessoaRepository pessoaRepository = new PessoaRepository();
         pessoaRepository.adicionar(new Pessoa("Ana", Sexo.FEMININO, true, true, true, true, false));
@@ -32,5 +25,27 @@ public class Main {
         );
 
         designacoes.forEach(System.out::println);
+    }
+}*/
+import java.sql.Connection;
+import java.sql.SQLException;
+
+
+public class Main {
+
+    public static void main(String[] args) {
+        System.out.println("Diretório atual: " + System.getProperty("user.dir"));
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+
+            System.out.println("Conexão com SQLite realizada com sucesso!");
+
+        } catch (SQLException e) {
+
+            System.out.println("Erro ao conectar:");
+            e.printStackTrace();
+
+        }
+
     }
 }

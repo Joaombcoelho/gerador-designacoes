@@ -1,4 +1,4 @@
-package model;
+package br.com.geradordesignacoes.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
