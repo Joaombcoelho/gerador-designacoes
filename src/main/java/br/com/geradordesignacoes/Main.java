@@ -1,6 +1,7 @@
 
 package br.com.geradordesignacoes;
 import br.com.geradordesignacoes.database.ConnectionFactory;
+import br.com.geradordesignacoes.database.DatabaseInitializer;
 
 /*public class Main {
     public static void main(String[] args) {
@@ -34,6 +35,7 @@ import java.sql.SQLException;
 public class Main {
 
     public static void main(String[] args) {
+        DatabaseInitializer.initialize();
         System.out.println("Diretório atual: " + System.getProperty("user.dir"));
 
         try (Connection connection = ConnectionFactory.getConnection()) {
