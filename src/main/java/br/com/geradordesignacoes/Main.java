@@ -59,9 +59,9 @@ public class Main {
         // TESTE BUSCAR POR ID
         // ============================
 
-        System.out.println("\nBuscando pessoa pelo ID 1:");
+        System.out.println("\nBuscando pessoa pelo ID 50:");
 
-        Optional<Pessoa> pessoaEncontrada = pessoaDAO.buscarPorId(1);
+        Optional<Pessoa> pessoaEncontrada = pessoaDAO.buscarPorId(50);
 
         if (pessoaEncontrada.isPresent()) {
 

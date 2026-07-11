@@ -54,10 +54,14 @@ public class PessoaDAO {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
 
                 if (generatedKeys.next()) {
+
                     int idGerado = generatedKeys.getInt(1);
                     pessoa.setId(idGerado);
+
                 } else {
+
                     throw new RuntimeException("Não foi possível obter o ID gerado.");
+
                 }
 
             }
@@ -66,6 +70,7 @@ public class PessoaDAO {
             throw new RuntimeException("Erro ao salvar pessoa.", e);
         }
     }
+
 
     public List<Pessoa> listarTodos() {
 
@@ -84,19 +89,8 @@ public class PessoaDAO {
 
             while (resultSet.next()) {
 
-                Pessoa pessoa = new Pessoa(
-                        resultSet.getString("nome"),
-                        Sexo.valueOf(resultSet.getString("sexo")),
-                        resultSet.getBoolean("ativo"),
-                        resultSet.getBoolean("pode_ser_responsavel"),
-                        resultSet.getBoolean("pode_ser_ajudante"),
-                        resultSet.getBoolean("pode_fazer_leitura"),
-                        resultSet.getBoolean("pode_fazer_discurso")
-                );
+                pessoas.add(mapearPessoa(resultSet));
 
-                pessoa.setId(resultSet.getInt("id"));
-
-                pessoas.add(pessoa);
             }
 
         } catch (SQLException e) {
@@ -105,6 +99,7 @@ public class PessoaDAO {
 
         return pessoas;
     }
+
 
     public Optional<Pessoa> buscarPorId(Integer id) {
 
@@ -125,19 +120,10 @@ public class PessoaDAO {
 
                 if (resultSet.next()) {
 
-                    Pessoa pessoa = new Pessoa(
-                            resultSet.getString("nome"),
-                            Sexo.valueOf(resultSet.getString("sexo")),
-                            resultSet.getBoolean("ativo"),
-                            resultSet.getBoolean("pode_ser_responsavel"),
-                            resultSet.getBoolean("pode_ser_ajudante"),
-                            resultSet.getBoolean("pode_fazer_leitura"),
-                            resultSet.getBoolean("pode_fazer_discurso")
-                    );
-
-                    pessoa.setId(resultSet.getInt("id"));
+                    Pessoa pessoa = mapearPessoa(resultSet);
 
                     return Optional.of(pessoa);
+
                 }
 
             }
@@ -149,12 +135,15 @@ public class PessoaDAO {
         return Optional.empty();
     }
 
+
     public void atualizar(Pessoa pessoa) {
 
         if (pessoa.getId() == null) {
+
             throw new IllegalArgumentException(
                     "A pessoa precisa possuir um ID para ser atualizada."
             );
+
         }
 
         String sql = """
@@ -193,8 +182,8 @@ public class PessoaDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao atualizar pessoa.", e);
         }
-
     }
+
 
     public void excluir(Integer id) {
 
@@ -220,4 +209,23 @@ public class PessoaDAO {
             throw new RuntimeException("Erro ao excluir pessoa.", e);
         }
     }
+
+
+    private Pessoa mapearPessoa(ResultSet resultSet) throws SQLException {
+
+        Pessoa pessoa = new Pessoa(
+                resultSet.getString("nome"),
+                Sexo.valueOf(resultSet.getString("sexo")),
+                resultSet.getBoolean("ativo"),
+                resultSet.getBoolean("pode_ser_responsavel"),
+                resultSet.getBoolean("pode_ser_ajudante"),
+                resultSet.getBoolean("pode_fazer_leitura"),
+                resultSet.getBoolean("pode_fazer_discurso")
+        );
+
+        pessoa.setId(resultSet.getInt("id"));
+
+        return pessoa;
+    }
+
 }
