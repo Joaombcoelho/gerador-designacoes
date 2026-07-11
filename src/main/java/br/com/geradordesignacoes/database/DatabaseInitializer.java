@@ -7,11 +7,17 @@ import java.sql.Statement;
 public class DatabaseInitializer {
 
     private static final String CREATE_TABLE_PESSOA = """
-    CREATE TABLE IF NOT EXISTS pessoa (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL,
-        sexo TEXT NOT NULL
-    );
+    
+            CREATE TABLE IF NOT EXISTS pessoa (
+                               id INTEGER PRIMARY KEY AUTOINCREMENT,
+                               nome TEXT NOT NULL,
+                               sexo TEXT NOT NULL,
+                               ativo INTEGER NOT NULL,
+                               pode_ser_responsavel INTEGER NOT NULL,
+                               pode_ser_ajudante INTEGER NOT NULL,
+                               pode_fazer_leitura INTEGER NOT NULL,
+                               pode_fazer_discurso INTEGER NOT NULL
+                           );
     """;
 
     public static void initialize() {

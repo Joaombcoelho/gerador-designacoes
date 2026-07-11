@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.model;
 import java.util.Objects;
 
 public class Pessoa {
+    private Integer id;
     private final String nome;
     private final Sexo sexo;
     private final boolean ativo;
@@ -27,6 +28,14 @@ public class Pessoa {
         this.podeSerAjudante = podeSerAjudante;
         this.podeFazerLeitura = podeFazerLeitura;
         this.podeFazerDiscurso = podeFazerDiscurso;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getNome() {
