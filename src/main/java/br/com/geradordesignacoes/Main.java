@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.Sexo;
+import br.com.geradordesignacoes.service.PessoaService;
 
 import java.util.Optional;
 
@@ -14,7 +15,7 @@ public class Main {
         DatabaseInitializer.initialize();
 
         PessoaDAO pessoaDAO = new PessoaDAO();
-
+        PessoaService pessoaService = new PessoaService(pessoaDAO);
 
         // ============================
         // TESTE SALVAR
@@ -30,10 +31,9 @@ public class Main {
                 false
         );
 
-        pessoaDAO.salvar(pessoa);
+        pessoaService.salvar(pessoa);
 
         System.out.println("Pessoa salva com ID: " + pessoa.getId());
-
 
         // ============================
         // TESTE LISTAR TODOS
@@ -41,7 +41,7 @@ public class Main {
 
         System.out.println("\nLista de pessoas:");
 
-        for (Pessoa p : pessoaDAO.listarTodos()) {
+        for (Pessoa p : pessoaService.listarTodas()) {
 
             System.out.println("-------------------------");
             System.out.println("ID: " + p.getId());
@@ -54,14 +54,14 @@ public class Main {
             System.out.println("Discurso: " + p.podeFazerDiscurso());
         }
 
-
         // ============================
         // TESTE BUSCAR POR ID
         // ============================
 
         System.out.println("\nBuscando pessoa pelo ID 50:");
 
-        Optional<Pessoa> pessoaEncontrada = pessoaDAO.buscarPorId(50);
+        Optional<Pessoa> pessoaEncontrada =
+                pessoaService.buscarPorId(50);
 
         if (pessoaEncontrada.isPresent()) {
 
@@ -75,7 +75,6 @@ public class Main {
 
             System.out.println("Pessoa não encontrada.");
         }
-
 
         // ============================
         // TESTE ATUALIZAR
@@ -95,15 +94,13 @@ public class Main {
 
         pessoaAlterada.setId(1);
 
-        pessoaDAO.atualizar(pessoaAlterada);
-
+        pessoaService.atualizar(pessoaAlterada);
 
         // ============================
         // CONFIRMAR ALTERAÇÃO
         // ============================
 
-        Optional<Pessoa> pessoaDepoisAtualizacao =
-                pessoaDAO.buscarPorId(1);
+        Optional<Pessoa> pessoaDepoisAtualizacao = pessoaService.buscarPorId(1);
 
         if (pessoaDepoisAtualizacao.isPresent()) {
 
@@ -117,9 +114,10 @@ public class Main {
 
             System.out.println("Pessoa não encontrada após atualização.");
         }
+
         // ============================
-// TESTE EXCLUIR
-// ============================
+        // TESTE EXCLUIR
+        // ============================
 
         System.out.println("\nTeste de exclusão:");
 
@@ -133,23 +131,17 @@ public class Main {
                 false
         );
 
-        pessoaDAO.salvar(pessoaParaExcluir);
+        pessoaService.salvar(pessoaParaExcluir);
 
         Integer idExclusao = pessoaParaExcluir.getId();
 
         System.out.println("Pessoa criada para exclusão. ID: " + idExclusao);
 
-
-// Executa exclusão
-
-        pessoaDAO.excluir(idExclusao);
+        pessoaService.excluir(idExclusao);
 
         System.out.println("Pessoa excluída.");
 
-
-// Confirma se foi removida
-
-        Optional<Pessoa> pessoaRemovida = pessoaDAO.buscarPorId(idExclusao);
+        Optional<Pessoa> pessoaRemovida = pessoaService.buscarPorId(idExclusao);
 
         if (pessoaRemovida.isPresent()) {
 
