@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.service;
 import java.util.List;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.TipoParticipacao;
 
 import static br.com.geradordesignacoes.model.TipoParte.*;
 
@@ -13,9 +14,29 @@ public class RegrasService {
         }
 
         return switch (parte.getTipo()) {
-            case LEITURA -> pessoa.podeFazerLeitura();
-            case DISCURSO -> pessoa.podeFazerDiscurso();
-            case DEMONSTRACAO -> pessoa.podeSerResponsavel() || pessoa.podeSerAjudante();
+
+            case LEITURA ->
+                    parte.pessoaPodeExercerParticipacao(
+                            pessoa,
+                            TipoParticipacao.LEITOR
+                    );
+
+            case DISCURSO ->
+                    parte.pessoaPodeExercerParticipacao(
+                            pessoa,
+                            TipoParticipacao.ORADOR
+                    );
+
+            case DEMONSTRACAO ->
+                    parte.pessoaPodeExercerParticipacao(
+                            pessoa,
+                            TipoParticipacao.RESPONSAVEL
+                    )
+                            ||
+                            parte.pessoaPodeExercerParticipacao(
+                                    pessoa,
+                                    TipoParticipacao.AJUDANTE
+                            );
         };
     }
 
@@ -28,7 +49,7 @@ public class RegrasService {
                 && responsavel.isAtivo()
                 && ajudante.isAtivo()
                 && responsavel.getSexo() == ajudante.getSexo()
-                && responsavel.podeSerResponsavel()
-                && ajudante.podeSerAjudante();
+                && responsavel.podeExercer(TipoParticipacao.RESPONSAVEL)
+                && ajudante.podeExercer(TipoParticipacao.AJUDANTE);
     }
 }

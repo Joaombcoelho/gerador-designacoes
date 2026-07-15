@@ -16,7 +16,8 @@ public class DatabaseInitializer {
                                pode_ser_responsavel INTEGER NOT NULL,
                                pode_ser_ajudante INTEGER NOT NULL,
                                pode_fazer_leitura INTEGER NOT NULL,
-                               pode_fazer_discurso INTEGER NOT NULL
+                               pode_fazer_discurso INTEGER NOT NULL,
+                               privilegio TEXT NOT NULL
                            );
     """;
 

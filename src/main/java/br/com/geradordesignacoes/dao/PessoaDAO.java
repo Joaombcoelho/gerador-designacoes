@@ -2,6 +2,7 @@ package br.com.geradordesignacoes.dao;
 
 import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.Sexo;
 
 import java.sql.Connection;
@@ -24,9 +25,10 @@ public class PessoaDAO {
                 pode_ser_responsavel,
                 pode_ser_ajudante,
                 pode_fazer_leitura,
-                pode_fazer_discurso
+                pode_fazer_discurso,
+                privilegio
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
         try (
@@ -44,6 +46,7 @@ public class PessoaDAO {
             statement.setBoolean(5, pessoa.podeSerAjudante());
             statement.setBoolean(6, pessoa.podeFazerLeitura());
             statement.setBoolean(7, pessoa.podeFazerDiscurso());
+            statement.setString(8, pessoa.getPrivilegio().name());
 
             int linhasAfetadas = statement.executeUpdate();
 
@@ -54,14 +57,9 @@ public class PessoaDAO {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
 
                 if (generatedKeys.next()) {
-
-                    int idGerado = generatedKeys.getInt(1);
-                    pessoa.setId(idGerado);
-
+                    pessoa.setId(generatedKeys.getInt(1));
                 } else {
-
                     throw new RuntimeException("Não foi possível obter o ID gerado.");
-
                 }
 
             }
@@ -70,7 +68,6 @@ public class PessoaDAO {
             throw new RuntimeException("Erro ao salvar pessoa.", e);
         }
     }
-
 
     public List<Pessoa> listarTodos() {
 
@@ -88,9 +85,7 @@ public class PessoaDAO {
         ) {
 
             while (resultSet.next()) {
-
                 pessoas.add(mapearPessoa(resultSet));
-
             }
 
         } catch (SQLException e) {
@@ -99,7 +94,6 @@ public class PessoaDAO {
 
         return pessoas;
     }
-
 
     public Optional<Pessoa> buscarPorId(Integer id) {
 
@@ -119,11 +113,7 @@ public class PessoaDAO {
             try (ResultSet resultSet = statement.executeQuery()) {
 
                 if (resultSet.next()) {
-
-                    Pessoa pessoa = mapearPessoa(resultSet);
-
-                    return Optional.of(pessoa);
-
+                    return Optional.of(mapearPessoa(resultSet));
                 }
 
             }
@@ -135,15 +125,12 @@ public class PessoaDAO {
         return Optional.empty();
     }
 
-
     public void atualizar(Pessoa pessoa) {
 
         if (pessoa.getId() == null) {
-
             throw new IllegalArgumentException(
                     "A pessoa precisa possuir um ID para ser atualizada."
             );
-
         }
 
         String sql = """
@@ -155,7 +142,8 @@ public class PessoaDAO {
                 pode_ser_responsavel = ?,
                 pode_ser_ajudante = ?,
                 pode_fazer_leitura = ?,
-                pode_fazer_discurso = ?
+                pode_fazer_discurso = ?,
+                privilegio = ?
             WHERE id = ?
             """;
 
@@ -171,7 +159,8 @@ public class PessoaDAO {
             statement.setBoolean(5, pessoa.podeSerAjudante());
             statement.setBoolean(6, pessoa.podeFazerLeitura());
             statement.setBoolean(7, pessoa.podeFazerDiscurso());
-            statement.setInt(8, pessoa.getId());
+            statement.setString(8, pessoa.getPrivilegio().name());
+            statement.setInt(9, pessoa.getId());
 
             int linhasAfetadas = statement.executeUpdate();
 
@@ -183,7 +172,6 @@ public class PessoaDAO {
             throw new RuntimeException("Erro ao atualizar pessoa.", e);
         }
     }
-
 
     public void excluir(Integer id) {
 
@@ -210,22 +198,21 @@ public class PessoaDAO {
         }
     }
 
-
     private Pessoa mapearPessoa(ResultSet resultSet) throws SQLException {
 
         Pessoa pessoa = new Pessoa(
                 resultSet.getString("nome"),
                 Sexo.valueOf(resultSet.getString("sexo")),
-                resultSet.getBoolean("ativo"),
-                resultSet.getBoolean("pode_ser_responsavel"),
-                resultSet.getBoolean("pode_ser_ajudante"),
-                resultSet.getBoolean("pode_fazer_leitura"),
-                resultSet.getBoolean("pode_fazer_discurso")
+                resultSet.getInt("ativo") == 1,
+                resultSet.getInt("pode_ser_responsavel") == 1,
+                resultSet.getInt("pode_ser_ajudante") == 1,
+                resultSet.getInt("pode_fazer_leitura") == 1,
+                resultSet.getInt("pode_fazer_discurso") == 1,
+                Privilegio.valueOf(resultSet.getString("privilegio"))
         );
 
         pessoa.setId(resultSet.getInt("id"));
 
         return pessoa;
     }
-
 }
