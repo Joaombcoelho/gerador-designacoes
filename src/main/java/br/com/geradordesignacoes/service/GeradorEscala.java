@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
@@ -30,6 +31,19 @@ public class GeradorEscala {
         return designacoes;
     }
 
+    private Optional<Pessoa> encontrarPessoa(
+            Parte parte,
+            List<Pessoa> pessoas,
+            List<Pessoa> pessoasJaDesignadas) {
+
+        for (Pessoa pessoa : pessoas) {
+            if (regrasService.podeDesignar(pessoa, parte, pessoasJaDesignadas)) {
+                return Optional.of(pessoa);
+            }
+        }
+
+        return Optional.empty();
+    }
     private void designarParteIndividual(
             LocalDate data,
             Parte parte,
@@ -37,13 +51,15 @@ public class GeradorEscala {
             List<Designacao> designacoes,
             List<Pessoa> pessoasJaDesignadas
     ) {
-        for (Pessoa pessoa : pessoas) {
-            if (regrasService.podeDesignar(pessoa, parte, pessoasJaDesignadas)) {
-                designacoes.add(new Designacao(data, parte, pessoa));
-                pessoasJaDesignadas.add(pessoa);
-                return;
-            }
-        }
+        Optional<Pessoa> pessoa = encontrarPessoa(
+                parte,
+                pessoas,
+                pessoasJaDesignadas);
+
+        pessoa.ifPresent(p -> {
+            designacoes.add(new Designacao(data, parte, p));
+            pessoasJaDesignadas.add(p);
+        });
     }
 
     private void designarDemonstracao(

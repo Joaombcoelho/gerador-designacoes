@@ -2,10 +2,14 @@ package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.DatabaseInitializer;
-import br.com.geradordesignacoes.model.Pessoa;
-import br.com.geradordesignacoes.model.Sexo;
+import br.com.geradordesignacoes.model.*;
+import br.com.geradordesignacoes.service.PessoaService;
+import br.com.geradordesignacoes.service.RegrasService;
+import br.com.geradordesignacoes.model.Parte;
 
+import java.util.List;
 import java.util.Optional;
+
 
 public class Main {
 
@@ -13,8 +17,37 @@ public class Main {
 
         DatabaseInitializer.initialize();
 
-        PessoaDAO pessoaDAO = new PessoaDAO();
+        System.out.println("===== TESTE PRIVILÉGIOS =====");
 
+        System.out.println(
+                "Ancião atende Servo? "
+                        + Privilegio.ANCIAO.atende(Privilegio.SERVO_MINISTERIAL)
+        );
+
+        System.out.println(
+                "Servo atende Batizado? "
+                        + Privilegio.SERVO_MINISTERIAL.atende(Privilegio.BATIZADO)
+        );
+
+        System.out.println(
+                "Batizado atende Ancião? "
+                        + Privilegio.BATIZADO.atende(Privilegio.ANCIAO)
+        );
+
+        System.out.println(
+                "Publicador atende Batizado? "
+                        + Privilegio.PUBLICADOR.atende(Privilegio.BATIZADO)
+        );
+
+        System.out.println(
+                "Ancião atende Publicador? "
+                        + Privilegio.ANCIAO.atende(Privilegio.PUBLICADOR)
+        );
+
+        System.out.println();
+
+        PessoaDAO pessoaDAO = new PessoaDAO();
+        PessoaService pessoaService = new PessoaService(pessoaDAO);
 
         // ============================
         // TESTE SALVAR
@@ -25,15 +58,34 @@ public class Main {
                 Sexo.MASCULINO,
                 true,
                 true,
+                false,
                 true,
-                true,
-                false
+                false,
+                Privilegio.SERVO_MINISTERIAL
         );
 
-        pessoaDAO.salvar(pessoa);
+        pessoaService.salvar(pessoa);
 
         System.out.println("Pessoa salva com ID: " + pessoa.getId());
 
+        //============================
+        // TESTE PODE EXERCER FUNÇÃO
+        //============================
+
+        System.out.println(
+                "Pode exercer LEITOR: "
+                        + pessoa.podeExercer(TipoParticipacao.LEITOR)
+        );
+
+        System.out.println(
+                "Pode exercer AJUDANTE: "
+                        + pessoa.podeExercer(TipoParticipacao.AJUDANTE)
+        );
+
+        System.out.println(
+                "Pode exercer PRESIDENTE: "
+                        + pessoa.podeExercer(TipoParticipacao.PRESIDENTE)
+        );
 
         // ============================
         // TESTE LISTAR TODOS
@@ -41,7 +93,7 @@ public class Main {
 
         System.out.println("\nLista de pessoas:");
 
-        for (Pessoa p : pessoaDAO.listarTodos()) {
+        for (Pessoa p : pessoaService.listarTodas()) {
 
             System.out.println("-------------------------");
             System.out.println("ID: " + p.getId());
@@ -52,16 +104,17 @@ public class Main {
             System.out.println("Ajudante: " + p.podeSerAjudante());
             System.out.println("Leitura: " + p.podeFazerLeitura());
             System.out.println("Discurso: " + p.podeFazerDiscurso());
+            System.out.println("Privilégio: " + p.getPrivilegio());
         }
-
 
         // ============================
         // TESTE BUSCAR POR ID
         // ============================
 
-        System.out.println("\nBuscando pessoa pelo ID 1:");
+        System.out.println("\nBuscando pessoa pelo ID 50:");
 
-        Optional<Pessoa> pessoaEncontrada = pessoaDAO.buscarPorId(1);
+        Optional<Pessoa> pessoaEncontrada =
+                pessoaService.buscarPorId(50);
 
         if (pessoaEncontrada.isPresent()) {
 
@@ -76,7 +129,6 @@ public class Main {
             System.out.println("Pessoa não encontrada.");
         }
 
-
         // ============================
         // TESTE ATUALIZAR
         // ============================
@@ -90,20 +142,19 @@ public class Main {
                 true,
                 true,
                 true,
-                false
+                false,
+                Privilegio.SERVO_MINISTERIAL
         );
 
         pessoaAlterada.setId(1);
 
-        pessoaDAO.atualizar(pessoaAlterada);
-
+        pessoaService.atualizar(pessoaAlterada);
 
         // ============================
         // CONFIRMAR ALTERAÇÃO
         // ============================
 
-        Optional<Pessoa> pessoaDepoisAtualizacao =
-                pessoaDAO.buscarPorId(1);
+        Optional<Pessoa> pessoaDepoisAtualizacao = pessoaService.buscarPorId(1);
 
         if (pessoaDepoisAtualizacao.isPresent()) {
 
@@ -117,9 +168,10 @@ public class Main {
 
             System.out.println("Pessoa não encontrada após atualização.");
         }
+
         // ============================
-// TESTE EXCLUIR
-// ============================
+        // TESTE EXCLUIR
+        // ============================
 
         System.out.println("\nTeste de exclusão:");
 
@@ -130,26 +182,21 @@ public class Main {
                 false,
                 true,
                 true,
-                false
+                false,
+                Privilegio.BATIZADO
         );
 
-        pessoaDAO.salvar(pessoaParaExcluir);
+        pessoaService.salvar(pessoaParaExcluir);
 
         Integer idExclusao = pessoaParaExcluir.getId();
 
         System.out.println("Pessoa criada para exclusão. ID: " + idExclusao);
 
-
-// Executa exclusão
-
-        pessoaDAO.excluir(idExclusao);
+        pessoaService.excluir(idExclusao);
 
         System.out.println("Pessoa excluída.");
 
-
-// Confirma se foi removida
-
-        Optional<Pessoa> pessoaRemovida = pessoaDAO.buscarPorId(idExclusao);
+        Optional<Pessoa> pessoaRemovida = pessoaService.buscarPorId(idExclusao);
 
         if (pessoaRemovida.isPresent()) {
 
@@ -159,5 +206,119 @@ public class Main {
 
             System.out.println("Sucesso: Pessoa não encontrada após exclusão.");
         }
+        System.out.println("\n===== TESTE PARTE =====");
+
+        Pessoa pessoaBatizada = new Pessoa(
+                "João",
+                Sexo.MASCULINO,
+                true,
+                false,
+                false,
+                true,
+                false,
+                Privilegio.BATIZADO
+        );
+
+        Pessoa pessoaPublicador = new Pessoa(
+                "Pedro",
+                Sexo.MASCULINO,
+                true,
+                false,
+                false,
+                true,
+                false,
+                Privilegio.PUBLICADOR
+        );
+
+        Parte leitura = new Parte(
+                "Leitura",
+                TipoParte.LEITURA,
+                Privilegio.BATIZADO,
+                false,
+                SexoPermitido.MASCULINO,
+                1,
+                false,
+                List.of(TipoParticipacao.LEITOR)
+        );
+
+        RegrasService regrasService = new RegrasService();
+        System.out.println(
+                "Pode formar demonstração: "
+                        + regrasService.podeFormarDemonstracao(
+                        pessoaBatizada,
+                        pessoaPublicador,
+                        List.of()
+                )
+        );
+        System.out.println(
+                "Batizado pode fazer leitura? "
+                        + leitura.podeSerRealizadaPor(pessoaBatizada)
+        );
+
+        System.out.println(
+                "Publicador pode fazer leitura? "
+                        + leitura.podeSerRealizadaPor(pessoaPublicador)
+        );
+
+        for (TipoParticipacao participacao : leitura.getParticipacoesNecessarias()) {
+            System.out.println(participacao);
+        }
+
+        System.out.println("\n===== TESTE SEXO PERMITIDO =====");
+
+        Parte leituraMasculina = new Parte(
+                "Leitura",
+                TipoParte.LEITURA,
+                Privilegio.BATIZADO,
+                false,
+                SexoPermitido.MASCULINO,
+                1,
+                false,
+                List.of(TipoParticipacao.LEITOR)
+        );
+
+        Pessoa pessoaFeminina = new Pessoa(
+                "Maria",
+                Sexo.FEMININO,
+                true,
+                false,
+                false,
+                true,
+                false,
+                Privilegio.BATIZADO
+        );
+
+        Parte parteAmbos = new Parte(
+                "Primeira Conversa",
+                TipoParte.DEMONSTRACAO,
+                Privilegio.BATIZADO,
+                true,
+                SexoPermitido.AMBOS,
+                2,
+                false,
+                List.of(TipoParticipacao.LEITOR)
+        );
+
+        System.out.println(
+                "Mulher pode fazer leitura masculina? "
+                        + leituraMasculina.podeSerRealizadaPor(pessoaFeminina)
+        );
+
+        System.out.println(
+                "Mulher pode fazer parte permitida para ambos? "
+                        + parteAmbos.podeSerRealizadaPor(pessoaFeminina)
+        );
+
+        System.out.println(
+                "Pessoa pode ser leitor: "
+                        + leitura.pessoaPodeExercerParticipacao(
+                        pessoa,
+                        TipoParticipacao.LEITOR
+                )
+
+
+        );
+
     }
+
 }

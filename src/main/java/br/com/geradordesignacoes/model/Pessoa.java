@@ -11,6 +11,7 @@ public class Pessoa {
     private final boolean podeSerAjudante;
     private final boolean podeFazerLeitura;
     private final boolean podeFazerDiscurso;
+    private final Privilegio privilegio;
 
     public Pessoa(
             String nome,
@@ -19,7 +20,8 @@ public class Pessoa {
             boolean podeSerResponsavel,
             boolean podeSerAjudante,
             boolean podeFazerLeitura,
-            boolean podeFazerDiscurso
+            boolean podeFazerDiscurso,
+            Privilegio privilegio
     ) {
         this.nome = Objects.requireNonNull(nome, "nome não pode ser nulo");
         this.sexo = Objects.requireNonNull(sexo, "sexo não pode ser nulo");
@@ -28,6 +30,7 @@ public class Pessoa {
         this.podeSerAjudante = podeSerAjudante;
         this.podeFazerLeitura = podeFazerLeitura;
         this.podeFazerDiscurso = podeFazerDiscurso;
+        this.privilegio = Objects.requireNonNull(privilegio, "privilégio não pode ser nulo");
     }
 
     public Integer getId() {
@@ -66,8 +69,24 @@ public class Pessoa {
         return podeFazerDiscurso;
     }
 
+    public Privilegio getPrivilegio() {
+        return privilegio;
+    }
+
     @Override
     public String toString() {
         return nome;
+    }
+
+    public boolean podeExercer(TipoParticipacao tipo) {
+
+        return switch (tipo) {
+            case RESPONSAVEL -> podeSerResponsavel;
+            case AJUDANTE -> podeSerAjudante;
+            case LEITOR -> podeFazerLeitura;
+            case ORADOR -> podeFazerDiscurso;
+            case DIRIGENTE -> podeSerResponsavel;
+            case PRESIDENTE -> podeSerResponsavel;
+        };
     }
 }
