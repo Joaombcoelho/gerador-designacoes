@@ -5,9 +5,11 @@ import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.PessoaService;
 import br.com.geradordesignacoes.service.RegrasService;
+import br.com.geradordesignacoes.model.Parte;
 
 import java.util.List;
 import java.util.Optional;
+
 
 public class Main {
 
@@ -258,6 +260,10 @@ public class Main {
                         + leitura.podeSerRealizadaPor(pessoaPublicador)
         );
 
+        for (TipoParticipacao participacao : leitura.getParticipacoesNecessarias()) {
+            System.out.println(participacao);
+        }
+
         System.out.println("\n===== TESTE SEXO PERMITIDO =====");
 
         Parte leituraMasculina = new Parte(
@@ -309,7 +315,10 @@ public class Main {
                         pessoa,
                         TipoParticipacao.LEITOR
                 )
+
+
         );
+
     }
 
 }

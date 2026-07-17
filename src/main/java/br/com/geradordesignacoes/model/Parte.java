@@ -2,6 +2,7 @@ package br.com.geradordesignacoes.model;
 
 import java.util.Objects;
 import java.util.List;
+import java.util.Collections;
 
 
 public class Parte {
@@ -107,7 +108,7 @@ public class Parte {
     }
 
     public List<TipoParticipacao> getParticipacoesNecessarias() {
-        return participacoesNecessarias;
+        return Collections.unmodifiableList(participacoesNecessarias);
     }
 
     public boolean necessitaParticipacao(TipoParticipacao tipo) {
@@ -129,4 +130,6 @@ public class Parte {
         return regrasBasicasAtendidas(pessoa)
                 && pessoa.podeExercer(tipo);
     }
+
+
 }
