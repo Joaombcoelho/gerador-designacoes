@@ -37,13 +37,31 @@ public class GeradorEscala {
             List<Pessoa> pessoas
     ) {
 
+        return gerar(
+                data,
+                partes,
+                pessoas,
+                List.of()
+        );
+    }
+
+
+    public ResultadoGeracaoEscala gerar(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas,
+            List<ParticipacaoDesignacao> historico
+    ) {
+
         List<Designacao> designacoes = new ArrayList<>();
         List<String> erros = new ArrayList<>();
         List<DiagnosticoSelecaoPessoa> diagnosticos =
                 new ArrayList<>();
 
         ControleDesignacoes controleDesignacoes =
-                new ControleDesignacoes();
+                new ControleDesignacoes(
+                        historico
+                );
 
 
         for (Parte parte : partes) {
@@ -111,7 +129,6 @@ public class GeradorEscala {
             List<DiagnosticoSelecaoPessoa> diagnosticos
     ) {
 
-
         DiagnosticoSelecaoPessoa diagnostico =
                 seletorPessoaService.selecionarComDiagnostico(
                         parte,
@@ -158,7 +175,6 @@ public class GeradorEscala {
     }
 
 
-
     private boolean designarDemonstracao(
             LocalDate data,
             Parte parte,
@@ -166,7 +182,6 @@ public class GeradorEscala {
             List<Designacao> designacoes,
             ControleDesignacoes controleDesignacoes
     ) {
-
 
         for (Pessoa responsavel : pessoas) {
 

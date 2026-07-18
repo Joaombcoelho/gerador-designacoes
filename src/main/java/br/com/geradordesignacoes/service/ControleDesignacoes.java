@@ -28,6 +28,21 @@ public class ControleDesignacoes {
     }
 
 
+    public ControleDesignacoes(
+            List<ParticipacaoDesignacao> historico
+    ) {
+
+        this();
+
+        if (historico != null) {
+
+            historico.forEach(
+                    this::registrarParticipacao
+            );
+        }
+    }
+
+
     public void registrar(Pessoa pessoa) {
 
         quantidadePorPessoa.merge(
@@ -78,18 +93,30 @@ public class ControleDesignacoes {
         );
     }
 
-    public boolean jaFezParte(Pessoa pessoa, Parte parte) {
+
+    public boolean jaFezParte(
+            Pessoa pessoa,
+            Parte parte
+    ) {
+
         return participacoes.stream()
                 .anyMatch(participacao ->
                         participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte));
+                                && participacao.getParte().equals(parte)
+                );
     }
 
-    public long quantidadeVezesNaParte(Pessoa pessoa, Parte parte) {
+
+    public long quantidadeVezesNaParte(
+            Pessoa pessoa,
+            Parte parte
+    ) {
+
         return participacoes.stream()
                 .filter(participacao ->
                         participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte))
+                                && participacao.getParte().equals(parte)
+                )
                 .count();
     }
 }
