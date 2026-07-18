@@ -57,6 +57,10 @@ public class TesteGeradorEscala {
 
             System.out.println("Nenhum erro encontrado.");
         }
+        System.out.println("\n=== DIAGNÓSTICOS ===\n");
+
+        resultado.getDiagnosticos()
+                .forEach(System.out::println);
     }
 
 
