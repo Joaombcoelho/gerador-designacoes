@@ -3,12 +3,10 @@ package br.com.geradordesignacoes;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.model.*;
-import br.com.geradordesignacoes.service.PessoaService;
-import br.com.geradordesignacoes.service.RegrasService;
+import br.com.geradordesignacoes.service.*;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Designacao;
 import java.time.LocalDate;
-import br.com.geradordesignacoes.service.GeradorEscala;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -426,9 +424,9 @@ public class Main {
 
         List<Pessoa> pessoasTeste = List.of(
                 joao,
-                maria,
+                lucas,
                 pedro,
-                lucas
+                maria
         );
 
 
@@ -436,7 +434,56 @@ public class Main {
                 new RegrasService()
         );
 
+        System.out.println("\n===== TESTE AVALIADOR =====");
 
+        ControleDesignacoes controleTeste =
+                new ControleDesignacoes();
+
+        AvaliadorPessoaService avaliador =
+                new AvaliadorPessoaService();
+
+
+        System.out.println(
+                "João: "
+                        + avaliador.avaliar(
+                        joao,
+                        leituraEscala,
+                        controleTeste
+                )
+        );
+
+        System.out.println(
+                "Lucas: "
+                        + avaliador.avaliar(
+                        lucas,
+                        leituraEscala,
+                        controleTeste
+                )
+        );
+
+        controleTeste.registrar(joao);
+        controleTeste.registrar(joao);
+
+
+        System.out.println("Após João ter 2 participações:");
+
+        System.out.println(
+                "João: "
+                        + avaliador.avaliar(
+                        joao,
+                        leituraEscala,
+                        controleTeste
+                )
+        );
+
+        System.out.println(
+                "Lucas: "
+                        + avaliador.avaliar(
+                        lucas,
+                        leituraEscala,
+                        controleTeste
+                )
+        );
         ResultadoGeracaoEscala resultado =
                 geradorEscala.gerar(
                         LocalDate.now(),

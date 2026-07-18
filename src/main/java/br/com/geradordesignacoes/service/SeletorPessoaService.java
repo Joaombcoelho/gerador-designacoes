@@ -10,11 +10,16 @@ import java.util.Optional;
 public class SeletorPessoaService {
 
     private final RegrasService regrasService;
+    private final AvaliadorPessoaService avaliadorPessoaService;
 
 
-    public SeletorPessoaService(RegrasService regrasService) {
+    public SeletorPessoaService(
+            RegrasService regrasService,
+            AvaliadorPessoaService avaliadorPessoaService
+    ) {
 
         this.regrasService = regrasService;
+        this.avaliadorPessoaService = avaliadorPessoaService;
     }
 
 
@@ -34,9 +39,13 @@ public class SeletorPessoaService {
                         )
                 )
 
-                .min(
+                .max(
                         Comparator.comparingInt(
-                                controle::quantidadeDe
+                                pessoa -> avaliadorPessoaService.avaliar(
+                                        pessoa,
+                                        parte,
+                                        controle
+                                )
                         )
                 );
     }

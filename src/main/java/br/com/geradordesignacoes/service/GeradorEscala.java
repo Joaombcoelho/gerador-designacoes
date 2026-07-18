@@ -20,8 +20,12 @@ public class GeradorEscala {
     public GeradorEscala(RegrasService regrasService) {
 
         this.regrasService = regrasService;
+
         this.seletorPessoaService =
-                new SeletorPessoaService(regrasService);
+                new SeletorPessoaService(
+                        regrasService,
+                        new AvaliadorPessoaService()
+                );
     }
 
 
