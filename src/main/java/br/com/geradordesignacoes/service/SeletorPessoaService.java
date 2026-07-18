@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,5 +67,45 @@ public class SeletorPessoaService {
 
 
         return Optional.ofNullable(melhorPessoa);
+    }
+
+
+
+    public List<ResultadoAvaliacaoPessoa> avaliarCandidatos(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controle
+    ) {
+
+        List<ResultadoAvaliacaoPessoa> resultados =
+                new ArrayList<>();
+
+
+        for (Pessoa pessoa : pessoas) {
+
+            boolean podeSerDesignada =
+                    regrasService.podeDesignar(
+                            pessoa,
+                            parte,
+                            List.of()
+                    );
+
+
+            if (!podeSerDesignada) {
+                continue;
+            }
+
+
+            resultados.add(
+                    avaliadorPessoaService.avaliar(
+                            pessoa,
+                            parte,
+                            controle
+                    )
+            );
+        }
+
+
+        return resultados;
     }
 }
