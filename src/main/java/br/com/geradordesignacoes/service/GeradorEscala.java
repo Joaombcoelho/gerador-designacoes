@@ -8,8 +8,10 @@ import java.util.Optional;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
 import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
 import br.com.geradordesignacoes.model.TipoParte;
+import br.com.geradordesignacoes.model.TipoParticipacao;
 
 public class GeradorEscala {
 
@@ -20,8 +22,12 @@ public class GeradorEscala {
     public GeradorEscala(RegrasService regrasService) {
 
         this.regrasService = regrasService;
+
         this.seletorPessoaService =
-                new SeletorPessoaService(regrasService);
+                new SeletorPessoaService(
+                        regrasService,
+                        new AvaliadorPessoaService()
+                );
     }
 
 
@@ -86,10 +92,10 @@ public class GeradorEscala {
 
         return new ResultadoGeracaoEscala(
                 designacoes,
+                controleDesignacoes.getParticipacoes(),
                 erros
         );
     }
-
 
 
     private boolean designarParteIndividual(
@@ -128,8 +134,13 @@ public class GeradorEscala {
         );
 
 
-        controleDesignacoes.registrar(
-                participante
+        controleDesignacoes.registrarParticipacao(
+                new ParticipacaoDesignacao(
+                        data,
+                        participante,
+                        parte,
+                        TipoParticipacao.LEITOR
+                )
         );
 
 
@@ -169,12 +180,23 @@ public class GeradorEscala {
                     );
 
 
-                    controleDesignacoes.registrar(
-                            responsavel
+                    controleDesignacoes.registrarParticipacao(
+                            new ParticipacaoDesignacao(
+                                    data,
+                                    responsavel,
+                                    parte,
+                                    TipoParticipacao.RESPONSAVEL
+                            )
                     );
 
-                    controleDesignacoes.registrar(
-                            ajudante
+
+                    controleDesignacoes.registrarParticipacao(
+                            new ParticipacaoDesignacao(
+                                    data,
+                                    ajudante,
+                                    parte,
+                                    TipoParticipacao.AJUDANTE
+                            )
                     );
 
 
