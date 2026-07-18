@@ -1,5 +1,6 @@
 package br.com.geradordesignacoes.service;
 
+import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
 import br.com.geradordesignacoes.model.Pessoa;
 
@@ -75,5 +76,20 @@ public class ControleDesignacoes {
         return new ArrayList<>(
                 participacoes
         );
+    }
+
+    public boolean jaFezParte(Pessoa pessoa, Parte parte) {
+        return participacoes.stream()
+                .anyMatch(participacao ->
+                        participacao.getPessoa().equals(pessoa)
+                                && participacao.getParte().equals(parte));
+    }
+
+    public long quantidadeVezesNaParte(Pessoa pessoa, Parte parte) {
+        return participacoes.stream()
+                .filter(participacao ->
+                        participacao.getPessoa().equals(pessoa)
+                                && participacao.getParte().equals(parte))
+                .count();
     }
 }

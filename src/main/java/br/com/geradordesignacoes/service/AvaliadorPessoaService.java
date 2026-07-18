@@ -2,30 +2,40 @@ package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
 
 public class AvaliadorPessoaService {
 
-
-    public int avaliar(
+    public ResultadoAvaliacaoPessoa avaliar(
             Pessoa pessoa,
             Parte parte,
             ControleDesignacoes controle
     ) {
 
-        int pontos = 0;
+        int pontosParticipacoes =
+                pontuarQuantidadeParticipacoes(
+                        controle.quantidadeDe(pessoa)
+                );
 
+        int pontosPrivilegio =
+                pontuarPrivilegio(
+                        pessoa,
+                        parte
+                );
 
-        int quantidade = controle.quantidadeDe(pessoa);
+        int penalidadeRepeticao =
+                pontuarRepeticaoParte(
+                        pessoa,
+                        parte,
+                        controle
+                );
 
-        pontos += pontuarQuantidadeParticipacoes(quantidade);
-
-        pontos += pontuarPrivilegio(
+        return new ResultadoAvaliacaoPessoa(
                 pessoa,
-                parte
+                pontosParticipacoes,
+                pontosPrivilegio,
+                penalidadeRepeticao
         );
-
-
-        return pontos;
     }
 
 
@@ -48,15 +58,28 @@ public class AvaliadorPessoaService {
 
         int diferencaNivel =
                 pessoa.getPrivilegio().getNivel()
-                        -
-                        parte.getPrivilegioMinimo().getNivel();
-
+                        - parte.getPrivilegioMinimo().getNivel();
 
         if (diferencaNivel <= 0) {
             return 0;
         }
 
-
         return diferencaNivel * 10;
+    }
+
+
+    private int pontuarRepeticaoParte(
+            Pessoa pessoa,
+            Parte parte,
+            ControleDesignacoes controle
+    ) {
+
+        long repeticoes =
+                controle.quantidadeVezesNaParte(
+                        pessoa,
+                        parte
+                );
+
+        return (int) repeticoes * 15;
     }
 }

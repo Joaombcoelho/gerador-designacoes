@@ -2,8 +2,8 @@ package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,24 +29,42 @@ public class SeletorPessoaService {
             ControleDesignacoes controle
     ) {
 
-        return pessoas.stream()
+        Pessoa melhorPessoa = null;
+        ResultadoAvaliacaoPessoa melhorResultado = null;
 
-                .filter(pessoa ->
-                        regrasService.podeDesignar(
-                                pessoa,
-                                parte,
-                                List.of()
-                        )
-                )
 
-                .max(
-                        Comparator.comparingInt(
-                                pessoa -> avaliadorPessoaService.avaliar(
-                                        pessoa,
-                                        parte,
-                                        controle
-                                )
-                        )
-                );
+        for (Pessoa pessoa : pessoas) {
+
+            boolean podeSerDesignada =
+                    regrasService.podeDesignar(
+                            pessoa,
+                            parte,
+                            List.of()
+                    );
+
+
+            if (!podeSerDesignada) {
+                continue;
+            }
+
+
+            ResultadoAvaliacaoPessoa resultado =
+                    avaliadorPessoaService.avaliar(
+                            pessoa,
+                            parte,
+                            controle
+                    );
+
+
+            if (melhorResultado == null ||
+                    resultado.getTotal() > melhorResultado.getTotal()) {
+
+                melhorResultado = resultado;
+                melhorPessoa = pessoa;
+            }
+        }
+
+
+        return Optional.ofNullable(melhorPessoa);
     }
 }
