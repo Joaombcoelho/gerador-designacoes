@@ -87,7 +87,7 @@ public class Parte {
         return privilegioMinimo;
     }
 
-    public boolean exigeAjudante() {
+    public boolean getExigeAjudante() {
         return exigeAjudante;
     }
 
