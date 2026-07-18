@@ -3,8 +3,8 @@ package br.com.geradordesignacoes.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
@@ -39,6 +39,8 @@ public class GeradorEscala {
 
         List<Designacao> designacoes = new ArrayList<>();
         List<String> erros = new ArrayList<>();
+        List<DiagnosticoSelecaoPessoa> diagnosticos =
+                new ArrayList<>();
 
         ControleDesignacoes controleDesignacoes =
                 new ControleDesignacoes();
@@ -75,7 +77,8 @@ public class GeradorEscala {
                                 parte,
                                 pessoas,
                                 designacoes,
-                                controleDesignacoes
+                                controleDesignacoes,
+                                diagnosticos
                         );
 
 
@@ -93,7 +96,8 @@ public class GeradorEscala {
         return new ResultadoGeracaoEscala(
                 designacoes,
                 controleDesignacoes.getParticipacoes(),
-                erros
+                erros,
+                diagnosticos
         );
     }
 
@@ -103,25 +107,31 @@ public class GeradorEscala {
             Parte parte,
             List<Pessoa> pessoas,
             List<Designacao> designacoes,
-            ControleDesignacoes controleDesignacoes
+            ControleDesignacoes controleDesignacoes,
+            List<DiagnosticoSelecaoPessoa> diagnosticos
     ) {
 
 
-        Optional<Pessoa> pessoa =
-                seletorPessoaService.selecionarMelhorPessoa(
+        DiagnosticoSelecaoPessoa diagnostico =
+                seletorPessoaService.selecionarComDiagnostico(
                         parte,
                         pessoas,
                         controleDesignacoes
                 );
 
 
-        if (pessoa.isEmpty()) {
+        diagnosticos.add(diagnostico);
+
+
+        if (diagnostico.getEscolhido() == null) {
 
             return false;
         }
 
 
-        Pessoa participante = pessoa.get();
+        Pessoa participante =
+                diagnostico.getEscolhido()
+                        .getPessoa();
 
 
         designacoes.add(
