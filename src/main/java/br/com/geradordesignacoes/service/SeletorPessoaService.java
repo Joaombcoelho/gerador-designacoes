@@ -1,10 +1,12 @@
 package br.com.geradordesignacoes.service;
 
+import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,5 +109,38 @@ public class SeletorPessoaService {
 
 
         return resultados;
+    }
+
+
+
+    public DiagnosticoSelecaoPessoa selecionarComDiagnostico(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controle
+    ) {
+
+        List<ResultadoAvaliacaoPessoa> candidatos =
+                avaliarCandidatos(
+                        parte,
+                        pessoas,
+                        controle
+                );
+
+
+        ResultadoAvaliacaoPessoa escolhido =
+                candidatos.stream()
+                        .max(
+                                Comparator.comparingInt(
+                                        ResultadoAvaliacaoPessoa::getTotal
+                                )
+                        )
+                        .orElse(null);
+
+
+        return new DiagnosticoSelecaoPessoa(
+                parte,
+                candidatos,
+                escolhido
+        );
     }
 }
