@@ -58,4 +58,20 @@ public class ParticipacaoDesignacao {
     public TipoParticipacao getTipoParticipacao() {
         return tipoParticipacao;
     }
+
+    @Override
+    public String toString() {
+
+        return """
+            Data: %s
+            Pessoa: %s
+            Parte: %s
+            Participação: %s
+            """.formatted(
+                data,
+                pessoa,
+                parte,
+                tipoParticipacao
+        );
+    }
 }
