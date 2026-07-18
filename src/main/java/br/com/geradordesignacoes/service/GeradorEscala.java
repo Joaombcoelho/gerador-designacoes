@@ -4,80 +4,185 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
 import br.com.geradordesignacoes.model.TipoParte;
 
 public class GeradorEscala {
-    private final RegrasService regrasService;
 
-    public GeradorEscala(br.com.geradordesignacoes.service.RegrasService regrasService) {
+    private final RegrasService regrasService;
+    private final SeletorPessoaService seletorPessoaService;
+
+
+    public GeradorEscala(RegrasService regrasService) {
+
         this.regrasService = regrasService;
+        this.seletorPessoaService =
+                new SeletorPessoaService(regrasService);
     }
 
-    public List<Designacao> gerar(LocalDate data, List<Parte> partes, List<Pessoa> pessoas) {
+
+    public ResultadoGeracaoEscala gerar(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas
+    ) {
+
         List<Designacao> designacoes = new ArrayList<>();
-        List<Pessoa> pessoasJaDesignadas = new ArrayList<>();
+        List<String> erros = new ArrayList<>();
+
+        ControleDesignacoes controleDesignacoes =
+                new ControleDesignacoes();
+
 
         for (Parte parte : partes) {
+
             if (parte.getTipo() == TipoParte.DEMONSTRACAO) {
-                designarDemonstracao(data, parte, pessoas, designacoes, pessoasJaDesignadas);
+
+                boolean gerou =
+                        designarDemonstracao(
+                                data,
+                                parte,
+                                pessoas,
+                                designacoes,
+                                controleDesignacoes
+                        );
+
+
+                if (!gerou) {
+
+                    erros.add(
+                            "Não foi possível gerar a parte: "
+                                    + parte
+                    );
+                }
+
+
             } else {
-                designarParteIndividual(data, parte, pessoas, designacoes, pessoasJaDesignadas);
-            }
-        }
 
-        return designacoes;
-    }
+                boolean gerou =
+                        designarParteIndividual(
+                                data,
+                                parte,
+                                pessoas,
+                                designacoes,
+                                controleDesignacoes
+                        );
 
-    private Optional<Pessoa> encontrarPessoa(
-            Parte parte,
-            List<Pessoa> pessoas,
-            List<Pessoa> pessoasJaDesignadas) {
 
-        for (Pessoa pessoa : pessoas) {
-            if (regrasService.podeDesignar(pessoa, parte, pessoasJaDesignadas)) {
-                return Optional.of(pessoa);
-            }
-        }
+                if (!gerou) {
 
-        return Optional.empty();
-    }
-    private void designarParteIndividual(
-            LocalDate data,
-            Parte parte,
-            List<Pessoa> pessoas,
-            List<Designacao> designacoes,
-            List<Pessoa> pessoasJaDesignadas
-    ) {
-        Optional<Pessoa> pessoa = encontrarPessoa(
-                parte,
-                pessoas,
-                pessoasJaDesignadas);
-
-        pessoa.ifPresent(p -> {
-            designacoes.add(new Designacao(data, parte, p));
-            pessoasJaDesignadas.add(p);
-        });
-    }
-
-    private void designarDemonstracao(
-            LocalDate data,
-            Parte parte,
-            List<Pessoa> pessoas,
-            List<Designacao> designacoes,
-            List<Pessoa> pessoasJaDesignadas
-    ) {
-        for (Pessoa responsavel : pessoas) {
-            for (Pessoa ajudante : pessoas) {
-                if (regrasService.podeFormarDemonstracao(responsavel, ajudante, pessoasJaDesignadas)) {
-                    designacoes.add(new Designacao(data, parte, responsavel, ajudante));
-                    pessoasJaDesignadas.add(responsavel);
-                    pessoasJaDesignadas.add(ajudante);
-                    return;
+                    erros.add(
+                            "Não foi possível gerar a parte: "
+                                    + parte
+                    );
                 }
             }
         }
+
+
+        return new ResultadoGeracaoEscala(
+                designacoes,
+                erros
+        );
+    }
+
+
+
+    private boolean designarParteIndividual(
+            LocalDate data,
+            Parte parte,
+            List<Pessoa> pessoas,
+            List<Designacao> designacoes,
+            ControleDesignacoes controleDesignacoes
+    ) {
+
+
+        Optional<Pessoa> pessoa =
+                seletorPessoaService.selecionarMelhorPessoa(
+                        parte,
+                        pessoas,
+                        controleDesignacoes
+                );
+
+
+        if (pessoa.isEmpty()) {
+
+            return false;
+        }
+
+
+        Pessoa participante = pessoa.get();
+
+
+        designacoes.add(
+                new Designacao(
+                        data,
+                        parte,
+                        participante,
+                        null
+                )
+        );
+
+
+        controleDesignacoes.registrar(
+                participante
+        );
+
+
+        return true;
+    }
+
+
+
+    private boolean designarDemonstracao(
+            LocalDate data,
+            Parte parte,
+            List<Pessoa> pessoas,
+            List<Designacao> designacoes,
+            ControleDesignacoes controleDesignacoes
+    ) {
+
+
+        for (Pessoa responsavel : pessoas) {
+
+            for (Pessoa ajudante : pessoas) {
+
+
+                if (regrasService.podeFormarDemonstracao(
+                        responsavel,
+                        ajudante,
+                        controleDesignacoes.getPessoasDesignadas()
+                )) {
+
+
+                    designacoes.add(
+                            new Designacao(
+                                    data,
+                                    parte,
+                                    responsavel,
+                                    ajudante
+                            )
+                    );
+
+
+                    controleDesignacoes.registrar(
+                            responsavel
+                    );
+
+                    controleDesignacoes.registrar(
+                            ajudante
+                    );
+
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
