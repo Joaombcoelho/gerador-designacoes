@@ -1,5 +1,6 @@
 package br.com.geradordesignacoes.service;
 
+import br.com.geradordesignacoes.model.HistoricoDesignacoes;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
 import br.com.geradordesignacoes.model.Pessoa;
@@ -15,7 +16,7 @@ public class ControleDesignacoes {
 
     private final List<Pessoa> pessoasDesignadas;
 
-    private final List<ParticipacaoDesignacao> participacoes;
+    private final HistoricoDesignacoes historico;
 
 
     public ControleDesignacoes() {
@@ -24,7 +25,21 @@ public class ControleDesignacoes {
 
         this.pessoasDesignadas = new ArrayList<>();
 
-        this.participacoes = new ArrayList<>();
+        this.historico = new HistoricoDesignacoes();
+    }
+
+
+    public ControleDesignacoes(
+            HistoricoDesignacoes historico
+    ) {
+
+        this();
+
+        if (historico != null) {
+
+            historico.getParticipacoes()
+                    .forEach(this::registrarParticipacao);
+        }
     }
 
 
@@ -32,14 +47,9 @@ public class ControleDesignacoes {
             List<ParticipacaoDesignacao> historico
     ) {
 
-        this();
-
-        if (historico != null) {
-
-            historico.forEach(
-                    this::registrarParticipacao
-            );
-        }
+        this(
+                new HistoricoDesignacoes(historico)
+        );
     }
 
 
@@ -59,7 +69,7 @@ public class ControleDesignacoes {
             ParticipacaoDesignacao participacao
     ) {
 
-        participacoes.add(
+        historico.adicionar(
                 participacao
         );
 
@@ -88,9 +98,7 @@ public class ControleDesignacoes {
 
     public List<ParticipacaoDesignacao> getParticipacoes() {
 
-        return new ArrayList<>(
-                participacoes
-        );
+        return historico.getParticipacoes();
     }
 
 
@@ -99,11 +107,10 @@ public class ControleDesignacoes {
             Parte parte
     ) {
 
-        return participacoes.stream()
-                .anyMatch(participacao ->
-                        participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte)
-                );
+        return historico.jaParticipou(
+                pessoa,
+                parte
+        );
     }
 
 
@@ -112,7 +119,8 @@ public class ControleDesignacoes {
             Parte parte
     ) {
 
-        return participacoes.stream()
+        return historico.getParticipacoes()
+                .stream()
                 .filter(participacao ->
                         participacao.getPessoa().equals(pessoa)
                                 && participacao.getParte().equals(parte)

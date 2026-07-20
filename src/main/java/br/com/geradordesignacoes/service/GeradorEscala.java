@@ -6,6 +6,7 @@ import java.util.List;
 
 import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
 import br.com.geradordesignacoes.model.Designacao;
+import br.com.geradordesignacoes.model.HistoricoDesignacoes;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
@@ -41,7 +42,7 @@ public class GeradorEscala {
                 data,
                 partes,
                 pessoas,
-                List.of()
+                new HistoricoDesignacoes()
         );
     }
 
@@ -51,6 +52,22 @@ public class GeradorEscala {
             List<Parte> partes,
             List<Pessoa> pessoas,
             List<ParticipacaoDesignacao> historico
+    ) {
+
+        return gerar(
+                data,
+                partes,
+                pessoas,
+                new HistoricoDesignacoes(historico)
+        );
+    }
+
+
+    public ResultadoGeracaoEscala gerar(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas,
+            HistoricoDesignacoes historico
     ) {
 
         List<Designacao> designacoes = new ArrayList<>();

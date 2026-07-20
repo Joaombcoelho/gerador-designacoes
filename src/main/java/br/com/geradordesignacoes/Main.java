@@ -15,5 +15,6 @@ public class Main {
         TesteRankingAvaliacao.executar();
         TesteDiagnosticoSelecao.executar();
         TesteHistoricoDesignacoes.executar();
+
     }
 }
