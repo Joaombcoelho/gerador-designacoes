@@ -1,10 +1,7 @@
 package br.com.geradordesignacoes.dao;
 
 import br.com.geradordesignacoes.database.ConnectionFactory;
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.Privilegio;
-import br.com.geradordesignacoes.model.SexoPermitido;
-import br.com.geradordesignacoes.model.TipoParte;
+import br.com.geradordesignacoes.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -81,6 +78,8 @@ public class ParteDAO {
     public List<Parte> listarTodos() {
 
         List<Parte> partes = new ArrayList<>();
+
+
 
         String sql = """
                 SELECT *

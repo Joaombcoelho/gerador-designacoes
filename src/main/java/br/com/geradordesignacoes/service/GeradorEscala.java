@@ -18,6 +18,7 @@ public class GeradorEscala {
 
     private final RegrasService regrasService;
     private final SeletorPessoaService seletorPessoaService;
+    private final HistoricoDesignacoesService historicoService;
 
 
     public GeradorEscala(RegrasService regrasService) {
@@ -29,6 +30,9 @@ public class GeradorEscala {
                         regrasService,
                         new AvaliadorPessoaService()
                 );
+
+        this.historicoService =
+                new HistoricoDesignacoesService();
     }
 
 
@@ -42,7 +46,7 @@ public class GeradorEscala {
                 data,
                 partes,
                 pessoas,
-                new HistoricoDesignacoes()
+                historicoService.getHistorico()
         );
     }
 
@@ -127,6 +131,9 @@ public class GeradorEscala {
             }
         }
 
+        historicoService.registrarGeracao(
+                controleDesignacoes.getParticipacoes()
+        );
 
         return new ResultadoGeracaoEscala(
                 designacoes,

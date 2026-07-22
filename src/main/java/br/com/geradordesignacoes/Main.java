@@ -10,11 +10,17 @@ public class Main {
 
         DatabaseInitializer.initialize();
 
+        TesteCadastroBanco.executar();
+
         TesteAvaliadorPessoa.executar();
         TesteGeradorEscala.executar();
         TesteRankingAvaliacao.executar();
         TesteDiagnosticoSelecao.executar();
-        TesteHistoricoDesignacoes.executar();
+
+        TestePersistenciaHistorico.executar();
+        TesteCarregarHistorico.executar();
+        TesteHistoricoService.executar();
+        TesteHistoricoInfluenciaSelecao.executar();
 
     }
 }
