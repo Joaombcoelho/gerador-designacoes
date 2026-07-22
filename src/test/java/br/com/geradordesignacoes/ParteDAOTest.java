@@ -1,7 +1,9 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ParteDAO;
+import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.model.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -10,6 +12,11 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ParteDAOTest {
+
+    @BeforeEach
+    void inicializarBanco() {
+        DatabaseInitializer.initialize();
+    }
 
     @Test
     void deveSalvarEBuscarParte() {

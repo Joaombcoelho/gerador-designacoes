@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.HistoricoDesignacoes;
 import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
+import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
 import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoParticipacao;
@@ -18,21 +20,50 @@ public class GeradorEscala {
 
     private final RegrasService regrasService;
     private final SeletorPessoaService seletorPessoaService;
+    private final AvaliadorPessoaService avaliadorPessoaService;
     private final HistoricoDesignacoesService historicoService;
 
 
     public GeradorEscala(RegrasService regrasService) {
 
         this.regrasService = regrasService;
+        this.avaliadorPessoaService = new AvaliadorPessoaService();
 
         this.seletorPessoaService =
                 new SeletorPessoaService(
                         regrasService,
-                        new AvaliadorPessoaService()
+                        avaliadorPessoaService
                 );
 
         this.historicoService =
                 new HistoricoDesignacoesService();
+    }
+
+
+    public ResultadoGeracaoEscala gerarEscala(
+            LocalDate data,
+            List<Parte> partes
+    ) {
+
+        return gerarEscala(
+                data,
+                partes,
+                new PessoaDAO().listarTodos()
+        );
+    }
+
+
+    public ResultadoGeracaoEscala gerarEscala(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas
+    ) {
+
+        return gerar(
+                data,
+                partes,
+                pessoas
+        );
     }
 
 
@@ -84,12 +115,17 @@ public class GeradorEscala {
                         historico
                 );
 
+        int quantidadeParticipacoesHistoricas =
+                controleDesignacoes.getParticipacoes().size();
+
 
         for (Parte parte : partes) {
 
+            boolean gerou;
+
             if (parte.getTipo() == TipoParte.DEMONSTRACAO) {
 
-                boolean gerou =
+                gerou =
                         designarDemonstracao(
                                 data,
                                 parte,
@@ -98,19 +134,9 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
-
-                if (!gerou) {
-
-                    erros.add(
-                            "Não foi possível gerar a parte: "
-                                    + parte
-                    );
-                }
-
-
             } else {
 
-                boolean gerou =
+                gerou =
                         designarParteIndividual(
                                 data,
                                 parte,
@@ -119,25 +145,34 @@ public class GeradorEscala {
                                 controleDesignacoes,
                                 diagnosticos
                         );
+            }
 
 
-                if (!gerou) {
+            if (!gerou) {
 
-                    erros.add(
-                            "Não foi possível gerar a parte: "
-                                    + parte
-                    );
-                }
+                erros.add(
+                        "Não foi possível gerar a parte: "
+                                + parte
+                );
             }
         }
 
+        List<ParticipacaoDesignacao> participacoesAtualizadas =
+                controleDesignacoes.getParticipacoes();
+
+        List<ParticipacaoDesignacao> participacoesGeradas =
+                participacoesAtualizadas.subList(
+                        quantidadeParticipacoesHistoricas,
+                        participacoesAtualizadas.size()
+                );
+
         historicoService.registrarGeracao(
-                controleDesignacoes.getParticipacoes()
+                participacoesGeradas
         );
 
         return new ResultadoGeracaoEscala(
                 designacoes,
-                controleDesignacoes.getParticipacoes(),
+                participacoesAtualizadas,
                 erros,
                 diagnosticos
         );
@@ -174,6 +209,11 @@ public class GeradorEscala {
                 diagnostico.getEscolhido()
                         .getPessoa();
 
+        TipoParticipacao tipoParticipacao =
+                determinarParticipacaoIndividual(
+                        parte
+                );
+
 
         designacoes.add(
                 new Designacao(
@@ -190,7 +230,7 @@ public class GeradorEscala {
                         data,
                         participante,
                         parte,
-                        TipoParticipacao.LEITOR
+                        tipoParticipacao
                 )
         );
 
@@ -207,53 +247,134 @@ public class GeradorEscala {
             ControleDesignacoes controleDesignacoes
     ) {
 
+        MelhorDuplaDemonstracao melhorDupla =
+                selecionarMelhorDuplaDemonstracao(
+                        parte,
+                        pessoas,
+                        controleDesignacoes
+                );
+
+        if (melhorDupla == null) {
+            return false;
+        }
+
+
+        designacoes.add(
+                new Designacao(
+                        data,
+                        parte,
+                        melhorDupla.responsavel(),
+                        melhorDupla.ajudante()
+                )
+        );
+
+
+        controleDesignacoes.registrarParticipacao(
+                new ParticipacaoDesignacao(
+                        data,
+                        melhorDupla.responsavel(),
+                        parte,
+                        TipoParticipacao.RESPONSAVEL
+                )
+        );
+
+
+        controleDesignacoes.registrarParticipacao(
+                new ParticipacaoDesignacao(
+                        data,
+                        melhorDupla.ajudante(),
+                        parte,
+                        TipoParticipacao.AJUDANTE
+                )
+        );
+
+
+        return true;
+    }
+
+
+    private MelhorDuplaDemonstracao selecionarMelhorDuplaDemonstracao(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controleDesignacoes
+    ) {
+
+        List<Pessoa> pessoasJaDesignadas =
+                controleDesignacoes.getPessoasDesignadas();
+
+        MelhorDuplaDemonstracao melhorDupla = null;
+
         for (Pessoa responsavel : pessoas) {
 
             for (Pessoa ajudante : pessoas) {
 
-
-                if (regrasService.podeFormarDemonstracao(
+                if (!regrasService.podeFormarDemonstracao(
+                        parte,
                         responsavel,
                         ajudante,
-                        controleDesignacoes.getPessoasDesignadas()
+                        pessoasJaDesignadas
                 )) {
+                    continue;
+                }
 
+                ResultadoAvaliacaoPessoa avaliacaoResponsavel =
+                        avaliadorPessoaService.avaliar(
+                                responsavel,
+                                parte,
+                                controleDesignacoes
+                        );
 
-                    designacoes.add(
-                            new Designacao(
-                                    data,
-                                    parte,
-                                    responsavel,
-                                    ajudante
-                            )
-                    );
+                ResultadoAvaliacaoPessoa avaliacaoAjudante =
+                        avaliadorPessoaService.avaliar(
+                                ajudante,
+                                parte,
+                                controleDesignacoes
+                        );
 
+                MelhorDuplaDemonstracao dupla =
+                        new MelhorDuplaDemonstracao(
+                                responsavel,
+                                ajudante,
+                                avaliacaoResponsavel.getTotal()
+                                        + avaliacaoAjudante.getTotal()
+                        );
 
-                    controleDesignacoes.registrarParticipacao(
-                            new ParticipacaoDesignacao(
-                                    data,
-                                    responsavel,
-                                    parte,
-                                    TipoParticipacao.RESPONSAVEL
-                            )
-                    );
+                if (melhorDupla == null
+                        || dupla.pontuacaoTotal() > melhorDupla.pontuacaoTotal()) {
 
-
-                    controleDesignacoes.registrarParticipacao(
-                            new ParticipacaoDesignacao(
-                                    data,
-                                    ajudante,
-                                    parte,
-                                    TipoParticipacao.AJUDANTE
-                            )
-                    );
-
-
-                    return true;
+                    melhorDupla = dupla;
                 }
             }
         }
 
-        return false;
+        return melhorDupla;
+    }
+
+
+    private TipoParticipacao determinarParticipacaoIndividual(
+            Parte parte
+    ) {
+
+        return parte.getParticipacoesNecessarias()
+                .stream()
+                .filter(tipoParticipacao ->
+                        tipoParticipacao == TipoParticipacao.LEITOR
+                                || tipoParticipacao == TipoParticipacao.ORADOR
+                )
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Parte individual sem participação compatível: "
+                                        + parte.getNome()
+                        )
+                );
+    }
+
+
+    private record MelhorDuplaDemonstracao(
+            Pessoa responsavel,
+            Pessoa ajudante,
+            int pontuacaoTotal
+    ) {
     }
 }

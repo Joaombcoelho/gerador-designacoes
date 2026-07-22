@@ -21,6 +21,7 @@ public class Main {
         TesteCarregarHistorico.executar();
         TesteHistoricoService.executar();
         TesteHistoricoInfluenciaSelecao.executar();
+        TesteGeracaoEscalaCompleta.executar();
 
     }
 }
