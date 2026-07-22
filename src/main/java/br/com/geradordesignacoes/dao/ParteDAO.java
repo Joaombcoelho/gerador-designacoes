@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.dao;
 
 import br.com.geradordesignacoes.database.ConnectionFactory;
+import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.model.*;
 
 import java.sql.Connection;
@@ -10,7 +11,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
+
 public class ParteDAO {
+
+    public ParteDAO() {
+        DatabaseInitializer.initialize();
+    }
 
     public Parte salvar(Parte parte) {
 
@@ -27,47 +33,59 @@ public class ParteDAO {
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (
-                Connection connection = ConnectionFactory.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        sql,
-                        PreparedStatement.RETURN_GENERATED_KEYS
-                )
-        ) {
+        try (Connection connection = ConnectionFactory.getConnection()) {
 
-            statement.setString(1, parte.getNome());
-            statement.setString(2, parte.getTipo().name());
-            statement.setString(3, parte.getPrivilegioMinimo().name());
-            statement.setBoolean(4, parte.getExigeAjudante());
-            statement.setString(5, parte.getSexoPermitido().name());
-            statement.setInt(6, parte.getQuantidadeMinimaParticipantes());
-            statement.setBoolean(7, parte.geraFormulario());
+            connection.setAutoCommit(false);
 
-            int linhasAfetadas = statement.executeUpdate();
+            try (
+                    PreparedStatement statement = connection.prepareStatement(
+                            sql,
+                            PreparedStatement.RETURN_GENERATED_KEYS
+                    )
+            ) {
 
-            if (linhasAfetadas != 1) {
-                throw new RuntimeException("Erro ao salvar parte.");
-            }
+                statement.setString(1, parte.getNome());
+                statement.setString(2, parte.getTipo().name());
+                statement.setString(3, parte.getPrivilegioMinimo().name());
+                statement.setBoolean(4, parte.getExigeAjudante());
+                statement.setString(5, parte.getSexoPermitido().name());
+                statement.setInt(6, parte.getQuantidadeMinimaParticipantes());
+                statement.setBoolean(7, parte.geraFormulario());
 
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                int linhasAfetadas = statement.executeUpdate();
 
-                if (generatedKeys.next()) {
-
-                    return new Parte(
-                            generatedKeys.getInt(1),
-                            parte.getNome(),
-                            parte.getTipo(),
-                            parte.getPrivilegioMinimo(),
-                            parte.getExigeAjudante(),
-                            parte.getSexoPermitido(),
-                            parte.getQuantidadeMinimaParticipantes(),
-                            parte.geraFormulario(),
-                            parte.getParticipacoesNecessarias()
-                    );
-
-                } else {
-                    throw new RuntimeException("Não foi possível obter o ID gerado.");
+                if (linhasAfetadas != 1) {
+                    throw new RuntimeException("Erro ao salvar parte.");
                 }
+
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+
+                    if (generatedKeys.next()) {
+
+                        Parte parteSalva = new Parte(
+                                generatedKeys.getInt(1),
+                                parte.getNome(),
+                                parte.getTipo(),
+                                parte.getPrivilegioMinimo(),
+                                parte.getExigeAjudante(),
+                                parte.getSexoPermitido(),
+                                parte.getQuantidadeMinimaParticipantes(),
+                                parte.geraFormulario(),
+                                parte.getParticipacoesNecessarias()
+                        );
+
+                        salvarParticipacoesNecessarias(connection, parteSalva);
+                        connection.commit();
+
+                        return parteSalva;
+
+                    } else {
+                        throw new RuntimeException("Não foi possível obter o ID gerado.");
+                    }
+                }
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
             }
 
         } catch (SQLException e) {
@@ -78,8 +96,6 @@ public class ParteDAO {
     public List<Parte> listarTodos() {
 
         List<Parte> partes = new ArrayList<>();
-
-
 
         String sql = """
                 SELECT *
@@ -94,7 +110,7 @@ public class ParteDAO {
         ) {
 
             while (resultSet.next()) {
-                partes.add(mapearParte(resultSet));
+                partes.add(mapearParte(connection, resultSet));
             }
 
         } catch (SQLException e) {
@@ -122,7 +138,7 @@ public class ParteDAO {
             try (ResultSet resultSet = statement.executeQuery()) {
 
                 if (resultSet.next()) {
-                    return Optional.of(mapearParte(resultSet));
+                    return Optional.of(mapearParte(connection, resultSet));
                 }
 
             }
@@ -155,24 +171,34 @@ public class ParteDAO {
                 WHERE id = ?
                 """;
 
-        try (
-                Connection connection = ConnectionFactory.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
+        try (Connection connection = ConnectionFactory.getConnection()) {
 
-            statement.setString(1, parte.getNome());
-            statement.setString(2, parte.getTipo().name());
-            statement.setString(3, parte.getPrivilegioMinimo().name());
-            statement.setBoolean(4, parte.getExigeAjudante());
-            statement.setString(5, parte.getSexoPermitido().name());
-            statement.setInt(6, parte.getQuantidadeMinimaParticipantes());
-            statement.setBoolean(7, parte.geraFormulario());
-            statement.setInt(8, parte.getId());
+            connection.setAutoCommit(false);
 
-            int linhasAfetadas = statement.executeUpdate();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            if (linhasAfetadas != 1) {
-                throw new RuntimeException("Erro ao atualizar parte.");
+                statement.setString(1, parte.getNome());
+                statement.setString(2, parte.getTipo().name());
+                statement.setString(3, parte.getPrivilegioMinimo().name());
+                statement.setBoolean(4, parte.getExigeAjudante());
+                statement.setString(5, parte.getSexoPermitido().name());
+                statement.setInt(6, parte.getQuantidadeMinimaParticipantes());
+                statement.setBoolean(7, parte.geraFormulario());
+                statement.setInt(8, parte.getId());
+
+                int linhasAfetadas = statement.executeUpdate();
+
+                if (linhasAfetadas != 1) {
+                    throw new RuntimeException("Erro ao atualizar parte.");
+                }
+
+                excluirParticipacoesNecessarias(connection, parte.getId());
+                salvarParticipacoesNecessarias(connection, parte);
+                connection.commit();
+
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
             }
 
         } catch (SQLException e) {
@@ -187,17 +213,26 @@ public class ParteDAO {
                 WHERE id = ?
                 """;
 
-        try (
-                Connection connection = ConnectionFactory.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
+        try (Connection connection = ConnectionFactory.getConnection()) {
 
-            statement.setInt(1, id);
+            connection.setAutoCommit(false);
 
-            int linhasAfetadas = statement.executeUpdate();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            if (linhasAfetadas != 1) {
-                throw new RuntimeException("Parte não encontrada para exclusão.");
+                excluirParticipacoesNecessarias(connection, id);
+                statement.setInt(1, id);
+
+                int linhasAfetadas = statement.executeUpdate();
+
+                if (linhasAfetadas != 1) {
+                    throw new RuntimeException("Parte não encontrada para exclusão.");
+                }
+
+                connection.commit();
+
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
             }
 
         } catch (SQLException e) {
@@ -205,10 +240,13 @@ public class ParteDAO {
         }
     }
 
-    private Parte mapearParte(ResultSet resultSet) throws SQLException {
+    private Parte mapearParte(Connection connection, ResultSet resultSet)
+            throws SQLException {
+
+        Integer parteId = resultSet.getInt("id");
 
         return new Parte(
-                resultSet.getInt("id"),
+                parteId,
                 resultSet.getString("nome"),
                 TipoParte.valueOf(resultSet.getString("tipo")),
                 Privilegio.valueOf(resultSet.getString("privilegio_minimo")),
@@ -216,7 +254,79 @@ public class ParteDAO {
                 SexoPermitido.valueOf(resultSet.getString("sexo_permitido")),
                 resultSet.getInt("quantidade_minima_participantes"),
                 resultSet.getInt("gera_formulario") == 1,
-                List.of()
+                buscarParticipacoesNecessarias(connection, parteId)
         );
+    }
+
+    private List<TipoParticipacao> buscarParticipacoesNecessarias(
+            Connection connection,
+            Integer parteId) throws SQLException {
+
+        String sql = """
+                SELECT tipo_participacao
+                FROM parte_participacao_necessaria
+                WHERE parte_id = ?
+                ORDER BY ordem
+                """;
+
+        List<TipoParticipacao> participacoes = new ArrayList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, parteId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    participacoes.add(
+                            TipoParticipacao.valueOf(
+                                    resultSet.getString("tipo_participacao")
+                            )
+                    );
+                }
+            }
+        }
+
+        return participacoes;
+    }
+
+    private void salvarParticipacoesNecessarias(
+            Connection connection,
+            Parte parte) throws SQLException {
+
+        String sql = """
+                INSERT INTO parte_participacao_necessaria (
+                    parte_id,
+                    tipo_participacao,
+                    ordem
+                )
+                VALUES (?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            int ordem = 0;
+
+            for (TipoParticipacao participacao : parte.getParticipacoesNecessarias()) {
+                statement.setInt(1, parte.getId());
+                statement.setString(2, participacao.name());
+                statement.setInt(3, ordem++);
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
+        }
+    }
+
+    private void excluirParticipacoesNecessarias(
+            Connection connection,
+            Integer parteId) throws SQLException {
+
+        String sql = """
+                DELETE FROM parte_participacao_necessaria
+                WHERE parte_id = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, parteId);
+            statement.executeUpdate();
+        }
     }
 }
