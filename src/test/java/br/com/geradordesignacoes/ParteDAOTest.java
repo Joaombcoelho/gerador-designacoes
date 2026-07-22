@@ -44,5 +44,44 @@ public class ParteDAOTest {
         assertEquals(salva.getSexoPermitido(), recuperada.getSexoPermitido());
         assertEquals(salva.getQuantidadeMinimaParticipantes(), recuperada.getQuantidadeMinimaParticipantes());
         assertEquals(salva.geraFormulario(), recuperada.geraFormulario());
+        assertEquals(
+                List.of(TipoParticipacao.LEITOR),
+                recuperada.getParticipacoesNecessarias()
+        );
+    }
+
+    @Test
+    void deveListarParteComParticipacoesNecessarias() {
+
+        ParteDAO parteDAO = new ParteDAO();
+
+        Parte salva = parteDAO.salvar(
+                new Parte(
+                        "Demonstração Teste",
+                        TipoParte.DEMONSTRACAO,
+                        Privilegio.BATIZADO,
+                        true,
+                        SexoPermitido.AMBOS,
+                        2,
+                        false,
+                        List.of(
+                                TipoParticipacao.RESPONSAVEL,
+                                TipoParticipacao.AJUDANTE
+                        )
+                )
+        );
+
+        Parte recuperada = parteDAO.listarTodos().stream()
+                .filter(parte -> parte.getId().equals(salva.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(
+                List.of(
+                        TipoParticipacao.RESPONSAVEL,
+                        TipoParticipacao.AJUDANTE
+                ),
+                recuperada.getParticipacoesNecessarias()
+        );
     }
 }
