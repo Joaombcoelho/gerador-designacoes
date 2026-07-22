@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public class ParticipacaoDesignacao {
 
+    private final Integer id;
     private final LocalDate data;
     private final Pessoa pessoa;
     private final Parte parte;
@@ -12,11 +13,14 @@ public class ParticipacaoDesignacao {
 
 
     public ParticipacaoDesignacao(
+            Integer id,
             LocalDate data,
             Pessoa pessoa,
             Parte parte,
             TipoParticipacao tipoParticipacao
     ) {
+
+        this.id = id;
 
         this.data = Objects.requireNonNull(
                 data,
@@ -40,6 +44,28 @@ public class ParticipacaoDesignacao {
     }
 
 
+    public ParticipacaoDesignacao(
+            LocalDate data,
+            Pessoa pessoa,
+            Parte parte,
+            TipoParticipacao tipoParticipacao
+    ) {
+
+        this(
+                null,
+                data,
+                pessoa,
+                parte,
+                tipoParticipacao
+        );
+    }
+
+
+    public Integer getId() {
+        return id;
+    }
+
+
     public LocalDate getData() {
         return data;
     }
@@ -57,5 +83,47 @@ public class ParticipacaoDesignacao {
 
     public TipoParticipacao getTipoParticipacao() {
         return tipoParticipacao;
+    }
+
+
+    @Override
+    public String toString() {
+
+        return """
+            Data: %s
+            Pessoa: %s
+            Parte: %s
+            Participação: %s
+            """.formatted(
+                data,
+                pessoa,
+                parte,
+                tipoParticipacao
+        );
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof ParticipacaoDesignacao outra)) {
+            return false;
+        }
+
+        if (id == null || outra.id == null) {
+            return false;
+        }
+
+        return id.equals(outra.id);
+    }
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

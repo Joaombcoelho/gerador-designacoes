@@ -21,8 +21,6 @@ public class ConnectionFactory {
 
         String url = "jdbc:sqlite:" + DATABASE_PATH.toAbsolutePath();
 
-        System.out.println("URL do banco: " + url);
-
         return DriverManager.getConnection(url);
     }
 }

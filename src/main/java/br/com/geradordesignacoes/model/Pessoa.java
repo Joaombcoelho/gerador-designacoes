@@ -89,4 +89,26 @@ public class Pessoa {
             case PRESIDENTE -> podeSerResponsavel;
         };
     }
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Pessoa outra)) {
+            return false;
+        }
+
+        if (id == null || outra.id == null) {
+            return false;
+        }
+
+        return id.equals(outra.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

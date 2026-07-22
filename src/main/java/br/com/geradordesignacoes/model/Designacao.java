@@ -86,4 +86,34 @@ public class Designacao {
             );
         };
     }
+
+
+    @Override
+    public String toString() {
+
+        StringBuilder texto = new StringBuilder();
+
+        texto.append("Data: ")
+                .append(data)
+                .append("\n");
+
+        texto.append("Parte: ")
+                .append(parte.getNome())
+                .append("\n");
+
+        texto.append("Responsável: ")
+                .append(responsavel.getNome())
+                .append("\n");
+
+
+        if (ajudante != null) {
+
+            texto.append("Ajudante: ")
+                    .append(ajudante.getNome())
+                    .append("\n");
+        }
+
+
+        return texto.toString();
+    }
 }

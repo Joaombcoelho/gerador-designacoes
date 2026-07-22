@@ -1,9 +1,7 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.database.DatabaseInitializer;
-import br.com.geradordesignacoes.test.TesteAvaliadorPessoa;
-import br.com.geradordesignacoes.test.TesteGeradorEscala;
-
+import br.com.geradordesignacoes.test.*;
 
 
 public class Main {
@@ -12,7 +10,17 @@ public class Main {
 
         DatabaseInitializer.initialize();
 
+        TesteCadastroBanco.executar();
+
         TesteAvaliadorPessoa.executar();
         TesteGeradorEscala.executar();
+        TesteRankingAvaliacao.executar();
+        TesteDiagnosticoSelecao.executar();
+
+        TestePersistenciaHistorico.executar();
+        TesteCarregarHistorico.executar();
+        TesteHistoricoService.executar();
+        TesteHistoricoInfluenciaSelecao.executar();
+
     }
 }

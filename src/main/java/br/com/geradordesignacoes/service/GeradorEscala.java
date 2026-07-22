@@ -3,9 +3,10 @@ package br.com.geradordesignacoes.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
 import br.com.geradordesignacoes.model.Designacao;
+import br.com.geradordesignacoes.model.HistoricoDesignacoes;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
@@ -17,6 +18,7 @@ public class GeradorEscala {
 
     private final RegrasService regrasService;
     private final SeletorPessoaService seletorPessoaService;
+    private final HistoricoDesignacoesService historicoService;
 
 
     public GeradorEscala(RegrasService regrasService) {
@@ -28,6 +30,9 @@ public class GeradorEscala {
                         regrasService,
                         new AvaliadorPessoaService()
                 );
+
+        this.historicoService =
+                new HistoricoDesignacoesService();
     }
 
 
@@ -37,11 +42,47 @@ public class GeradorEscala {
             List<Pessoa> pessoas
     ) {
 
+        return gerar(
+                data,
+                partes,
+                pessoas,
+                historicoService.getHistorico()
+        );
+    }
+
+
+    public ResultadoGeracaoEscala gerar(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas,
+            List<ParticipacaoDesignacao> historico
+    ) {
+
+        return gerar(
+                data,
+                partes,
+                pessoas,
+                new HistoricoDesignacoes(historico)
+        );
+    }
+
+
+    public ResultadoGeracaoEscala gerar(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas,
+            HistoricoDesignacoes historico
+    ) {
+
         List<Designacao> designacoes = new ArrayList<>();
         List<String> erros = new ArrayList<>();
+        List<DiagnosticoSelecaoPessoa> diagnosticos =
+                new ArrayList<>();
 
         ControleDesignacoes controleDesignacoes =
-                new ControleDesignacoes();
+                new ControleDesignacoes(
+                        historico
+                );
 
 
         for (Parte parte : partes) {
@@ -75,7 +116,8 @@ public class GeradorEscala {
                                 parte,
                                 pessoas,
                                 designacoes,
-                                controleDesignacoes
+                                controleDesignacoes,
+                                diagnosticos
                         );
 
 
@@ -89,11 +131,15 @@ public class GeradorEscala {
             }
         }
 
+        historicoService.registrarGeracao(
+                controleDesignacoes.getParticipacoes()
+        );
 
         return new ResultadoGeracaoEscala(
                 designacoes,
                 controleDesignacoes.getParticipacoes(),
-                erros
+                erros,
+                diagnosticos
         );
     }
 
@@ -103,25 +149,30 @@ public class GeradorEscala {
             Parte parte,
             List<Pessoa> pessoas,
             List<Designacao> designacoes,
-            ControleDesignacoes controleDesignacoes
+            ControleDesignacoes controleDesignacoes,
+            List<DiagnosticoSelecaoPessoa> diagnosticos
     ) {
 
-
-        Optional<Pessoa> pessoa =
-                seletorPessoaService.selecionarMelhorPessoa(
+        DiagnosticoSelecaoPessoa diagnostico =
+                seletorPessoaService.selecionarComDiagnostico(
                         parte,
                         pessoas,
                         controleDesignacoes
                 );
 
 
-        if (pessoa.isEmpty()) {
+        diagnosticos.add(diagnostico);
+
+
+        if (diagnostico.getEscolhido() == null) {
 
             return false;
         }
 
 
-        Pessoa participante = pessoa.get();
+        Pessoa participante =
+                diagnostico.getEscolhido()
+                        .getPessoa();
 
 
         designacoes.add(
@@ -148,7 +199,6 @@ public class GeradorEscala {
     }
 
 
-
     private boolean designarDemonstracao(
             LocalDate data,
             Parte parte,
@@ -156,7 +206,6 @@ public class GeradorEscala {
             List<Designacao> designacoes,
             ControleDesignacoes controleDesignacoes
     ) {
-
 
         for (Pessoa responsavel : pessoas) {
 

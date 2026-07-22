@@ -1,5 +1,6 @@
 package br.com.geradordesignacoes.service;
 
+import br.com.geradordesignacoes.model.HistoricoDesignacoes;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
 import br.com.geradordesignacoes.model.Pessoa;
@@ -15,7 +16,7 @@ public class ControleDesignacoes {
 
     private final List<Pessoa> pessoasDesignadas;
 
-    private final List<ParticipacaoDesignacao> participacoes;
+    private final HistoricoDesignacoes historico;
 
 
     public ControleDesignacoes() {
@@ -24,7 +25,31 @@ public class ControleDesignacoes {
 
         this.pessoasDesignadas = new ArrayList<>();
 
-        this.participacoes = new ArrayList<>();
+        this.historico = new HistoricoDesignacoes();
+    }
+
+
+    public ControleDesignacoes(
+            HistoricoDesignacoes historico
+    ) {
+
+        this();
+
+        if (historico != null) {
+
+            historico.getParticipacoes()
+                    .forEach(this::registrarParticipacao);
+        }
+    }
+
+
+    public ControleDesignacoes(
+            List<ParticipacaoDesignacao> historico
+    ) {
+
+        this(
+                new HistoricoDesignacoes(historico)
+        );
     }
 
 
@@ -44,7 +69,7 @@ public class ControleDesignacoes {
             ParticipacaoDesignacao participacao
     ) {
 
-        participacoes.add(
+        historico.adicionar(
                 participacao
         );
 
@@ -73,23 +98,33 @@ public class ControleDesignacoes {
 
     public List<ParticipacaoDesignacao> getParticipacoes() {
 
-        return new ArrayList<>(
-                participacoes
+        return historico.getParticipacoes();
+    }
+
+
+    public boolean jaFezParte(
+            Pessoa pessoa,
+            Parte parte
+    ) {
+
+        return historico.jaParticipou(
+                pessoa,
+                parte
         );
     }
 
-    public boolean jaFezParte(Pessoa pessoa, Parte parte) {
-        return participacoes.stream()
-                .anyMatch(participacao ->
-                        participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte));
-    }
 
-    public long quantidadeVezesNaParte(Pessoa pessoa, Parte parte) {
-        return participacoes.stream()
+    public long quantidadeVezesNaParte(
+            Pessoa pessoa,
+            Parte parte
+    ) {
+
+        return historico.getParticipacoes()
+                .stream()
                 .filter(participacao ->
                         participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte))
+                                && participacao.getParte().equals(parte)
+                )
                 .count();
     }
 }
