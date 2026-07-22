@@ -1,7 +1,6 @@
 package br.com.geradordesignacoes.dao;
 
 import br.com.geradordesignacoes.database.ConnectionFactory;
-import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.model.*;
 
 import java.sql.Connection;
@@ -14,11 +13,7 @@ import java.util.Optional;
 
 public class ParteDAO {
 
-    public ParteDAO() {
-        DatabaseInitializer.initialize();
-    }
-
-    public Parte salvar(Parte parte) {
+        public Parte salvar(Parte parte) {
 
         String sql = """
                 INSERT INTO parte (
