@@ -28,7 +28,7 @@ public class HistoricoDesignacoesService {
     /**
      * Carrega o histórico persistido no banco.
      */
-    public void carregar() {
+    public final void carregar() {
 
         this.historico =
                 historicoDAO.carregarHistorico();
@@ -47,20 +47,26 @@ public class HistoricoDesignacoesService {
 
 
     /**
-     * Adiciona uma participação
-     * e persiste no banco.
+     * Adiciona uma participação:
+     * 1 - salva no banco
+     * 2 - atualiza memória
      */
     public void adicionar(
             ParticipacaoDesignacao participacao
     ) {
 
 
-        historico.adicionar(
+        validarParticipacao(
                 participacao
         );
 
 
         historicoDAO.salvar(
+                participacao
+        );
+
+
+        historico.adicionar(
                 participacao
         );
     }
@@ -84,19 +90,81 @@ public class HistoricoDesignacoesService {
             );
         }
     }
+
+
+
+    /**
+     * Registra somente participações válidas
+     * vindas de uma geração.
+     */
     public void registrarGeracao(
             List<ParticipacaoDesignacao> participacoes
     ) {
 
-        for (ParticipacaoDesignacao participacao : participacoes) {
+
+        for (ParticipacaoDesignacao participacao :
+                participacoes) {
+
 
             if (participacao.getPessoa().getId() == null) {
-
                 continue;
             }
 
+
+            if (participacao.getParte().getId() == null) {
+                continue;
+            }
+
+
             adicionar(
                     participacao
+            );
+        }
+    }
+
+
+
+    private void validarParticipacao(
+            ParticipacaoDesignacao participacao
+    ) {
+
+
+        if (participacao == null) {
+
+            throw new IllegalArgumentException(
+                    "Participação não pode ser nula."
+            );
+        }
+
+
+        if (participacao.getPessoa() == null) {
+
+            throw new IllegalArgumentException(
+                    "Participação sem pessoa."
+            );
+        }
+
+
+        if (participacao.getParte() == null) {
+
+            throw new IllegalArgumentException(
+                    "Participação sem parte."
+            );
+        }
+
+
+        if (participacao.getPessoa().getId() == null) {
+
+            throw new IllegalArgumentException(
+                    "Pessoa sem ID para persistência."
+            );
+        }
+
+
+        if (participacao.getParte().getId() == null) {
+
+            throw new IllegalArgumentException(
+                    "Parte sem ID para persistência."
             );
         }
     }

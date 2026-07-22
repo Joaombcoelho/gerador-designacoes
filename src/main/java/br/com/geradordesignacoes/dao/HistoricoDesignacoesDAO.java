@@ -17,23 +17,36 @@ import java.util.List;
 
 public class HistoricoDesignacoesDAO {
 
+
     private final PessoaDAO pessoaDAO;
+
     private final ParteDAO parteDAO;
+
 
 
     public HistoricoDesignacoesDAO() {
 
-        this.pessoaDAO = new PessoaDAO();
-        this.parteDAO = new ParteDAO();
+        this.pessoaDAO =
+                new PessoaDAO();
+
+        this.parteDAO =
+                new ParteDAO();
     }
+
 
 
     public void salvar(
             ParticipacaoDesignacao participacao
     ) {
 
+
+        validarParticipacao(
+                participacao
+        );
+
+
         String sql = """
-                INSERT INTO historico_designacoes (
+                INSERT OR IGNORE INTO historico_designacoes (
                     data,
                     pessoa_id,
                     parte_id,
@@ -44,25 +57,31 @@ public class HistoricoDesignacoesDAO {
 
 
         try (
-                Connection connection = ConnectionFactory.getConnection();
+                Connection connection =
+                        ConnectionFactory.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
+
 
             statement.setString(
                     1,
                     participacao.getData().toString()
             );
 
+
             statement.setInt(
                     2,
                     participacao.getPessoa().getId()
             );
 
+
             statement.setInt(
                     3,
                     participacao.getParte().getId()
             );
+
 
             statement.setString(
                     4,
@@ -70,14 +89,7 @@ public class HistoricoDesignacoesDAO {
             );
 
 
-            int linhasAfetadas = statement.executeUpdate();
-
-
-            if (linhasAfetadas != 1) {
-                throw new RuntimeException(
-                        "Erro ao salvar participação no histórico."
-                );
-            }
+            statement.executeUpdate();
 
 
         } catch (SQLException e) {
@@ -90,7 +102,9 @@ public class HistoricoDesignacoesDAO {
     }
 
 
+
     public List<ParticipacaoDesignacao> listarTodas() {
+
 
         List<ParticipacaoDesignacao> participacoes =
                 new ArrayList<>();
@@ -99,20 +113,24 @@ public class HistoricoDesignacoesDAO {
         String sql = """
                 SELECT *
                 FROM historico_designacoes
-                ORDER BY data
+                ORDER BY data, id
                 """;
 
 
         try (
-                Connection connection = ConnectionFactory.getConnection();
+                Connection connection =
+                        ConnectionFactory.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql);
+
                 ResultSet resultSet =
                         statement.executeQuery()
         ) {
 
 
             while (resultSet.next()) {
+
 
                 participacoes.add(
                         mapearParticipacao(resultSet)
@@ -123,7 +141,7 @@ public class HistoricoDesignacoesDAO {
         } catch (SQLException e) {
 
             throw new RuntimeException(
-                    "Erro ao listar histórico de designações.",
+                    "Erro ao listar histórico.",
                     e
             );
         }
@@ -133,22 +151,23 @@ public class HistoricoDesignacoesDAO {
     }
 
 
+
     public HistoricoDesignacoes carregarHistorico() {
+
 
         HistoricoDesignacoes historico =
                 new HistoricoDesignacoes();
 
 
-        for (ParticipacaoDesignacao participacao : listarTodas()) {
-
-            historico.adicionar(
-                    participacao
-            );
-        }
+        listarTodas()
+                .forEach(
+                        historico::adicionar
+                );
 
 
         return historico;
     }
+
 
 
     private ParticipacaoDesignacao mapearParticipacao(
@@ -166,12 +185,13 @@ public class HistoricoDesignacoesDAO {
                 );
 
 
-        Integer pessoaId =
+        int pessoaId =
                 resultSet.getInt("pessoa_id");
 
 
-        Integer parteId =
+        int parteId =
                 resultSet.getInt("parte_id");
+
 
 
         Pessoa pessoa =
@@ -184,6 +204,7 @@ public class HistoricoDesignacoesDAO {
                         );
 
 
+
         Parte parte =
                 parteDAO.buscarPorId(parteId)
                         .orElseThrow(
@@ -194,12 +215,14 @@ public class HistoricoDesignacoesDAO {
                         );
 
 
+
         TipoParticipacao tipoParticipacao =
                 TipoParticipacao.valueOf(
                         resultSet.getString(
                                 "tipo_participacao"
                         )
                 );
+
 
 
         return new ParticipacaoDesignacao(
@@ -209,5 +232,38 @@ public class HistoricoDesignacoesDAO {
                 parte,
                 tipoParticipacao
         );
+    }
+
+
+
+    private void validarParticipacao(
+            ParticipacaoDesignacao participacao
+    ) {
+
+
+        if (participacao == null) {
+
+            throw new IllegalArgumentException(
+                    "Participação não pode ser nula."
+            );
+        }
+
+
+        if (participacao.getPessoa() == null
+                || participacao.getPessoa().getId() == null) {
+
+            throw new IllegalArgumentException(
+                    "Pessoa sem ID."
+            );
+        }
+
+
+        if (participacao.getParte() == null
+                || participacao.getParte().getId() == null) {
+
+            throw new IllegalArgumentException(
+                    "Parte sem ID."
+            );
+        }
     }
 }
