@@ -37,6 +37,72 @@ public class DatabaseInitializer {
 
         """;
 
+    private static final String CREATE_TABLE_PARTE_PARTICIPACAO_NECESSARIA = """
+
+            CREATE TABLE IF NOT EXISTS parte_participacao_necessaria (
+                parte_id INTEGER NOT NULL,
+                tipo_participacao TEXT NOT NULL,
+                ordem INTEGER NOT NULL,
+
+                PRIMARY KEY (parte_id, tipo_participacao),
+                FOREIGN KEY (parte_id) REFERENCES parte(id) ON DELETE CASCADE
+            );
+
+            """;
+
+
+    private static final String BACKFILL_PARTICIPACOES_LEITURA = """
+
+            INSERT OR IGNORE INTO parte_participacao_necessaria (
+                parte_id,
+                tipo_participacao,
+                ordem
+            )
+            SELECT id, 'LEITOR', 0
+            FROM parte
+            WHERE tipo = 'LEITURA';
+
+            """;
+
+    private static final String BACKFILL_PARTICIPACOES_DISCURSO = """
+
+            INSERT OR IGNORE INTO parte_participacao_necessaria (
+                parte_id,
+                tipo_participacao,
+                ordem
+            )
+            SELECT id, 'ORADOR', 0
+            FROM parte
+            WHERE tipo = 'DISCURSO';
+
+            """;
+
+    private static final String BACKFILL_PARTICIPACOES_DEMONSTRACAO_RESPONSAVEL = """
+
+            INSERT OR IGNORE INTO parte_participacao_necessaria (
+                parte_id,
+                tipo_participacao,
+                ordem
+            )
+            SELECT id, 'RESPONSAVEL', 0
+            FROM parte
+            WHERE tipo = 'DEMONSTRACAO';
+
+            """;
+
+    private static final String BACKFILL_PARTICIPACOES_DEMONSTRACAO_AJUDANTE = """
+
+            INSERT OR IGNORE INTO parte_participacao_necessaria (
+                parte_id,
+                tipo_participacao,
+                ordem
+            )
+            SELECT id, 'AJUDANTE', 1
+            FROM parte
+            WHERE tipo = 'DEMONSTRACAO';
+
+            """;
+
     private static final String CREATE_TABLE_HISTORICO_DESIGNACOES = """
 
             CREATE TABLE IF NOT EXISTS historico_designacoes (
@@ -64,6 +130,14 @@ public class DatabaseInitializer {
 
             statement.execute(CREATE_TABLE_PARTE);
             System.out.println("Tabela 'parte' criada ou já existente.");
+
+            statement.execute(CREATE_TABLE_PARTE_PARTICIPACAO_NECESSARIA);
+            System.out.println("Tabela 'parte_participacao_necessaria' criada ou já existente.");
+
+            statement.execute(BACKFILL_PARTICIPACOES_LEITURA);
+            statement.execute(BACKFILL_PARTICIPACOES_DISCURSO);
+            statement.execute(BACKFILL_PARTICIPACOES_DEMONSTRACAO_RESPONSAVEL);
+            statement.execute(BACKFILL_PARTICIPACOES_DEMONSTRACAO_AJUDANTE);
 
             statement.execute(CREATE_TABLE_HISTORICO_DESIGNACOES);
             System.out.println("Tabela 'historico_designacoes' criada ou já existente.");

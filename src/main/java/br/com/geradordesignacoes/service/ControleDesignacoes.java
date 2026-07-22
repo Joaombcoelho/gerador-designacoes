@@ -38,7 +38,7 @@ public class ControleDesignacoes {
         if (historico != null) {
 
             historico.getParticipacoes()
-                    .forEach(this::registrarParticipacao);
+                    .forEach(this::registrarParticipacaoHistorica);
         }
     }
 
@@ -75,6 +75,22 @@ public class ControleDesignacoes {
 
         registrar(
                 participacao.getPessoa()
+        );
+    }
+
+
+    private void registrarParticipacaoHistorica(
+            ParticipacaoDesignacao participacao
+    ) {
+
+        historico.adicionar(
+                participacao
+        );
+
+        quantidadePorPessoa.merge(
+                participacao.getPessoa(),
+                1,
+                Integer::sum
         );
     }
 

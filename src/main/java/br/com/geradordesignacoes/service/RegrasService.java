@@ -52,4 +52,27 @@ public class RegrasService {
                 && responsavel.podeExercer(TipoParticipacao.RESPONSAVEL)
                 && ajudante.podeExercer(TipoParticipacao.AJUDANTE);
     }
+
+    public boolean podeFormarDemonstracao(
+            Parte parte,
+            Pessoa responsavel,
+            Pessoa ajudante,
+            List<Pessoa> pessoasJaDesignadas
+    ) {
+
+        return podeFormarDemonstracao(
+                responsavel,
+                ajudante,
+                pessoasJaDesignadas
+        )
+                && parte != null
+                && parte.pessoaPodeExercerParticipacao(
+                        responsavel,
+                        TipoParticipacao.RESPONSAVEL
+                )
+                && parte.pessoaPodeExercerParticipacao(
+                        ajudante,
+                        TipoParticipacao.AJUDANTE
+                );
+    }
 }

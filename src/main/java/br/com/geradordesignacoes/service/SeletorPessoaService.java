@@ -42,7 +42,7 @@ public class SeletorPessoaService {
                     regrasService.podeDesignar(
                             pessoa,
                             parte,
-                            List.of()
+                            controle.getPessoasDesignadas()
                     );
 
 
@@ -89,7 +89,7 @@ public class SeletorPessoaService {
                     regrasService.podeDesignar(
                             pessoa,
                             parte,
-                            List.of()
+                            controle.getPessoasDesignadas()
                     );
 
 
