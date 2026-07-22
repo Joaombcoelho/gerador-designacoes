@@ -21,11 +21,14 @@ public class ControleDesignacoes {
 
     public ControleDesignacoes() {
 
-        this.quantidadePorPessoa = new HashMap<>();
+        this.quantidadePorPessoa =
+                new HashMap<>();
 
-        this.pessoasDesignadas = new ArrayList<>();
+        this.pessoasDesignadas =
+                new ArrayList<>();
 
-        this.historico = new HistoricoDesignacoes();
+        this.historico =
+                new HistoricoDesignacoes();
     }
 
 
@@ -33,12 +36,32 @@ public class ControleDesignacoes {
             HistoricoDesignacoes historico
     ) {
 
-        this();
+        this.quantidadePorPessoa =
+                new HashMap<>();
 
-        if (historico != null) {
+        this.pessoasDesignadas =
+                new ArrayList<>();
 
-            historico.getParticipacoes()
-                    .forEach(this::registrarParticipacaoHistorica);
+        this.historico =
+                historico != null
+                        ? historico
+                        : new HistoricoDesignacoes();
+
+
+        /*
+         * Carrega somente dados estatísticos
+         * do histórico.
+         *
+         * Não adiciona pessoas em
+         * pessoasDesignadas, pois elas
+         * pertencem apenas à geração atual.
+         */
+        for (ParticipacaoDesignacao participacao :
+                this.historico.getParticipacoes()) {
+
+            registrarHistorico(
+                    participacao
+            );
         }
     }
 
@@ -48,12 +71,19 @@ public class ControleDesignacoes {
     ) {
 
         this(
-                new HistoricoDesignacoes(historico)
+                new HistoricoDesignacoes(
+                        historico
+                )
         );
     }
 
 
-    public void registrar(Pessoa pessoa) {
+    /**
+     * Registra uma pessoa na geração atual.
+     */
+    public void registrar(
+            Pessoa pessoa
+    ) {
 
         quantidadePorPessoa.merge(
                 pessoa,
@@ -61,10 +91,19 @@ public class ControleDesignacoes {
                 Integer::sum
         );
 
-        pessoasDesignadas.add(pessoa);
+
+        if (!pessoasDesignadas.contains(pessoa)) {
+
+            pessoasDesignadas.add(
+                    pessoa
+            );
+        }
     }
 
 
+    /**
+     * Registra uma nova participação gerada.
+     */
     public void registrarParticipacao(
             ParticipacaoDesignacao participacao
     ) {
@@ -73,19 +112,22 @@ public class ControleDesignacoes {
                 participacao
         );
 
+
         registrar(
                 participacao.getPessoa()
         );
     }
 
 
-    private void registrarParticipacaoHistorica(
+    /**
+     * Carrega participações antigas somente
+     * para cálculo e histórico.
+     *
+     * Não bloqueia a pessoa na escala atual.
+     */
+    private void registrarHistorico(
             ParticipacaoDesignacao participacao
     ) {
-
-        historico.adicionar(
-                participacao
-        );
 
         quantidadePorPessoa.merge(
                 participacao.getPessoa(),
@@ -95,7 +137,9 @@ public class ControleDesignacoes {
     }
 
 
-    public int quantidadeDe(Pessoa pessoa) {
+    public int quantidadeDe(
+            Pessoa pessoa
+    ) {
 
         return quantidadePorPessoa.getOrDefault(
                 pessoa,
@@ -104,6 +148,10 @@ public class ControleDesignacoes {
     }
 
 
+    /**
+     * Pessoas que já receberam alguma parte
+     * nesta geração atual.
+     */
     public List<Pessoa> getPessoasDesignadas() {
 
         return new ArrayList<>(
@@ -112,6 +160,10 @@ public class ControleDesignacoes {
     }
 
 
+    /**
+     * Histórico completo:
+     * histórico recebido + novas participações.
+     */
     public List<ParticipacaoDesignacao> getParticipacoes() {
 
         return historico.getParticipacoes();
@@ -139,7 +191,8 @@ public class ControleDesignacoes {
                 .stream()
                 .filter(participacao ->
                         participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte)
+                                &&
+                                participacao.getParte().equals(parte)
                 )
                 .count();
     }

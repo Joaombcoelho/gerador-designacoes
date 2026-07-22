@@ -36,10 +36,11 @@ public class TesteGeracaoEscalaCompleta {
                 );
 
         ResultadoGeracaoEscala primeiraGeracao =
-                geradorEscala.gerarEscala(
+                geradorEscala.gerar(
                         LocalDate.of(2026, 7, 28),
                         partes,
-                        pessoas
+                        pessoas,
+                        new HistoricoDesignacoes()
                 );
 
         imprimirEscala(primeiraGeracao);
@@ -59,6 +60,27 @@ public class TesteGeracaoEscalaCompleta {
                                 primeiraGeracao.getParticipacoes()
                         )
                 );
+        System.out.println(
+                "TOTAL PRIMEIRA GERAÇÃO: "
+                        + primeiraGeracao.getParticipacoes().size()
+        );
+
+        System.out.println(
+                "TOTAL SEGUNDA GERAÇÃO: "
+                        + segundaGeracao.getParticipacoes().size()
+        );
+
+        for (ParticipacaoDesignacao p :
+                segundaGeracao.getParticipacoes()) {
+
+            System.out.println(
+                    p.getPessoa().getNome()
+                            + " - "
+                            + p.getParte().getNome()
+                            + " - "
+                            + p.getTipoParticipacao()
+            );
+        }
 
         validarSegundaGeracaoConsideraPrimeira(
                 primeiraGeracao,

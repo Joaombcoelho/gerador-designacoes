@@ -16,6 +16,7 @@ import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoParticipacao;
 
+
 public class GeradorEscala {
 
     private final RegrasService regrasService;
@@ -27,13 +28,17 @@ public class GeradorEscala {
     public GeradorEscala(RegrasService regrasService) {
 
         this.regrasService = regrasService;
-        this.avaliadorPessoaService = new AvaliadorPessoaService();
+
+        this.avaliadorPessoaService =
+                new AvaliadorPessoaService();
+
 
         this.seletorPessoaService =
                 new SeletorPessoaService(
                         regrasService,
                         avaliadorPessoaService
                 );
+
 
         this.historicoService =
                 new HistoricoDesignacoesService();
@@ -105,23 +110,43 @@ public class GeradorEscala {
             HistoricoDesignacoes historico
     ) {
 
-        List<Designacao> designacoes = new ArrayList<>();
-        List<String> erros = new ArrayList<>();
+
+        List<Designacao> designacoes =
+                new ArrayList<>();
+
+        List<String> erros =
+                new ArrayList<>();
+
         List<DiagnosticoSelecaoPessoa> diagnosticos =
                 new ArrayList<>();
 
-        ControleDesignacoes controleDesignacoes =
-                new ControleDesignacoes(
-                        historico
+
+        HistoricoDesignacoes historicoControle =
+                new HistoricoDesignacoes(
+                        historico.getParticipacoes()
                 );
 
-        int quantidadeParticipacoesHistoricas =
-                controleDesignacoes.getParticipacoes().size();
 
+        ControleDesignacoes controleDesignacoes =
+                new ControleDesignacoes(
+                        historicoControle
+                );
+
+
+        int quantidadeHistorica =
+                controleDesignacoes
+                        .getParticipacoes()
+                        .size();
+
+        System.out.println(
+                "HISTÓRICO RECEBIDO PELO GERADOR: "
+                        + quantidadeHistorica
+        );
 
         for (Parte parte : partes) {
 
             boolean gerou;
+
 
             if (parte.getTipo() == TipoParte.DEMONSTRACAO) {
 
@@ -148,35 +173,78 @@ public class GeradorEscala {
             }
 
 
+
             if (!gerou) {
 
                 erros.add(
                         "Não foi possível gerar a parte: "
-                                + parte
+                                + parte.getNome()
                 );
             }
         }
 
-        List<ParticipacaoDesignacao> participacoesAtualizadas =
-                controleDesignacoes.getParticipacoes();
-
-        List<ParticipacaoDesignacao> participacoesGeradas =
-                participacoesAtualizadas.subList(
-                        quantidadeParticipacoesHistoricas,
-                        participacoesAtualizadas.size()
-                );
-
-        historicoService.registrarGeracao(
-                participacoesGeradas
+        System.out.println(
+                "HISTÓRICO APÓS GERAÇÃO: "
+                        + controleDesignacoes.getParticipacoes().size()
         );
 
+
+        List<ParticipacaoDesignacao> todasParticipacoes =
+                controleDesignacoes.getParticipacoes();
+
+
+        List<ParticipacaoDesignacao> novasParticipacoes =
+                todasParticipacoes
+                        .subList(
+                                quantidadeHistorica,
+                                todasParticipacoes.size()
+                        );
+
+
+
+        historicoService.registrarGeracao(
+                novasParticipacoes
+        );
+
+        System.out.println(
+                "TOTAL PARTICIPAÇÕES GERADAS: "
+                        + todasParticipacoes.size()
+        );
+
+        for (ParticipacaoDesignacao p : todasParticipacoes) {
+
+            System.out.println(
+                    p.getPessoa().getNome()
+                            + " - "
+                            + p.getParte().getNome()
+                            + " - "
+                            + p.getTipoParticipacao()
+            );
+        }
+
+        System.out.println(
+                "TOTAL PARTICIPAÇÕES NO RESULTADO: "
+                        + todasParticipacoes.size()
+        );
+
+        for (ParticipacaoDesignacao p : todasParticipacoes) {
+
+            System.out.println(
+                    p.getPessoa().getNome()
+                            + " - "
+                            + p.getParte().getNome()
+                            + " - "
+                            + p.getTipoParticipacao()
+            );
+        }
         return new ResultadoGeracaoEscala(
                 designacoes,
-                participacoesAtualizadas,
+                todasParticipacoes,
                 erros,
                 diagnosticos
         );
     }
+
 
 
     private boolean designarParteIndividual(
@@ -188,6 +256,7 @@ public class GeradorEscala {
             List<DiagnosticoSelecaoPessoa> diagnosticos
     ) {
 
+
         DiagnosticoSelecaoPessoa diagnostico =
                 seletorPessoaService.selecionarComDiagnostico(
                         parte,
@@ -196,7 +265,9 @@ public class GeradorEscala {
                 );
 
 
-        diagnosticos.add(diagnostico);
+        diagnosticos.add(
+                diagnostico
+        );
 
 
         if (diagnostico.getEscolhido() == null) {
@@ -205,14 +276,19 @@ public class GeradorEscala {
         }
 
 
+
         Pessoa participante =
-                diagnostico.getEscolhido()
+                diagnostico
+                        .getEscolhido()
                         .getPessoa();
+
+
 
         TipoParticipacao tipoParticipacao =
                 determinarParticipacaoIndividual(
                         parte
                 );
+
 
 
         designacoes.add(
@@ -223,6 +299,7 @@ public class GeradorEscala {
                         null
                 )
         );
+
 
 
         controleDesignacoes.registrarParticipacao(
@@ -239,6 +316,8 @@ public class GeradorEscala {
     }
 
 
+
+
     private boolean designarDemonstracao(
             LocalDate data,
             Parte parte,
@@ -247,42 +326,49 @@ public class GeradorEscala {
             ControleDesignacoes controleDesignacoes
     ) {
 
-        MelhorDuplaDemonstracao melhorDupla =
+
+        MelhorDuplaDemonstracao dupla =
                 selecionarMelhorDuplaDemonstracao(
                         parte,
                         pessoas,
                         controleDesignacoes
                 );
 
-        if (melhorDupla == null) {
+
+
+        if (dupla == null) {
+
             return false;
         }
+
 
 
         designacoes.add(
                 new Designacao(
                         data,
                         parte,
-                        melhorDupla.responsavel(),
-                        melhorDupla.ajudante()
+                        dupla.responsavel(),
+                        dupla.ajudante()
                 )
         );
+
 
 
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
                         data,
-                        melhorDupla.responsavel(),
+                        dupla.responsavel(),
                         parte,
                         TipoParticipacao.RESPONSAVEL
                 )
         );
 
 
+
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
                         data,
-                        melhorDupla.ajudante(),
+                        dupla.ajudante(),
                         parte,
                         TipoParticipacao.AJUDANTE
                 )
@@ -293,20 +379,39 @@ public class GeradorEscala {
     }
 
 
+
+
     private MelhorDuplaDemonstracao selecionarMelhorDuplaDemonstracao(
             Parte parte,
             List<Pessoa> pessoas,
             ControleDesignacoes controleDesignacoes
     ) {
 
-        List<Pessoa> pessoasJaDesignadas =
-                controleDesignacoes.getPessoasDesignadas();
 
-        MelhorDuplaDemonstracao melhorDupla = null;
+        List<Pessoa> pessoasJaDesignadas =
+                controleDesignacoes
+                        .getPessoasDesignadas();
+
+
+
+        MelhorDuplaDemonstracao melhor =
+                null;
+
+
 
         for (Pessoa responsavel : pessoas) {
 
+
             for (Pessoa ajudante : pessoas) {
+
+
+
+                if (responsavel.equals(ajudante)) {
+
+                    continue;
+                }
+
+
 
                 if (!regrasService.podeFormarDemonstracao(
                         parte,
@@ -314,8 +419,11 @@ public class GeradorEscala {
                         ajudante,
                         pessoasJaDesignadas
                 )) {
+
                     continue;
                 }
+
+
 
                 ResultadoAvaliacaoPessoa avaliacaoResponsavel =
                         avaliadorPessoaService.avaliar(
@@ -324,6 +432,8 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
+
+
                 ResultadoAvaliacaoPessoa avaliacaoAjudante =
                         avaliadorPessoaService.avaliar(
                                 ajudante,
@@ -331,44 +441,57 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
-                MelhorDuplaDemonstracao dupla =
+
+
+                MelhorDuplaDemonstracao candidata =
                         new MelhorDuplaDemonstracao(
                                 responsavel,
                                 ajudante,
                                 avaliacaoResponsavel.getTotal()
-                                        + avaliacaoAjudante.getTotal()
+                                        +
+                                        avaliacaoAjudante.getTotal()
                         );
 
-                if (melhorDupla == null
-                        || dupla.pontuacaoTotal() > melhorDupla.pontuacaoTotal()) {
 
-                    melhorDupla = dupla;
+
+                if (melhor == null
+                        ||
+                        candidata.pontuacaoTotal()
+                                >
+                                melhor.pontuacaoTotal()) {
+
+
+                    melhor =
+                            candidata;
                 }
             }
         }
 
-        return melhorDupla;
+
+        return melhor;
     }
+
+
+
 
 
     private TipoParticipacao determinarParticipacaoIndividual(
             Parte parte
     ) {
 
+
         return parte.getParticipacoesNecessarias()
                 .stream()
-                .filter(tipoParticipacao ->
-                        tipoParticipacao == TipoParticipacao.LEITOR
-                                || tipoParticipacao == TipoParticipacao.ORADOR
-                )
                 .findFirst()
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Parte individual sem participação compatível: "
+                                "Parte sem participação definida: "
                                         + parte.getNome()
                         )
                 );
     }
+
+
 
 
     private record MelhorDuplaDemonstracao(
