@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
 import br.com.geradordesignacoes.model.Designacao;
@@ -22,7 +23,8 @@ public class GeradorEscala {
     private final RegrasService regrasService;
     private final SeletorPessoaService seletorPessoaService;
     private final AvaliadorPessoaService avaliadorPessoaService;
-    private final HistoricoDesignacoesService historicoService;
+    private final HistoricoDesignacoesDAO historicoDAO;
+    private final PessoaDAO pessoaDAO;
 
 
     public GeradorEscala(RegrasService regrasService) {
@@ -40,8 +42,11 @@ public class GeradorEscala {
                 );
 
 
-        this.historicoService =
-                new HistoricoDesignacoesService();
+        this.historicoDAO =
+                new HistoricoDesignacoesDAO();
+
+        this.pessoaDAO =
+                new PessoaDAO();
     }
 
 
@@ -53,7 +58,7 @@ public class GeradorEscala {
         return gerarEscala(
                 data,
                 partes,
-                new PessoaDAO().listarTodos()
+                pessoaDAO.listarTodos()
         );
     }
 
@@ -82,7 +87,7 @@ public class GeradorEscala {
                 data,
                 partes,
                 pessoas,
-                historicoService.getHistorico()
+                historicoDAO.carregarHistorico()
         );
     }
 
@@ -138,11 +143,6 @@ public class GeradorEscala {
                         .getParticipacoes()
                         .size();
 
-        System.out.println(
-                "HISTÓRICO RECEBIDO PELO GERADOR: "
-                        + quantidadeHistorica
-        );
-
         for (Parte parte : partes) {
 
             boolean gerou;
@@ -183,11 +183,6 @@ public class GeradorEscala {
             }
         }
 
-        System.out.println(
-                "HISTÓRICO APÓS GERAÇÃO: "
-                        + controleDesignacoes.getParticipacoes().size()
-        );
-
 
         List<ParticipacaoDesignacao> todasParticipacoes =
                 controleDesignacoes.getParticipacoes();
@@ -202,41 +197,10 @@ public class GeradorEscala {
 
 
 
-        historicoService.registrarGeracao(
+        historicoDAO.salvarTodos(
                 novasParticipacoes
         );
 
-        System.out.println(
-                "TOTAL PARTICIPAÇÕES GERADAS: "
-                        + todasParticipacoes.size()
-        );
-
-        for (ParticipacaoDesignacao p : todasParticipacoes) {
-
-            System.out.println(
-                    p.getPessoa().getNome()
-                            + " - "
-                            + p.getParte().getNome()
-                            + " - "
-                            + p.getTipoParticipacao()
-            );
-        }
-
-        System.out.println(
-                "TOTAL PARTICIPAÇÕES NO RESULTADO: "
-                        + todasParticipacoes.size()
-        );
-
-        for (ParticipacaoDesignacao p : todasParticipacoes) {
-
-            System.out.println(
-                    p.getPessoa().getNome()
-                            + " - "
-                            + p.getParte().getNome()
-                            + " - "
-                            + p.getTipoParticipacao()
-            );
-        }
         return new ResultadoGeracaoEscala(
                 designacoes,
                 todasParticipacoes,
