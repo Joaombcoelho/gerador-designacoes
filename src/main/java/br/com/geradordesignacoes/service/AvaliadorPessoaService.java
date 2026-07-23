@@ -80,11 +80,6 @@ public class AvaliadorPessoaService {
                         parte
                 );
 
-        System.out.println(
-                pessoa.getNome()
-                        + " | Parte=" + parte.getNome()
-                        + " | Repetições=" + repeticoes
-        );
 
         return (int) repeticoes * 15;
     }
