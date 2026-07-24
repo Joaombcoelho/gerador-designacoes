@@ -4,6 +4,8 @@ import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
+import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.service.PessoaService;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -16,13 +18,20 @@ import javafx.scene.layout.StackPane;
 public class MainView {
 
     private final BorderPane root;
-    private final PessoaView pessoaView = new PessoaView();
+    private final PessoaView pessoaView;
     private final ParteView parteView = new ParteView();
     private final EscalaView escalaView = new EscalaView();
     private final HistoricoView historicoView = new HistoricoView();
 
     public MainView() {
+
         root = new BorderPane();
+
+        PessoaDAO pessoaDAO = new PessoaDAO();
+
+        PessoaService pessoaService = new PessoaService(pessoaDAO);
+
+        pessoaView = new PessoaView(pessoaService);
 
         criarMenu();
         criarTelaInicial();
