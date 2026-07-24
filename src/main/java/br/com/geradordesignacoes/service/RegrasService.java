@@ -1,11 +1,10 @@
 package br.com.geradordesignacoes.service;
 
-import java.util.List;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.TipoParticipacao;
 
-import static br.com.geradordesignacoes.model.TipoParte.*;
+import java.util.List;
 
 public class RegrasService {
     public boolean podeDesignar(Pessoa pessoa, Parte parte, List<Pessoa> pessoasJaDesignadas) {
@@ -15,28 +14,25 @@ public class RegrasService {
 
         return switch (parte.getTipo()) {
 
-            case LEITURA ->
-                    parte.pessoaPodeExercerParticipacao(
-                            pessoa,
-                            TipoParticipacao.LEITOR
-                    );
+            case LEITURA -> parte.pessoaPodeExercerParticipacao(
+                    pessoa,
+                    TipoParticipacao.LEITOR
+            );
 
-            case DISCURSO ->
-                    parte.pessoaPodeExercerParticipacao(
-                            pessoa,
-                            TipoParticipacao.ORADOR
-                    );
+            case DISCURSO -> parte.pessoaPodeExercerParticipacao(
+                    pessoa,
+                    TipoParticipacao.ORADOR
+            );
 
-            case DEMONSTRACAO ->
+            case DEMONSTRACAO -> parte.pessoaPodeExercerParticipacao(
+                    pessoa,
+                    TipoParticipacao.RESPONSAVEL
+            )
+                    ||
                     parte.pessoaPodeExercerParticipacao(
                             pessoa,
-                            TipoParticipacao.RESPONSAVEL
-                    )
-                            ||
-                            parte.pessoaPodeExercerParticipacao(
-                                    pessoa,
-                                    TipoParticipacao.AJUDANTE
-                            );
+                            TipoParticipacao.AJUDANTE
+                    );
         };
     }
 
@@ -67,12 +63,12 @@ public class RegrasService {
         )
                 && parte != null
                 && parte.pessoaPodeExercerParticipacao(
-                        responsavel,
-                        TipoParticipacao.RESPONSAVEL
-                )
+                responsavel,
+                TipoParticipacao.RESPONSAVEL
+        )
                 && parte.pessoaPodeExercerParticipacao(
-                        ajudante,
-                        TipoParticipacao.AJUDANTE
-                );
+                ajudante,
+                TipoParticipacao.AJUDANTE
+        );
     }
 }

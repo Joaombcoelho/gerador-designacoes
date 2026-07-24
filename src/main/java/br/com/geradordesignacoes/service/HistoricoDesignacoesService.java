@@ -14,7 +14,6 @@ public class HistoricoDesignacoesService {
     private HistoricoDesignacoes historico;
 
 
-
     public HistoricoDesignacoesService() {
 
         this.historicoDAO =
@@ -22,7 +21,6 @@ public class HistoricoDesignacoesService {
 
         carregar();
     }
-
 
 
     /**
@@ -35,7 +33,6 @@ public class HistoricoDesignacoesService {
     }
 
 
-
     /**
      * Retorna o histórico atual em memória.
      */
@@ -43,7 +40,6 @@ public class HistoricoDesignacoesService {
 
         return historico;
     }
-
 
 
     /**
@@ -72,7 +68,6 @@ public class HistoricoDesignacoesService {
     }
 
 
-
     /**
      * Salva várias participações geradas.
      */
@@ -90,7 +85,6 @@ public class HistoricoDesignacoesService {
             );
         }
     }
-
 
 
     /**
@@ -121,7 +115,6 @@ public class HistoricoDesignacoesService {
             );
         }
     }
-
 
 
     private void validarParticipacao(

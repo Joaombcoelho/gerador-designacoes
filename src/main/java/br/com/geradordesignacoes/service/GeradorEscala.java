@@ -1,21 +1,12 @@
 package br.com.geradordesignacoes.service;
 
+import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.model.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
-import br.com.geradordesignacoes.dao.PessoaDAO;
-import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
-import br.com.geradordesignacoes.model.Designacao;
-import br.com.geradordesignacoes.model.HistoricoDesignacoes;
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
-import br.com.geradordesignacoes.model.Pessoa;
-import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
-import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
-import br.com.geradordesignacoes.model.TipoParte;
-import br.com.geradordesignacoes.model.TipoParticipacao;
 
 
 public class GeradorEscala {
@@ -173,7 +164,6 @@ public class GeradorEscala {
             }
 
 
-
             if (!gerou) {
 
                 erros.add(
@@ -196,7 +186,6 @@ public class GeradorEscala {
                         );
 
 
-
         historicoDAO.salvarTodos(
                 novasParticipacoes
         );
@@ -208,7 +197,6 @@ public class GeradorEscala {
                 diagnosticos
         );
     }
-
 
 
     private boolean designarParteIndividual(
@@ -240,19 +228,16 @@ public class GeradorEscala {
         }
 
 
-
         Pessoa participante =
                 diagnostico
                         .getEscolhido()
                         .getPessoa();
 
 
-
         TipoParticipacao tipoParticipacao =
                 determinarParticipacaoIndividual(
                         parte
                 );
-
 
 
         designacoes.add(
@@ -263,7 +248,6 @@ public class GeradorEscala {
                         null
                 )
         );
-
 
 
         controleDesignacoes.registrarParticipacao(
@@ -278,8 +262,6 @@ public class GeradorEscala {
 
         return true;
     }
-
-
 
 
     private boolean designarDemonstracao(
@@ -299,12 +281,10 @@ public class GeradorEscala {
                 );
 
 
-
         if (dupla == null) {
 
             return false;
         }
-
 
 
         designacoes.add(
@@ -317,7 +297,6 @@ public class GeradorEscala {
         );
 
 
-
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
                         data,
@@ -326,7 +305,6 @@ public class GeradorEscala {
                         TipoParticipacao.RESPONSAVEL
                 )
         );
-
 
 
         controleDesignacoes.registrarParticipacao(
@@ -343,8 +321,6 @@ public class GeradorEscala {
     }
 
 
-
-
     private MelhorDuplaDemonstracao selecionarMelhorDuplaDemonstracao(
             Parte parte,
             List<Pessoa> pessoas,
@@ -357,10 +333,8 @@ public class GeradorEscala {
                         .getPessoasDesignadas();
 
 
-
         MelhorDuplaDemonstracao melhor =
                 null;
-
 
 
         for (Pessoa responsavel : pessoas) {
@@ -369,12 +343,10 @@ public class GeradorEscala {
             for (Pessoa ajudante : pessoas) {
 
 
-
                 if (responsavel.equals(ajudante)) {
 
                     continue;
                 }
-
 
 
                 if (!regrasService.podeFormarDemonstracao(
@@ -388,14 +360,12 @@ public class GeradorEscala {
                 }
 
 
-
                 ResultadoAvaliacaoPessoa avaliacaoResponsavel =
                         avaliadorPessoaService.avaliar(
                                 responsavel,
                                 parte,
                                 controleDesignacoes
                         );
-
 
 
                 ResultadoAvaliacaoPessoa avaliacaoAjudante =
@@ -406,7 +376,6 @@ public class GeradorEscala {
                         );
 
 
-
                 MelhorDuplaDemonstracao candidata =
                         new MelhorDuplaDemonstracao(
                                 responsavel,
@@ -415,7 +384,6 @@ public class GeradorEscala {
                                         +
                                         avaliacaoAjudante.getTotal()
                         );
-
 
 
                 if (melhor == null
@@ -436,9 +404,6 @@ public class GeradorEscala {
     }
 
 
-
-
-
     private TipoParticipacao determinarParticipacaoIndividual(
             Parte parte
     ) {
@@ -454,8 +419,6 @@ public class GeradorEscala {
                         )
                 );
     }
-
-
 
 
     private record MelhorDuplaDemonstracao(

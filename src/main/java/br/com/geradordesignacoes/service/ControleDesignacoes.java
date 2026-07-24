@@ -122,7 +122,7 @@ public class ControleDesignacoes {
     /**
      * Carrega participações antigas somente
      * para cálculo e histórico.
-     *
+     * <p>
      * Não bloqueia a pessoa na escala atual.
      */
     private void registrarHistorico(

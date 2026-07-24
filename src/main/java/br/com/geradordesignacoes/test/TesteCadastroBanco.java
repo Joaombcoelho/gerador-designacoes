@@ -23,7 +23,6 @@ public class TesteCadastroBanco {
                 new ParteDAO();
 
 
-
         // Pessoas
 
         List<Pessoa> pessoas =
@@ -89,7 +88,6 @@ public class TesteCadastroBanco {
         }
 
 
-
         // Partes
 
         List<Parte> partes =
@@ -146,7 +144,6 @@ public class TesteCadastroBanco {
                             + partes.size()
             );
         }
-
 
 
         System.out.println(

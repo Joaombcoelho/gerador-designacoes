@@ -1,19 +1,10 @@
 package br.com.geradordesignacoes.test;
 
-import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.Pessoa;
-import br.com.geradordesignacoes.model.Privilegio;
-import br.com.geradordesignacoes.model.Sexo;
-import br.com.geradordesignacoes.model.SexoPermitido;
-import br.com.geradordesignacoes.model.TipoParte;
-import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.AvaliadorPessoaService;
 import br.com.geradordesignacoes.service.ControleDesignacoes;
 import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.service.SeletorPessoaService;
-import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
-
 
 
 public final class TesteDiagnosticoSelecao {

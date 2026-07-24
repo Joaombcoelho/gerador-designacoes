@@ -104,25 +104,25 @@ public class DatabaseInitializer {
             """;
 
     private static final String CREATE_TABLE_HISTORICO_DESIGNACOES = """
-
+            
             CREATE TABLE IF NOT EXISTS historico_designacoes (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   data DATE NOT NULL,
                   pessoa_id INTEGER NOT NULL,
                   parte_id INTEGER NOT NULL,
                   tipo_participacao TEXT NOT NULL,
-              
+            
                   UNIQUE(
                       data,
                       pessoa_id,
                       parte_id,
                       tipo_participacao
                   ),
-              
+            
                   FOREIGN KEY (pessoa_id) REFERENCES pessoa(id),
                   FOREIGN KEY (parte_id) REFERENCES parte(id)
               );
-
+            
             """;
 
     public static void initialize() {

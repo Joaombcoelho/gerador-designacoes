@@ -26,7 +26,6 @@ public class TestePersistenciaHistorico {
                 new HistoricoDesignacoesDAO();
 
 
-
         Pessoa pessoa =
                 pessoaDAO.listarTodos()
                         .stream()
@@ -38,7 +37,6 @@ public class TestePersistenciaHistorico {
                         );
 
 
-
         Parte parte =
                 parteDAO.listarTodos()
                         .stream()
@@ -48,7 +46,6 @@ public class TestePersistenciaHistorico {
                                         "Nenhuma parte cadastrada."
                                 )
                         );
-
 
 
         System.out.println("\nDados utilizados:");
@@ -69,7 +66,6 @@ public class TestePersistenciaHistorico {
         );
 
 
-
         ParticipacaoDesignacao participacao =
                 new ParticipacaoDesignacao(
                         null,
@@ -78,7 +74,6 @@ public class TestePersistenciaHistorico {
                         parte,
                         TipoParticipacao.RESPONSAVEL
                 );
-
 
 
         System.out.println(
@@ -91,11 +86,9 @@ public class TestePersistenciaHistorico {
         );
 
 
-
         System.out.println(
                 "Registro salvo."
         );
-
 
 
         System.out.println(
@@ -107,17 +100,14 @@ public class TestePersistenciaHistorico {
                 historicoDAO.carregarHistorico();
 
 
-
         List<ParticipacaoDesignacao> lista =
                 historico.getParticipacoes();
-
 
 
         System.out.println(
                 "\nTotal registros encontrados: "
                         + lista.size()
         );
-
 
 
         for (ParticipacaoDesignacao p : lista) {
@@ -149,7 +139,6 @@ public class TestePersistenciaHistorico {
                             + p.getTipoParticipacao()
             );
         }
-
 
 
         System.out.println(

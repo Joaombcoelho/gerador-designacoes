@@ -89,6 +89,7 @@ public class Pessoa {
             case PRESIDENTE -> podeSerResponsavel;
         };
     }
+
     @Override
     public boolean equals(Object o) {
 

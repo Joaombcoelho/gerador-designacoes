@@ -1,8 +1,11 @@
 package br.com.geradordesignacoes.test;
 
+import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
+import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.RegrasService;
+import br.com.geradordesignacoes.dao.PessoaDAO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,6 +17,7 @@ public class TesteGeradorEscala {
 
         System.out.println("\n=== TESTE GERADOR DE ESCALA ===\n");
 
+        new HistoricoDesignacoesDAO().limpar();
 
         List<Pessoa> pessoas = criarPessoasTeste();
 
@@ -64,61 +68,65 @@ public class TesteGeradorEscala {
     }
 
 
-
     private static List<Pessoa> criarPessoasTeste() {
 
+        PessoaDAO pessoaDAO = new PessoaDAO();
 
         Pessoa joao =
-                new Pessoa(
-                        "João",
-                        Sexo.MASCULINO,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        Privilegio.BATIZADO
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "João",
+                                Sexo.MASCULINO,
+                                true,
+                                true,
+                                true,
+                                true,
+                                true,
+                                Privilegio.BATIZADO
+                        )
                 );
-
 
         Pessoa pedro =
-                new Pessoa(
-                        "Pedro",
-                        Sexo.MASCULINO,
-                        true,
-                        false,
-                        true,
-                        true,
-                        false,
-                        Privilegio.BATIZADO
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "Pedro",
+                                Sexo.MASCULINO,
+                                true,
+                                false,
+                                true,
+                                true,
+                                false,
+                                Privilegio.BATIZADO
+                        )
                 );
-
 
         Pessoa carlos =
-                new Pessoa(
-                        "Carlos",
-                        Sexo.MASCULINO,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        Privilegio.BATIZADO
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "Carlos",
+                                Sexo.MASCULINO,
+                                true,
+                                true,
+                                true,
+                                true,
+                                true,
+                                Privilegio.BATIZADO
+                        )
                 );
-
 
         Pessoa maria =
-                new Pessoa(
-                        "Maria",
-                        Sexo.FEMININO,
-                        true,
-                        false,
-                        false,
-                        true,
-                        false,
-                        Privilegio.BATIZADO
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "Maria",
+                                Sexo.FEMININO,
+                                true,
+                                false,
+                                false,
+                                true,
+                                false,
+                                Privilegio.BATIZADO
+                        )
                 );
-
 
         return List.of(
                 joao,
@@ -128,12 +136,11 @@ public class TesteGeradorEscala {
         );
     }
 
-
-
     private static List<Parte> criarPartesTeste() {
 
+        ParteDAO parteDAO = new ParteDAO();
 
-        Parte leitura =
+        Parte leitura = parteDAO.salvar(
                 new Parte(
                         "Leitura Bíblica",
                         TipoParte.LEITURA,
@@ -142,14 +149,11 @@ public class TesteGeradorEscala {
                         SexoPermitido.MASCULINO,
                         1,
                         false,
-                        List.of(
-                                TipoParticipacao.LEITOR
-                        )
-                );
+                        List.of(TipoParticipacao.LEITOR)
+                )
+        );
 
-
-
-        Parte demonstracao =
+        Parte demonstracao = parteDAO.salvar(
                 new Parte(
                         "Demonstração",
                         TipoParte.DEMONSTRACAO,
@@ -162,12 +166,16 @@ public class TesteGeradorEscala {
                                 TipoParticipacao.RESPONSAVEL,
                                 TipoParticipacao.AJUDANTE
                         )
-                );
-
+                )
+        );
+        System.out.println("ID leitura: " + leitura.getId());
+        System.out.println("ID demonstração: " + demonstracao.getId());
 
         return List.of(
                 leitura,
                 demonstracao
         );
+
     }
+
 }

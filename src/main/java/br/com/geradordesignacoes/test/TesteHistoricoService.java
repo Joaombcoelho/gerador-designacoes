@@ -2,7 +2,10 @@ package br.com.geradordesignacoes.test;
 
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
-import br.com.geradordesignacoes.model.*;
+import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
+import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.TipoParticipacao;
 import br.com.geradordesignacoes.service.HistoricoDesignacoesService;
 
 import java.time.LocalDate;
@@ -23,7 +26,6 @@ public class TesteHistoricoService {
                 new HistoricoDesignacoesService();
 
 
-
         System.out.println(
                 "Histórico carregado:"
         );
@@ -37,13 +39,11 @@ public class TesteHistoricoService {
         );
 
 
-
         PessoaDAO pessoaDAO =
                 new PessoaDAO();
 
         ParteDAO parteDAO =
                 new ParteDAO();
-
 
 
         Pessoa pessoa =
@@ -53,13 +53,11 @@ public class TesteHistoricoService {
                         .orElseThrow();
 
 
-
         Parte parte =
                 parteDAO.listarTodos()
                         .stream()
                         .findFirst()
                         .orElseThrow();
-
 
 
         ParticipacaoDesignacao novaParticipacao =
@@ -72,7 +70,6 @@ public class TesteHistoricoService {
                 );
 
 
-
         System.out.println(
                 "\nAdicionando nova participação..."
         );
@@ -83,14 +80,12 @@ public class TesteHistoricoService {
         );
 
 
-
         System.out.println(
                 "Quantidade após adicionar: "
                         + service.getHistorico()
                         .getParticipacoes()
                         .size()
         );
-
 
 
         System.out.println(
@@ -102,14 +97,12 @@ public class TesteHistoricoService {
                 new HistoricoDesignacoesService();
 
 
-
         System.out.println(
                 "Quantidade recuperada do banco: "
                         + novoService.getHistorico()
                         .getParticipacoes()
                         .size()
         );
-
 
 
         System.out.println(

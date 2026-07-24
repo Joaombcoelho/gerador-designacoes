@@ -72,7 +72,6 @@ public class SeletorPessoaService {
     }
 
 
-
     public List<ResultadoAvaliacaoPessoa> avaliarCandidatos(
             Parte parte,
             List<Pessoa> pessoas,
@@ -110,7 +109,6 @@ public class SeletorPessoaService {
 
         return resultados;
     }
-
 
 
     public DiagnosticoSelecaoPessoa selecionarComDiagnostico(

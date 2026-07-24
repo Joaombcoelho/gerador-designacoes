@@ -20,17 +20,14 @@ public class TesteCarregarHistorico {
                 new HistoricoDesignacoesDAO();
 
 
-
         HistoricoDesignacoes historico =
                 dao.carregarHistorico();
-
 
 
         System.out.println(
                 "Quantidade de participações carregadas: "
                         + historico.getParticipacoes().size()
         );
-
 
 
         for (ParticipacaoDesignacao p :
@@ -62,7 +59,6 @@ public class TesteCarregarHistorico {
                             + p.getTipoParticipacao()
             );
         }
-
 
 
         System.out.println(

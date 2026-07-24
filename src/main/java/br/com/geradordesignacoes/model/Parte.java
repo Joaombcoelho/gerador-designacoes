@@ -1,6 +1,8 @@
-package br.com.geradordesignacoes.model;import java.util.Objects;
-import java.util.List;
+package br.com.geradordesignacoes.model;
+
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 
 public class Parte {

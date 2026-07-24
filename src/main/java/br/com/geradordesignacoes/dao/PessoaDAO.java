@@ -15,21 +15,21 @@ import java.util.Optional;
 
 public class PessoaDAO {
 
-    public void salvar(Pessoa pessoa) {
+    public Pessoa salvar(Pessoa pessoa) {
 
         String sql = """
-            INSERT INTO pessoa (
-                nome,
-                sexo,
-                ativo,
-                pode_ser_responsavel,
-                pode_ser_ajudante,
-                pode_fazer_leitura,
-                pode_fazer_discurso,
-                privilegio
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """;
+                INSERT INTO pessoa (
+                    nome,
+                    sexo,
+                    ativo,
+                    pode_ser_responsavel,
+                    pode_ser_ajudante,
+                    pode_fazer_leitura,
+                    pode_fazer_discurso,
+                    privilegio
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
         try (
                 Connection connection = ConnectionFactory.getConnection();
@@ -67,6 +67,7 @@ public class PessoaDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao salvar pessoa.", e);
         }
+        return pessoa;
     }
 
     public List<Pessoa> listarTodos() {
@@ -74,9 +75,9 @@ public class PessoaDAO {
         List<Pessoa> pessoas = new ArrayList<>();
 
         String sql = """
-            SELECT *
-            FROM pessoa
-            """;
+                SELECT *
+                FROM pessoa
+                """;
 
         try (
                 Connection connection = ConnectionFactory.getConnection();
@@ -98,10 +99,10 @@ public class PessoaDAO {
     public Optional<Pessoa> buscarPorId(Integer id) {
 
         String sql = """
-            SELECT *
-            FROM pessoa
-            WHERE id = ?
-            """;
+                SELECT *
+                FROM pessoa
+                WHERE id = ?
+                """;
 
         try (
                 Connection connection = ConnectionFactory.getConnection();
@@ -134,18 +135,18 @@ public class PessoaDAO {
         }
 
         String sql = """
-            UPDATE pessoa
-            SET
-                nome = ?,
-                sexo = ?,
-                ativo = ?,
-                pode_ser_responsavel = ?,
-                pode_ser_ajudante = ?,
-                pode_fazer_leitura = ?,
-                pode_fazer_discurso = ?,
-                privilegio = ?
-            WHERE id = ?
-            """;
+                UPDATE pessoa
+                SET
+                    nome = ?,
+                    sexo = ?,
+                    ativo = ?,
+                    pode_ser_responsavel = ?,
+                    pode_ser_ajudante = ?,
+                    pode_fazer_leitura = ?,
+                    pode_fazer_discurso = ?,
+                    privilegio = ?
+                WHERE id = ?
+                """;
 
         try (
                 Connection connection = ConnectionFactory.getConnection();
@@ -176,9 +177,9 @@ public class PessoaDAO {
     public void excluir(Integer id) {
 
         String sql = """
-            DELETE FROM pessoa
-            WHERE id = ?
-            """;
+                DELETE FROM pessoa
+                WHERE id = ?
+                """;
 
         try (
                 Connection connection = ConnectionFactory.getConnection();

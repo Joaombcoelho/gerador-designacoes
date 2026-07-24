@@ -23,6 +23,7 @@ public class HistoricoDesignacoesDAO {
     private final ParteDAO parteDAO;
 
 
+
     public HistoricoDesignacoesDAO() {
 
         this.pessoaDAO =
@@ -31,6 +32,7 @@ public class HistoricoDesignacoesDAO {
         this.parteDAO =
                 new ParteDAO();
     }
+
 
 
     public void salvar(
@@ -99,21 +101,7 @@ public class HistoricoDesignacoesDAO {
         }
     }
 
-    public void salvarTodos(
-            List<ParticipacaoDesignacao> participacoes
-    ) {
 
-        if (participacoes == null) {
-            throw new IllegalArgumentException(
-                    "Lista de participações não pode ser nula."
-            );
-        }
-
-        for (ParticipacaoDesignacao participacao : participacoes) {
-
-            salvar(participacao);
-        }
-    }
 
     public List<ParticipacaoDesignacao> listarTodas() {
 
@@ -163,6 +151,7 @@ public class HistoricoDesignacoesDAO {
     }
 
 
+
     public HistoricoDesignacoes carregarHistorico() {
 
 
@@ -178,6 +167,7 @@ public class HistoricoDesignacoesDAO {
 
         return historico;
     }
+
 
 
     private ParticipacaoDesignacao mapearParticipacao(
@@ -203,6 +193,7 @@ public class HistoricoDesignacoesDAO {
                 resultSet.getInt("parte_id");
 
 
+
         Pessoa pessoa =
                 pessoaDAO.buscarPorId(pessoaId)
                         .orElseThrow(
@@ -211,6 +202,7 @@ public class HistoricoDesignacoesDAO {
                                                 + pessoaId
                                 )
                         );
+
 
 
         Parte parte =
@@ -223,12 +215,14 @@ public class HistoricoDesignacoesDAO {
                         );
 
 
+
         TipoParticipacao tipoParticipacao =
                 TipoParticipacao.valueOf(
                         resultSet.getString(
                                 "tipo_participacao"
                         )
                 );
+
 
 
         return new ParticipacaoDesignacao(
@@ -239,6 +233,7 @@ public class HistoricoDesignacoesDAO {
                 tipoParticipacao
         );
     }
+
 
 
     private void validarParticipacao(
@@ -275,8 +270,8 @@ public class HistoricoDesignacoesDAO {
     public void limpar() {
 
         String sql = """
-                DELETE FROM historico_designacoes
-                """;
+            DELETE FROM historico_designacoes
+            """;
 
         try (
                 Connection connection =
@@ -306,11 +301,11 @@ public class HistoricoDesignacoesDAO {
 
 
         String sql = """
-                SELECT *
-                FROM historico_designacoes
-                WHERE pessoa_id = ?
-                ORDER BY data, id
-                """;
+            SELECT *
+            FROM historico_designacoes
+            WHERE pessoa_id = ?
+            ORDER BY data, id
+            """;
 
 
         try (
@@ -359,11 +354,11 @@ public class HistoricoDesignacoesDAO {
 
 
         String sql = """
-                SELECT *
-                FROM historico_designacoes
-                WHERE parte_id = ?
-                ORDER BY data, id
-                """;
+            SELECT *
+            FROM historico_designacoes
+            WHERE parte_id = ?
+            ORDER BY data, id
+            """;
 
 
         try (
@@ -403,5 +398,17 @@ public class HistoricoDesignacoesDAO {
         return participacoes;
     }
 
+    public void salvarTodos(
+            List<ParticipacaoDesignacao> participacoes
+    ) {
+
+        if (participacoes == null || participacoes.isEmpty()) {
+            return;
+        }
+
+        for (ParticipacaoDesignacao participacao : participacoes) {
+            salvar(participacao);
+        }
+    }
 
 }

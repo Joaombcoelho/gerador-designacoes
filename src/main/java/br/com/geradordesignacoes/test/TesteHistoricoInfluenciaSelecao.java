@@ -112,27 +112,27 @@ public class TesteHistoricoInfluenciaSelecao {
             ResultadoGeracaoEscala resultado
     ) {
 
-            if (resultado.getDesignacoes().isEmpty()) {
-                System.out.println("Nenhuma designação gerada.");
-            }
+        if (resultado.getDesignacoes().isEmpty()) {
+            System.out.println("Nenhuma designação gerada.");
+        }
 
-            for (Designacao designacao : resultado.getDesignacoes()) {
+        for (Designacao designacao : resultado.getDesignacoes()) {
 
-                System.out.println(
-                        "Parte: " + designacao.getParte().getNome()
-                );
+            System.out.println(
+                    "Parte: " + designacao.getParte().getNome()
+            );
 
-                System.out.println(
-                        "Pessoa escolhida: "
-                                + designacao.getResponsavel().getNome()
-                );
-            }
+            System.out.println(
+                    "Pessoa escolhida: "
+                            + designacao.getResponsavel().getNome()
+            );
+        }
 
-            if (!resultado.getErros().isEmpty()) {
+        if (!resultado.getErros().isEmpty()) {
 
-                System.out.println("\nErros:");
+            System.out.println("\nErros:");
 
-                resultado.getErros().forEach(System.out::println);
-            }
+            resultado.getErros().forEach(System.out::println);
         }
     }
+}

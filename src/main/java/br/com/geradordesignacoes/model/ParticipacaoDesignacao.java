@@ -90,11 +90,11 @@ public class ParticipacaoDesignacao {
     public String toString() {
 
         return """
-            Data: %s
-            Pessoa: %s
-            Parte: %s
-            Participação: %s
-            """.formatted(
+                Data: %s
+                Pessoa: %s
+                Parte: %s
+                Participação: %s
+                """.formatted(
                 data,
                 pessoa,
                 parte,
