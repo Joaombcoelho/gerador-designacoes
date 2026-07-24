@@ -23,6 +23,18 @@
             <version>3.50.3.0</version>
         </dependency>
 
+<!-- JavaFX -->
+<dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-controls</artifactId>
+    <version>21.0.7</version>
+</dependency>
+
+<dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-fxml</artifactId>
+    <version>21.0.7</version>
+</dependency>
 
         <!-- JUnit 5 -->
         <dependency>
@@ -44,6 +56,18 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
+
+<plugin>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-maven-plugin</artifactId>
+    <version>0.0.8</version>
+
+    <configuration>
+        <mainClass>
+            br.com.geradordesignacoes.MainApp
+        </mainClass>
+    </configuration>
+</plugin>
 
         </plugins>
 
