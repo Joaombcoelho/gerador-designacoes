@@ -98,6 +98,9 @@ public class PessoaView {
         Button excluir = new Button("Excluir");
 
 
+        novo.setOnAction(event -> abrirFormulario());
+
+
         HBox botoes = new HBox(
                 10,
                 novo,
@@ -105,9 +108,7 @@ public class PessoaView {
                 excluir
         );
 
-
         botoes.setAlignment(Pos.CENTER);
-
 
         root.setBottom(botoes);
     }
@@ -122,6 +123,36 @@ public class PessoaView {
         tabela.getItems().addAll(
                 pessoaService.listarTodas()
         );
+
+    }
+
+    private void abrirFormulario() {
+
+        PessoaFormularioView formulario =
+                new PessoaFormularioView(
+                        this::salvarPessoa,
+                        this::voltarParaTabela
+                );
+
+        root.setCenter(formulario.getView());
+
+    }
+
+    private void voltarParaTabela() {
+
+        carregarPessoas();
+
+        root.setCenter(tabela);
+
+    }
+
+    private void salvarPessoa(Pessoa pessoa) {
+
+        pessoaService.salvar(pessoa);
+
+        carregarPessoas();
+
+        root.setCenter(tabela);
 
     }
 }
