@@ -3,7 +3,8 @@ package br.com.geradordesignacoes.test;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.RegrasService;
-
+import br.com.geradordesignacoes.dao.ParteDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -85,53 +86,69 @@ public class TesteGeracaoEscalaCompleta {
 
     private static List<Pessoa> criarPessoas() {
 
+        PessoaDAO pessoaDAO = new PessoaDAO();
+
         Pessoa joao =
-                new Pessoa(
-                        "João",
-                        Sexo.MASCULINO,
-                        true,
-                        true,
-                        false,
-                        false,
-                        true,
-                        Privilegio.ANCIAO
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "João",
+                                Sexo.MASCULINO,
+                                true,
+                                true,
+                                false,
+                                false,
+                                true,
+                                Privilegio.ANCIAO
+                        )
                 );
 
         Pessoa carlos =
-                new Pessoa(
-                        "Carlos",
-                        Sexo.MASCULINO,
-                        true,
-                        false,
-                        false,
-                        true,
-                        false,
-                        Privilegio.SERVO_MINISTERIAL
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "Carlos",
+                                Sexo.MASCULINO,
+                                true,
+                                false,
+                                false,
+                                true,
+                                false,
+                                Privilegio.SERVO_MINISTERIAL
+                        )
                 );
 
         Pessoa lucas =
-                new Pessoa(
-                        "Lucas",
-                        Sexo.MASCULINO,
-                        true,
-                        true,
-                        false,
-                        false,
-                        false,
-                        Privilegio.SERVO_MINISTERIAL
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "Lucas",
+                                Sexo.MASCULINO,
+                                true,
+                                true,
+                                false,
+                                false,
+                                false,
+                                Privilegio.SERVO_MINISTERIAL
+                        )
                 );
 
         Pessoa pedro =
-                new Pessoa(
-                        "Pedro",
-                        Sexo.MASCULINO,
-                        true,
-                        false,
-                        true,
-                        false,
-                        false,
-                        Privilegio.SERVO_MINISTERIAL
+                pessoaDAO.salvar(
+                        new Pessoa(
+                                "Pedro",
+                                Sexo.MASCULINO,
+                                true,
+                                false,
+                                true,
+                                false,
+                                false,
+                                Privilegio.SERVO_MINISTERIAL
+                        )
                 );
+
+        System.out.println("IDs das pessoas:");
+        System.out.println("João: " + joao.getId());
+        System.out.println("Carlos: " + carlos.getId());
+        System.out.println("Lucas: " + lucas.getId());
+        System.out.println("Pedro: " + pedro.getId());
 
         return List.of(
                 joao,
@@ -144,48 +161,61 @@ public class TesteGeracaoEscalaCompleta {
 
     private static List<Parte> criarPartes() {
 
+        ParteDAO parteDAO = new ParteDAO();
+
         Parte leitura =
-                new Parte(
-                        "Leitura",
-                        TipoParte.LEITURA,
-                        Privilegio.PUBLICADOR,
-                        false,
-                        SexoPermitido.MASCULINO,
-                        1,
-                        false,
-                        List.of(
-                                TipoParticipacao.LEITOR
+                parteDAO.salvar(
+                        new Parte(
+                                "Leitura",
+                                TipoParte.LEITURA,
+                                Privilegio.PUBLICADOR,
+                                false,
+                                SexoPermitido.MASCULINO,
+                                1,
+                                false,
+                                List.of(
+                                        TipoParticipacao.LEITOR
+                                )
                         )
                 );
 
         Parte discurso =
-                new Parte(
-                        "Discurso",
-                        TipoParte.DISCURSO,
-                        Privilegio.ANCIAO,
-                        false,
-                        SexoPermitido.MASCULINO,
-                        1,
-                        false,
-                        List.of(
-                                TipoParticipacao.ORADOR
+                parteDAO.salvar(
+                        new Parte(
+                                "Discurso",
+                                TipoParte.DISCURSO,
+                                Privilegio.ANCIAO,
+                                false,
+                                SexoPermitido.MASCULINO,
+                                1,
+                                false,
+                                List.of(
+                                        TipoParticipacao.ORADOR
+                                )
                         )
                 );
 
         Parte demonstracao =
-                new Parte(
-                        "Demonstração",
-                        TipoParte.DEMONSTRACAO,
-                        Privilegio.SERVO_MINISTERIAL,
-                        true,
-                        SexoPermitido.MASCULINO,
-                        2,
-                        false,
-                        List.of(
-                                TipoParticipacao.RESPONSAVEL,
-                                TipoParticipacao.AJUDANTE
+                parteDAO.salvar(
+                        new Parte(
+                                "Demonstração",
+                                TipoParte.DEMONSTRACAO,
+                                Privilegio.SERVO_MINISTERIAL,
+                                true,
+                                SexoPermitido.MASCULINO,
+                                2,
+                                false,
+                                List.of(
+                                        TipoParticipacao.RESPONSAVEL,
+                                        TipoParticipacao.AJUDANTE
+                                )
                         )
                 );
+
+        System.out.println("IDs das partes:");
+        System.out.println("Leitura: " + leitura.getId());
+        System.out.println("Discurso: " + discurso.getId());
+        System.out.println("Demonstração: " + demonstracao.getId());
 
         return List.of(
                 leitura,
