@@ -109,9 +109,11 @@ public class PessoaFormularioView {
         Button salvar = new Button("Salvar");
         Button cancelar = new Button("Cancelar");
 
+
         salvar.setOnAction(event -> salvarPessoa());
 
         cancelar.setOnAction(event -> aoCancelar.run());
+
 
         HBox botoes = new HBox(10, salvar, cancelar);
         botoes.setAlignment(Pos.CENTER);
@@ -211,4 +213,6 @@ public class PessoaFormularioView {
                 pessoaEdicao.podeFazerDiscurso()
         );
     }
+
+
 }

@@ -97,6 +97,7 @@ public class PessoaView {
 
         novo.setOnAction(event -> abrirFormulario());
         editar.setOnAction(event -> abrirFormularioEdicao());
+        excluir.setOnAction(event -> excluirPessoa());
 
 
         HBox botoes = new HBox(
@@ -201,5 +202,44 @@ public class PessoaView {
 
         voltarParaTabela();
 
+    }
+
+    private void excluirPessoa() {
+
+        Pessoa pessoa = obterPessoaSelecionada();
+
+        if (pessoa == null) {
+
+            mostrarAviso("Selecione uma pessoa.");
+
+            return;
+        }
+
+        confirmarExclusao(pessoa);
+
+    }
+
+    private void confirmarExclusao(Pessoa pessoa) {
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+
+        alert.setTitle("Confirmação");
+
+        alert.setHeaderText("Excluir Pessoa");
+
+        alert.setContentText(
+                "Deseja realmente excluir \"" +
+                        pessoa.getNome() +
+                        "\"?"
+        );
+
+        ButtonType resposta = alert.showAndWait().orElse(ButtonType.CANCEL);
+
+        if (resposta == ButtonType.OK) {
+
+            pessoaService.excluir(pessoa.getId());
+
+            voltarParaTabela();
+        }
     }
 }
