@@ -4,10 +4,7 @@ import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.service.PessoaService;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -99,6 +96,7 @@ public class PessoaView {
 
 
         novo.setOnAction(event -> abrirFormulario());
+        editar.setOnAction(event -> abrirFormularioEdicao());
 
 
         HBox botoes = new HBox(
@@ -120,7 +118,7 @@ public class PessoaView {
 
     private void carregarPessoas() {
 
-        tabela.getItems().addAll(
+        tabela.getItems().setAll(
                 pessoaService.listarTodas()
         );
 
@@ -130,7 +128,9 @@ public class PessoaView {
 
         PessoaFormularioView formulario =
                 new PessoaFormularioView(
+                        null,
                         this::salvarPessoa,
+                        this::atualizarPessoa,
                         this::voltarParaTabela
                 );
 
@@ -150,9 +150,56 @@ public class PessoaView {
 
         pessoaService.salvar(pessoa);
 
-        carregarPessoas();
+        voltarParaTabela();
 
-        root.setCenter(tabela);
+    }
+
+    private Pessoa obterPessoaSelecionada() {
+
+        return tabela.getSelectionModel().getSelectedItem();
+
+    }
+
+    private void mostrarAviso(String mensagem) {
+
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+
+        alert.setTitle("Atenção");
+        alert.setHeaderText(null);
+        alert.setContentText(mensagem);
+
+        alert.showAndWait();
+
+    }
+
+    private void abrirFormularioEdicao() {
+
+        Pessoa pessoa = obterPessoaSelecionada();
+
+        if (pessoa == null) {
+
+            mostrarAviso("Selecione uma pessoa.");
+
+            return;
+        }
+
+        PessoaFormularioView formulario =
+                new PessoaFormularioView(
+                        pessoa,
+                        this::salvarPessoa,
+                        this::atualizarPessoa,
+                        this::voltarParaTabela
+                );
+
+        root.setCenter(formulario.getView());
+
+    }
+
+    private void atualizarPessoa(Pessoa pessoa) {
+
+        pessoaService.atualizar(pessoa);
+
+        voltarParaTabela();
 
     }
 }
