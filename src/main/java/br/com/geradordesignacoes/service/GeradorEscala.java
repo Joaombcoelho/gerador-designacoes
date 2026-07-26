@@ -188,12 +188,17 @@ public class GeradorEscala {
                         );
 
 
-        historicoService.salvarGeracao(
-                novasParticipacoes
+       // salvarHistorico(
+        //        novasParticipacoes
+       // )
+
+        Escala escala = new Escala(
+                data,
+                designacoes
         );
 
         return new ResultadoGeracaoEscala(
-                designacoes,
+                escala,
                 todasParticipacoes,
                 erros,
                 diagnosticos
@@ -428,5 +433,13 @@ public class GeradorEscala {
             Pessoa ajudante,
             int pontuacaoTotal
     ) {
+    }
+
+    private void salvarHistorico(
+            List<ParticipacaoDesignacao> participacoes
+    ) {
+
+        historicoService.salvarGeracao(participacoes);
+
     }
 }

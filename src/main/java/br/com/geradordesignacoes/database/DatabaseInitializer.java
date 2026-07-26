@@ -124,6 +124,29 @@ public class DatabaseInitializer {
               );
             
             """;
+    private static final String CREATE_TABLE_ESCALA = """
+    CREATE TABLE IF NOT EXISTS escala (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data DATE NOT NULL,
+            status TEXT NOT NULL,
+            data_geracao TEXT NOT NULL,
+            data_salvamento TEXT
+    );
+    """;
+
+    private static final String CREATE_TABLE_DESIGNACAO = """
+    CREATE TABLE IF NOT EXISTS designacao (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    escala_id INTEGER NOT NULL,
+    parte_id INTEGER NOT NULL,
+    responsavel_id INTEGER NOT NULL,
+    ajudante_id INTEGER,
+    FOREIGN KEY (escala_id) REFERENCES escala(id) ON DELETE CASCADE
+    FOREIGN KEY (parte_id) REFERENCES parte(id),
+    FOREIGN KEY (responsavel_id) REFERENCES pessoa(id),
+    FOREIGN KEY (ajudante_id) REFERENCES pessoa(id)
+);
+""";
 
     public static void initialize() {
 
@@ -149,8 +172,15 @@ public class DatabaseInitializer {
             statement.execute(CREATE_TABLE_HISTORICO_DESIGNACOES);
             System.out.println("Tabela 'historico_designacoes' criada ou já existente.");
 
+            statement.execute(CREATE_TABLE_ESCALA);
+            System.out.println("Tabela 'escala' criada ou já existente.");
+
+            statement.execute(CREATE_TABLE_DESIGNACAO);
+            System.out.println("Tabela 'designacao' criada ou já existente.");
+
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inicializar o banco de dados.", e);
         }
     }
+
 }

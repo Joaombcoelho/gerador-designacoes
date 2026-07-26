@@ -12,6 +12,7 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\MainApp.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Designacao.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\DiagnosticoSelecaoPessoa.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Escala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\HistoricoDesignacoes.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Parte.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ParticipacaoDesignacao.java
@@ -44,7 +45,9 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\test\TestePersistenciaHistorico.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\test\TesteRankingAvaliacao.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\test\TesteRegrasService.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\escala\EscalaResultadoView.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\escala\EscalaView.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\escala\ItemEscala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\historico\HistoricoView.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\MainView.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\parte\ParteFormularioView.java

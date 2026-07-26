@@ -13,6 +13,7 @@ public class HistoricoDesignacoesService {
 
     private HistoricoDesignacoes historico;
 
+    private boolean escalaSalva;
 
     public HistoricoDesignacoesService() {
         this(new HistoricoDesignacoesDAO());
