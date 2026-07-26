@@ -85,40 +85,162 @@ public class PessoaFormularioView {
 
     private void criarLayout() {
 
-        root.setPadding(new Insets(20));
-        root.setHgap(10);
-        root.setVgap(10);
+        root.setPadding(
+                new Insets(20)
+        );
 
-        root.add(new Label("Nome:"), 0, 0);
-        root.add(campoNome, 1, 0);
+        root.setHgap(15);
 
-        root.add(new Label("Sexo:"), 0, 1);
-        root.add(comboSexo, 1, 1);
-
-        root.add(new Label("Privilégio:"), 0, 2);
-        root.add(comboPrivilegio, 1, 2);
-
-        root.add(checkResponsavel, 0, 3);
-        root.add(checkAjudante, 1, 3);
-
-        root.add(checkLeitura, 0, 4);
-        root.add(checkDiscurso, 1, 4);
-
-        root.add(checkAtivo, 0, 5);
-
-        Button salvar = new Button("Salvar");
-        Button cancelar = new Button("Cancelar");
+        root.setVgap(15);
 
 
-        salvar.setOnAction(event -> salvarPessoa());
+        Label titulo =
+                new Label(
+                        "Cadastro de Pessoa"
+                );
 
-        cancelar.setOnAction(event -> aoCancelar.run());
+
+        titulo.setStyle(
+                "-fx-font-size: 18px; -fx-font-weight: bold;"
+        );
 
 
-        HBox botoes = new HBox(10, salvar, cancelar);
-        botoes.setAlignment(Pos.CENTER);
+        root.add(
+                titulo,
+                0,
+                0,
+                2,
+                1
+        );
 
-        root.add(botoes, 1, 6);
+
+        campoNome.setPrefWidth(250);
+
+        comboSexo.setPrefWidth(250);
+
+        comboPrivilegio.setPrefWidth(250);
+
+
+
+        root.add(
+                new Label("Nome:"),
+                0,
+                1
+        );
+
+        root.add(
+                campoNome,
+                1,
+                1
+        );
+
+
+
+        root.add(
+                new Label("Sexo:"),
+                0,
+                2
+        );
+
+        root.add(
+                comboSexo,
+                1,
+                2
+        );
+
+
+
+        root.add(
+                new Label("Privilégio:"),
+                0,
+                3
+        );
+
+        root.add(
+                comboPrivilegio,
+                1,
+                3
+        );
+
+
+
+        root.add(
+                checkResponsavel,
+                0,
+                4
+        );
+
+        root.add(
+                checkAjudante,
+                1,
+                4
+        );
+
+
+
+        root.add(
+                checkLeitura,
+                0,
+                5
+        );
+
+        root.add(
+                checkDiscurso,
+                1,
+                5
+        );
+
+
+
+        root.add(
+                checkAtivo,
+                0,
+                6
+        );
+
+
+
+        Button salvar =
+                new Button(
+                        "Salvar"
+                );
+
+
+        Button cancelar =
+                new Button(
+                        "Cancelar"
+                );
+
+
+        salvar.setOnAction(
+                event -> salvarPessoa()
+        );
+
+
+        cancelar.setOnAction(
+                event -> aoCancelar.run()
+        );
+
+
+
+        HBox botoes =
+                new HBox(
+                        10,
+                        salvar,
+                        cancelar
+                );
+
+
+        botoes.setAlignment(
+                Pos.CENTER_RIGHT
+        );
+
+
+        root.add(
+                botoes,
+                1,
+                7
+        );
     }
 
     public Parent getView() {

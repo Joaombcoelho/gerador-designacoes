@@ -2,25 +2,33 @@ package br.com.geradordesignacoes.view.pessoa;
 
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.service.PessoaService;
-import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 
 public class PessoaView {
 
     private final BorderPane root;
+
     private final PessoaService pessoaService;
 
     private final TableView<Pessoa> tabela;
+
 
     public PessoaView(PessoaService pessoaService) {
 
         this.pessoaService = pessoaService;
 
         root = new BorderPane();
+
+        root.setPadding(
+                new Insets(10)
+        );
 
         tabela = new TableView<>();
 
@@ -30,50 +38,73 @@ public class PessoaView {
         carregarPessoas();
     }
 
+
     private void criarCabecalho() {
 
-        Label titulo = new Label("Cadastro de Pessoas");
+        Label titulo =
+                new Label(
+                        "Cadastro de Pessoas"
+                );
+
 
         titulo.setStyle(
                 "-fx-font-size: 20px;"
         );
 
-        root.setTop(titulo);
+
+        VBox topo =
+                new VBox(
+                        10,
+                        titulo
+                );
+
+
+        root.setTop(topo);
     }
+
 
 
     private void criarTabela() {
 
+
         TableColumn<Pessoa, String> colunaNome =
                 new TableColumn<>("Nome");
+
 
         colunaNome.setCellValueFactory(
                 new PropertyValueFactory<>("nome")
         );
 
 
+
         TableColumn<Pessoa, String> colunaSexo =
                 new TableColumn<>("Sexo");
+
 
         colunaSexo.setCellValueFactory(
                 new PropertyValueFactory<>("sexo")
         );
 
 
+
         TableColumn<Pessoa, String> colunaPrivilegio =
                 new TableColumn<>("Privilégio");
+
 
         colunaPrivilegio.setCellValueFactory(
                 new PropertyValueFactory<>("privilegio")
         );
 
 
+
         TableColumn<Pessoa, Boolean> colunaAtivo =
                 new TableColumn<>("Ativo");
+
 
         colunaAtivo.setCellValueFactory(
                 new PropertyValueFactory<>("ativo")
         );
+
 
 
         tabela.getColumns().addAll(
@@ -84,38 +115,96 @@ public class PessoaView {
         );
 
 
-        root.setCenter(tabela);
+        tabela.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY
+        );
+
+
+        root.setCenter(
+                tabela
+        );
     }
+
+
 
 
     private void criarBotoes() {
 
-        Button novo = new Button("Novo");
-        Button editar = new Button("Editar");
-        Button excluir = new Button("Excluir");
+
+        Button novo =
+                new Button("Novo");
 
 
-        novo.setOnAction(event -> abrirFormulario());
-        editar.setOnAction(event -> abrirFormularioEdicao());
-        excluir.setOnAction(event -> excluirPessoa());
+        Button editar =
+                new Button("Editar");
 
 
-        HBox botoes = new HBox(
-                10,
-                novo,
-                editar,
-                excluir
+        Button excluir =
+                new Button("Excluir");
+
+
+
+        novo.setOnAction(
+                event -> abrirFormulario()
         );
 
-        botoes.setAlignment(Pos.CENTER);
 
-        root.setBottom(botoes);
+        editar.setOnAction(
+                event -> abrirFormularioEdicao()
+        );
+
+
+        excluir.setOnAction(
+                event -> excluirPessoa()
+        );
+
+
+
+        ToolBar barra =
+                new ToolBar(
+                        novo,
+                        editar,
+                        excluir
+                );
+
+
+        VBox topo =
+                new VBox(
+                        10
+                );
+
+
+        Label titulo =
+                new Label(
+                        "Cadastro de Pessoas"
+                );
+
+
+        titulo.setStyle(
+                "-fx-font-size: 20px;"
+        );
+
+
+        topo.getChildren().addAll(
+                titulo,
+                barra
+        );
+
+
+        root.setTop(
+                topo
+        );
     }
+
 
 
     public Parent getView() {
+
         return root;
+
     }
+
+
 
     private void carregarPessoas() {
 
@@ -124,6 +213,8 @@ public class PessoaView {
         );
 
     }
+
+
 
     private void abrirFormulario() {
 
@@ -135,17 +226,26 @@ public class PessoaView {
                         this::voltarParaTabela
                 );
 
-        root.setCenter(formulario.getView());
+
+        root.setCenter(
+                formulario.getView()
+        );
 
     }
+
+
 
     private void voltarParaTabela() {
 
         carregarPessoas();
 
-        root.setCenter(tabela);
+        root.setCenter(
+                tabela
+        );
 
     }
+
+
 
     private void salvarPessoa(Pessoa pessoa) {
 
@@ -155,34 +255,60 @@ public class PessoaView {
 
     }
 
+
+
     private Pessoa obterPessoaSelecionada() {
 
-        return tabela.getSelectionModel().getSelectedItem();
+        return tabela
+                .getSelectionModel()
+                .getSelectedItem();
 
     }
 
+
+
     private void mostrarAviso(String mensagem) {
 
-        Alert alert = new Alert(Alert.AlertType.WARNING);
+        Alert alert =
+                new Alert(
+                        Alert.AlertType.WARNING
+                );
 
-        alert.setTitle("Atenção");
-        alert.setHeaderText(null);
-        alert.setContentText(mensagem);
+
+        alert.setTitle(
+                "Atenção"
+        );
+
+        alert.setHeaderText(
+                null
+        );
+
+        alert.setContentText(
+                mensagem
+        );
+
 
         alert.showAndWait();
 
     }
 
+
+
     private void abrirFormularioEdicao() {
 
-        Pessoa pessoa = obterPessoaSelecionada();
+        Pessoa pessoa =
+                obterPessoaSelecionada();
+
 
         if (pessoa == null) {
 
-            mostrarAviso("Selecione uma pessoa.");
+            mostrarAviso(
+                    "Selecione uma pessoa."
+            );
 
             return;
         }
+
 
         PessoaFormularioView formulario =
                 new PessoaFormularioView(
@@ -192,40 +318,68 @@ public class PessoaView {
                         this::voltarParaTabela
                 );
 
-        root.setCenter(formulario.getView());
+
+        root.setCenter(
+                formulario.getView()
+        );
 
     }
 
+
+
     private void atualizarPessoa(Pessoa pessoa) {
 
-        pessoaService.atualizar(pessoa);
+        pessoaService.atualizar(
+                pessoa
+        );
 
         voltarParaTabela();
 
     }
 
+
+
     private void excluirPessoa() {
 
-        Pessoa pessoa = obterPessoaSelecionada();
+        Pessoa pessoa =
+                obterPessoaSelecionada();
+
 
         if (pessoa == null) {
 
-            mostrarAviso("Selecione uma pessoa.");
+            mostrarAviso(
+                    "Selecione uma pessoa."
+            );
 
             return;
         }
 
-        confirmarExclusao(pessoa);
+
+        confirmarExclusao(
+                pessoa
+        );
 
     }
 
+
+
     private void confirmarExclusao(Pessoa pessoa) {
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        Alert alert =
+                new Alert(
+                        Alert.AlertType.CONFIRMATION
+                );
 
-        alert.setTitle("Confirmação");
 
-        alert.setHeaderText("Excluir Pessoa");
+        alert.setTitle(
+                "Confirmação"
+        );
+
+
+        alert.setHeaderText(
+                "Excluir Pessoa"
+        );
+
 
         alert.setContentText(
                 "Deseja realmente excluir \"" +
@@ -233,13 +387,21 @@ public class PessoaView {
                         "\"?"
         );
 
-        ButtonType resposta = alert.showAndWait().orElse(ButtonType.CANCEL);
+
+        ButtonType resposta =
+                alert.showAndWait()
+                        .orElse(ButtonType.CANCEL);
+
+
 
         if (resposta == ButtonType.OK) {
 
-            pessoaService.excluir(pessoa.getId());
+            pessoaService.excluir(
+                    pessoa.getId()
+            );
 
             voltarParaTabela();
+
         }
     }
 }

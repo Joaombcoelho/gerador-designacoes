@@ -104,7 +104,11 @@ public class MainView {
     }
 
     private void mostrarTela(Parent view) {
+
+        root.setCenter(null);
+
         root.setCenter(view);
+
     }
 
     public Parent getView() {

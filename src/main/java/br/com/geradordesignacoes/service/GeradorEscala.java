@@ -14,8 +14,8 @@ public class GeradorEscala {
     private final RegrasService regrasService;
     private final SeletorPessoaService seletorPessoaService;
     private final AvaliadorPessoaService avaliadorPessoaService;
-    private final HistoricoDesignacoesDAO historicoDAO;
-    private final PessoaDAO pessoaDAO;
+    private final HistoricoDesignacoesService historicoService;
+    private final PessoaService pessoaService;
 
 
     public GeradorEscala(RegrasService regrasService) {
@@ -33,11 +33,13 @@ public class GeradorEscala {
                 );
 
 
-        this.historicoDAO =
-                new HistoricoDesignacoesDAO();
+        this.historicoService =
+                new HistoricoDesignacoesService();
 
-        this.pessoaDAO =
-                new PessoaDAO();
+        this.pessoaService =
+                new PessoaService(
+                        new PessoaDAO()
+                );
     }
 
 
@@ -49,7 +51,7 @@ public class GeradorEscala {
         return gerarEscala(
                 data,
                 partes,
-                pessoaDAO.listarTodos()
+                pessoaService.listarTodas()
         );
     }
 
@@ -78,7 +80,7 @@ public class GeradorEscala {
                 data,
                 partes,
                 pessoas,
-                historicoDAO.carregarHistorico()
+                historicoService.getHistorico()
         );
     }
 
@@ -186,7 +188,7 @@ public class GeradorEscala {
                         );
 
 
-        historicoDAO.salvarTodos(
+        historicoService.salvarGeracao(
                 novasParticipacoes
         );
 

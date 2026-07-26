@@ -1,5 +1,6 @@
 br\com\geradordesignacoes\view\escala\EscalaView.class
 br\com\geradordesignacoes\view\pessoa\PessoaFormularioView.class
 br\com\geradordesignacoes\view\pessoa\PessoaView.class
+br\com\geradordesignacoes\view\parte\ParteFormularioView.class
 br\com\geradordesignacoes\view\parte\ParteView.class
 br\com\geradordesignacoes\view\historico\HistoricoView.class

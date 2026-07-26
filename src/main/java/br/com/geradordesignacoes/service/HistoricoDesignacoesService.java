@@ -15,10 +15,11 @@ public class HistoricoDesignacoesService {
 
 
     public HistoricoDesignacoesService() {
+        this(new HistoricoDesignacoesDAO());
+    }
 
-        this.historicoDAO =
-                new HistoricoDesignacoesDAO();
-
+    public HistoricoDesignacoesService(HistoricoDesignacoesDAO historicoDAO) {
+        this.historicoDAO = historicoDAO;
         carregar();
     }
 
@@ -160,5 +161,10 @@ public class HistoricoDesignacoesService {
                     "Parte sem ID para persistência."
             );
         }
+    }
+    public void salvarGeracao(
+            List<ParticipacaoDesignacao> participacoes
+    ) {
+        adicionarTodos(participacoes);
     }
 }
