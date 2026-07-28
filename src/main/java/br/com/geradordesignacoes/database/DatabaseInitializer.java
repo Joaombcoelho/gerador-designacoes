@@ -136,17 +136,18 @@ public class DatabaseInitializer {
 
     private static final String CREATE_TABLE_DESIGNACAO = """
     CREATE TABLE IF NOT EXISTS designacao (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    escala_id INTEGER NOT NULL,
-    parte_id INTEGER NOT NULL,
-    responsavel_id INTEGER NOT NULL,
-    ajudante_id INTEGER,
-    FOREIGN KEY (escala_id) REFERENCES escala(id) ON DELETE CASCADE
-    FOREIGN KEY (parte_id) REFERENCES parte(id),
-    FOREIGN KEY (responsavel_id) REFERENCES pessoa(id),
-    FOREIGN KEY (ajudante_id) REFERENCES pessoa(id)
-);
-""";
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        escala_id INTEGER NOT NULL,
+        parte_id INTEGER NOT NULL,
+        responsavel_id INTEGER NOT NULL,
+        ajudante_id INTEGER,
+
+        FOREIGN KEY (escala_id) REFERENCES escala(id) ON DELETE CASCADE,
+        FOREIGN KEY (parte_id) REFERENCES parte(id),
+        FOREIGN KEY (responsavel_id) REFERENCES pessoa(id),
+        FOREIGN KEY (ajudante_id) REFERENCES pessoa(id)
+    );
+    """;
 
     public static void initialize() {
 

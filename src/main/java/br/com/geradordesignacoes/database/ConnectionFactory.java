@@ -21,6 +21,12 @@ public class ConnectionFactory {
 
         String url = "jdbc:sqlite:" + DATABASE_PATH.toAbsolutePath();
 
-        return DriverManager.getConnection(url);
+        Connection connection = DriverManager.getConnection(url);
+
+        try (var statement = connection.createStatement()) {
+            statement.execute("PRAGMA foreign_keys = ON;");
+        }
+
+        return connection;
     }
 }

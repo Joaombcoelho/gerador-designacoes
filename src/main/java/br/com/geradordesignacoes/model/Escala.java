@@ -9,10 +9,6 @@ import java.util.Objects;
 
 public class Escala {
 
-    private final LocalDate data;
-
-    private final List<Designacao> designacoes;
-
     private Integer id;
 
     private final LocalDate data;
@@ -41,6 +37,17 @@ public class Escala {
                         "A lista de designações não pode ser nula."
                 )
         );
+
+        this.status = StatusEscala.GERADA;
+        this.dataGeracao = LocalDateTime.now();
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public LocalDate getData() {
@@ -49,6 +56,41 @@ public class Escala {
 
     public List<Designacao> getDesignacoes() {
         return Collections.unmodifiableList(designacoes);
+    }
+
+    /**
+     * Uso interno dos DAOs para adicionar designações
+     * durante a reconstrução da escala.
+     */
+    public void adicionarDesignacao(Designacao designacao) {
+
+        designacoes.add(
+                Objects.requireNonNull(designacao)
+        );
+    }
+
+    public StatusEscala getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusEscala status) {
+        this.status = Objects.requireNonNull(status);
+    }
+
+    public LocalDateTime getDataGeracao() {
+        return dataGeracao;
+    }
+
+    public void setDataGeracao(LocalDateTime dataGeracao) {
+        this.dataGeracao = Objects.requireNonNull(dataGeracao);
+    }
+
+    public LocalDateTime getDataSalvamento() {
+        return dataSalvamento;
+    }
+
+    public void setDataSalvamento(LocalDateTime dataSalvamento) {
+        this.dataSalvamento = dataSalvamento;
     }
 
     public int getQuantidadeDesignacoes() {
@@ -62,8 +104,10 @@ public class Escala {
     @Override
     public String toString() {
         return "Escala{" +
-                "data=" + data +
+                "id=" + id +
+                ", data=" + data +
                 ", designacoes=" + designacoes.size() +
+                ", status=" + status +
                 '}';
     }
 }
