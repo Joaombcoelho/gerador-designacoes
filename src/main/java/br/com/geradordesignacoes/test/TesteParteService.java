@@ -18,7 +18,7 @@ public class TesteParteService {
 
 
         Parte parte = new Parte(
-                null,
+
                 "Leitura",
                 TipoParte.LEITURA,
                 Privilegio.PUBLICADOR,

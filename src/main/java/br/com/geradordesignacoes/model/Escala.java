@@ -21,6 +21,12 @@ public class Escala {
 
     private LocalDateTime dataSalvamento;
 
+    private Pessoa presidente;
+
+    private Pessoa dirigente;
+
+    private Pessoa oracaoInicial;
+
     public Escala(
             LocalDate data,
             List<Designacao> designacoes
@@ -109,5 +115,31 @@ public class Escala {
                 ", designacoes=" + designacoes.size() +
                 ", status=" + status +
                 '}';
+    }
+
+    public Pessoa getPresidente() {
+        return presidente;
+    }
+
+    public void setPresidente(Pessoa presidente) {
+        this.presidente = presidente;
+    }
+
+
+    public Pessoa getDirigente() {
+        return dirigente;
+    }
+
+    public void setDirigente(Pessoa dirigente) {
+        this.dirigente = dirigente;
+    }
+
+
+    public Pessoa getOracaoInicial() {
+        return oracaoInicial;
+    }
+
+    public void setOracaoInicial(Pessoa oracaoInicial) {
+        this.oracaoInicial = oracaoInicial;
     }
 }

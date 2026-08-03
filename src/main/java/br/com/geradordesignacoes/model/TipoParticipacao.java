@@ -7,5 +7,6 @@ public enum TipoParticipacao {
     LEITOR,
     DIRIGENTE,
     ORADOR,
-    PRESIDENTE
+    PRESIDENTE,
+    ORACAO
 }

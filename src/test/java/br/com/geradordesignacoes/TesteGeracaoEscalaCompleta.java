@@ -15,7 +15,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TesteGeracaoEscalaCompleta {
+
+
+public class TesteGeracaoEscalaCompleta extends BaseDAOTest {
 
 
     private PessoaDAO pessoaDAO;
@@ -29,8 +31,6 @@ public class TesteGeracaoEscalaCompleta {
         pessoaDAO = new PessoaDAO();
         parteDAO = new ParteDAO();
         historicoDAO = new HistoricoDesignacoesDAO();
-
-        historicoDAO.limpar();
     }
 
 
@@ -79,7 +79,8 @@ public class TesteGeracaoEscalaCompleta {
 
 
         assertFalse(
-                historicoDAO.listarTodas().isEmpty()
+                resultado.possuiErros(),
+                "Erros encontrados: " + resultado.getErros()
         );
     }
     private List<Pessoa> criarPessoas() {

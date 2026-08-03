@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-
 public class Parte {
 
     private final Integer id;
@@ -17,43 +16,7 @@ public class Parte {
     private final SexoPermitido sexoPermitido;
     private final boolean geraFormulario;
     private final int quantidadeMinimaParticipantes;
-
-
-    private boolean privilegioPermitido(Pessoa pessoa) {
-        return pessoa.getPrivilegio().atende(privilegioMinimo);
-    }
-
-
-    private boolean regrasBasicasAtendidas(Pessoa pessoa) {
-
-        if (pessoa == null) {
-            return false;
-        }
-
-        if (!pessoa.isAtivo()) {
-            return false;
-        }
-
-        if (!privilegioPermitido(pessoa)) {
-            return false;
-        }
-
-        return sexoPermitido(pessoa);
-    }
-
-
-    private boolean sexoPermitido(Pessoa pessoa) {
-
-        if (sexoPermitido == SexoPermitido.AMBOS) {
-            return true;
-        }
-
-        return (sexoPermitido == SexoPermitido.MASCULINO
-                && pessoa.getSexo() == Sexo.MASCULINO)
-                ||
-                (sexoPermitido == SexoPermitido.FEMININO
-                        && pessoa.getSexo() == Sexo.FEMININO);
-    }
+    private final NivelLeitura nivelLeituraMinimo;
 
 
     public Parte(
@@ -65,19 +28,99 @@ public class Parte {
             SexoPermitido sexoPermitido,
             int quantidadeMinimaParticipantes,
             boolean geraFormulario,
-            List<TipoParticipacao> participacoesNecessarias) {
+            NivelLeitura nivelLeituraMinimo,
+            List<TipoParticipacao> participacoesNecessarias
+    ) {
 
         this.id = id;
+
         this.nome = Objects.requireNonNull(nome);
         this.tipo = Objects.requireNonNull(tipo);
-        this.privilegioMinimo = Objects.requireNonNull(privilegioMinimo);
+        this.privilegioMinimo =
+                Objects.requireNonNull(privilegioMinimo);
+
         this.exigeAjudante = exigeAjudante;
-        this.sexoPermitido = Objects.requireNonNull(sexoPermitido);
-        this.quantidadeMinimaParticipantes = quantidadeMinimaParticipantes;
-        this.geraFormulario = geraFormulario;
+
+        this.sexoPermitido =
+                Objects.requireNonNull(sexoPermitido);
+
+        this.quantidadeMinimaParticipantes =
+                quantidadeMinimaParticipantes;
+
+        this.geraFormulario =
+                geraFormulario;
+
+        this.nivelLeituraMinimo =
+                Objects.requireNonNull(nivelLeituraMinimo);
+
         this.participacoesNecessarias =
                 List.copyOf(participacoesNecessarias);
     }
+
+
+
+    /**
+     * Construtor utilizado pelo cadastro normal.
+     */
+    public Parte(
+            String nome,
+            TipoParte tipo,
+            Privilegio privilegioMinimo,
+            boolean exigeAjudante,
+            SexoPermitido sexoPermitido,
+            int quantidadeMinimaParticipantes,
+            boolean geraFormulario,
+            NivelLeitura nivelLeituraMinimo,
+            List<TipoParticipacao> participacoesNecessarias
+    ) {
+
+        this(
+                null,
+                nome,
+                tipo,
+                privilegioMinimo,
+                exigeAjudante,
+                sexoPermitido,
+                quantidadeMinimaParticipantes,
+                geraFormulario,
+                nivelLeituraMinimo,
+                participacoesNecessarias
+        );
+    }
+
+
+
+    /**
+     * Construtor legado.
+     *
+     * Mantido para compatibilidade
+     * com testes antigos.
+     */
+    public Parte(
+            String nome,
+            TipoParte tipo,
+            Privilegio privilegioMinimo,
+            boolean exigeAjudante,
+            SexoPermitido sexoPermitido,
+            int quantidadeMinimaParticipantes,
+            boolean geraFormulario,
+            List<TipoParticipacao> participacoesNecessarias
+    ) {
+
+        this(
+                null,
+                nome,
+                tipo,
+                privilegioMinimo,
+                exigeAjudante,
+                sexoPermitido,
+                quantidadeMinimaParticipantes,
+                geraFormulario,
+                NivelLeitura.BASICO,
+                participacoesNecessarias
+        );
+    }
+
 
 
     public Integer getId() {
@@ -92,12 +135,6 @@ public class Parte {
 
     public TipoParte getTipo() {
         return tipo;
-    }
-
-
-    @Override
-    public String toString() {
-        return nome + (id != null ? " [id=" + id + "]" : "");
     }
 
 
@@ -121,29 +158,47 @@ public class Parte {
     }
 
 
-    public boolean podeSerRealizadaPor(Pessoa pessoa) {
-        return regrasBasicasAtendidas(pessoa);
-    }
-
-
     public boolean geraFormulario() {
         return geraFormulario;
     }
 
 
-    public List<TipoParticipacao> getParticipacoesNecessarias() {
-        return Collections.unmodifiableList(participacoesNecessarias);
+    public NivelLeitura getNivelLeituraMinimo() {
+        return nivelLeituraMinimo;
     }
 
 
-    public boolean necessitaParticipacao(TipoParticipacao tipo) {
+    public List<TipoParticipacao> getParticipacoesNecessarias() {
+
+        return Collections.unmodifiableList(
+                participacoesNecessarias
+        );
+    }
+
+
+
+    public boolean necessitaParticipacao(
+            TipoParticipacao tipo
+    ) {
+
         return participacoesNecessarias.contains(tipo);
     }
 
 
+
+    public boolean podeSerRealizadaPor(
+            Pessoa pessoa
+    ) {
+
+        return regrasBasicasAtendidas(pessoa);
+    }
+
+
+
     public boolean pessoaPodeExercerParticipacao(
             Pessoa pessoa,
-            TipoParticipacao tipo) {
+            TipoParticipacao tipo
+    ) {
 
         if (tipo == null) {
             return false;
@@ -153,53 +208,126 @@ public class Parte {
             return false;
         }
 
-        return regrasBasicasAtendidas(pessoa)
-                && pessoa.podeExercer(tipo);
+        if (!regrasBasicasAtendidas(pessoa)) {
+            return false;
+        }
+
+
+        if (tipo == TipoParticipacao.LEITOR) {
+
+            return nivelLeituraPermitido(pessoa);
+        }
+
+
+        return pessoa.podeExercer(tipo);
     }
 
-    public Parte(
-            String nome,
-            TipoParte tipo,
-            Privilegio privilegioMinimo,
-            boolean exigeAjudante,
-            SexoPermitido sexoPermitido,
-            int quantidadeMinimaParticipantes,
-            boolean geraFormulario,
-            List<TipoParticipacao> participacoesNecessarias) {
 
-        this(
-                null,
-                nome,
-                tipo,
-                privilegioMinimo,
-                exigeAjudante,
-                sexoPermitido,
-                quantidadeMinimaParticipantes,
-                geraFormulario,
-                participacoesNecessarias
-        );
+
+    private boolean regrasBasicasAtendidas(
+            Pessoa pessoa
+    ) {
+
+        if (pessoa == null) {
+            return false;
+        }
+
+
+        if (!pessoa.isAtivo()) {
+            return false;
+        }
+
+
+        if (!privilegioPermitido(pessoa)) {
+            return false;
+        }
+
+
+        return sexoPermitido(pessoa);
     }
+
+
+
+    private boolean privilegioPermitido(
+            Pessoa pessoa
+    ) {
+
+        return pessoa.getPrivilegio()
+                .atende(privilegioMinimo);
+    }
+
+
+
+    private boolean sexoPermitido(
+            Pessoa pessoa
+    ) {
+
+        if (sexoPermitido == SexoPermitido.AMBOS) {
+            return true;
+        }
+
+
+        return
+                (sexoPermitido == SexoPermitido.MASCULINO
+                        &&
+                        pessoa.getSexo() == Sexo.MASCULINO)
+
+                        ||
+
+                        (sexoPermitido == SexoPermitido.FEMININO
+                                &&
+                                pessoa.getSexo() == Sexo.FEMININO);
+    }
+
+
+
+    private boolean nivelLeituraPermitido(
+            Pessoa pessoa
+    ) {
+
+        return pessoa.getNivelLeitura()
+                .atende(nivelLeituraMinimo);
+    }
+
+
+
+    @Override
+    public String toString() {
+
+        return nome +
+                (id != null
+                        ? " [id=" + id + "]"
+                        : "");
+    }
+
+
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) {
             return true;
         }
+
 
         if (!(o instanceof Parte outra)) {
             return false;
         }
 
+
         if (id == null || outra.id == null) {
             return false;
         }
 
+
         return id.equals(outra.id);
     }
 
+
+
     @Override
     public int hashCode() {
+
         return Objects.hash(id);
     }
-
 }

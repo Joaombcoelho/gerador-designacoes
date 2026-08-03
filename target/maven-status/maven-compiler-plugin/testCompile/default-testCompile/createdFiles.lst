@@ -1,0 +1,12 @@
+br\com\geradordesignacoes\EscalaDAOTest.class
+br\com\geradordesignacoes\GeradorEscalaTest.class
+br\com\geradordesignacoes\GeradorEscalaHistoricoTest.class
+br\com\geradordesignacoes\SeletorPessoaServiceTest.class
+br\com\geradordesignacoes\BaseDAOTest.class
+br\com\geradordesignacoes\ParteDAOTest.class
+br\com\geradordesignacoes\RegrasServiceTest.class
+br\com\geradordesignacoes\ControleDesignacoesTest.class
+br\com\geradordesignacoes\TesteGeracaoEscalaCompleta.class
+br\com\geradordesignacoes\AvaliadorPessoaServiceTest.class
+br\com\geradordesignacoes\PessoaDAOTest.class
+br\com\geradordesignacoes\HistoricoDesignacoesDAOTest.class

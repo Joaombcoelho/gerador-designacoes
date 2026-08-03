@@ -6,8 +6,10 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\HistoricoDesignacoesDAO.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\ParteDAO.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\PessoaDAO.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\BackupDatabase.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\ConnectionFactory.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\DatabaseInitializer.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\RestaurarDatabase.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\ScriptExecutor.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\Main.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\MainApp.java
@@ -15,6 +17,7 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\DiagnosticoSelecaoPessoa.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Escala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\HistoricoDesignacoes.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\NivelLeitura.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Parte.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ParticipacaoDesignacao.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Pessoa.java

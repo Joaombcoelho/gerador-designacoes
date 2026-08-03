@@ -10,7 +10,8 @@ import br.com.geradordesignacoes.service.ParteService;
 import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.escala.ItemEscala;
-
+import br.com.geradordesignacoes.dao.EscalaDAO;
+import br.com.geradordesignacoes.model.Escala;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class EscalaController {
 
     private boolean escalaSalva;
 
+    private final EscalaDAO escalaDAO;
+
     public EscalaController(EscalaView view) {
 
         this.view = view;
@@ -46,6 +49,8 @@ public class EscalaController {
 
         historicoService =
                 new HistoricoDesignacoesService();
+
+        escalaDAO = new EscalaDAO();
 
 
         registrarEventos();
@@ -233,6 +238,8 @@ public class EscalaController {
 
         ultimoResultado = null;
 
+        escalaSalva = false;
+
 
         view.atualizarStatus(
                 "Aguardando geração da escala..."
@@ -254,6 +261,7 @@ public class EscalaController {
             return;
         }
 
+
         if (ultimoResultado == null) {
 
             view.atualizarStatus(
@@ -267,27 +275,43 @@ public class EscalaController {
             return;
         }
 
+
         try {
+
+            Escala escala =
+                    ultimoResultado.getEscala();
+
+
+            escalaDAO.salvar(
+                    escala
+            );
+
 
             historicoService.salvarGeracao(
                     ultimoResultado.getParticipacoes()
             );
 
+
             escalaSalva = true;
+
 
             view.atualizarStatus(
                     "Escala salva com sucesso."
             );
 
+
         } catch (Exception e) {
+
 
             view.atualizarStatus(
                     "Erro ao salvar a escala."
             );
 
+
             view.atualizarResumo(
                     e.getMessage()
             );
+
 
             e.printStackTrace();
         }

@@ -112,12 +112,18 @@ public class EscalaDAO {
                     return Optional.empty();
                 }
 
+                LocalDate data =
+                        LocalDate.parse(
+                                resultSet.getString("data")
+                        );
+
+
                 Escala escala = new Escala(
-                        resultSet.getDate("data").toLocalDate(),
+                        data,
                         buscarDesignacoes(
                                 connection,
                                 id,
-                                resultSet.getDate("data").toLocalDate()
+                                data
                         )
                 );
 
@@ -132,15 +138,17 @@ public class EscalaDAO {
                 );
 
                 escala.setDataGeracao(
-                        resultSet.getTimestamp("data_geracao")
-                                .toLocalDateTime()
+                        java.time.LocalDateTime.parse(
+                                resultSet.getString("data_geracao")
+                        )
                 );
 
                 if (resultSet.getTimestamp("data_salvamento") != null) {
 
                     escala.setDataSalvamento(
-                            resultSet.getTimestamp("data_salvamento")
-                                    .toLocalDateTime()
+                            java.time.LocalDateTime.parse(
+                                    resultSet.getString("data_salvamento")
+                            )
                     );
                 }
 

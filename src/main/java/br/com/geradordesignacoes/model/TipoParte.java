@@ -3,5 +3,8 @@ package br.com.geradordesignacoes.model;
 public enum TipoParte {
     DEMONSTRACAO,
     LEITURA,
-    DISCURSO
+    DISCURSO,
+    PRESIDENTE_REUNIAO,
+    ORACAO,
+    DIRIGENTE_ESTUDO
 }

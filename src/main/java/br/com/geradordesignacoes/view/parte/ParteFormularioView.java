@@ -29,6 +29,7 @@ public class ParteFormularioView {
 
     private final Runnable aoCancelar;
 
+
     private final TextField campoNome;
 
     private final ComboBox<TipoParte> comboTipo;
@@ -36,6 +37,8 @@ public class ParteFormularioView {
     private final ComboBox<Privilegio> comboPrivilegio;
 
     private final ComboBox<SexoPermitido> comboSexo;
+
+    private final ComboBox<NivelLeitura> comboNivelLeitura;
 
 
     private final CheckBox checkExigeAjudante;
@@ -45,7 +48,6 @@ public class ParteFormularioView {
             new ArrayList<>();
 
 
-
     public ParteFormularioView(
             Parte parte,
             Consumer<Parte> callback,
@@ -53,9 +55,7 @@ public class ParteFormularioView {
     ) {
 
         this.parteEdicao = parte;
-
         this.callback = callback;
-
         this.aoCancelar = aoCancelar;
 
         this.parteDAO = new ParteDAO();
@@ -69,23 +69,50 @@ public class ParteFormularioView {
 
         comboTipo = new ComboBox<>();
         comboTipo.getItems()
-                .addAll(
-                        TipoParte.values()
-                );
+                .addAll(TipoParte.values());
 
 
         comboPrivilegio = new ComboBox<>();
         comboPrivilegio.getItems()
-                .addAll(
-                        Privilegio.values()
-                );
+                .addAll(Privilegio.values());
 
 
         comboSexo = new ComboBox<>();
         comboSexo.getItems()
-                .addAll(
-                        SexoPermitido.values()
+                .addAll(SexoPermitido.values());
+
+
+        comboNivelLeitura = new ComboBox<>();
+        comboNivelLeitura.getItems()
+                .addAll(NivelLeitura.values());
+
+        comboNivelLeitura.setDisable(true);
+
+
+
+        comboTipo.setOnAction(event -> {
+
+            boolean leitura =
+                    comboTipo.getValue()
+                            == TipoParte.LEITURA;
+
+
+            comboNivelLeitura.setDisable(!leitura);
+
+
+            if (!leitura) {
+
+                comboNivelLeitura.setValue(
+                        NivelLeitura.BASICO
                 );
+
+            }
+
+
+            atualizarParticipacoesAutomaticas();
+
+        });
+
 
 
         checkExigeAjudante =
@@ -95,7 +122,6 @@ public class ParteFormularioView {
 
 
         criarParticipacoes();
-
 
         criarLayout();
 
@@ -126,9 +152,7 @@ public class ParteFormularioView {
             check.setUserData(tipo);
 
 
-            checkParticipacoes.add(
-                    check
-            );
+            checkParticipacoes.add(check);
 
         }
 
@@ -145,14 +169,10 @@ public class ParteFormularioView {
         );
 
 
-        root.setHgap(
-                15
-        );
+        root.setHgap(15);
 
 
-        root.setVgap(
-                15
-        );
+        root.setVgap(15);
 
 
 
@@ -185,6 +205,8 @@ public class ParteFormularioView {
         comboPrivilegio.setPrefWidth(250);
 
         comboSexo.setPrefWidth(250);
+
+        comboNivelLeitura.setPrefWidth(250);
 
 
 
@@ -249,9 +271,24 @@ public class ParteFormularioView {
 
 
         root.add(
-                checkExigeAjudante,
+                new Label("Nível leitura mínimo:"),
+                0,
+                5
+        );
+
+
+        root.add(
+                comboNivelLeitura,
                 1,
                 5
+        );
+
+
+
+        root.add(
+                checkExigeAjudante,
+                1,
+                6
         );
 
 
@@ -262,21 +299,18 @@ public class ParteFormularioView {
                 );
 
 
+
         Label tituloParticipacoes =
                 new Label(
                         "Participações necessárias:"
                 );
 
 
-        boxParticipacoes
-                .getChildren()
-                .add(
-                        tituloParticipacoes
-                );
+        boxParticipacoes.getChildren()
+                .add(tituloParticipacoes);
 
 
-        boxParticipacoes
-                .getChildren()
+        boxParticipacoes.getChildren()
                 .addAll(
                         checkParticipacoes
                 );
@@ -286,9 +320,8 @@ public class ParteFormularioView {
         root.add(
                 boxParticipacoes,
                 1,
-                6
+                7
         );
-
 
 
 
@@ -333,10 +366,11 @@ public class ParteFormularioView {
         root.add(
                 botoes,
                 1,
-                7
+                8
         );
 
     }
+
 
 
 
@@ -362,6 +396,33 @@ public class ParteFormularioView {
         comboSexo.setValue(
                 parteEdicao.getSexoPermitido()
         );
+
+
+
+        if (parteEdicao.getTipo()
+                == TipoParte.LEITURA) {
+
+
+            comboNivelLeitura.setDisable(false);
+
+
+            comboNivelLeitura.setValue(
+                    parteEdicao.getNivelLeituraMinimo()
+            );
+
+
+        } else {
+
+
+            comboNivelLeitura.setValue(
+                    NivelLeitura.BASICO
+            );
+
+
+            comboNivelLeitura.setDisable(true);
+
+        }
+
 
 
         checkExigeAjudante.setSelected(
@@ -397,17 +458,43 @@ public class ParteFormularioView {
     private void salvar() {
 
 
-        if (campoNome.getText()
-                .isBlank()) {
-
+        if (campoNome.getText().isBlank()) {
 
             mostrarMensagem(
                     "Informe o nome da Parte."
             );
 
+            return;
+
+        }
+
+
+
+        if (comboTipo.getValue() == null) {
+
+            mostrarMensagem(
+                    "Informe o tipo da Parte."
+            );
 
             return;
+
         }
+
+
+
+        if (comboNivelLeitura.getValue() == null
+                && comboTipo.getValue()
+                == TipoParte.LEITURA) {
+
+
+            mostrarMensagem(
+                    "Informe o nível de leitura mínimo."
+            );
+
+            return;
+
+        }
+
 
 
 
@@ -415,13 +502,11 @@ public class ParteFormularioView {
                 new ArrayList<>();
 
 
-
         for (CheckBox check :
                 checkParticipacoes) {
 
 
             if (check.isSelected()) {
-
 
                 participacoes.add(
                         (TipoParticipacao)
@@ -434,13 +519,23 @@ public class ParteFormularioView {
 
 
 
+        NivelLeitura nivelLeitura =
+                comboTipo.getValue()
+                        == TipoParte.LEITURA
+                        ?
+                        comboNivelLeitura.getValue()
+                        :
+                        NivelLeitura.BASICO;
+
+
 
         Parte parte =
                 new Parte(
 
                         parteEdicao == null
                                 ? null
-                                : parteEdicao.getId(),
+                                :
+                                parteEdicao.getId(),
 
                         campoNome.getText(),
 
@@ -456,6 +551,8 @@ public class ParteFormularioView {
 
                         true,
 
+                        nivelLeitura,
+
                         participacoes
 
                 );
@@ -464,26 +561,17 @@ public class ParteFormularioView {
 
         if (parteEdicao == null) {
 
-
-            parteDAO.salvar(
-                    parte
-            );
-
+            parteDAO.salvar(parte);
 
         } else {
 
-
-            parteDAO.atualizar(
-                    parte
-            );
+            parteDAO.atualizar(parte);
 
         }
 
 
 
-        callback.accept(
-                parte
-        );
+        callback.accept(parte);
 
     }
 
@@ -528,6 +616,107 @@ public class ParteFormularioView {
 
         return root;
 
+    }
+
+    private void atualizarParticipacoesAutomaticas() {
+
+        TipoParte tipo = comboTipo.getValue();
+
+        if (tipo == null) {
+            return;
+        }
+
+
+        // limpa todas primeiro
+        for (CheckBox check : checkParticipacoes) {
+
+            check.setSelected(false);
+
+        }
+
+
+        switch (tipo) {
+
+            case LEITURA -> selecionarParticipacao(
+                    TipoParticipacao.LEITOR
+            );
+
+
+            case DISCURSO -> selecionarParticipacao(
+                    TipoParticipacao.ORADOR
+            );
+
+
+            case DEMONSTRACAO -> {
+
+                selecionarParticipacao(
+                        TipoParticipacao.RESPONSAVEL
+                );
+
+                selecionarParticipacao(
+                        TipoParticipacao.AJUDANTE
+                );
+
+            }
+
+
+            case PRESIDENTE_REUNIAO -> selecionarParticipacao(
+                    TipoParticipacao.PRESIDENTE
+            );
+
+
+            case ORACAO -> selecionarParticipacao(
+                    TipoParticipacao.ORACAO
+            );
+
+
+            case DIRIGENTE_ESTUDO -> {
+
+                selecionarParticipacao(
+                        TipoParticipacao.DIRIGENTE
+                );
+
+                selecionarParticipacao(
+                        TipoParticipacao.LEITOR
+                );
+
+            }
+
+        }
+
+    }
+
+    private void marcarParticipacao(
+            TipoParticipacao tipo
+    ) {
+
+        for (CheckBox check :
+                checkParticipacoes) {
+
+
+            if (check.getUserData()
+                    == tipo) {
+
+                check.setSelected(true);
+
+                break;
+            }
+        }
+    }
+
+    private void selecionarParticipacao(
+            TipoParticipacao participacao
+    ) {
+
+        for (CheckBox check : checkParticipacoes) {
+
+            if (check.getUserData()
+                    == participacao) {
+
+                check.setSelected(true);
+                return;
+            }
+        }
     }
 
 }

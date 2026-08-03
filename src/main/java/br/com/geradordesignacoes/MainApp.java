@@ -1,5 +1,6 @@
 package br.com.geradordesignacoes;
 
+import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.view.MainView;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -9,6 +10,8 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
+
+        DatabaseInitializer.initialize();
 
         MainView mainView = new MainView();
 

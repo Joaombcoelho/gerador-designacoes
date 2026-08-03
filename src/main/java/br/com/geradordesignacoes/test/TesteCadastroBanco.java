@@ -104,7 +104,7 @@ public class TesteCadastroBanco {
 
             parteDAO.salvar(
                     new Parte(
-                            null,
+
                             "Leitura Teste",
                             TipoParte.LEITURA,
                             Privilegio.SERVO_MINISTERIAL,
@@ -121,7 +121,7 @@ public class TesteCadastroBanco {
 
             parteDAO.salvar(
                     new Parte(
-                            null,
+
                             "Demonstração Teste",
                             TipoParte.DEMONSTRACAO,
                             Privilegio.SERVO_MINISTERIAL,

@@ -14,6 +14,7 @@ public class ResultadoGeracaoEscala {
     private final List<DiagnosticoSelecaoPessoa> diagnosticos;
 
 
+
     public ResultadoGeracaoEscala(
             Escala escala,
             List<ParticipacaoDesignacao> participacoes,

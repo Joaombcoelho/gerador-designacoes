@@ -143,6 +143,7 @@ public class GeradorEscala {
 
             if (parte.getTipo() == TipoParte.DEMONSTRACAO) {
 
+
                 gerou =
                         designarDemonstracao(
                                 data,
@@ -152,7 +153,23 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
+
+            } else if (parte.getTipo() == TipoParte.DIRIGENTE_ESTUDO) {
+
+
+                gerou =
+                        designarDirigenteEstudo(
+                                data,
+                                parte,
+                                pessoas,
+                                designacoes,
+                                controleDesignacoes,
+                                diagnosticos
+                        );
+
+
             } else {
+
 
                 gerou =
                         designarParteIndividual(
@@ -163,6 +180,7 @@ public class GeradorEscala {
                                 controleDesignacoes,
                                 diagnosticos
                         );
+
             }
 
 
@@ -188,9 +206,10 @@ public class GeradorEscala {
                         );
 
 
-       // salvarHistorico(
-        //        novasParticipacoes
-       // )
+        salvarHistorico(
+                novasParticipacoes
+        );
+
 
         Escala escala = new Escala(
                 data,
@@ -309,7 +328,7 @@ public class GeradorEscala {
                         data,
                         dupla.responsavel(),
                         parte,
-                        TipoParticipacao.RESPONSAVEL
+                        encontrarParticipacao(parte, TipoParticipacao.RESPONSAVEL)
                 )
         );
 
@@ -319,7 +338,7 @@ public class GeradorEscala {
                         data,
                         dupla.ajudante(),
                         parte,
-                        TipoParticipacao.AJUDANTE
+                        encontrarParticipacao(parte, TipoParticipacao.AJUDANTE)
                 )
         );
 
@@ -327,6 +346,62 @@ public class GeradorEscala {
         return true;
     }
 
+    private boolean designarDirigenteEstudo(
+            LocalDate data,
+            Parte parte,
+            List<Pessoa> pessoas,
+            List<Designacao> designacoes,
+            ControleDesignacoes controleDesignacoes,
+            List<DiagnosticoSelecaoPessoa> diagnosticos
+    ) {
+
+
+        MelhorDuplaDirigenteEstudo dupla =
+                selecionarDirigenteELeitor(
+                        parte,
+                        pessoas,
+                        controleDesignacoes
+                );
+
+
+        if (dupla == null) {
+
+            return false;
+        }
+
+
+        designacoes.add(
+                new Designacao(
+                        data,
+                        parte,
+                        dupla.dirigente(),
+                        dupla.leitor()
+                )
+        );
+
+
+        controleDesignacoes.registrarParticipacao(
+                new ParticipacaoDesignacao(
+                        data,
+                        dupla.dirigente(),
+                        parte,
+                        TipoParticipacao.DIRIGENTE
+                )
+        );
+
+
+        controleDesignacoes.registrarParticipacao(
+                new ParticipacaoDesignacao(
+                        data,
+                        dupla.leitor(),
+                        parte,
+                        TipoParticipacao.LEITOR
+                )
+        );
+
+
+        return true;
+    }
 
     private MelhorDuplaDemonstracao selecionarMelhorDuplaDemonstracao(
             Parte parte,
@@ -410,6 +485,122 @@ public class GeradorEscala {
         return melhor;
     }
 
+    private MelhorDuplaDirigenteEstudo selecionarDirigenteELeitor(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controleDesignacoes
+
+    ) {
+
+        List<Pessoa> pessoasJaDesignadas =
+                controleDesignacoes.getPessoasDesignadas();
+
+
+        MelhorDuplaDirigenteEstudo melhor =
+                null;
+
+
+        for (Pessoa dirigente : pessoas) {
+
+
+            if (!parte.pessoaPodeExercerParticipacao(
+                    dirigente,
+                    TipoParticipacao.DIRIGENTE
+            )) {
+                continue;
+            }
+
+
+            if (pessoasJaDesignadas.contains(dirigente)) {
+                continue;
+            }
+
+
+
+            for (Pessoa leitor : pessoas) {
+
+
+                if (dirigente.equals(leitor)) {
+                    continue;
+                }
+
+
+                if (!parte.pessoaPodeExercerParticipacao(
+                        leitor,
+                        TipoParticipacao.LEITOR
+                )) {
+                    continue;
+                }
+
+
+                if (pessoasJaDesignadas.contains(leitor)) {
+                    continue;
+                }
+
+
+
+                ResultadoAvaliacaoPessoa avaliacaoDirigente =
+                        avaliadorPessoaService.avaliar(
+                                dirigente,
+                                parte,
+                                controleDesignacoes
+                        );
+
+
+                ResultadoAvaliacaoPessoa avaliacaoLeitor =
+                        avaliadorPessoaService.avaliar(
+                                leitor,
+                                parte,
+                                controleDesignacoes
+                        );
+
+
+
+                MelhorDuplaDirigenteEstudo candidata =
+                        new MelhorDuplaDirigenteEstudo(
+                                dirigente,
+                                leitor,
+                                avaliacaoDirigente.getTotal()
+                                        +
+                                        avaliacaoLeitor.getTotal()
+                        );
+
+
+
+                if (melhor == null
+                        ||
+                        candidata.pontuacaoTotal()
+                                >
+                                melhor.pontuacaoTotal()) {
+
+
+                    melhor = candidata;
+                }
+            }
+        }
+
+
+        return melhor;
+    }
+
+    private TipoParticipacao encontrarParticipacao(
+            Parte parte,
+            TipoParticipacao esperada
+    ) {
+
+        return parte.getParticipacoesNecessarias()
+                .stream()
+                .filter(tipo -> tipo == esperada)
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "A parte "
+                                        + parte.getNome()
+                                        + " não possui a participação "
+                                        + esperada
+                        )
+                );
+    }
 
     private TipoParticipacao determinarParticipacaoIndividual(
             Parte parte
@@ -441,5 +632,11 @@ public class GeradorEscala {
 
         historicoService.salvarGeracao(participacoes);
 
+    }
+    private record MelhorDuplaDirigenteEstudo(
+            Pessoa dirigente,
+            Pessoa leitor,
+            int pontuacaoTotal
+    ) {
     }
 }
