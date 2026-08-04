@@ -120,6 +120,9 @@ public class GeradorEscala {
 
         Pessoa presidenteDaReuniao = null;
 
+        List<Parte> partesOrdenadas =
+                ordenarPartesComPresidentePrimeiro(partes);
+
         HistoricoDesignacoes historicoControle =
                 new HistoricoDesignacoes(
                         historico.getParticipacoes()
@@ -137,7 +140,7 @@ public class GeradorEscala {
                         .getParticipacoes()
                         .size();
 
-        for (Parte parte : partes) {
+        for (Parte parte : partesOrdenadas) {
 
             boolean gerou;
 
@@ -224,6 +227,8 @@ public class GeradorEscala {
                 designacoes
         );
 
+        escala.setPresidente(presidenteDaReuniao);
+
         return new ResultadoGeracaoEscala(
                 escala,
                 todasParticipacoes,
@@ -232,6 +237,33 @@ public class GeradorEscala {
         );
     }
 
+
+
+    private List<Parte> ordenarPartesComPresidentePrimeiro(
+            List<Parte> partes
+    ) {
+
+        List<Parte> partesOrdenadas =
+                new ArrayList<>();
+
+
+        partes.stream()
+                .filter(parte ->
+                        parte.getTipo() == TipoParte.PRESIDENTE_REUNIAO
+                )
+                .findFirst()
+                .ifPresent(partesOrdenadas::add);
+
+
+        partes.stream()
+                .filter(parte ->
+                        parte.getTipo() != TipoParte.PRESIDENTE_REUNIAO
+                )
+                .forEach(partesOrdenadas::add);
+
+
+        return partesOrdenadas;
+    }
 
     private boolean designarParteIndividual(
             LocalDate data,
