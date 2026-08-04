@@ -118,6 +118,7 @@ public class GeradorEscala {
         List<DiagnosticoSelecaoPessoa> diagnosticos =
                 new ArrayList<>();
 
+        Pessoa presidenteDaReuniao = null;
 
         HistoricoDesignacoes historicoControle =
                 new HistoricoDesignacoes(
@@ -183,6 +184,13 @@ public class GeradorEscala {
 
             }
 
+            if (gerou
+                    && parte.getTipo() == TipoParte.PRESIDENTE_REUNIAO) {
+
+                presidenteDaReuniao =
+                        designacoes.get(designacoes.size() - 1)
+                                .getResponsavel();
+            }
 
             if (!gerou) {
 
