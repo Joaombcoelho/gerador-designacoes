@@ -3,6 +3,8 @@ package br.com.geradordesignacoes.service;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.model.Privilegio;
+import br.com.geradordesignacoes.model.Sexo;
 
 import java.util.List;
 
@@ -28,6 +30,13 @@ public class RegrasService {
                 parte.getParticipacoesNecessarias()) {
 
 
+            if (tipo == PRESIDENTE
+                    && !podePresidirReuniao(pessoa)) {
+
+                continue;
+            }
+
+
             if (parte.pessoaPodeExercerParticipacao(
                     pessoa,
                     tipo
@@ -39,6 +48,15 @@ public class RegrasService {
 
 
         return false;
+    }
+
+    public boolean podePresidirReuniao(Pessoa pessoa) {
+
+        return pessoa != null
+                && pessoa.isAtivo()
+                && pessoa.getSexo() == Sexo.MASCULINO
+                && pessoa.getPrivilegio().atende(Privilegio.BATIZADO)
+                && pessoa.podeSerPresidente();
     }
 
     public boolean podeFormarDemonstracao(Pessoa responsavel, Pessoa ajudante, List<Pessoa> pessoasJaDesignadas) {

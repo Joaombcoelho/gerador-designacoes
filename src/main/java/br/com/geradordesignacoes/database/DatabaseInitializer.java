@@ -385,6 +385,17 @@ public class DatabaseInitializer {
         """;
 
 
+
+
+    private static final String AJUSTAR_PRIVILEGIO_MINIMO_PARTE_PRESIDENTE = """
+
+        UPDATE parte
+        SET privilegio_minimo = 'ANCIAO'
+        WHERE tipo = 'PRESIDENTE_REUNIAO'
+          AND privilegio_minimo <> 'ANCIAO';
+
+        """;
+
     private static final String CRIAR_PARTE_ORACAO = """
 
         INSERT OR IGNORE INTO parte (
@@ -534,6 +545,10 @@ public class DatabaseInitializer {
 
             statement.execute(
                     CRIAR_PARTE_PRESIDENTE
+            );
+
+            statement.execute(
+                    AJUSTAR_PRIVILEGIO_MINIMO_PARTE_PRESIDENTE
             );
 
             statement.execute(
