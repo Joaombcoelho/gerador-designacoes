@@ -396,31 +396,55 @@ public class DatabaseInitializer {
 
         """;
 
-    private static final String CRIAR_PARTE_ORACAO = """
+    private static final String CRIAR_PARTE_ORACAO_INICIAL = """
 
-        INSERT OR IGNORE INTO parte (
-            nome,
-            tipo,
-            privilegio_minimo,
-            exige_ajudante,
-            sexo_permitido,
-            quantidade_minima_participantes,
-            gera_formulario,
-            nivel_leitura_minimo
-        )
-        VALUES (
-            'Oração',
-            'ORACAO',
-            'BATIZADO',
-            0,
-            'MASCULINO',
-            1,
-            0,
-            'BASICO'
-        );
+    INSERT OR IGNORE INTO parte (
+        nome,
+        tipo,
+        privilegio_minimo,
+        exige_ajudante,
+        sexo_permitido,
+        quantidade_minima_participantes,
+        gera_formulario,
+        nivel_leitura_minimo
+    )
+    VALUES (
+        'Oração inicial',
+        'ORACAO_INICIAL',
+        'BATIZADO',
+        0,
+        'MASCULINO',
+        1,
+        0,
+        'BASICO'
+    );
 
-        """;
+    """;
 
+    private static final String CRIAR_PARTE_ORACAO_FINAL = """
+
+    INSERT OR IGNORE INTO parte (
+        nome,
+        tipo,
+        privilegio_minimo,
+        exige_ajudante,
+        sexo_permitido,
+        quantidade_minima_participantes,
+        gera_formulario,
+        nivel_leitura_minimo
+    )
+    VALUES (
+        'Oração final',
+        'ORACAO_FINAL',
+        'BATIZADO',
+        0,
+        'MASCULINO',
+        1,
+        0,
+        'BASICO'
+    );
+
+    """;
 
     private static final String CRIAR_PARTE_DIRIGENTE_ESTUDO = """
 
@@ -461,18 +485,31 @@ public class DatabaseInitializer {
         """;
 
 
-    private static final String BACKFILL_PARTICIPACAO_ORACAO = """
+    private static final String BACKFILL_PARTICIPACAO_ORACAO_INICIAL = """
 
-        INSERT OR IGNORE INTO parte_participacao_necessaria (
-            parte_id,
-            tipo_participacao,
-            ordem
-        )
-        SELECT id, 'ORACAO', 0
-        FROM parte
-        WHERE tipo = 'ORACAO';
+INSERT OR IGNORE INTO parte_participacao_necessaria (
+    parte_id,
+    tipo_participacao,
+    ordem
+)
+SELECT id, 'ORACAO_INICIAL', 0
+FROM parte
+WHERE tipo = 'ORACAO_INICIAL';
 
-        """;
+""";
+
+    private static final String BACKFILL_PARTICIPACAO_ORACAO_FINAL = """
+
+INSERT OR IGNORE INTO parte_participacao_necessaria (
+    parte_id,
+    tipo_participacao,
+    ordem
+)
+SELECT id, 'ORACAO_FINAL', 0
+FROM parte
+WHERE tipo = 'ORACAO_FINAL';
+
+""";
 
 
     private static final String BACKFILL_PARTICIPACOES_DIRIGENTE_ESTUDO = """
@@ -552,7 +589,11 @@ public class DatabaseInitializer {
             );
 
             statement.execute(
-                    CRIAR_PARTE_ORACAO
+                    CRIAR_PARTE_ORACAO_INICIAL
+            );
+
+            statement.execute(
+                    CRIAR_PARTE_ORACAO_FINAL
             );
 
             statement.execute(
@@ -565,7 +606,11 @@ public class DatabaseInitializer {
             );
 
             statement.execute(
-                    BACKFILL_PARTICIPACAO_ORACAO
+                    BACKFILL_PARTICIPACAO_ORACAO_INICIAL
+            );
+
+            statement.execute(
+                    BACKFILL_PARTICIPACAO_ORACAO_FINAL
             );
 
             statement.execute(

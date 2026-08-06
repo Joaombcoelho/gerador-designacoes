@@ -1,4 +1,15 @@
 -------------------------------------------------------------------------------
 Test set: br.com.geradordesignacoes.ParteDAOTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.230 s -- in br.com.geradordesignacoes.ParteDAOTest
+Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.686 s <<< FAILURE! -- in br.com.geradordesignacoes.ParteDAOTest
+br.com.geradordesignacoes.ParteDAOTest.deveListarParteComParticipacoesNecessarias -- Time elapsed: 0.826 s <<< ERROR!
+java.lang.IllegalArgumentException: No enum constant br.com.geradordesignacoes.model.TipoParte.ORACAO_FINAL
+	at java.base/java.lang.Enum.valueOf(Enum.java:293)
+	at br.com.geradordesignacoes.model.TipoParte.valueOf(TipoParte.java:3)
+	at br.com.geradordesignacoes.dao.ParteDAO.mapearParte(ParteDAO.java:408)
+	at br.com.geradordesignacoes.dao.ParteDAO.listarTodos(ParteDAO.java:152)
+	at br.com.geradordesignacoes.ParteDAOTest.deveListarParteComParticipacoesNecessarias(ParteDAOTest.java:81)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+

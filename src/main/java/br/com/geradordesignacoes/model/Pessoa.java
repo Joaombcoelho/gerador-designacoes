@@ -218,8 +218,11 @@ public class Pessoa {
             case ORADOR ->
                     podeFazerDiscurso;
 
-            case ORACAO ->
+            case ORACAO_INICIAL ->
                     podeFazerOracao;
+
+            case ORACAO_FINAL ->
+                    podeSerPresidente;
 
             case DIRIGENTE ->
                     podeSerDirigente;

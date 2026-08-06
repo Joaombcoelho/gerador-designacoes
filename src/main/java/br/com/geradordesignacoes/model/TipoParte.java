@@ -5,6 +5,7 @@ public enum TipoParte {
     LEITURA,
     DISCURSO,
     PRESIDENTE_REUNIAO,
-    ORACAO,
+    ORACAO_FINAL,
+    ORACAO_INICIAL,
     DIRIGENTE_ESTUDO
 }

@@ -665,8 +665,8 @@ public class ParteFormularioView {
             );
 
 
-            case ORACAO -> selecionarParticipacao(
-                    TipoParticipacao.ORACAO
+            case ORACAO_INICIAL -> selecionarParticipacao(
+                    TipoParticipacao.ORACAO_INICIAL
             );
 
 

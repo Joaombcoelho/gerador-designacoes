@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: br.com.geradordesignacoes.EscalaDAOTest
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.154 s -- in br.com.geradordesignacoes.EscalaDAOTest
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.545 s -- in br.com.geradordesignacoes.EscalaDAOTest

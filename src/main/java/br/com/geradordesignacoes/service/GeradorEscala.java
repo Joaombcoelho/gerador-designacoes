@@ -174,7 +174,6 @@ public class GeradorEscala {
 
             } else {
 
-
                 gerou =
                         designarParteIndividual(
                                 data,
@@ -182,7 +181,8 @@ public class GeradorEscala {
                                 pessoas,
                                 designacoes,
                                 controleDesignacoes,
-                                diagnosticos
+                                diagnosticos,
+                                presidenteDaReuniao
                         );
 
             }
@@ -271,33 +271,48 @@ public class GeradorEscala {
             List<Pessoa> pessoas,
             List<Designacao> designacoes,
             ControleDesignacoes controleDesignacoes,
-            List<DiagnosticoSelecaoPessoa> diagnosticos
+            List<DiagnosticoSelecaoPessoa> diagnosticos,
+            Pessoa presidenteDaReuniao
     ) {
 
-
-        DiagnosticoSelecaoPessoa diagnostico =
-                seletorPessoaService.selecionarComDiagnostico(
-                        parte,
-                        pessoas,
-                        controleDesignacoes
-                );
+        Pessoa participante;
 
 
-        diagnosticos.add(
-                diagnostico
-        );
+        if (parte.necessitaParticipacao(
+                TipoParticipacao.ORACAO_FINAL)) {
+
+            if (presidenteDaReuniao == null) {
+                return false;
+            }
+
+            participante = presidenteDaReuniao;
 
 
-        if (diagnostico.getEscolhido() == null) {
+        } else {
 
-            return false;
+            DiagnosticoSelecaoPessoa diagnostico =
+                    seletorPessoaService.selecionarComDiagnostico(
+                            parte,
+                            pessoas,
+                            controleDesignacoes
+                    );
+
+
+            diagnosticos.add(
+                    diagnostico
+            );
+
+
+            if (diagnostico.getEscolhido() == null) {
+
+                return false;
+            }
+
+
+            participante =
+                    diagnostico.getEscolhido()
+                            .getPessoa();
         }
-
-
-        Pessoa participante =
-                diagnostico
-                        .getEscolhido()
-                        .getPessoa();
 
 
         TipoParticipacao tipoParticipacao =
@@ -328,7 +343,6 @@ public class GeradorEscala {
 
         return true;
     }
-
 
     private boolean designarDemonstracao(
             LocalDate data,

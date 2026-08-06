@@ -4,10 +4,7 @@ import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
-import br.com.geradordesignacoes.service.GeradorEscala;
-import br.com.geradordesignacoes.service.HistoricoDesignacoesService;
-import br.com.geradordesignacoes.service.ParteService;
-import br.com.geradordesignacoes.service.RegrasService;
+import br.com.geradordesignacoes.service.*;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.escala.ItemEscala;
 import br.com.geradordesignacoes.dao.EscalaDAO;
@@ -32,6 +29,8 @@ public class EscalaController {
 
     private final EscalaDAO escalaDAO;
 
+    private final BackupService backupService;
+
     public EscalaController(EscalaView view) {
 
         this.view = view;
@@ -51,6 +50,8 @@ public class EscalaController {
                 new HistoricoDesignacoesService();
 
         escalaDAO = new EscalaDAO();
+
+        backupService = new BackupService();
 
 
         registrarEventos();
@@ -285,12 +286,7 @@ public class EscalaController {
             escalaDAO.salvar(
                     escala
             );
-
-
-            historicoService.salvarGeracao(
-                    ultimoResultado.getParticipacoes()
-            );
-
+            backupService.criarBackup();
 
             escalaSalva = true;
 

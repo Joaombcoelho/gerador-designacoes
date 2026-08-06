@@ -29,4 +29,8 @@ public class ConnectionFactory {
 
         return connection;
     }
+
+    public static Path getDatabasePath() {
+        return DATABASE_PATH;
+    }
 }

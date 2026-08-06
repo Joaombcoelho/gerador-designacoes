@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: br.com.geradordesignacoes.TesteGeracaoEscalaCompleta
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 1.278 s <<< FAILURE! -- in br.com.geradordesignacoes.TesteGeracaoEscalaCompleta
-br.com.geradordesignacoes.TesteGeracaoEscalaCompleta.deveGerarEscalaCompletaComPersistencia -- Time elapsed: 1.274 s <<< FAILURE!
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 2.739 s <<< FAILURE! -- in br.com.geradordesignacoes.TesteGeracaoEscalaCompleta
+br.com.geradordesignacoes.TesteGeracaoEscalaCompleta.deveGerarEscalaCompletaComPersistencia -- Time elapsed: 2.734 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: A geração não deveria possuir erros ==> expected: <false> but was: <true>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
