@@ -124,9 +124,7 @@ public class GeradorEscala {
                 ordenarPartesComPresidentePrimeiro(partes);
 
         HistoricoDesignacoes historicoControle =
-                new HistoricoDesignacoes(
-                        historico.getParticipacoes()
-                );
+                historico.semParticipacoesDaData(data);
 
 
         ControleDesignacoes controleDesignacoes =
@@ -218,6 +216,7 @@ public class GeradorEscala {
 
 
         salvarHistorico(
+                data,
                 novasParticipacoes
         );
 
@@ -681,10 +680,14 @@ public class GeradorEscala {
     }
 
     private void salvarHistorico(
+            LocalDate data,
             List<ParticipacaoDesignacao> participacoes
     ) {
 
-        historicoService.salvarGeracao(participacoes);
+        historicoService.substituirGeracaoDaData(
+                data,
+                participacoes
+        );
 
     }
     private record MelhorDuplaDirigenteEstudo(

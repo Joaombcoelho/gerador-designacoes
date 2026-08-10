@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
 import br.com.geradordesignacoes.model.HistoricoDesignacoes;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class HistoricoDesignacoesService {
@@ -167,5 +168,18 @@ public class HistoricoDesignacoesService {
             List<ParticipacaoDesignacao> participacoes
     ) {
         adicionarTodos(participacoes);
+    }
+
+    public void substituirGeracaoDaData(
+            LocalDate data,
+            List<ParticipacaoDesignacao> participacoes
+    ) {
+
+        historicoDAO.substituirParticipacoesDaData(
+                data,
+                participacoes
+        );
+
+        carregar();
     }
 }

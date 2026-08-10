@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.model;
 
 import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 
 public class HistoricoDesignacoes {
@@ -38,6 +39,23 @@ public class HistoricoDesignacoes {
         return new ArrayList<>(
                 participacoes
         );
+    }
+
+
+    public HistoricoDesignacoes semParticipacoesDaData(
+            LocalDate data
+    ) {
+
+        HistoricoDesignacoes historicoFiltrado =
+                new HistoricoDesignacoes();
+
+        participacoes.stream()
+                .filter(participacao ->
+                        !participacao.getData().equals(data)
+                )
+                .forEach(historicoFiltrado::adicionar);
+
+        return historicoFiltrado;
     }
 
 
