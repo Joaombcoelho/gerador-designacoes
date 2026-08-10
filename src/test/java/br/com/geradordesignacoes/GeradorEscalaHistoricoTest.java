@@ -61,7 +61,8 @@ public class GeradorEscalaHistoricoTest {
 
 
         assertFalse(
-                primeira.possuiErros()
+                primeira.possuiErros(),
+                "Erros na primeira geração: " + primeira.getErros()
         );
 
 
@@ -75,7 +76,8 @@ public class GeradorEscalaHistoricoTest {
 
 
         assertFalse(
-                segunda.possuiErros()
+                segunda.possuiErros(),
+                "Erros na segunda geração: " + segunda.getErros()
         );
 
 

@@ -1,10 +1,8 @@
 package br.com.geradordesignacoes.service;
 
-import br.com.geradordesignacoes.model.HistoricoDesignacoes;
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
-import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +15,8 @@ public class ControleDesignacoes {
     private final List<Pessoa> pessoasDesignadas;
 
     private final HistoricoDesignacoes historico;
+
+    private Pessoa presidente;
 
 
     public ControleDesignacoes() {
@@ -195,5 +195,42 @@ public class ControleDesignacoes {
                                 participacao.getParte().equals(parte)
                 )
                 .count();
+    }
+    public LocalDate ultimaParticipacaoNaParte(
+            Pessoa pessoa,
+            Parte parte
+    ) {
+
+        return historico.getParticipacoes()
+                .stream()
+                .filter(participacao ->
+                        participacao.getPessoa().equals(pessoa)
+                                &&
+                                participacao.getParte().equals(parte)
+                )
+                .map(ParticipacaoDesignacao::getData)
+                .max(LocalDate::compareTo)
+                .orElse(null);
+    }
+    public long quantidadeVezesNaParticipacao(
+            Pessoa pessoa,
+            Parte parte,
+            TipoParticipacao tipoParticipacao
+    ) {
+
+        return historico.quantidadeVezesNaParticipacao(
+                pessoa,
+                parte,
+                tipoParticipacao
+        );
+    }
+
+    public void definirPresidente(Pessoa presidente) {
+        this.presidente = presidente;
+    }
+
+    public boolean ehPresidente(Pessoa pessoa) {
+        return presidente != null
+                && presidente.equals(pessoa);
     }
 }

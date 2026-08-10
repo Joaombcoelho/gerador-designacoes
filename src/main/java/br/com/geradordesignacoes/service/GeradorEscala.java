@@ -193,6 +193,10 @@ public class GeradorEscala {
                 presidenteDaReuniao =
                         designacoes.get(designacoes.size() - 1)
                                 .getResponsavel();
+
+                controleDesignacoes.definirPresidente(
+                        presidenteDaReuniao
+                );
             }
 
             if (!gerou) {

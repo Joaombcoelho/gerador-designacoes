@@ -62,7 +62,7 @@ public class TesteGeracaoEscalaCompleta extends BaseDAOTest {
 
         assertFalse(
                 resultado.possuiErros(),
-                "A geração não deveria possuir erros"
+                "Erros encontrados: " + resultado.getErros()
         );
 
 

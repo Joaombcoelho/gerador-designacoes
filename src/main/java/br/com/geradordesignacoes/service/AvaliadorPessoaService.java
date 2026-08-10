@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.service;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
+import br.com.geradordesignacoes.model.TipoParticipacao;
 
 public class AvaliadorPessoaService {
 
@@ -24,7 +25,7 @@ public class AvaliadorPessoaService {
                 );
 
         int penalidadeRepeticao =
-                pontuarRepeticaoParte(
+                pontuarRepeticaoParticipacao(
                         pessoa,
                         parte,
                         controle
@@ -68,18 +69,28 @@ public class AvaliadorPessoaService {
     }
 
 
-    private int pontuarRepeticaoParte(
+    private int pontuarRepeticaoParticipacao(
             Pessoa pessoa,
             Parte parte,
             ControleDesignacoes controle
     ) {
 
-        long repeticoes =
-                controle.quantidadeVezesNaParte(
-                        pessoa,
-                        parte
-                );
+        TipoParticipacao tipoParticipacao =
+                parte.getParticipacoesNecessarias()
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
 
+        if (tipoParticipacao == null) {
+            return 0;
+        }
+
+        long repeticoes =
+                controle.quantidadeVezesNaParticipacao(
+                        pessoa,
+                        parte,
+                        tipoParticipacao
+                );
 
         return (int) repeticoes * 15;
     }
