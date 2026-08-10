@@ -15,12 +15,18 @@ public class RegrasService {
             Pessoa pessoa,
             Parte parte,
             List<Pessoa> pessoasJaDesignadas
-    ) {
+    )
+    {
 
         if (pessoa == null
                 || parte == null
-                || pessoasJaDesignadas.contains(pessoa)
                 || !pessoa.isAtivo()) {
+
+            return false;
+        }
+
+        if (pessoasJaDesignadas.contains(pessoa)
+                && pessoa.getPrivilegio() != Privilegio.ANCIAO) {
 
             return false;
         }
@@ -46,6 +52,62 @@ public class RegrasService {
             }
         }
 
+
+        return false;
+    }
+    public boolean podeDesignar(
+            Pessoa pessoa,
+            Parte parte,
+            ControleDesignacoes controle
+    ) {
+
+        if (pessoa == null
+                || parte == null
+                || controle == null
+                || !pessoa.isAtivo()) {
+
+            return false;
+        }
+
+        List<Pessoa> pessoasJaDesignadas =
+                controle.getPessoasDesignadas();
+
+        if (pessoasJaDesignadas.contains(pessoa)) {
+
+            /*
+             * O presidente nunca pode receber
+             * uma segunda designação.
+             */
+            if (controle.ehPresidente(pessoa)) {
+                return false;
+            }
+
+            /*
+             * Somente Anciãos podem acumular
+             * mais de uma designação.
+             */
+            if (pessoa.getPrivilegio() != Privilegio.ANCIAO) {
+                return false;
+            }
+        }
+
+        for (TipoParticipacao tipo :
+                parte.getParticipacoesNecessarias()) {
+
+            if (tipo == PRESIDENTE
+                    && !podePresidirReuniao(pessoa)) {
+
+                continue;
+            }
+
+            if (parte.pessoaPodeExercerParticipacao(
+                    pessoa,
+                    tipo
+            )) {
+
+                return true;
+            }
+        }
 
         return false;
     }

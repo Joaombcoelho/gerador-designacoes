@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.model;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
+import java.time.LocalDate;
 
 public class HistoricoDesignacoes {
 
@@ -72,6 +73,23 @@ public class HistoricoDesignacoes {
                 .count();
     }
 
+    public long quantidadeVezesNaParticipacao(
+            Pessoa pessoa,
+            Parte parte,
+            TipoParticipacao tipoParticipacao
+    ) {
+
+        return participacoes.stream()
+                .filter(participacao ->
+                        participacao.getPessoa().equals(pessoa)
+                                &&
+                                participacao.getParte().equals(parte)
+                                &&
+                                participacao.getTipoParticipacao() == tipoParticipacao
+                )
+                .count();
+    }
+
     public boolean jaParticipou(
             Pessoa pessoa,
             Parte parte
@@ -84,4 +102,20 @@ public class HistoricoDesignacoes {
                 );
     }
 
+}
+    public LocalDate ultimaParticipacaoNaParte(
+            Pessoa pessoa,
+            Parte parte
+    ) {
+
+        return participacoes.stream()
+                .filter(participacao ->
+                        participacao.getPessoa().equals(pessoa)
+                                &&
+                                participacao.getParte().equals(parte)
+                )
+                .map(ParticipacaoDesignacao::getData)
+                .max(LocalDate::compareTo)
+                .orElse(null);
+    }
 }

@@ -42,7 +42,7 @@ public class SeletorPessoaService {
                     regrasService.podeDesignar(
                             pessoa,
                             parte,
-                            controle.getPessoasDesignadas()
+                            controle
                     );
 
 
@@ -88,7 +88,7 @@ public class SeletorPessoaService {
                     regrasService.podeDesignar(
                             pessoa,
                             parte,
-                            controle.getPessoasDesignadas()
+                            controle
                     );
 
 

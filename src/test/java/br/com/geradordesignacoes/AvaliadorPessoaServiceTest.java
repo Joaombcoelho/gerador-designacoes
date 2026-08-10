@@ -211,6 +211,7 @@ public class AvaliadorPessoaServiceTest {
         );
     }
 
+
     @Test
     void naoDeveAplicarPenalidadeSemHistorico() {
 
