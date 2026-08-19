@@ -1,6 +1,5 @@
 package br.com.geradordesignacoes.service;
 
-import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.*;
 
@@ -124,7 +123,9 @@ public class GeradorEscala {
                 ordenarPartesComPresidentePrimeiro(partes);
 
         HistoricoDesignacoes historicoControle =
-                historico.semParticipacoesDaData(data);
+                new HistoricoDesignacoes(
+                        historico.getParticipacoes()
+                );
 
 
         ControleDesignacoes controleDesignacoes =
@@ -220,7 +221,6 @@ public class GeradorEscala {
 
 
         salvarHistorico(
-                data,
                 novasParticipacoes
         );
 
@@ -684,14 +684,10 @@ public class GeradorEscala {
     }
 
     private void salvarHistorico(
-            LocalDate data,
             List<ParticipacaoDesignacao> participacoes
     ) {
 
-        historicoService.substituirGeracaoDaData(
-                data,
-                participacoes
-        );
+        historicoService.salvarGeracao(participacoes);
 
     }
     private record MelhorDuplaDirigenteEstudo(

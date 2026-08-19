@@ -102,7 +102,6 @@ public class HistoricoDesignacoesDAO {
     }
 
 
-
     public void substituirParticipacoesDaData(
             LocalDate data,
             List<ParticipacaoDesignacao> participacoes
@@ -215,6 +214,7 @@ public class HistoricoDesignacoesDAO {
             );
         }
     }
+
 
 
     public List<ParticipacaoDesignacao> listarTodas() {

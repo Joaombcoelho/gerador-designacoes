@@ -1,111 +1,247 @@
 package br.com.geradordesignacoes.view;
 
+import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.database.BackupDatabase;
+import br.com.geradordesignacoes.database.RestaurarDatabase;
+import br.com.geradordesignacoes.service.PessoaService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
-import br.com.geradordesignacoes.dao.PessoaDAO;
-import br.com.geradordesignacoes.service.PessoaService;
+
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import br.com.geradordesignacoes.database.BackupDatabase;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
-import javafx.scene.control.Alert;
-import br.com.geradordesignacoes.database.RestaurarDatabase;
+
 import java.io.File;
 import java.io.IOException;
 
 public class MainView {
 
     private final BorderPane root;
+
     private final PessoaView pessoaView;
-    private final ParteView parteView = new ParteView();
-    private final EscalaView escalaView = new EscalaView();
-    private final HistoricoView historicoView = new HistoricoView();
+    private final ParteView parteView =
+            new ParteView();
+    private final EscalaView escalaView =
+            new EscalaView();
+    private final HistoricoView historicoView =
+            new HistoricoView();
+
 
     public MainView() {
 
         root = new BorderPane();
 
-        PessoaDAO pessoaDAO = new PessoaDAO();
+        PessoaDAO pessoaDAO =
+                new PessoaDAO();
 
-        PessoaService pessoaService = new PessoaService(pessoaDAO);
+        PessoaService pessoaService =
+                new PessoaService(
+                        pessoaDAO
+                );
 
-        pessoaView = new PessoaView(pessoaService);
+        pessoaView =
+                new PessoaView(
+                        pessoaService
+                );
 
         criarMenu();
         criarTelaInicial();
     }
 
+
     private void criarMenu() {
 
-        MenuBar menuBar = new MenuBar();
+        MenuBar menuBar =
+                new MenuBar();
 
-        // Arquivo
-        Menu menuArquivo = new Menu("Arquivo");
 
-        MenuItem itemBackup = new MenuItem("Fazer Backup");
-        MenuItem itemRestaurarBackup = new MenuItem("Restaurar Backup");
-        MenuItem itemSair = new MenuItem("Sair");
+        // =====================================================
+        // BOTÃO INÍCIO
+        // =====================================================
 
-        itemBackup.setOnAction(event -> fazerBackup());
-        itemRestaurarBackup.setOnAction(event -> restaurarBackup());
+        Button botaoInicio =
+                new Button("Início");
+
+        botaoInicio.setPrefHeight(25);
+
+        botaoInicio.setOnAction(
+                event -> criarTelaInicial()
+        );
+
+
+        // =====================================================
+        // ARQUIVO
+        // =====================================================
+
+        Menu menuArquivo =
+                new Menu("Arquivo");
+
+        MenuItem itemBackup =
+                new MenuItem("Fazer Backup");
+
+        MenuItem itemRestaurarBackup =
+                new MenuItem("Restaurar Backup");
+
+        MenuItem itemSair =
+                new MenuItem("Sair");
+
+
+        itemBackup.setOnAction(
+                event -> fazerBackup()
+        );
+
+        itemRestaurarBackup.setOnAction(
+                event -> restaurarBackup()
+        );
+
+        itemSair.setOnAction(
+                event -> {
+
+                    if (root.getScene() != null) {
+
+                        root.getScene()
+                                .getWindow()
+                                .hide();
+                    }
+                }
+        );
+
 
         menuArquivo.getItems().addAll(
                 itemBackup,
                 itemRestaurarBackup,
+                new SeparatorMenuItem(),
                 itemSair
         );
 
-        // Cadastros
-        Menu menuCadastros = new Menu("Cadastros");
-        MenuItem itemPessoas = new MenuItem("Pessoas");
-        MenuItem itemPartes = new MenuItem("Partes");
 
-        menuCadastros.getItems().addAll(itemPessoas, itemPartes);
+        // =====================================================
+        // CADASTROS
+        // =====================================================
 
-        // Escala
-        Menu menuEscala = new Menu("Escala");
-        MenuItem itemGerarEscala = new MenuItem("Gerar Escala");
-        menuEscala.getItems().add(itemGerarEscala);
+        Menu menuCadastros =
+                new Menu("Cadastros");
 
-        // Histórico
-        Menu menuHistorico = new Menu("Histórico");
-        MenuItem itemConsultarHistorico = new MenuItem("Consultar Histórico");
-        menuHistorico.getItems().add(itemConsultarHistorico);
+        MenuItem itemPessoas =
+                new MenuItem("Pessoas");
 
-        // Ajuda
-        Menu menuAjuda = new Menu("Ajuda");
-        MenuItem itemSobre = new MenuItem("Sobre");
-        menuAjuda.getItems().add(itemSobre);
+        MenuItem itemPartes =
+                new MenuItem("Partes");
 
-        // Eventos
-        itemPessoas.setOnAction(e ->
-                mostrarTela(pessoaView.getView()));
 
-        itemPartes.setOnAction(e ->
-                mostrarTela(parteView.getView()));
+        itemPessoas.setOnAction(
+                event ->
+                        mostrarTela(
+                                pessoaView.getView()
+                        )
+        );
 
-        itemGerarEscala.setOnAction(e ->
-                mostrarTela(escalaView.getView()));
+        itemPartes.setOnAction(
+                event ->
+                        mostrarTela(
+                                parteView.getView()
+                        )
+        );
 
-        menuHistorico.setOnAction(event -> {
 
-            historicoView.atualizar();
+        menuCadastros.getItems().addAll(
+                itemPessoas,
+                itemPartes
+        );
 
-            mostrarTela(
-                    historicoView.getView()
-            );
 
-        });
-        // Adiciona os menus
+        // =====================================================
+        // ESCALA
+        // =====================================================
+
+        Menu menuEscala =
+                new Menu("Escala");
+
+        MenuItem itemGerarEscala =
+                new MenuItem("Gerar Escala");
+
+
+        itemGerarEscala.setOnAction(
+                event ->
+                        mostrarTela(
+                                escalaView.getView()
+                        )
+        );
+
+
+        menuEscala.getItems().add(
+                itemGerarEscala
+        );
+
+
+        // =====================================================
+        // HISTÓRICO
+        // =====================================================
+
+        Menu menuHistorico =
+                new Menu("Histórico");
+
+        MenuItem itemConsultarHistorico =
+                new MenuItem(
+                        "Consultar Histórico"
+                );
+
+
+        itemConsultarHistorico.setOnAction(
+                event -> {
+
+                    historicoView.atualizar();
+
+                    mostrarTela(
+                            historicoView.getView()
+                    );
+                }
+        );
+
+
+        menuHistorico.getItems().add(
+                itemConsultarHistorico
+        );
+
+
+        // =====================================================
+        // AJUDA
+        // =====================================================
+
+        Menu menuAjuda =
+                new Menu("Ajuda");
+
+        MenuItem itemSobre =
+                new MenuItem("Sobre");
+
+
+        itemSobre.setOnAction(
+                event -> mostrarSobre()
+        );
+
+
+        menuAjuda.getItems().add(
+                itemSobre
+        );
+
+
+        // =====================================================
+        // MENU PRINCIPAL
+        // =====================================================
+
         menuBar.getMenus().addAll(
                 menuArquivo,
                 menuCadastros,
@@ -114,36 +250,256 @@ public class MainView {
                 menuAjuda
         );
 
-        root.setTop(menuBar);
+
+        // =====================================================
+        // BARRA SUPERIOR
+        // =====================================================
+
+        HBox barraSuperior =
+                new HBox();
+
+        barraSuperior.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        barraSuperior.setSpacing(5);
+
+        barraSuperior.setPadding(
+                new Insets(2, 5, 2, 5)
+        );
+
+
+        barraSuperior.getChildren().addAll(
+                botaoInicio,
+                menuBar
+        );
+
+
+        root.setTop(
+                barraSuperior
+        );
     }
+
 
     private void criarTelaInicial() {
 
-        Label titulo = new Label("Bem-vindo ao Gerador de Designações");
+        VBox painelPrincipal =
+                new VBox(20);
 
-        StackPane painel = new StackPane(titulo);
-        painel.setAlignment(Pos.CENTER);
+        painelPrincipal.setAlignment(
+                Pos.CENTER
+        );
 
-        root.setCenter(painel);
+        painelPrincipal.setPadding(
+                new Insets(40)
+        );
+
+
+        // =====================================================
+        // TÍTULO
+        // =====================================================
+
+        Label titulo =
+                new Label(
+                        "Gerador de Designações"
+                );
+
+        titulo.setStyle(
+                "-fx-font-size: 28px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+
+        Label subtitulo =
+                new Label(
+                        "Automatize a geração e o gerenciamento " +
+                                "das designações das reuniões."
+                );
+
+        subtitulo.setStyle(
+                "-fx-font-size: 15px;"
+        );
+
+
+        // =====================================================
+        // STATUS
+        // =====================================================
+
+        Label status =
+                new Label(
+                        "● Sistema pronto"
+                );
+
+        status.setStyle(
+                "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+
+        // =====================================================
+        // BOTÕES DE ACESSO RÁPIDO
+        // =====================================================
+
+        Button botaoGerarEscala =
+                new Button(
+                        "Gerar Escala"
+                );
+
+        Button botaoPessoas =
+                new Button(
+                        "Pessoas"
+                );
+
+        Button botaoPartes =
+                new Button(
+                        "Partes"
+                );
+
+        Button botaoHistorico =
+                new Button(
+                        "Histórico"
+                );
+
+
+        configurarBotaoPrincipal(
+                botaoGerarEscala
+        );
+
+        configurarBotaoPrincipal(
+                botaoPessoas
+        );
+
+        configurarBotaoPrincipal(
+                botaoPartes
+        );
+
+        configurarBotaoPrincipal(
+                botaoHistorico
+        );
+
+
+        botaoGerarEscala.setOnAction(
+                event ->
+                        mostrarTela(
+                                escalaView.getView()
+                        )
+        );
+
+
+        botaoPessoas.setOnAction(
+                event ->
+                        mostrarTela(
+                                pessoaView.getView()
+                        )
+        );
+
+
+        botaoPartes.setOnAction(
+                event ->
+                        mostrarTela(
+                                parteView.getView()
+                        )
+        );
+
+
+        botaoHistorico.setOnAction(
+                event -> {
+
+                    historicoView.atualizar();
+
+                    mostrarTela(
+                            historicoView.getView()
+                    );
+                }
+        );
+
+
+        HBox botoes =
+                new HBox(15);
+
+        botoes.setAlignment(
+                Pos.CENTER
+        );
+
+        botoes.getChildren().addAll(
+                botaoGerarEscala,
+                botaoPessoas,
+                botaoPartes,
+                botaoHistorico
+        );
+
+
+        // =====================================================
+        // INFORMAÇÃO
+        // =====================================================
+
+        Label informacao =
+                new Label(
+                        "Use o menu superior ou os atalhos " +
+                                "abaixo para começar."
+                );
+
+        informacao.setStyle(
+                "-fx-font-size: 13px;"
+        );
+
+
+        painelPrincipal.getChildren().addAll(
+                titulo,
+                subtitulo,
+                status,
+                botoes,
+                informacao
+        );
+
+
+        root.setCenter(
+                painelPrincipal
+        );
     }
 
-    private void mostrarTela(Parent view) {
+
+    private void configurarBotaoPrincipal(
+            Button botao
+    ) {
+
+        botao.setPrefWidth(130);
+        botao.setPrefHeight(40);
+
+        botao.setStyle(
+                "-fx-font-size: 14px;"
+        );
+    }
+
+
+    private void mostrarTela(
+            Parent view
+    ) {
 
         root.setCenter(null);
 
         root.setCenter(view);
-
     }
 
+
     public Parent getView() {
+
         return root;
     }
 
+
+    // =========================================================
+    // BACKUP
+    // =========================================================
+
     private void fazerBackup() {
 
-        FileChooser fileChooser = new FileChooser();
+        FileChooser fileChooser =
+                new FileChooser();
 
-        fileChooser.setTitle("Salvar backup do banco");
+        fileChooser.setTitle(
+                "Salvar backup do banco"
+        );
 
         fileChooser.getExtensionFilters()
                 .add(
@@ -177,8 +533,14 @@ public class MainView {
                             Alert.AlertType.INFORMATION
                     );
 
-            alerta.setTitle("Backup");
-            alerta.setHeaderText(null);
+            alerta.setTitle(
+                    "Backup"
+            );
+
+            alerta.setHeaderText(
+                    null
+            );
+
             alerta.setContentText(
                     "Backup realizado com sucesso."
             );
@@ -193,8 +555,14 @@ public class MainView {
                             Alert.AlertType.ERROR
                     );
 
-            alerta.setTitle("Erro");
-            alerta.setHeaderText(null);
+            alerta.setTitle(
+                    "Erro"
+            );
+
+            alerta.setHeaderText(
+                    null
+            );
+
             alerta.setContentText(
                     "Não foi possível criar o backup.\n"
                             + e.getMessage()
@@ -204,9 +572,15 @@ public class MainView {
         }
     }
 
+
+    // =========================================================
+    // RESTAURAÇÃO
+    // =========================================================
+
     private void restaurarBackup() {
 
-        FileChooser fileChooser = new FileChooser();
+        FileChooser fileChooser =
+                new FileChooser();
 
         fileChooser.setTitle(
                 "Selecionar backup do banco"
@@ -255,7 +629,10 @@ public class MainView {
         confirmacao.showAndWait()
                 .ifPresent(resposta -> {
 
-                    if (resposta == javafx.scene.control.ButtonType.OK) {
+                    if (
+                            resposta ==
+                                    javafx.scene.control.ButtonType.OK
+                    ) {
 
                         executarRestauracao(
                                 arquivo
@@ -265,7 +642,10 @@ public class MainView {
                 });
     }
 
-    private void executarRestauracao(File arquivo) {
+
+    private void executarRestauracao(
+            File arquivo
+    ) {
 
         try {
 
@@ -284,7 +664,9 @@ public class MainView {
                     "Restauração concluída"
             );
 
-            alerta.setHeaderText(null);
+            alerta.setHeaderText(
+                    null
+            );
 
             alerta.setContentText(
                     "Backup restaurado com sucesso.\n"
@@ -297,7 +679,6 @@ public class MainView {
 
         } catch (IOException e) {
 
-
             Alert alerta =
                     new Alert(
                             Alert.AlertType.ERROR
@@ -308,7 +689,9 @@ public class MainView {
                     "Erro na restauração"
             );
 
-            alerta.setHeaderText(null);
+            alerta.setHeaderText(
+                    null
+            );
 
             alerta.setContentText(
                     e.getMessage()
@@ -319,4 +702,32 @@ public class MainView {
         }
     }
 
+
+    // =========================================================
+    // SOBRE
+    // =========================================================
+
+    private void mostrarSobre() {
+
+        Alert alerta =
+                new Alert(
+                        Alert.AlertType.INFORMATION
+                );
+
+        alerta.setTitle(
+                "Sobre"
+        );
+
+        alerta.setHeaderText(
+                "Gerador de Designações"
+        );
+
+        alerta.setContentText(
+                "Sistema para gerenciamento e geração "
+                        + "automática de designações.\n\n"
+                        + "Versão 1.0"
+        );
+
+        alerta.showAndWait();
+    }
 }

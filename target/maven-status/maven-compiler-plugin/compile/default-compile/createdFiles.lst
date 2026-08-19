@@ -5,6 +5,7 @@ br\com\geradordesignacoes\model\SexoPermitido.class
 br\com\geradordesignacoes\view\escala\EscalaView.class
 br\com\geradordesignacoes\controller\PessoaController.class
 br\com\geradordesignacoes\service\GeradorEscala$MelhorDuplaDirigenteEstudo.class
+br\com\geradordesignacoes\service\BackupAutomaticoService.class
 br\com\geradordesignacoes\view\parte\ParteFormularioView$1.class
 br\com\geradordesignacoes\model\Pessoa.class
 br\com\geradordesignacoes\model\Designacao$1.class
@@ -26,9 +27,11 @@ br\com\geradordesignacoes\view\pessoa\PessoaView.class
 br\com\geradordesignacoes\test\TesteHistoricoInfluenciaSelecao.class
 br\com\geradordesignacoes\database\ScriptExecutor.class
 br\com\geradordesignacoes\model\Parte.class
+br\com\geradordesignacoes\service\BackupService.class
 br\com\geradordesignacoes\controller\HistoricoController.class
 br\com\geradordesignacoes\test\TesteCadastroBanco.class
 br\com\geradordesignacoes\test\TesteDiagnosticoSelecao.class
+br\com\geradordesignacoes\model\SecaoParte.class
 br\com\geradordesignacoes\dao\PessoaDAO.class
 br\com\geradordesignacoes\Main.class
 br\com\geradordesignacoes\model\ResultadoAvaliacaoPessoa.class
@@ -43,12 +46,14 @@ br\com\geradordesignacoes\service\GeradorEscala.class
 br\com\geradordesignacoes\model\DiagnosticoSelecaoPessoa.class
 br\com\geradordesignacoes\dao\EscalaDAO.class
 br\com\geradordesignacoes\service\PessoaService.class
+br\com\geradordesignacoes\model\SemanaProgramacao.class
 br\com\geradordesignacoes\view\parte\ParteFormularioView.class
 br\com\geradordesignacoes\model\HistoricoDesignacoes.class
 br\com\geradordesignacoes\view\MainView.class
 br\com\geradordesignacoes\view\parte\ParteView.class
 br\com\geradordesignacoes\model\ParticipacaoDesignacao.class
 br\com\geradordesignacoes\database\DatabaseInitializer.class
+br\com\geradordesignacoes\model\TipoVariacaoParte.class
 br\com\geradordesignacoes\model\ResultadoGeracaoEscala.class
 br\com\geradordesignacoes\test\TesteCarregarHistorico.class
 br\com\geradordesignacoes\test\TesteParteService.class

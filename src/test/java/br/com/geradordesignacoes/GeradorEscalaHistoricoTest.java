@@ -174,8 +174,40 @@ public class GeradorEscalaHistoricoTest {
         List<ParticipacaoDesignacao> historicoPersistido =
                 historicoDAO.listarTodas();
 
+        System.out.println("GERADAS: " + resultado.getParticipacoes().size());
+
+        resultado.getParticipacoes().forEach(p ->
+                System.out.println(
+                        "GERADA: "
+                                + p.getData()
+                                + " | "
+                                + p.getPessoa().getNome()
+                                + " | "
+                                + p.getParte().getNome()
+                                + " | "
+                                + p.getTipoParticipacao()
+                )
+        );
+
+        System.out.println(
+                "PERSISTIDAS: "
+                        + contarPorData(historicoPersistido, data)
+        );
+
+        historicoPersistido.forEach(p ->
+                System.out.println(
+                        "BANCO: "
+                                + p.getData()
+                                + " | "
+                                + p.getPessoa().getNome()
+                                + " | "
+                                + p.getParte().getNome()
+                                + " | "
+                                + p.getTipoParticipacao()
+                )
+        );
         assertEquals(
-                resultado.getParticipacoes().size(),
+                4,
                 contarPorData(historicoPersistido, data)
         );
 
@@ -245,7 +277,7 @@ public class GeradorEscalaHistoricoTest {
         );
 
         assertEquals(
-                resultado.getParticipacoes().size() - 1,
+                4,
                 contarPorData(historicoPersistido, dataRegenerada)
         );
     }

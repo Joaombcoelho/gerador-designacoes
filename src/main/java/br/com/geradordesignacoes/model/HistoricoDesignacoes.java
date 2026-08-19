@@ -1,9 +1,8 @@
 package br.com.geradordesignacoes.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.time.LocalDate;
 import java.util.List;
-import java.time.LocalDate;
 
 public class HistoricoDesignacoes {
 
@@ -43,6 +42,12 @@ public class HistoricoDesignacoes {
     }
 
 
+    /**
+     * Retorna um novo histórico sem as participações
+     * realizadas na data informada.
+     *
+     * O histórico original não é alterado.
+     */
     public HistoricoDesignacoes semParticipacoesDaData(
             LocalDate data
     ) {
@@ -68,10 +73,12 @@ public class HistoricoDesignacoes {
         return participacoes.stream()
                 .filter(participacao ->
                         participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte)
+                                &&
+                                participacao.getParte().equals(parte)
                 )
                 .count();
     }
+
 
     public long quantidadeVezesNaParticipacao(
             Pessoa pessoa,
@@ -90,6 +97,7 @@ public class HistoricoDesignacoes {
                 .count();
     }
 
+
     public boolean jaParticipou(
             Pessoa pessoa,
             Parte parte
@@ -98,11 +106,12 @@ public class HistoricoDesignacoes {
         return participacoes.stream()
                 .anyMatch(participacao ->
                         participacao.getPessoa().equals(pessoa)
-                                && participacao.getParte().equals(parte)
+                                &&
+                                participacao.getParte().equals(parte)
                 );
     }
 
-}
+
     public LocalDate ultimaParticipacaoNaParte(
             Pessoa pessoa,
             Parte parte

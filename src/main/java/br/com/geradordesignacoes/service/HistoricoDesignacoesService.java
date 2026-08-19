@@ -167,13 +167,12 @@ public class HistoricoDesignacoesService {
     public void salvarGeracao(
             List<ParticipacaoDesignacao> participacoes
     ) {
-        adicionarTodos(participacoes);
-    }
 
-    public void substituirGeracaoDaData(
-            LocalDate data,
-            List<ParticipacaoDesignacao> participacoes
-    ) {
+        if (participacoes == null || participacoes.isEmpty()) {
+            return;
+        }
+
+        LocalDate data = participacoes.get(0).getData();
 
         historicoDAO.substituirParticipacoesDaData(
                 data,

@@ -60,6 +60,9 @@ public class PessoaFormularioView {
 
         comboSexo = new ComboBox<>();
         comboSexo.getItems().addAll(Sexo.values());
+        comboSexo.setOnAction(event ->
+                atualizarPermissoesSexo()
+        );
 
 
         comboPrivilegio = new ComboBox<>();
@@ -242,7 +245,12 @@ public class PessoaFormularioView {
             return;
         }
 
+        if (comboSexo.getValue() == Sexo.FEMININO) {
 
+            checkLeitura.setSelected(false);
+            checkDiscurso.setSelected(false);
+            checkOracao.setSelected(false);
+        }
 
         Pessoa pessoa =
                 new Pessoa(
@@ -339,6 +347,8 @@ public class PessoaFormularioView {
         checkDirigente.setSelected(
                 pessoaEdicao.podeSerDirigente()
         );
+
+        atualizarPermissoesSexo();
     }
 
 
@@ -361,5 +371,24 @@ public class PessoaFormularioView {
 
     public Parent getView() {
         return root;
+    }
+
+    private void atualizarPermissoesSexo() {
+
+        boolean feminino =
+                comboSexo.getValue() == Sexo.FEMININO;
+
+
+        checkLeitura.setDisable(feminino);
+        checkDiscurso.setDisable(feminino);
+        checkOracao.setDisable(feminino);
+
+
+        if (feminino) {
+
+            checkLeitura.setSelected(false);
+            checkDiscurso.setSelected(false);
+            checkOracao.setSelected(false);
+        }
     }
 }

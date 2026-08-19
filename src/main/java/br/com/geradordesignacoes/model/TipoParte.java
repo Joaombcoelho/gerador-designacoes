@@ -1,11 +1,40 @@
 package br.com.geradordesignacoes.model;
 
 public enum TipoParte {
+
     DEMONSTRACAO,
-    LEITURA,
-    DISCURSO,
+
     PRESIDENTE_REUNIAO,
-    ORACAO_FINAL,
+
     ORACAO_INICIAL,
-    DIRIGENTE_ESTUDO
+
+    DISCURSO_TESOUROS,
+
+    JOIAS_ESPIRITUAIS,
+
+    LEITURA,
+
+    INICIANDO_CONVERSAS,
+
+    CULTIVANDO_INTERESSE,
+
+    O_QUE_VOCE_DIRIA,
+
+    FAZENDO_DISCIPULOS,
+
+    EXPLICANDO_SUAS_CRENÇAS,
+
+    DISCURSO,
+
+    PARTE_1,
+
+    PARTE_2,
+
+    PARTE_3,
+
+    NECESSIDADES_LOCAIS,
+
+    DIRIGENTE_ESTUDO,
+
+    ORACAO_FINAL
 }

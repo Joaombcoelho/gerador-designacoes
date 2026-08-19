@@ -24,12 +24,17 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Privilegio.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ResultadoAvaliacaoPessoa.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ResultadoGeracaoEscala.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\SecaoParte.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\SemanaProgramacao.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Sexo.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\SexoPermitido.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\StatusEscala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\TipoParte.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\TipoParticipacao.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\TipoVariacaoParte.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\service\AvaliadorPessoaService.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\service\BackupAutomaticoService.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\service\BackupService.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\service\ControleDesignacoes.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\service\GeradorEscala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\service\HistoricoDesignacoesService.java

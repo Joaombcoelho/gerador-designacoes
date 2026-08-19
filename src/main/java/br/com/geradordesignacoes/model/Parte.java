@@ -18,7 +18,22 @@ public class Parte {
     private final int quantidadeMinimaParticipantes;
     private final NivelLeitura nivelLeituraMinimo;
 
+    /*
+     * Classificação utilizada na programação semanal.
+     */
+    private final SecaoParte secao;
+    private final TipoVariacaoParte tipoVariacao;
 
+    /*
+     * Indica se a parte precisa receber um tema
+     * durante a programação da semana.
+     */
+    private final boolean possuiTema;
+
+
+    /**
+     * Construtor principal.
+     */
     public Parte(
             Integer id,
             String nome,
@@ -29,6 +44,9 @@ public class Parte {
             int quantidadeMinimaParticipantes,
             boolean geraFormulario,
             NivelLeitura nivelLeituraMinimo,
+            SecaoParte secao,
+            TipoVariacaoParte tipoVariacao,
+            boolean possuiTema,
             List<TipoParticipacao> participacoesNecessarias
     ) {
 
@@ -36,6 +54,7 @@ public class Parte {
 
         this.nome = Objects.requireNonNull(nome);
         this.tipo = Objects.requireNonNull(tipo);
+
         this.privilegioMinimo =
                 Objects.requireNonNull(privilegioMinimo);
 
@@ -53,14 +72,62 @@ public class Parte {
         this.nivelLeituraMinimo =
                 Objects.requireNonNull(nivelLeituraMinimo);
 
-        this.participacoesNecessarias =
-                List.copyOf(participacoesNecessarias);
-    }
+        this.secao = secao;
 
+        this.tipoVariacao = tipoVariacao;
+
+        this.possuiTema = possuiTema;
+
+        this.participacoesNecessarias =
+                List.copyOf(
+                        Objects.requireNonNull(
+                                participacoesNecessarias
+                        )
+                );
+    }
 
 
     /**
      * Construtor utilizado pelo cadastro normal.
+     */
+    public Parte(
+            String nome,
+            TipoParte tipo,
+            Privilegio privilegioMinimo,
+            boolean exigeAjudante,
+            SexoPermitido sexoPermitido,
+            int quantidadeMinimaParticipantes,
+            boolean geraFormulario,
+            NivelLeitura nivelLeituraMinimo,
+            SecaoParte secao,
+            TipoVariacaoParte tipoVariacao,
+            boolean possuiTema,
+            List<TipoParticipacao> participacoesNecessarias
+    ) {
+
+        this(
+                null,
+                nome,
+                tipo,
+                privilegioMinimo,
+                exigeAjudante,
+                sexoPermitido,
+                quantidadeMinimaParticipantes,
+                geraFormulario,
+                nivelLeituraMinimo,
+                secao,
+                tipoVariacao,
+                possuiTema,
+                participacoesNecessarias
+        );
+    }
+
+
+    /**
+     * Construtor utilizado pelo cadastro normal
+     * sem classificação de seção/variação.
+     *
+     * Mantido para compatibilidade.
      */
     public Parte(
             String nome,
@@ -84,10 +151,47 @@ public class Parte {
                 quantidadeMinimaParticipantes,
                 geraFormulario,
                 nivelLeituraMinimo,
+                null,
+                null,
+                false,
                 participacoesNecessarias
         );
     }
 
+
+    /**
+     * Construtor utilizado pelo DAO e mantido
+     * para compatibilidade com o cadastro atual.
+     */
+    public Parte(
+            Integer id,
+            String nome,
+            TipoParte tipo,
+            Privilegio privilegioMinimo,
+            boolean exigeAjudante,
+            SexoPermitido sexoPermitido,
+            int quantidadeMinimaParticipantes,
+            boolean geraFormulario,
+            NivelLeitura nivelLeituraMinimo,
+            List<TipoParticipacao> participacoesNecessarias
+    ) {
+
+        this(
+                id,
+                nome,
+                tipo,
+                privilegioMinimo,
+                exigeAjudante,
+                sexoPermitido,
+                quantidadeMinimaParticipantes,
+                geraFormulario,
+                nivelLeituraMinimo,
+                null,
+                null,
+                false,
+                participacoesNecessarias
+        );
+    }
 
 
     /**
@@ -117,10 +221,12 @@ public class Parte {
                 quantidadeMinimaParticipantes,
                 geraFormulario,
                 NivelLeitura.BASICO,
+                null,
+                null,
+                false,
                 participacoesNecessarias
         );
     }
-
 
 
     public Integer getId() {
@@ -168,13 +274,27 @@ public class Parte {
     }
 
 
+    public SecaoParte getSecao() {
+        return secao;
+    }
+
+
+    public TipoVariacaoParte getTipoVariacao() {
+        return tipoVariacao;
+    }
+
+
+    public boolean possuiTema() {
+        return possuiTema;
+    }
+
+
     public List<TipoParticipacao> getParticipacoesNecessarias() {
 
         return Collections.unmodifiableList(
                 participacoesNecessarias
         );
     }
-
 
 
     public boolean necessitaParticipacao(
@@ -185,14 +305,12 @@ public class Parte {
     }
 
 
-
     public boolean podeSerRealizadaPor(
             Pessoa pessoa
     ) {
 
         return regrasBasicasAtendidas(pessoa);
     }
-
 
 
     public boolean pessoaPodeExercerParticipacao(
@@ -212,16 +330,13 @@ public class Parte {
             return false;
         }
 
-
         if (tipo == TipoParticipacao.LEITOR) {
 
             return nivelLeituraPermitido(pessoa);
         }
 
-
         return pessoa.podeExercer(tipo);
     }
-
 
 
     private boolean regrasBasicasAtendidas(
@@ -232,20 +347,16 @@ public class Parte {
             return false;
         }
 
-
         if (!pessoa.isAtivo()) {
             return false;
         }
-
 
         if (!privilegioPermitido(pessoa)) {
             return false;
         }
 
-
         return sexoPermitido(pessoa);
     }
-
 
 
     private boolean privilegioPermitido(
@@ -257,7 +368,6 @@ public class Parte {
     }
 
 
-
     private boolean sexoPermitido(
             Pessoa pessoa
     ) {
@@ -265,7 +375,6 @@ public class Parte {
         if (sexoPermitido == SexoPermitido.AMBOS) {
             return true;
         }
-
 
         return
                 (sexoPermitido == SexoPermitido.MASCULINO
@@ -280,7 +389,6 @@ public class Parte {
     }
 
 
-
     private boolean nivelLeituraPermitido(
             Pessoa pessoa
     ) {
@@ -288,7 +396,6 @@ public class Parte {
         return pessoa.getNivelLeitura()
                 .atende(nivelLeituraMinimo);
     }
-
 
 
     @Override
@@ -301,7 +408,6 @@ public class Parte {
     }
 
 
-
     @Override
     public boolean equals(Object o) {
 
@@ -309,20 +415,16 @@ public class Parte {
             return true;
         }
 
-
         if (!(o instanceof Parte outra)) {
             return false;
         }
-
 
         if (id == null || outra.id == null) {
             return false;
         }
 
-
         return id.equals(outra.id);
     }
-
 
 
     @Override
