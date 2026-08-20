@@ -124,7 +124,7 @@ public class GeradorEscala {
 
         HistoricoDesignacoes historicoControle =
                 new HistoricoDesignacoes(
-                        historico.getParticipacoes()
+                        historico.participacoes()
                 );
 
 
@@ -191,7 +191,7 @@ public class GeradorEscala {
 
                 presidenteDaReuniao =
                         designacoes.get(designacoes.size() - 1)
-                                .getResponsavel();
+                                .responsavel();
 
                 controleDesignacoes.definirPresidente(
                         presidenteDaReuniao
@@ -306,14 +306,14 @@ public class GeradorEscala {
             );
 
 
-            if (diagnostico.getEscolhido() == null) {
+            if (diagnostico.escolhido() == null) {
 
                 return false;
             }
 
 
             participante =
-                    diagnostico.getEscolhido()
+                    diagnostico.escolhido()
                             .getPessoa();
         }
 

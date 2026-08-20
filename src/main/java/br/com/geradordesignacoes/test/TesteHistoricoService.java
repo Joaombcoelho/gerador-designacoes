@@ -34,7 +34,7 @@ public class TesteHistoricoService {
         System.out.println(
                 "Quantidade inicial: "
                         + service.getHistorico()
-                        .getParticipacoes()
+                        .participacoes()
                         .size()
         );
 
@@ -83,7 +83,7 @@ public class TesteHistoricoService {
         System.out.println(
                 "Quantidade após adicionar: "
                         + service.getHistorico()
-                        .getParticipacoes()
+                        .participacoes()
                         .size()
         );
 
@@ -100,7 +100,7 @@ public class TesteHistoricoService {
         System.out.println(
                 "Quantidade recuperada do banco: "
                         + novoService.getHistorico()
-                        .getParticipacoes()
+                        .participacoes()
                         .size()
         );
 

@@ -62,7 +62,7 @@ public class TesteGeracaoEscalaCompleta extends BaseDAOTest {
 
         assertFalse(
                 resultado.possuiErros(),
-                "Erros encontrados: " + resultado.getErros()
+                "Erros encontrados: " + resultado.erros()
         );
 
 
@@ -74,13 +74,13 @@ public class TesteGeracaoEscalaCompleta extends BaseDAOTest {
 
         assertEquals(
                 4,
-                resultado.getParticipacoes().size()
+                resultado.participacoes().size()
         );
 
 
         assertFalse(
                 resultado.possuiErros(),
-                "Erros encontrados: " + resultado.getErros()
+                "Erros encontrados: " + resultado.erros()
         );
     }
     private List<Pessoa> criarPessoas() {

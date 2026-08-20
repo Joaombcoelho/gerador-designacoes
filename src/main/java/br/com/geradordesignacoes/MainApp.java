@@ -39,11 +39,7 @@ public class MainApp extends Application {
 
         stage.show();
 
-        stage.setOnCloseRequest(event -> {
-
-            backupAutomaticoService.encerrar();
-
-        });
+        stage.setOnCloseRequest(event -> backupAutomaticoService.encerrar());
     }
 
     public static void main(String[] args) {

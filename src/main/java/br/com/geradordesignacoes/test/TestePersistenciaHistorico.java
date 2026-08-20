@@ -101,7 +101,7 @@ public class TestePersistenciaHistorico {
 
 
         List<ParticipacaoDesignacao> lista =
-                historico.getParticipacoes();
+                historico.participacoes();
 
 
         System.out.println(
@@ -116,27 +116,27 @@ public class TestePersistenciaHistorico {
 
             System.out.println(
                     "ID: "
-                            + p.getId()
+                            + p.id()
             );
 
             System.out.println(
                     "Data: "
-                            + p.getData()
+                            + p.data()
             );
 
             System.out.println(
                     "Pessoa: "
-                            + p.getPessoa().getNome()
+                            + p.pessoa().getNome()
             );
 
             System.out.println(
                     "Parte: "
-                            + p.getParte().getNome()
+                            + p.parte().getNome()
             );
 
             System.out.println(
                     "Tipo: "
-                            + p.getTipoParticipacao()
+                            + p.tipoParticipacao()
             );
         }
 

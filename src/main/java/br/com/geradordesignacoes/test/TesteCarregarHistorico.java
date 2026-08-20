@@ -26,37 +26,37 @@ public class TesteCarregarHistorico {
 
         System.out.println(
                 "Quantidade de participações carregadas: "
-                        + historico.getParticipacoes().size()
+                        + historico.participacoes().size()
         );
 
 
         for (ParticipacaoDesignacao p :
-                historico.getParticipacoes()) {
+                historico.participacoes()) {
 
 
             System.out.println("-----------------------");
 
             System.out.println(
                     "Data: "
-                            + p.getData()
+                            + p.data()
             );
 
 
             System.out.println(
                     "Pessoa: "
-                            + p.getPessoa().getNome()
+                            + p.pessoa().getNome()
             );
 
 
             System.out.println(
                     "Parte: "
-                            + p.getParte().getNome()
+                            + p.parte().getNome()
             );
 
 
             System.out.println(
                     "Tipo: "
-                            + p.getTipoParticipacao()
+                            + p.tipoParticipacao()
             );
         }
 

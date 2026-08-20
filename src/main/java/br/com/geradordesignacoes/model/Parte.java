@@ -126,7 +126,6 @@ public class Parte {
     /**
      * Construtor utilizado pelo cadastro normal
      * sem classificação de seção/variação.
-     *
      * Mantido para compatibilidade.
      */
     public Parte(
@@ -196,7 +195,6 @@ public class Parte {
 
     /**
      * Construtor legado.
-     *
      * Mantido para compatibilidade
      * com testes antigos.
      */

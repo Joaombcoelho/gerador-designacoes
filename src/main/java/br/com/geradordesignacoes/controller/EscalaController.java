@@ -121,7 +121,7 @@ public class EscalaController {
 
             preencherTabela(
                     ultimoResultado
-                            .getEscala()
+                            .escala()
                             .getDesignacoes()
             );
 
@@ -160,11 +160,11 @@ public class EscalaController {
             String ajudante = "";
 
 
-            if (designacao.getAjudante() != null) {
+            if (designacao.ajudante() != null) {
 
                 ajudante =
                         designacao
-                                .getAjudante()
+                                .ajudante()
                                 .getNome();
             }
 
@@ -172,11 +172,11 @@ public class EscalaController {
             ItemEscala item =
                     new ItemEscala(
                             designacao
-                                    .getParte()
+                                    .parte()
                                     .getNome(),
 
                             designacao
-                                    .getResponsavel()
+                                    .responsavel()
                                     .getNome(),
 
                             ajudante
@@ -210,7 +210,7 @@ public class EscalaController {
 
             resumo.append("\n\nPartes não geradas:\n");
 
-            for (String erro : ultimoResultado.getErros()) {
+            for (String erro : ultimoResultado.erros()) {
 
                 resumo.append("• ")
                         .append(erro)
@@ -280,7 +280,7 @@ public class EscalaController {
         try {
 
             Escala escala =
-                    ultimoResultado.getEscala();
+                    ultimoResultado.escala();
 
 
             escalaDAO.salvar(

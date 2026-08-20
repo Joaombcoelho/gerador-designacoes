@@ -4,14 +4,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoricoDesignacoes {
-
-    private final List<ParticipacaoDesignacao> participacoes;
-
+public record HistoricoDesignacoes(List<ParticipacaoDesignacao> participacoes) {
 
     public HistoricoDesignacoes() {
 
-        this.participacoes = new ArrayList<>();
+        this(new ArrayList<>());
     }
 
 
@@ -34,7 +31,8 @@ public class HistoricoDesignacoes {
     }
 
 
-    public List<ParticipacaoDesignacao> getParticipacoes() {
+    @Override
+    public List<ParticipacaoDesignacao> participacoes() {
 
         return new ArrayList<>(
                 participacoes
@@ -45,7 +43,6 @@ public class HistoricoDesignacoes {
     /**
      * Retorna um novo histórico sem as participações
      * realizadas na data informada.
-     *
      * O histórico original não é alterado.
      */
     public HistoricoDesignacoes semParticipacoesDaData(
@@ -57,7 +54,7 @@ public class HistoricoDesignacoes {
 
         participacoes.stream()
                 .filter(participacao ->
-                        !participacao.getData().equals(data)
+                        !participacao.data().equals(data)
                 )
                 .forEach(historicoFiltrado::adicionar);
 
@@ -72,9 +69,9 @@ public class HistoricoDesignacoes {
 
         return participacoes.stream()
                 .filter(participacao ->
-                        participacao.getPessoa().equals(pessoa)
+                        participacao.pessoa().equals(pessoa)
                                 &&
-                                participacao.getParte().equals(parte)
+                                participacao.parte().equals(parte)
                 )
                 .count();
     }
@@ -88,11 +85,11 @@ public class HistoricoDesignacoes {
 
         return participacoes.stream()
                 .filter(participacao ->
-                        participacao.getPessoa().equals(pessoa)
+                        participacao.pessoa().equals(pessoa)
                                 &&
-                                participacao.getParte().equals(parte)
+                                participacao.parte().equals(parte)
                                 &&
-                                participacao.getTipoParticipacao() == tipoParticipacao
+                                participacao.tipoParticipacao() == tipoParticipacao
                 )
                 .count();
     }
@@ -105,9 +102,9 @@ public class HistoricoDesignacoes {
 
         return participacoes.stream()
                 .anyMatch(participacao ->
-                        participacao.getPessoa().equals(pessoa)
+                        participacao.pessoa().equals(pessoa)
                                 &&
-                                participacao.getParte().equals(parte)
+                                participacao.parte().equals(parte)
                 );
     }
 
@@ -119,11 +116,11 @@ public class HistoricoDesignacoes {
 
         return participacoes.stream()
                 .filter(participacao ->
-                        participacao.getPessoa().equals(pessoa)
+                        participacao.pessoa().equals(pessoa)
                                 &&
-                                participacao.getParte().equals(parte)
+                                participacao.parte().equals(parte)
                 )
-                .map(ParticipacaoDesignacao::getData)
+                .map(ParticipacaoDesignacao::data)
                 .max(LocalDate::compareTo)
                 .orElse(null);
     }

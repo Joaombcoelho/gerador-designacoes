@@ -84,7 +84,7 @@ public final class TesteHistoricoDesignacoes {
                         LocalDate.now().plusDays(7),
                         List.of(leitura),
                         List.of(joao, carlos),
-                        primeiraGeracao.getParticipacoes()
+                        primeiraGeracao.participacoes()
                 );
 
 
@@ -96,7 +96,7 @@ public final class TesteHistoricoDesignacoes {
 
         System.out.println("\n=== DIAGNÓSTICO SEGUNDA GERAÇÃO ===");
 
-        segundaGeracao.getDiagnosticos()
+        segundaGeracao.diagnosticos()
                 .forEach(System.out::println);
     }
 }

@@ -221,14 +221,12 @@ public class Pessoa {
             case ORACAO_INICIAL ->
                     podeFazerOracao;
 
-            case ORACAO_FINAL ->
+            case ORACAO_FINAL, PRESIDENTE ->
                     podeSerPresidente;
 
             case DIRIGENTE ->
                     podeSerDirigente;
 
-            case PRESIDENTE ->
-                    podeSerPresidente;
         };
     }
 

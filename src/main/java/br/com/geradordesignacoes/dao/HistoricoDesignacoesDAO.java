@@ -67,25 +67,25 @@ public class HistoricoDesignacoesDAO {
 
             statement.setString(
                     1,
-                    participacao.getData().toString()
+                    participacao.data().toString()
             );
 
 
             statement.setInt(
                     2,
-                    participacao.getPessoa().getId()
+                    participacao.pessoa().getId()
             );
 
 
             statement.setInt(
                     3,
-                    participacao.getParte().getId()
+                    participacao.parte().getId()
             );
 
 
             statement.setString(
                     4,
-                    participacao.getTipoParticipacao().name()
+                    participacao.tipoParticipacao().name()
             );
 
 
@@ -122,7 +122,7 @@ public class HistoricoDesignacoesDAO {
         participacoes.forEach(participacao -> {
             validarParticipacao(participacao);
 
-            if (!participacao.getData().equals(data)) {
+            if (!participacao.data().equals(data)) {
                 throw new IllegalArgumentException(
                         "Participação não pertence à data informada."
                 );
@@ -171,22 +171,22 @@ public class HistoricoDesignacoesDAO {
 
                         inserir.setString(
                                 1,
-                                participacao.getData().toString()
+                                participacao.data().toString()
                         );
 
                         inserir.setInt(
                                 2,
-                                participacao.getPessoa().getId()
+                                participacao.pessoa().getId()
                         );
 
                         inserir.setInt(
                                 3,
-                                participacao.getParte().getId()
+                                participacao.parte().getId()
                         );
 
                         inserir.setString(
                                 4,
-                                participacao.getTipoParticipacao().name()
+                                participacao.tipoParticipacao().name()
                         );
 
                         inserir.addBatch();
@@ -363,8 +363,8 @@ public class HistoricoDesignacoesDAO {
         }
 
 
-        if (participacao.getPessoa() == null
-                || participacao.getPessoa().getId() == null) {
+        if (participacao.pessoa() == null
+                || participacao.pessoa().getId() == null) {
 
             throw new IllegalArgumentException(
                     "Pessoa sem ID."
@@ -372,8 +372,8 @@ public class HistoricoDesignacoesDAO {
         }
 
 
-        if (participacao.getParte() == null
-                || participacao.getParte().getId() == null) {
+        if (participacao.parte() == null
+                || participacao.parte().getId() == null) {
 
             throw new IllegalArgumentException(
                     "Parte sem ID."

@@ -95,7 +95,7 @@ public final class TesteDiagnosticoSelecao {
         System.out.println("\n=== DIAGNÓSTICO DA SELEÇÃO ===");
 
 
-        for (var candidato : diagnostico.getCandidatos()) {
+        for (var candidato : diagnostico.candidatos()) {
 
             System.out.println(candidato);
         }
@@ -103,10 +103,10 @@ public final class TesteDiagnosticoSelecao {
 
         System.out.println("\n=== ESCOLHIDO ===");
 
-        if (diagnostico.getEscolhido() != null) {
+        if (diagnostico.escolhido() != null) {
 
             System.out.println(
-                    diagnostico.getEscolhido()
+                    diagnostico.escolhido()
             );
 
         } else {

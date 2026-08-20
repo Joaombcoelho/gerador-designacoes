@@ -248,15 +248,15 @@ public class EscalaDAO {
             for (Designacao designacao : escala.getDesignacoes()) {
 
                 statement.setInt(1, escala.getId());
-                statement.setInt(2, designacao.getParte().getId());
-                statement.setInt(3, designacao.getResponsavel().getId());
+                statement.setInt(2, designacao.parte().getId());
+                statement.setInt(3, designacao.responsavel().getId());
 
-                if (designacao.getAjudante() == null) {
+                if (designacao.ajudante() == null) {
                     statement.setNull(4, java.sql.Types.INTEGER);
                 } else {
                     statement.setInt(
                             4,
-                            designacao.getAjudante().getId()
+                            designacao.ajudante().getId()
                     );
                 }
 

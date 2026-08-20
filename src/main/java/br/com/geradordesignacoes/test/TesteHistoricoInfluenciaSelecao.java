@@ -119,20 +119,20 @@ public class TesteHistoricoInfluenciaSelecao {
         for (Designacao designacao : resultado.getDesignacoes()) {
 
             System.out.println(
-                    "Parte: " + designacao.getParte().getNome()
+                    "Parte: " + designacao.parte().getNome()
             );
 
             System.out.println(
                     "Pessoa escolhida: "
-                            + designacao.getResponsavel().getNome()
+                            + designacao.responsavel().getNome()
             );
         }
 
-        if (!resultado.getErros().isEmpty()) {
+        if (!resultado.erros().isEmpty()) {
 
             System.out.println("\nErros:");
 
-            resultado.getErros().forEach(System.out::println);
+            resultado.erros().forEach(System.out::println);
         }
     }
 }

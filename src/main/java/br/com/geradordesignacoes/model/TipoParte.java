@@ -22,7 +22,7 @@ public enum TipoParte {
 
     FAZENDO_DISCIPULOS,
 
-    EXPLICANDO_SUAS_CRENÇAS,
+    EXPLICANDO_SUAS_CRENCAS,
 
     DISCURSO,
 

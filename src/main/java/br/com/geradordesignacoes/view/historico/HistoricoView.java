@@ -235,15 +235,15 @@ public class HistoricoView {
                                 .map(designacao ->
                                         new ItemEscala(
 
-                                                designacao.getParte().getNome(),
+                                                designacao.parte().getNome(),
 
-                                                designacao.getResponsavel().getNome(),
+                                                designacao.responsavel().getNome(),
 
-                                                designacao.getAjudante() == null
+                                                designacao.ajudante() == null
                                                         ?
                                                         ""
                                                         :
-                                                        designacao.getAjudante().getNome()
+                                                        designacao.ajudante().getNome()
                                         )
                                 )
                                 .toList()

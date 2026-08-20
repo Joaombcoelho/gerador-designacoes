@@ -63,7 +63,7 @@ public class GeradorEscalaHistoricoTest {
 
         assertFalse(
                 primeira.possuiErros(),
-                "Erros na primeira geração: " + primeira.getErros()
+                "Erros na primeira geração: " + primeira.erros()
         );
 
 
@@ -72,21 +72,21 @@ public class GeradorEscalaHistoricoTest {
                         LocalDate.of(2026, 8, 4),
                         partes,
                         pessoas,
-                        primeira.getParticipacoes()
+                        primeira.participacoes()
                 );
 
 
         assertFalse(
                 segunda.possuiErros(),
-                "Erros na segunda geração: " + segunda.getErros()
+                "Erros na segunda geração: " + segunda.erros()
         );
 
 
         assertTrue(
-                segunda.getParticipacoes()
+                segunda.participacoes()
                         .size()
                         >
-                        primeira.getParticipacoes()
+                        primeira.participacoes()
                                 .size()
         );
     }
@@ -124,7 +124,7 @@ public class GeradorEscalaHistoricoTest {
                 historicoDAO.listarTodas();
 
         assertEquals(
-                primeira.getParticipacoes().size(),
+                primeira.participacoes().size(),
                 contarPorData(
                         historicoPersistido,
                         LocalDate.of(2026, 7, 28)
@@ -174,18 +174,18 @@ public class GeradorEscalaHistoricoTest {
         List<ParticipacaoDesignacao> historicoPersistido =
                 historicoDAO.listarTodas();
 
-        System.out.println("GERADAS: " + resultado.getParticipacoes().size());
+        System.out.println("GERADAS: " + resultado.participacoes().size());
 
-        resultado.getParticipacoes().forEach(p ->
+        resultado.participacoes().forEach(p ->
                 System.out.println(
                         "GERADA: "
-                                + p.getData()
+                                + p.data()
                                 + " | "
-                                + p.getPessoa().getNome()
+                                + p.pessoa().getNome()
                                 + " | "
-                                + p.getParte().getNome()
+                                + p.parte().getNome()
                                 + " | "
-                                + p.getTipoParticipacao()
+                                + p.tipoParticipacao()
                 )
         );
 
@@ -197,13 +197,13 @@ public class GeradorEscalaHistoricoTest {
         historicoPersistido.forEach(p ->
                 System.out.println(
                         "BANCO: "
-                                + p.getData()
+                                + p.data()
                                 + " | "
-                                + p.getPessoa().getNome()
+                                + p.pessoa().getNome()
                                 + " | "
-                                + p.getParte().getNome()
+                                + p.parte().getNome()
                                 + " | "
-                                + p.getTipoParticipacao()
+                                + p.tipoParticipacao()
                 )
         );
         assertEquals(
@@ -214,15 +214,15 @@ public class GeradorEscalaHistoricoTest {
         assertFalse(
                 historicoPersistido.stream()
                         .anyMatch(participacao ->
-                                participacao.getData().equals(data)
-                                        && participacao.getPessoa().equals(
-                                        historicoAntigo.getPessoa()
+                                participacao.data().equals(data)
+                                        && participacao.pessoa().equals(
+                                        historicoAntigo.pessoa()
                                 )
-                                        && participacao.getParte().equals(
-                                        historicoAntigo.getParte()
+                                        && participacao.parte().equals(
+                                        historicoAntigo.parte()
                                 )
-                                        && participacao.getTipoParticipacao()
-                                        == historicoAntigo.getTipoParticipacao()
+                                        && participacao.tipoParticipacao()
+                                        == historicoAntigo.tipoParticipacao()
                         )
         );
     }
@@ -330,16 +330,16 @@ public class GeradorEscalaHistoricoTest {
         assertTrue(
                 historicoDAO.listarTodas().stream()
                         .anyMatch(participacao ->
-                                participacao.getData().equals(dataHistorica)
-                                        && participacao.getPessoa().equals(inativo)
+                                participacao.data().equals(dataHistorica)
+                                        && participacao.pessoa().equals(inativo)
                         )
         );
 
         assertFalse(
-                resultado.getEscala().getDesignacoes().stream()
+                resultado.escala().getDesignacoes().stream()
                         .anyMatch(designacao ->
-                                inativo.equals(designacao.getResponsavel())
-                                        || inativo.equals(designacao.getAjudante())
+                                inativo.equals(designacao.responsavel())
+                                        || inativo.equals(designacao.ajudante())
                         )
         );
     }
@@ -388,7 +388,7 @@ public class GeradorEscalaHistoricoTest {
         assertFalse(resultado.possuiErros());
         assertEquals(
                 pessoa,
-                resultado.getEscala().getDesignacoes().get(0).getResponsavel()
+                resultado.escala().getDesignacoes().get(0).responsavel()
         );
     }
 
@@ -451,7 +451,7 @@ public class GeradorEscalaHistoricoTest {
         assertFalse(resultado.possuiErros());
         assertEquals(
                 pessoaSemHistorico,
-                resultado.getEscala().getDesignacoes().get(0).getResponsavel()
+                resultado.escala().getDesignacoes().get(0).responsavel()
         );
     }
 
@@ -463,7 +463,7 @@ public class GeradorEscalaHistoricoTest {
 
         return participacoes.stream()
                 .filter(participacao ->
-                        participacao.getData().equals(data)
+                        participacao.data().equals(data)
                 )
                 .count();
     }

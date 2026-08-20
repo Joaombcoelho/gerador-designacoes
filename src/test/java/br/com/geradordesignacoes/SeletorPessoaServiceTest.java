@@ -196,21 +196,21 @@ public class SeletorPessoaServiceTest {
 
         assertEquals(
                 parte,
-                diagnostico.getParte()
+                diagnostico.parte()
         );
 
         assertEquals(
                 2,
-                diagnostico.getCandidatos().size()
+                diagnostico.candidatos().size()
         );
 
         assertNotNull(
-                diagnostico.getEscolhido()
+                diagnostico.escolhido()
         );
 
         assertEquals(
                 anciao,
-                diagnostico.getEscolhido().getPessoa()
+                diagnostico.escolhido().getPessoa()
         );
     }
 
@@ -232,11 +232,11 @@ public class SeletorPessoaServiceTest {
         assertNotNull(diagnostico);
 
         assertTrue(
-                diagnostico.getCandidatos().isEmpty()
+                diagnostico.candidatos().isEmpty()
         );
 
         assertNull(
-                diagnostico.getEscolhido()
+                diagnostico.escolhido()
         );
     }
 

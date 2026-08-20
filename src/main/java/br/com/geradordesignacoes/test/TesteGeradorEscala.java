@@ -46,7 +46,7 @@ public class TesteGeradorEscala {
 
         System.out.println("\n=== PARTICIPAÇÕES ===\n");
 
-        resultado.getParticipacoes()
+        resultado.participacoes()
                 .forEach(System.out::println);
 
 
@@ -54,7 +54,7 @@ public class TesteGeradorEscala {
 
         if (resultado.possuiErros()) {
 
-            resultado.getErros()
+            resultado.erros()
                     .forEach(System.out::println);
 
         } else {
@@ -63,7 +63,7 @@ public class TesteGeradorEscala {
         }
         System.out.println("\n=== DIAGNÓSTICOS ===\n");
 
-        resultado.getDiagnosticos()
+        resultado.diagnosticos()
                 .forEach(System.out::println);
     }
 

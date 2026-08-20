@@ -48,28 +48,28 @@ public class TesteGeracaoEscalaCompleta {
                         partes,
                         pessoas,
                         new HistoricoDesignacoes(
-                                primeiraGeracao.getParticipacoes()
+                                primeiraGeracao.participacoes()
                         )
                 );
         System.out.println(
                 "TOTAL PRIMEIRA GERAÇÃO: "
-                        + primeiraGeracao.getParticipacoes().size()
+                        + primeiraGeracao.participacoes().size()
         );
 
         System.out.println(
                 "TOTAL SEGUNDA GERAÇÃO: "
-                        + segundaGeracao.getParticipacoes().size()
+                        + segundaGeracao.participacoes().size()
         );
 
         for (ParticipacaoDesignacao p :
-                segundaGeracao.getParticipacoes()) {
+                segundaGeracao.participacoes()) {
 
             System.out.println(
-                    p.getPessoa().getNome()
+                    p.pessoa().getNome()
                             + " - "
-                            + p.getParte().getNome()
+                            + p.parte().getNome()
                             + " - "
-                            + p.getTipoParticipacao()
+                            + p.tipoParticipacao()
             );
         }
 
@@ -237,26 +237,26 @@ public class TesteGeracaoEscalaCompleta {
 
             System.out.println(
                     "\nParte: "
-                            + designacao.getParte().getNome()
+                            + designacao.parte().getNome()
             );
 
-            if (designacao.getParte().getTipo() == TipoParte.DEMONSTRACAO) {
+            if (designacao.parte().getTipo() == TipoParte.DEMONSTRACAO) {
 
                 System.out.println(
                         "Responsável: "
-                                + designacao.getResponsavel().getNome()
+                                + designacao.responsavel().getNome()
                 );
 
                 System.out.println(
                         "Ajudante: "
-                                + designacao.getAjudante().getNome()
+                                + designacao.ajudante().getNome()
                 );
 
             } else {
 
                 System.out.println(
                         "Pessoa: "
-                                + designacao.getResponsavel().getNome()
+                                + designacao.responsavel().getNome()
                 );
             }
         }
@@ -272,7 +272,7 @@ public class TesteGeracaoEscalaCompleta {
         if (resultado.possuiErros()) {
             throw new RuntimeException(
                     "A escala completa não deveria possuir erros: "
-                            + resultado.getErros()
+                            + resultado.erros()
             );
         }
 
@@ -282,7 +282,7 @@ public class TesteGeracaoEscalaCompleta {
             );
         }
 
-        if (resultado.getParticipacoes().size()
+        if (resultado.participacoes().size()
                 != quantidadeParticipacoesEsperadas) {
             throw new RuntimeException(
                     "O histórico da geração não recebeu todas as participações."
@@ -293,32 +293,32 @@ public class TesteGeracaoEscalaCompleta {
 
         for (Designacao designacao : resultado.getDesignacoes()) {
 
-            if (!designacao.getParte().podeSerRealizadaPor(
-                    designacao.getResponsavel()
+            if (!designacao.parte().podeSerRealizadaPor(
+                    designacao.responsavel()
             )) {
                 throw new RuntimeException(
                         "Responsável inválido para a parte: "
-                                + designacao.getParte().getNome()
+                                + designacao.parte().getNome()
                 );
             }
 
-            if (!pessoasDesignadas.add(designacao.getResponsavel())) {
+            if (!pessoasDesignadas.add(designacao.responsavel())) {
                 throw new RuntimeException(
                         "Pessoa repetida na mesma escala: "
-                                + designacao.getResponsavel().getNome()
+                                + designacao.responsavel().getNome()
                 );
             }
 
-            if (designacao.getParte().getTipo() == TipoParte.DEMONSTRACAO) {
+            if (designacao.parte().getTipo() == TipoParte.DEMONSTRACAO) {
 
-                if (designacao.getAjudante() == null) {
+                if (designacao.ajudante() == null) {
                     throw new RuntimeException(
                             "Demonstração gerada sem ajudante."
                     );
                 }
 
-                if (!designacao.getParte().pessoaPodeExercerParticipacao(
-                        designacao.getResponsavel(),
+                if (!designacao.parte().pessoaPodeExercerParticipacao(
+                        designacao.responsavel(),
                         TipoParticipacao.RESPONSAVEL
                 )) {
                     throw new RuntimeException(
@@ -326,8 +326,8 @@ public class TesteGeracaoEscalaCompleta {
                     );
                 }
 
-                if (!designacao.getParte().pessoaPodeExercerParticipacao(
-                        designacao.getAjudante(),
+                if (!designacao.parte().pessoaPodeExercerParticipacao(
+                        designacao.ajudante(),
                         TipoParticipacao.AJUDANTE
                 )) {
                     throw new RuntimeException(
@@ -335,10 +335,10 @@ public class TesteGeracaoEscalaCompleta {
                     );
                 }
 
-                if (!pessoasDesignadas.add(designacao.getAjudante())) {
+                if (!pessoasDesignadas.add(designacao.ajudante())) {
                     throw new RuntimeException(
                             "Pessoa repetida na mesma escala: "
-                                    + designacao.getAjudante().getNome()
+                                    + designacao.ajudante().getNome()
                     );
                 }
             }
@@ -351,18 +351,18 @@ public class TesteGeracaoEscalaCompleta {
             ResultadoGeracaoEscala segundaGeracao
     ) {
 
-        if (segundaGeracao.getParticipacoes().size()
-                <= primeiraGeracao.getParticipacoes().size()) {
+        if (segundaGeracao.participacoes().size()
+                <= primeiraGeracao.participacoes().size()) {
             throw new RuntimeException(
                     "A segunda geração não considerou/acumulou o histórico da primeira."
             );
         }
 
         List<ParticipacaoDesignacao> participacoesPrimeiraGeracao =
-                primeiraGeracao.getParticipacoes();
+                primeiraGeracao.participacoes();
 
         boolean manteveHistorico =
-                segundaGeracao.getParticipacoes()
+                segundaGeracao.participacoes()
                         .containsAll(participacoesPrimeiraGeracao);
 
         if (!manteveHistorico) {

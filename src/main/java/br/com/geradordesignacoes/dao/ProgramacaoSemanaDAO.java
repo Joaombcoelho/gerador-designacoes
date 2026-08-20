@@ -51,7 +51,7 @@ public class ProgramacaoSemanaDAO {
             statement.setDate(
                     1,
                     Date.valueOf(
-                            programacaoSemana.getData()
+                            programacaoSemana.data()
                     )
             );
 
@@ -59,7 +59,7 @@ public class ProgramacaoSemanaDAO {
             statement.executeUpdate();
 
 
-            Integer id;
+            int id;
 
 
             try (
@@ -83,7 +83,7 @@ public class ProgramacaoSemanaDAO {
 
             for (
                     ProgramacaoParte programacaoParte :
-                    programacaoSemana.getPartes()
+                    programacaoSemana.partes()
             ) {
 
                 programacaoParteDAO.salvar(
@@ -95,8 +95,8 @@ public class ProgramacaoSemanaDAO {
 
             return new ProgramacaoSemana(
                     id,
-                    programacaoSemana.getData(),
-                    programacaoSemana.getPartes()
+                    programacaoSemana.data(),
+                    programacaoSemana.partes()
             );
 
 
@@ -148,7 +148,7 @@ public class ProgramacaoSemanaDAO {
                 }
 
 
-                Integer id =
+                int id =
                         resultSet.getInt("id");
 
 

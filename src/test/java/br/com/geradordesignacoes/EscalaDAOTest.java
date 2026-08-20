@@ -160,7 +160,7 @@ class EscalaDAOTest extends BaseDAOTest {
                 pessoa.getId(),
                 encontrada.getDesignacoes()
                         .get(0)
-                        .getResponsavel()
+                        .responsavel()
                         .getId()
         );
     }

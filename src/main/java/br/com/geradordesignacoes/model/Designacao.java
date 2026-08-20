@@ -3,13 +3,7 @@ package br.com.geradordesignacoes.model;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Designacao {
-
-    private final LocalDate data;
-    private final Parte parte;
-    private final Pessoa responsavel;
-    private final Pessoa ajudante;
-
+public record Designacao(LocalDate data, Parte parte, Pessoa responsavel, Pessoa ajudante) {
 
     public Designacao(
             LocalDate data,
@@ -43,26 +37,6 @@ public class Designacao {
         }
 
         this.ajudante = ajudante;
-    }
-
-
-    public LocalDate getData() {
-        return data;
-    }
-
-
-    public Parte getParte() {
-        return parte;
-    }
-
-
-    public Pessoa getResponsavel() {
-        return responsavel;
-    }
-
-
-    public Pessoa getAjudante() {
-        return ajudante;
     }
 
 

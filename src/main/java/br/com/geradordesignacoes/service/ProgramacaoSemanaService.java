@@ -37,7 +37,6 @@ public class ProgramacaoSemanaService {
 
     /**
      * Busca a programação de uma semana já cadastrada.
-     *
      * Caso não exista, cria uma nova programação
      * contendo as partes cadastradas no sistema.
      */
@@ -98,7 +97,7 @@ public class ProgramacaoSemanaService {
 
 
         ProgramacaoParte programacaoParte =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .filter(
                                 parte ->
@@ -193,8 +192,7 @@ public class ProgramacaoSemanaService {
 
 
     /**
-     * Ordem padrão das partes da reunião.
-     *
+     * Ordem padrão das partes da reunião
      * A ordem é baseada no nome da parte porque,
      * neste momento, a tabela parte ainda não possui
      * uma coluna específica para armazenar a ordem.
@@ -453,7 +451,7 @@ public class ProgramacaoSemanaService {
 
 
         boolean jaExiste =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .anyMatch(
                                 programacaoParte ->
@@ -473,7 +471,7 @@ public class ProgramacaoSemanaService {
 
 
         long quantidadeVariaveis =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .filter(
                                 programacaoParte ->
@@ -494,7 +492,7 @@ public class ProgramacaoSemanaService {
 
 
         int novaOrdem =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .mapToInt(
                                 ProgramacaoParte::getOrdem
@@ -512,7 +510,7 @@ public class ProgramacaoSemanaService {
 
 
         programacaoParteDAO.salvar(
-                programacao.getId(),
+                programacao.id(),
                 programacaoParte
         );
         ProgramacaoSemana atualizada =
@@ -558,7 +556,7 @@ public class ProgramacaoSemanaService {
 
 
         ProgramacaoParte programacaoParte =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .filter(
                                 parte ->
@@ -587,7 +585,7 @@ public class ProgramacaoSemanaService {
 
 
         programacaoParteDAO.excluir(
-                programacao.getId(),
+                programacao.id(),
                 parteId
         );
     }

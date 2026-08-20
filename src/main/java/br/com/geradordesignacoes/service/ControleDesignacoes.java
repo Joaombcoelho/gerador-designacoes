@@ -57,7 +57,7 @@ public class ControleDesignacoes {
          * pertencem apenas à geração atual.
          */
         for (ParticipacaoDesignacao participacao :
-                this.historico.getParticipacoes()) {
+                this.historico.participacoes()) {
 
             registrarHistorico(
                     participacao
@@ -114,7 +114,7 @@ public class ControleDesignacoes {
 
 
         registrar(
-                participacao.getPessoa()
+                participacao.pessoa()
         );
     }
 
@@ -130,7 +130,7 @@ public class ControleDesignacoes {
     ) {
 
         quantidadePorPessoa.merge(
-                participacao.getPessoa(),
+                participacao.pessoa(),
                 1,
                 Integer::sum
         );
@@ -166,7 +166,7 @@ public class ControleDesignacoes {
      */
     public List<ParticipacaoDesignacao> getParticipacoes() {
 
-        return historico.getParticipacoes();
+        return historico.participacoes();
     }
 
 
@@ -187,12 +187,12 @@ public class ControleDesignacoes {
             Parte parte
     ) {
 
-        return historico.getParticipacoes()
+        return historico.participacoes()
                 .stream()
                 .filter(participacao ->
-                        participacao.getPessoa().equals(pessoa)
+                        participacao.pessoa().equals(pessoa)
                                 &&
-                                participacao.getParte().equals(parte)
+                                participacao.parte().equals(parte)
                 )
                 .count();
     }
@@ -201,14 +201,14 @@ public class ControleDesignacoes {
             Parte parte
     ) {
 
-        return historico.getParticipacoes()
+        return historico.participacoes()
                 .stream()
                 .filter(participacao ->
-                        participacao.getPessoa().equals(pessoa)
+                        participacao.pessoa().equals(pessoa)
                                 &&
-                                participacao.getParte().equals(parte)
+                                participacao.parte().equals(parte)
                 )
-                .map(ParticipacaoDesignacao::getData)
+                .map(ParticipacaoDesignacao::data)
                 .max(LocalDate::compareTo)
                 .orElse(null);
     }

@@ -4,10 +4,7 @@ import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
-import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
-import br.com.geradordesignacoes.model.ProgramacaoParte;
-import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,15 +41,15 @@ class ProgramacaoSemanaServiceTest {
 
         assertEquals(
                 data,
-                programacao.getData()
+                programacao.data()
         );
 
         assertNotNull(
-                programacao.getId()
+                programacao.id()
         );
 
         assertFalse(
-                programacao.getPartes().isEmpty()
+                programacao.partes().isEmpty()
         );
     }
 
@@ -69,7 +66,7 @@ class ProgramacaoSemanaServiceTest {
 
 
         List<ProgramacaoParte> partes =
-                programacao.getPartes();
+                programacao.partes();
 
 
         assertFalse(partes.isEmpty());
@@ -137,20 +134,20 @@ class ProgramacaoSemanaServiceTest {
 
 
         assertEquals(
-                primeira.getId(),
-                segunda.getId()
+                primeira.id(),
+                segunda.id()
         );
 
 
         assertEquals(
-                primeira.getData(),
-                segunda.getData()
+                primeira.data(),
+                segunda.data()
         );
 
 
         assertEquals(
-                primeira.getPartes().size(),
-                segunda.getPartes().size()
+                primeira.partes().size(),
+                segunda.partes().size()
         );
     }
 
@@ -168,7 +165,7 @@ class ProgramacaoSemanaServiceTest {
 
         for (
                 ProgramacaoParte parte :
-                programacao.getPartes()
+                programacao.partes()
         ) {
 
             assertFalse(
@@ -210,7 +207,7 @@ class ProgramacaoSemanaServiceTest {
 
 
         ProgramacaoParte parte =
-                atualizada.getPartes()
+                atualizada.partes()
                         .stream()
                         .filter(
                                 p ->
@@ -256,7 +253,7 @@ class ProgramacaoSemanaServiceTest {
 
 
         ProgramacaoParte parte =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .filter(
                                 p ->
@@ -563,7 +560,7 @@ class ProgramacaoSemanaServiceTest {
                 service.obterOuCriar(data);
 
         Parte parteFixa =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .map(ProgramacaoParte::getParte)
                         .filter(parte ->
@@ -785,7 +782,7 @@ class ProgramacaoSemanaServiceTest {
                 service.obterOuCriar(data);
 
         Parte parteFixa =
-                programacao.getPartes()
+                programacao.partes()
                         .stream()
                         .map(ProgramacaoParte::getParte)
                         .filter(parte ->

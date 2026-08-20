@@ -4,33 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class DiagnosticoSelecaoPessoa {
-
-    private final Parte parte;
-    private final List<ResultadoAvaliacaoPessoa> candidatos;
-    private final ResultadoAvaliacaoPessoa escolhido;
-
-    public DiagnosticoSelecaoPessoa(
-            Parte parte,
-            List<ResultadoAvaliacaoPessoa> candidatos,
-            ResultadoAvaliacaoPessoa escolhido
-    ) {
-        this.parte = parte;
-        this.candidatos = candidatos;
-        this.escolhido = escolhido;
-    }
-
-    public Parte getParte() {
-        return parte;
-    }
-
-    public List<ResultadoAvaliacaoPessoa> getCandidatos() {
-        return candidatos;
-    }
-
-    public ResultadoAvaliacaoPessoa getEscolhido() {
-        return escolhido;
-    }
+public record DiagnosticoSelecaoPessoa(Parte parte, List<ResultadoAvaliacaoPessoa> candidatos,
+                                       ResultadoAvaliacaoPessoa escolhido) {
 
 
     @Override

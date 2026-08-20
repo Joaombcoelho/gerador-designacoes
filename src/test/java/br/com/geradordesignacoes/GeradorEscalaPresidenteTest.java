@@ -42,13 +42,13 @@ public class GeradorEscalaPresidenteTest extends BaseDAOTest {
                 );
 
         assertFalse(resultado.possuiErros());
-        assertEquals(presidente, resultado.getEscala().getPresidente());
+        assertEquals(presidente, resultado.escala().getPresidente());
         assertEquals(TipoParte.PRESIDENTE_REUNIAO,
-                resultado.getDesignacoes().get(0).getParte().getTipo());
-        assertTrue(resultado.getParticipacoes().stream()
+                resultado.getDesignacoes().get(0).parte().getTipo());
+        assertTrue(resultado.participacoes().stream()
                 .anyMatch(participacao ->
-                        participacao.getPessoa().equals(presidente)
-                                && participacao.getTipoParticipacao() == TipoParticipacao.PRESIDENTE));
+                        participacao.pessoa().equals(presidente)
+                                && participacao.tipoParticipacao() == TipoParticipacao.PRESIDENTE));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class GeradorEscalaPresidenteTest extends BaseDAOTest {
                 );
 
         assertFalse(resultado.possuiErros());
-        assertEquals(novoPresidente, resultado.getEscala().getPresidente());
+        assertEquals(novoPresidente, resultado.escala().getPresidente());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class GeradorEscalaPresidenteTest extends BaseDAOTest {
                 );
 
         assertTrue(resultado.possuiErros());
-        assertNull(resultado.getEscala().getPresidente());
+        assertNull(resultado.escala().getPresidente());
     }
 
     private Pessoa salvarPessoa(

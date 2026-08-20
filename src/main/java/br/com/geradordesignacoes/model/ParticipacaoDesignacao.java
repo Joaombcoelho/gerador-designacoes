@@ -3,14 +3,8 @@ package br.com.geradordesignacoes.model;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class ParticipacaoDesignacao {
-
-    private final Integer id;
-    private final LocalDate data;
-    private final Pessoa pessoa;
-    private final Parte parte;
-    private final TipoParticipacao tipoParticipacao;
-
+public record ParticipacaoDesignacao(Integer id, LocalDate data, Pessoa pessoa, Parte parte,
+                                     TipoParticipacao tipoParticipacao) {
 
     public ParticipacaoDesignacao(
             Integer id,
@@ -58,31 +52,6 @@ public class ParticipacaoDesignacao {
                 parte,
                 tipoParticipacao
         );
-    }
-
-
-    public Integer getId() {
-        return id;
-    }
-
-
-    public LocalDate getData() {
-        return data;
-    }
-
-
-    public Pessoa getPessoa() {
-        return pessoa;
-    }
-
-
-    public Parte getParte() {
-        return parte;
-    }
-
-
-    public TipoParticipacao getTipoParticipacao() {
-        return tipoParticipacao;
     }
 
 

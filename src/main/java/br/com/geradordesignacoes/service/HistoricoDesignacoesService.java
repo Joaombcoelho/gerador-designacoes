@@ -103,12 +103,12 @@ public class HistoricoDesignacoesService {
                 participacoes) {
 
 
-            if (participacao.getPessoa().getId() == null) {
+            if (participacao.pessoa().getId() == null) {
                 continue;
             }
 
 
-            if (participacao.getParte().getId() == null) {
+            if (participacao.parte().getId() == null) {
                 continue;
             }
 
@@ -133,7 +133,7 @@ public class HistoricoDesignacoesService {
         }
 
 
-        if (participacao.getPessoa() == null) {
+        if (participacao.pessoa() == null) {
 
             throw new IllegalArgumentException(
                     "Participação sem pessoa."
@@ -141,7 +141,7 @@ public class HistoricoDesignacoesService {
         }
 
 
-        if (participacao.getParte() == null) {
+        if (participacao.parte() == null) {
 
             throw new IllegalArgumentException(
                     "Participação sem parte."
@@ -149,7 +149,7 @@ public class HistoricoDesignacoesService {
         }
 
 
-        if (participacao.getPessoa().getId() == null) {
+        if (participacao.pessoa().getId() == null) {
 
             throw new IllegalArgumentException(
                     "Pessoa sem ID para persistência."
@@ -157,7 +157,7 @@ public class HistoricoDesignacoesService {
         }
 
 
-        if (participacao.getParte().getId() == null) {
+        if (participacao.parte().getId() == null) {
 
             throw new IllegalArgumentException(
                     "Parte sem ID para persistência."
@@ -172,7 +172,7 @@ public class HistoricoDesignacoesService {
             return;
         }
 
-        LocalDate data = participacoes.get(0).getData();
+        LocalDate data = participacoes.get(0).data();
 
         historicoDAO.substituirParticipacoesDaData(
                 data,

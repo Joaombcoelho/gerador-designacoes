@@ -72,31 +72,31 @@ public class HistoricoDesignacoesDAOTest {
         assertNotNull(historico);
 
         assertFalse(
-                historico.getParticipacoes().isEmpty()
+                historico.participacoes().isEmpty()
         );
 
         ParticipacaoDesignacao recuperada =
-                historico.getParticipacoes()
-                        .get(historico.getParticipacoes().size() - 1);
+                historico.participacoes()
+                        .get(historico.participacoes().size() - 1);
 
         assertEquals(
                 pessoa.getId(),
-                recuperada.getPessoa().getId()
+                recuperada.pessoa().getId()
         );
 
         assertEquals(
                 parteSalva.getId(),
-                recuperada.getParte().getId()
+                recuperada.parte().getId()
         );
 
         assertEquals(
                 TipoParticipacao.LEITOR,
-                recuperada.getTipoParticipacao()
+                recuperada.tipoParticipacao()
         );
 
         assertEquals(
                 LocalDate.now(),
-                recuperada.getData()
+                recuperada.data()
         );
     }
 
@@ -148,7 +148,7 @@ public class HistoricoDesignacoesDAOTest {
 
         assertEquals(
                 pessoa.getId(),
-                resultado.get(0).getPessoa().getId()
+                resultado.get(0).pessoa().getId()
         );
     }
 
@@ -200,7 +200,7 @@ public class HistoricoDesignacoesDAOTest {
 
         assertEquals(
                 parte.getId(),
-                resultado.get(0).getParte().getId()
+                resultado.get(0).parte().getId()
         );
     }
 

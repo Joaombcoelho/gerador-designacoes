@@ -6,13 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class ProgramacaoSemana {
-
-    private final Integer id;
-    private final LocalDate data;
-
-    private final List<ProgramacaoParte> partes;
-
+public record ProgramacaoSemana(Integer id, LocalDate data, List<ProgramacaoParte> partes) {
 
     public ProgramacaoSemana(
             Integer id,
@@ -44,17 +38,8 @@ public class ProgramacaoSemana {
     }
 
 
-    public Integer getId() {
-        return id;
-    }
-
-
-    public LocalDate getData() {
-        return data;
-    }
-
-
-    public List<ProgramacaoParte> getPartes() {
+    @Override
+    public List<ProgramacaoParte> partes() {
 
         return Collections.unmodifiableList(
                 partes
