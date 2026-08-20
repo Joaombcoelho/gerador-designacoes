@@ -135,6 +135,54 @@ public class DatabaseInitializer {
 
     /*
      * ============================================================
+     * PROGRAMAÇÃO SEMANAL
+     * ============================================================
+     */
+
+    private static final String CREATE_TABLE_PROGRAMACAO_SEMANA = """
+
+        CREATE TABLE IF NOT EXISTS programacao_semana (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data DATE NOT NULL UNIQUE
+        );
+
+        """;
+
+
+    private static final String CREATE_TABLE_PROGRAMACAO_PARTE = """
+
+        CREATE TABLE IF NOT EXISTS programacao_parte (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            programacao_semana_id INTEGER NOT NULL,
+            parte_id INTEGER NOT NULL,
+
+            ordem INTEGER NOT NULL,
+            tema TEXT,
+
+            FOREIGN KEY (programacao_semana_id)
+                REFERENCES programacao_semana(id)
+                ON DELETE CASCADE,
+
+            FOREIGN KEY (parte_id)
+                REFERENCES parte(id),
+
+            UNIQUE (
+                programacao_semana_id,
+                parte_id
+            ),
+
+            UNIQUE (
+                programacao_semana_id,
+                ordem
+            )
+        );
+
+        """;
+
+
+    /*
+     * ============================================================
      * INICIALIZAÇÃO
      * ============================================================
      */
@@ -154,40 +202,102 @@ public class DatabaseInitializer {
             );
 
 
+            /*
+             * ----------------------------------------------------
+             * PESSOA
+             * ----------------------------------------------------
+             */
+
             statement.execute(
                     CREATE_TABLE_PESSOA
             );
 
+
+            /*
+             * ----------------------------------------------------
+             * PARTE
+             * ----------------------------------------------------
+             */
 
             statement.execute(
                     CREATE_TABLE_PARTE
             );
 
 
+            /*
+             * ----------------------------------------------------
+             * PARTICIPAÇÕES NECESSÁRIAS
+             * ----------------------------------------------------
+             */
+
             statement.execute(
                     CREATE_TABLE_PARTE_PARTICIPACAO_NECESSARIA
             );
 
+
+            /*
+             * ----------------------------------------------------
+             * HISTÓRICO
+             * ----------------------------------------------------
+             */
 
             statement.execute(
                     CREATE_TABLE_HISTORICO_DESIGNACOES
             );
 
 
+            /*
+             * ----------------------------------------------------
+             * ESCALA
+             * ----------------------------------------------------
+             */
+
             statement.execute(
                     CREATE_TABLE_ESCALA
             );
 
+
+            /*
+             * ----------------------------------------------------
+             * DESIGNAÇÃO
+             * ----------------------------------------------------
+             */
 
             statement.execute(
                     CREATE_TABLE_DESIGNACAO
             );
 
 
-            cadastrarPartesIniciais(connection);
+            /*
+             * ----------------------------------------------------
+             * PROGRAMAÇÃO SEMANAL
+             * ----------------------------------------------------
+             */
+
+            statement.execute(
+                    CREATE_TABLE_PROGRAMACAO_SEMANA
+            );
 
 
-            cadastrarPessoasIniciais(connection);
+            statement.execute(
+                    CREATE_TABLE_PROGRAMACAO_PARTE
+            );
+
+
+            /*
+             * ----------------------------------------------------
+             * DADOS INICIAIS
+             * ----------------------------------------------------
+             */
+
+            cadastrarPartesIniciais(
+                    connection
+            );
+
+
+            cadastrarPessoasIniciais(
+                    connection
+            );
 
 
             System.out.println(
@@ -383,7 +493,7 @@ public class DatabaseInitializer {
 
                     "Leitura",
                     TipoParte.LEITURA,
-                    Privilegio.SERVO_MINISTERIAL,
+                    Privilegio.PUBLICADOR,
                     SexoPermitido.MASCULINO,
                     1,
                     false,
@@ -398,7 +508,7 @@ public class DatabaseInitializer {
 
 
             /*
-             * DEMONSTRAÇÕES
+             * INICIANDO CONVERSAS
              */
 
             inserirParte(
@@ -408,7 +518,7 @@ public class DatabaseInitializer {
 
                     "Iniciando Conversas",
                     TipoParte.DEMONSTRACAO,
-                    Privilegio.BATIZADO,
+                    Privilegio.PUBLICADOR,
                     SexoPermitido.AMBOS,
                     2,
                     true,
@@ -423,6 +533,10 @@ public class DatabaseInitializer {
             );
 
 
+            /*
+             * CULTIVANDO INTERESSE
+             */
+
             inserirParte(
                     verificar,
                     inserir,
@@ -430,7 +544,7 @@ public class DatabaseInitializer {
 
                     "Cultivando Interesse",
                     TipoParte.DEMONSTRACAO,
-                    Privilegio.BATIZADO,
+                    Privilegio.PUBLICADOR,
                     SexoPermitido.AMBOS,
                     2,
                     true,
@@ -470,6 +584,10 @@ public class DatabaseInitializer {
             );
 
 
+            /*
+             * FAZENDO DISCÍPULOS
+             */
+
             inserirParte(
                     verificar,
                     inserir,
@@ -477,7 +595,7 @@ public class DatabaseInitializer {
 
                     "Fazendo Discípulos",
                     TipoParte.DEMONSTRACAO,
-                    Privilegio.BATIZADO,
+                    Privilegio.PUBLICADOR,
                     SexoPermitido.AMBOS,
                     2,
                     true,
@@ -492,6 +610,10 @@ public class DatabaseInitializer {
             );
 
 
+            /*
+             * EXPLICANDO SUAS CRENÇAS
+             */
+
             inserirParte(
                     verificar,
                     inserir,
@@ -499,7 +621,7 @@ public class DatabaseInitializer {
 
                     "Explicando suas crenças",
                     TipoParte.DEMONSTRACAO,
-                    Privilegio.BATIZADO,
+                    Privilegio.PUBLICADOR,
                     SexoPermitido.AMBOS,
                     2,
                     true,
@@ -516,9 +638,6 @@ public class DatabaseInitializer {
 
             /*
              * DISCURSO — MINISTÉRIO
-             *
-             * A habilitação específica será controlada
-             * pela configuração da Pessoa.
              */
 
             inserirParte(
@@ -653,7 +772,7 @@ public class DatabaseInitializer {
 
                     "Estudo Bíblico",
                     TipoParte.DIRIGENTE_ESTUDO,
-                    Privilegio.ANCIAO,
+                    Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     2,
                     true,
@@ -705,8 +824,8 @@ public class DatabaseInitializer {
             Privilegio privilegioMinimo,
             SexoPermitido sexoPermitido,
             int quantidadeMinimaParticipantes,
-            boolean exigeAjudante,
             boolean geraFormulario,
+            boolean exigeAjudante,
             NivelLeitura nivelLeituraMinimo,
             SecaoParte secao,
             TipoVariacaoParte tipoVariacao,
@@ -722,11 +841,20 @@ public class DatabaseInitializer {
 
 
         try (
-                ResultSet resultSet =
+                ResultSet resultado =
                         verificar.executeQuery()
         ) {
 
-            if (resultSet.next()) {
+            if (resultado.next()) {
+
+                int parteId =
+                        resultado.getInt("id");
+
+                inserirParticipacoes(
+                        participacao,
+                        parteId,
+                        participacoes
+                );
 
                 return;
             }
@@ -775,16 +903,16 @@ public class DatabaseInitializer {
 
         inserir.setString(
                 9,
-                secao != null
-                        ? secao.name()
-                        : null
+                secao == null
+                        ? null
+                        : secao.name()
         );
 
         inserir.setString(
                 10,
-                tipoVariacao != null
-                        ? tipoVariacao.name()
-                        : null
+                tipoVariacao == null
+                        ? null
+                        : tipoVariacao.name()
         );
 
         inserir.setBoolean(
@@ -800,11 +928,11 @@ public class DatabaseInitializer {
 
 
         try (
-                ResultSet generatedKeys =
+                ResultSet chaves =
                         inserir.getGeneratedKeys()
         ) {
 
-            if (!generatedKeys.next()) {
+            if (!chaves.next()) {
 
                 throw new SQLException(
                         "Não foi possível obter o ID da Parte."
@@ -812,9 +940,23 @@ public class DatabaseInitializer {
             }
 
             parteId =
-                    generatedKeys.getInt(1);
+                    chaves.getInt(1);
         }
 
+
+        inserirParticipacoes(
+                participacao,
+                parteId,
+                participacoes
+        );
+    }
+
+
+    private static void inserirParticipacoes(
+            PreparedStatement participacao,
+            int parteId,
+            TipoParticipacao... participacoes
+    ) throws SQLException {
 
         for (
                 int ordem = 0;
@@ -839,11 +981,6 @@ public class DatabaseInitializer {
 
             participacao.executeUpdate();
         }
-
-
-        System.out.println(
-                "Parte cadastrada: " + nome
-        );
     }
 
 
@@ -851,29 +988,23 @@ public class DatabaseInitializer {
      * ============================================================
      * PESSOAS INICIAIS
      * ============================================================
-     *
-     * Mantemos aqui o cadastro das pessoas que você já possui.
-     * ============================================================
      */
 
     private static void cadastrarPessoasIniciais(
             Connection connection
     ) throws SQLException {
 
-        /*
-         * ============================================================
-         * CADASTRO INICIAL DAS 44 PESSOAS
-         * ============================================================
-         */
+        String sqlVerificar = """
 
-            String sqlVerificar = """
             SELECT COUNT(*)
             FROM pessoa
             WHERE nome = ?
+
             """;
 
 
-            String sqlInserir = """
+        String sqlInserir = """
+
             INSERT INTO pessoa (
                 nome,
                 sexo,
@@ -889,570 +1020,559 @@ public class DatabaseInitializer {
                 nivel_leitura
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
             """;
 
 
-            try (
-                    PreparedStatement verificar =
-                            connection.prepareStatement(sqlVerificar);
-
-                    PreparedStatement inserir =
-                            connection.prepareStatement(sqlInserir)
-            ) {
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Carlos Kovalski",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.ANCIAO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Marcio Correa",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.ANCIAO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Alef Dias",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.SERVO_MINISTERIAL
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "João Manoel",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.ANCIAO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Rubens Coelho",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.ANCIAO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Adriana",
-                        Sexo.FEMININO,
-                        false,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Priscila",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Samara Coelho",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Valdecir",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Ângela",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Marisilvia",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Marli",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Heitor",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Luís Cláudio",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Lídia",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Diogo",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Flaviana",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Lana",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Monique",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Dariane",
-                        Sexo.FEMININO,
-                        false,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Lourenço",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Rhuan",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.PUBLICADOR
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Elisandro",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Mara",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Sabrina",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.PUBLICADOR
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Reginaldo",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Loili",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Loreni",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "José de Quadros",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Jéssica",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Soeli",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Mariane",
-                        Sexo.FEMININO,
-                        false,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "João Vaz",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Nelci",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Jamyle",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Josane",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Simone",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Dieisson",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Anancí",
-                        Sexo.FEMININO,
-                        false,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Vagner",
-                        Sexo.MASCULINO,
-                        false,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "João de Deus",
-                        Sexo.MASCULINO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Armelindo",
-                        Sexo.MASCULINO,
-                        false,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Erazi",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-
-                inserirPessoaInicial(
-                        verificar,
-                        inserir,
-                        "Cirlene",
-                        Sexo.FEMININO,
-                        true,
-                        Privilegio.BATIZADO
-                );
-            }
-        }
-
-
-        private static void inserirPessoaInicial(
-                PreparedStatement verificar,
-                PreparedStatement inserir,
-                String nome,
-                Sexo sexo,
-        boolean ativo,
-        Privilegio privilegio
-    ) throws SQLException {
-
-            verificar.setString(1, nome);
-
-
-            try (ResultSet resultSet =
-                         verificar.executeQuery()) {
-
-                if (resultSet.next()
-                        && resultSet.getInt(1) > 0) {
-
-                    System.out.println(
-                            "Pessoa já cadastrada: " + nome
-                    );
-
-                    return;
-                }
-            }
-
-
-            /*
-             * ========================================================
-             * PERMISSÕES INICIAIS
-             * ========================================================
-             */
-
-            boolean responsavel = false;
-            boolean ajudante = false;
-            boolean leitura = false;
-            boolean discurso = false;
-            boolean oracao = false;
-            boolean presidente = false;
-            boolean dirigente = false;
-
-
-            if (sexo == Sexo.FEMININO) {
-
-                /*
-                 * Mulheres:
-                 * somente responsável e ajudante.
-                 */
-                responsavel = true;
-                ajudante = true;
-
-            } else {
-
-                /*
-                 * Homens.
-                 */
-
-                if (privilegio == Privilegio.ANCIAO) {
-
-                    responsavel = true;
-                    ajudante = true;
-                    leitura = true;
-                    discurso = true;
-                    oracao = true;
-                    presidente = true;
-                    dirigente = true;
-
-                } else if (
-                        privilegio == Privilegio.SERVO_MINISTERIAL
-                                || privilegio == Privilegio.BATIZADO
-                ) {
-
-                    responsavel = true;
-                    ajudante = true;
-                    leitura = true;
-                    discurso = true;
-                    oracao = true;
-
-                } else if (
-                        privilegio == Privilegio.PUBLICADOR
-                ) {
-
-                    responsavel = true;
-                    ajudante = true;
-                }
-            }
-
-
-            inserir.setString(
-                    1,
-                    nome
+        try (
+                PreparedStatement verificar =
+                        connection.prepareStatement(
+                                sqlVerificar
+                        );
+
+                PreparedStatement inserir =
+                        connection.prepareStatement(
+                                sqlInserir
+                        )
+        ) {
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Carlos Kovalski",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.ANCIAO
             );
 
-            inserir.setString(
-                    2,
-                    sexo.name()
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Marcio Correa",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.ANCIAO
             );
 
-            inserir.setBoolean(
-                    3,
-                    ativo
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Alef Dias",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.SERVO_MINISTERIAL
             );
 
-            inserir.setBoolean(
-                    4,
-                    responsavel
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "João Manoel",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.ANCIAO
             );
 
-            inserir.setBoolean(
-                    5,
-                    ajudante
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Rubens Coelho",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.ANCIAO
             );
 
-            inserir.setBoolean(
-                    6,
-                    leitura
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Adriana",
+                    Sexo.FEMININO,
+                    false,
+                    Privilegio.BATIZADO
             );
 
-            inserir.setBoolean(
-                    7,
-                    discurso
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Priscila",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
             );
 
-            inserir.setBoolean(
-                    8,
-                    oracao
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Samara Coelho",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
             );
 
-            inserir.setBoolean(
-                    9,
-                    presidente
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Valdecir",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
             );
 
-            inserir.setBoolean(
-                    10,
-                    dirigente
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Ângela",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
             );
 
-            inserir.setString(
-                    11,
-                    privilegio.name()
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Marisilvia",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
             );
 
-            inserir.setString(
-                    12,
-                    NivelLeitura.BASICO.name()
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Marli",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
             );
 
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Heitor",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
 
-            inserir.executeUpdate();
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Luís Cláudio",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
 
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Lídia",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
 
-            System.out.println(
-                    "Pessoa cadastrada: " + nome
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Diogo",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Flaviana",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Lana",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Monique",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Dariane",
+                    Sexo.FEMININO,
+                    false,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Lourenço",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Rhuan",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.PUBLICADOR
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Elisandro",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Mara",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Sabrina",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.PUBLICADOR
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Reginaldo",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Loili",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Loreni",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "José de Quadros",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Jéssica",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Soeli",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Mariane",
+                    Sexo.FEMININO,
+                    false,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "João Vaz",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Nelci",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Jamyle",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Josane",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Simone",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Dieisson",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Anancí",
+                    Sexo.FEMININO,
+                    false,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Vagner",
+                    Sexo.MASCULINO,
+                    false,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "João de Deus",
+                    Sexo.MASCULINO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Armelindo",
+                    Sexo.MASCULINO,
+                    false,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Erazi",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
+            );
+
+            inserirPessoaInicial(
+                    verificar,
+                    inserir,
+                    "Cirlene",
+                    Sexo.FEMININO,
+                    true,
+                    Privilegio.BATIZADO
             );
         }
     }
+
+
+    private static void inserirPessoaInicial(
+            PreparedStatement verificar,
+            PreparedStatement inserir,
+            String nome,
+            Sexo sexo,
+            boolean ativo,
+            Privilegio privilegio
+    ) throws SQLException {
+
+        verificar.setString(
+                1,
+                nome
+        );
+
+
+        try (
+                ResultSet resultado =
+                        verificar.executeQuery()
+        ) {
+
+            if (
+                    resultado.next()
+                            && resultado.getInt(1) > 0
+            ) {
+
+                return;
+            }
+        }
+
+
+        boolean responsavel = false;
+        boolean ajudante = false;
+        boolean leitura = false;
+        boolean discurso = false;
+        boolean oracao = false;
+        boolean presidente = false;
+        boolean dirigente = false;
+
+
+        if (sexo == Sexo.FEMININO) {
+
+            responsavel = true;
+            ajudante = true;
+
+        } else {
+
+            if (privilegio == Privilegio.ANCIAO) {
+
+                responsavel = true;
+                ajudante = true;
+                leitura = true;
+                discurso = true;
+                oracao = true;
+                presidente = true;
+                dirigente = true;
+
+            } else if (
+                    privilegio == Privilegio.SERVO_MINISTERIAL
+                            || privilegio == Privilegio.BATIZADO
+            ) {
+
+                responsavel = true;
+                ajudante = true;
+                leitura = true;
+                discurso = true;
+                oracao = true;
+
+            } else if (
+                    privilegio == Privilegio.PUBLICADOR
+            ) {
+
+                responsavel = true;
+                ajudante = true;
+            }
+        }
+
+
+        inserir.setString(
+                1,
+                nome
+        );
+
+        inserir.setString(
+                2,
+                sexo.name()
+        );
+
+        inserir.setBoolean(
+                3,
+                ativo
+        );
+
+        inserir.setBoolean(
+                4,
+                responsavel
+        );
+
+        inserir.setBoolean(
+                5,
+                ajudante
+        );
+
+        inserir.setBoolean(
+                6,
+                leitura
+        );
+
+        inserir.setBoolean(
+                7,
+                discurso
+        );
+
+        inserir.setBoolean(
+                8,
+                oracao
+        );
+
+        inserir.setBoolean(
+                9,
+                presidente
+        );
+
+        inserir.setBoolean(
+                10,
+                dirigente
+        );
+
+        inserir.setString(
+                11,
+                privilegio.name()
+        );
+
+        inserir.setString(
+                12,
+                NivelLeitura.BASICO.name()
+        );
+
+
+        inserir.executeUpdate();
+    }
+}

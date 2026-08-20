@@ -46,7 +46,6 @@ br\com\geradordesignacoes\service\GeradorEscala.class
 br\com\geradordesignacoes\model\DiagnosticoSelecaoPessoa.class
 br\com\geradordesignacoes\dao\EscalaDAO.class
 br\com\geradordesignacoes\service\PessoaService.class
-br\com\geradordesignacoes\model\SemanaProgramacao.class
 br\com\geradordesignacoes\view\parte\ParteFormularioView.class
 br\com\geradordesignacoes\model\HistoricoDesignacoes.class
 br\com\geradordesignacoes\view\MainView.class

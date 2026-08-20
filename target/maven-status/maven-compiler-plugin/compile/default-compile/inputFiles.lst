@@ -6,6 +6,8 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\HistoricoDesignacoesDAO.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\ParteDAO.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\PessoaDAO.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\ProgramacaoParteDAO.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\dao\ProgramacaoSemanaDAO.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\BackupDatabase.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\ConnectionFactory.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\database\DatabaseInitializer.java
@@ -22,10 +24,11 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ParticipacaoDesignacao.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Pessoa.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Privilegio.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ProgramacaoParte.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ProgramacaoSemana.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ResultadoAvaliacaoPessoa.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\ResultadoGeracaoEscala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\SecaoParte.java
-D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\SemanaProgramacao.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\Sexo.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\SexoPermitido.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\model\StatusEscala.java

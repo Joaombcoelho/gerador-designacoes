@@ -383,7 +383,6 @@ public class ParteDAO {
             ResultSet resultSet
     ) throws SQLException {
 
-
         Integer id =
                 resultSet.getInt("id");
 
@@ -394,43 +393,73 @@ public class ParteDAO {
                 );
 
 
-        if(nivel == null){
-
-            nivel = NivelLeitura.BASICO.name();
-
+        if (nivel == null) {
+            nivel =
+                    NivelLeitura.BASICO.name();
         }
 
+
+        String secao =
+                resultSet.getString("secao");
+
+
+        String tipoVariacao =
+                resultSet.getString("tipo_variacao");
 
 
         return new Parte(
                 id,
+
                 resultSet.getString("nome"),
+
                 TipoParte.valueOf(
                         resultSet.getString("tipo")
                 ),
+
                 Privilegio.valueOf(
                         resultSet.getString("privilegio_minimo")
                 ),
-                resultSet.getInt("exige_ajudante") == 1,
+
+                resultSet.getInt(
+                        "exige_ajudante"
+                ) == 1,
+
                 SexoPermitido.valueOf(
                         resultSet.getString("sexo_permitido")
                 ),
+
                 resultSet.getInt(
                         "quantidade_minima_participantes"
                 ),
+
                 resultSet.getInt(
                         "gera_formulario"
                 ) == 1,
-                NivelLeitura.valueOf(nivel),
+
+                NivelLeitura.valueOf(
+                        nivel
+                ),
+
+                secao == null
+                        ? null
+                        : SecaoParte.valueOf(secao),
+
+                tipoVariacao == null
+                        ? null
+                        : TipoVariacaoParte.valueOf(
+                        tipoVariacao
+                ),
+
+                resultSet.getInt(
+                        "possui_tema"
+                ) == 1,
+
                 buscarParticipacoesNecessarias(
                         connection,
                         id
                 )
         );
     }
-
-
-
 
     private void salvarParticipacoesNecessarias(
             Connection connection,

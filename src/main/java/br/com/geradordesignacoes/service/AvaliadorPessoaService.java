@@ -1,9 +1,6 @@
 package br.com.geradordesignacoes.service;
 
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.Pessoa;
-import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
-import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.model.*;
 
 public class AvaliadorPessoaService {
 
@@ -57,9 +54,20 @@ public class AvaliadorPessoaService {
             Parte parte
     ) {
 
+        Privilegio minimo =
+                parte.getPrivilegioMinimo();
+
+        if (minimo == Privilegio.SERVO_MINISTERIAL) {
+
+            return pessoa.getPrivilegio()
+                    == Privilegio.SERVO_MINISTERIAL
+                    ? 10
+                    : 0;
+        }
+
         int diferencaNivel =
                 pessoa.getPrivilegio().getNivel()
-                        - parte.getPrivilegioMinimo().getNivel();
+                        - minimo.getNivel();
 
         if (diferencaNivel <= 0) {
             return 0;

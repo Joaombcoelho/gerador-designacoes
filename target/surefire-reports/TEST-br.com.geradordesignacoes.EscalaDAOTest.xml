@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="br.com.geradordesignacoes.EscalaDAOTest" time="5.267" tests="6" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="br.com.geradordesignacoes.EscalaDAOTest" time="6.092" tests="6" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="22"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="BR"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-22\bin"/>
-    <property name="sun.java.command" value="C:\Users\João Manoel\AppData\Local\Temp\surefire4731455067587746046\surefirebooter-20260818195117849_3.jar C:\Users\João Manoel\AppData\Local\Temp\surefire4731455067587746046 2026-08-18T19-51-17_182-jvmRun1 surefire-20260818195117849_1tmp surefire_0-20260818195117849_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\João Manoel\AppData\Local\Temp\surefire14979592166522754707\surefirebooter-20260819173251668_3.jar C:\Users\João Manoel\AppData\Local\Temp\surefire14979592166522754707 2026-08-19T17-32-51_328-jvmRun1 surefire-20260819173251668_1tmp surefire_0-20260819173251668_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\target\test-classes;D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\target\classes;C:\Users\João Manoel\.m2\repository\org\xerial\sqlite-jdbc\3.50.3.0\sqlite-jdbc-3.50.3.0.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-controls\21.0.7\javafx-controls-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-controls\21.0.7\javafx-controls-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-graphics\21.0.7\javafx-graphics-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-graphics\21.0.7\javafx-graphics-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-base\21.0.7\javafx-base-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-base\21.0.7\javafx-base-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-fxml\21.0.7\javafx-fxml-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-fxml\21.0.7\javafx-fxml-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter\5.10.2\junit-jupiter-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\João Manoel\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\João Manoel\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;C:\Users\João Manoel\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\João Manoel\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\João Manoel\AppData\Local\Temp\surefire4731455067587746046\surefirebooter-20260818195117849_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\João Manoel\AppData\Local\Temp\surefire14979592166522754707\surefirebooter-20260819173251668_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="22.0.2+9-70"/>
@@ -58,328 +58,28 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="66.0"/>
   </properties>
-  <testcase name="deveBuscarEscalaPorId" classname="br.com.geradordesignacoes.EscalaDAOTest" time="1.45">
-    <system-out><![CDATA[Tabela 'pessoa' criada ou já existente.
-Tabela 'parte' criada ou já existente.
-Tabela 'parte_participacao_necessaria' criada ou já existente.
-Tabela 'historico_designacoes' criada ou já existente.
-Tabela 'escala' criada ou já existente.
-Tabela 'designacao' criada ou já existente.
-Pessoa cadastrada: Carlos Kovalski
-Pessoa cadastrada: Marcio Correa
-Pessoa cadastrada: Alef Dias
-Pessoa cadastrada: João Manoel
-Pessoa cadastrada: Rubens Coelho
-Pessoa cadastrada: Adriana
-Pessoa cadastrada: Priscila
-Pessoa cadastrada: Samara Coelho
-Pessoa cadastrada: Valdecir
-Pessoa cadastrada: Ângela
-Pessoa cadastrada: Marisilvia
-Pessoa cadastrada: Marli
-Pessoa cadastrada: Heitor
-Pessoa cadastrada: Luís Cláudio
-Pessoa cadastrada: Lídia
-Pessoa cadastrada: Diogo
-Pessoa cadastrada: Flaviana
-Pessoa cadastrada: Lana
-Pessoa cadastrada: Monique
-Pessoa cadastrada: Dariane
-Pessoa cadastrada: Lourenço
-Pessoa cadastrada: Rhuan
-Pessoa cadastrada: Elisandro
-Pessoa cadastrada: Mara
-Pessoa cadastrada: Sabrina
-Pessoa cadastrada: Reginaldo
-Pessoa cadastrada: Loili
-Pessoa cadastrada: Loreni
-Pessoa cadastrada: José de Quadros
-Pessoa cadastrada: Jéssica
-Pessoa cadastrada: Soeli
-Pessoa cadastrada: Mariane
-Pessoa cadastrada: João Vaz
-Pessoa cadastrada: Nelci
-Pessoa cadastrada: Jamyle
-Pessoa cadastrada: Josane
-Pessoa cadastrada: Simone
-Pessoa cadastrada: Dieisson
-Pessoa cadastrada: Anancí
-Pessoa cadastrada: Vagner
-Pessoa cadastrada: João de Deus
-Pessoa cadastrada: Armelindo
-Pessoa cadastrada: Erazi
-Pessoa cadastrada: Cirlene
-Inicialização do banco concluída.
+  <testcase name="deveBuscarEscalaPorId" classname="br.com.geradordesignacoes.EscalaDAOTest" time="2.073">
+    <system-out><![CDATA[Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
-  <testcase name="deveSalvarDesignacoesDaEscala" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.674">
-    <system-out><![CDATA[Tabela 'pessoa' criada ou já existente.
-Tabela 'parte' criada ou já existente.
-Tabela 'parte_participacao_necessaria' criada ou já existente.
-Tabela 'historico_designacoes' criada ou já existente.
-Tabela 'escala' criada ou já existente.
-Tabela 'designacao' criada ou já existente.
-Pessoa cadastrada: Carlos Kovalski
-Pessoa cadastrada: Marcio Correa
-Pessoa cadastrada: Alef Dias
-Pessoa cadastrada: João Manoel
-Pessoa cadastrada: Rubens Coelho
-Pessoa cadastrada: Adriana
-Pessoa cadastrada: Priscila
-Pessoa cadastrada: Samara Coelho
-Pessoa cadastrada: Valdecir
-Pessoa cadastrada: Ângela
-Pessoa cadastrada: Marisilvia
-Pessoa cadastrada: Marli
-Pessoa cadastrada: Heitor
-Pessoa cadastrada: Luís Cláudio
-Pessoa cadastrada: Lídia
-Pessoa cadastrada: Diogo
-Pessoa cadastrada: Flaviana
-Pessoa cadastrada: Lana
-Pessoa cadastrada: Monique
-Pessoa cadastrada: Dariane
-Pessoa cadastrada: Lourenço
-Pessoa cadastrada: Rhuan
-Pessoa cadastrada: Elisandro
-Pessoa cadastrada: Mara
-Pessoa cadastrada: Sabrina
-Pessoa cadastrada: Reginaldo
-Pessoa cadastrada: Loili
-Pessoa cadastrada: Loreni
-Pessoa cadastrada: José de Quadros
-Pessoa cadastrada: Jéssica
-Pessoa cadastrada: Soeli
-Pessoa cadastrada: Mariane
-Pessoa cadastrada: João Vaz
-Pessoa cadastrada: Nelci
-Pessoa cadastrada: Jamyle
-Pessoa cadastrada: Josane
-Pessoa cadastrada: Simone
-Pessoa cadastrada: Dieisson
-Pessoa cadastrada: Anancí
-Pessoa cadastrada: Vagner
-Pessoa cadastrada: João de Deus
-Pessoa cadastrada: Armelindo
-Pessoa cadastrada: Erazi
-Pessoa cadastrada: Cirlene
-Inicialização do banco concluída.
+  <testcase name="deveSalvarDesignacoesDaEscala" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.88">
+    <system-out><![CDATA[Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
-  <testcase name="deveRetornarVazioQuandoEscalaNaoExiste" classname="br.com.geradordesignacoes.EscalaDAOTest" time="1.201">
-    <system-out><![CDATA[Tabela 'pessoa' criada ou já existente.
-Tabela 'parte' criada ou já existente.
-Tabela 'parte_participacao_necessaria' criada ou já existente.
-Tabela 'historico_designacoes' criada ou já existente.
-Tabela 'escala' criada ou já existente.
-Tabela 'designacao' criada ou já existente.
-Pessoa cadastrada: Carlos Kovalski
-Pessoa cadastrada: Marcio Correa
-Pessoa cadastrada: Alef Dias
-Pessoa cadastrada: João Manoel
-Pessoa cadastrada: Rubens Coelho
-Pessoa cadastrada: Adriana
-Pessoa cadastrada: Priscila
-Pessoa cadastrada: Samara Coelho
-Pessoa cadastrada: Valdecir
-Pessoa cadastrada: Ângela
-Pessoa cadastrada: Marisilvia
-Pessoa cadastrada: Marli
-Pessoa cadastrada: Heitor
-Pessoa cadastrada: Luís Cláudio
-Pessoa cadastrada: Lídia
-Pessoa cadastrada: Diogo
-Pessoa cadastrada: Flaviana
-Pessoa cadastrada: Lana
-Pessoa cadastrada: Monique
-Pessoa cadastrada: Dariane
-Pessoa cadastrada: Lourenço
-Pessoa cadastrada: Rhuan
-Pessoa cadastrada: Elisandro
-Pessoa cadastrada: Mara
-Pessoa cadastrada: Sabrina
-Pessoa cadastrada: Reginaldo
-Pessoa cadastrada: Loili
-Pessoa cadastrada: Loreni
-Pessoa cadastrada: José de Quadros
-Pessoa cadastrada: Jéssica
-Pessoa cadastrada: Soeli
-Pessoa cadastrada: Mariane
-Pessoa cadastrada: João Vaz
-Pessoa cadastrada: Nelci
-Pessoa cadastrada: Jamyle
-Pessoa cadastrada: Josane
-Pessoa cadastrada: Simone
-Pessoa cadastrada: Dieisson
-Pessoa cadastrada: Anancí
-Pessoa cadastrada: Vagner
-Pessoa cadastrada: João de Deus
-Pessoa cadastrada: Armelindo
-Pessoa cadastrada: Erazi
-Pessoa cadastrada: Cirlene
-Inicialização do banco concluída.
+  <testcase name="deveRetornarVazioQuandoEscalaNaoExiste" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.838">
+    <system-out><![CDATA[Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
-  <testcase name="deveSalvarUmaEscala" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.882">
-    <system-out><![CDATA[Tabela 'pessoa' criada ou já existente.
-Tabela 'parte' criada ou já existente.
-Tabela 'parte_participacao_necessaria' criada ou já existente.
-Tabela 'historico_designacoes' criada ou já existente.
-Tabela 'escala' criada ou já existente.
-Tabela 'designacao' criada ou já existente.
-Pessoa cadastrada: Carlos Kovalski
-Pessoa cadastrada: Marcio Correa
-Pessoa cadastrada: Alef Dias
-Pessoa cadastrada: João Manoel
-Pessoa cadastrada: Rubens Coelho
-Pessoa cadastrada: Adriana
-Pessoa cadastrada: Priscila
-Pessoa cadastrada: Samara Coelho
-Pessoa cadastrada: Valdecir
-Pessoa cadastrada: Ângela
-Pessoa cadastrada: Marisilvia
-Pessoa cadastrada: Marli
-Pessoa cadastrada: Heitor
-Pessoa cadastrada: Luís Cláudio
-Pessoa cadastrada: Lídia
-Pessoa cadastrada: Diogo
-Pessoa cadastrada: Flaviana
-Pessoa cadastrada: Lana
-Pessoa cadastrada: Monique
-Pessoa cadastrada: Dariane
-Pessoa cadastrada: Lourenço
-Pessoa cadastrada: Rhuan
-Pessoa cadastrada: Elisandro
-Pessoa cadastrada: Mara
-Pessoa cadastrada: Sabrina
-Pessoa cadastrada: Reginaldo
-Pessoa cadastrada: Loili
-Pessoa cadastrada: Loreni
-Pessoa cadastrada: José de Quadros
-Pessoa cadastrada: Jéssica
-Pessoa cadastrada: Soeli
-Pessoa cadastrada: Mariane
-Pessoa cadastrada: João Vaz
-Pessoa cadastrada: Nelci
-Pessoa cadastrada: Jamyle
-Pessoa cadastrada: Josane
-Pessoa cadastrada: Simone
-Pessoa cadastrada: Dieisson
-Pessoa cadastrada: Anancí
-Pessoa cadastrada: Vagner
-Pessoa cadastrada: João de Deus
-Pessoa cadastrada: Armelindo
-Pessoa cadastrada: Erazi
-Pessoa cadastrada: Cirlene
-Inicialização do banco concluída.
+  <testcase name="deveSalvarUmaEscala" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.802">
+    <system-out><![CDATA[Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
-  <testcase name="deveListarTodasAsEscalas" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.57">
-    <system-out><![CDATA[Tabela 'pessoa' criada ou já existente.
-Tabela 'parte' criada ou já existente.
-Tabela 'parte_participacao_necessaria' criada ou já existente.
-Tabela 'historico_designacoes' criada ou já existente.
-Tabela 'escala' criada ou já existente.
-Tabela 'designacao' criada ou já existente.
-Pessoa cadastrada: Carlos Kovalski
-Pessoa cadastrada: Marcio Correa
-Pessoa cadastrada: Alef Dias
-Pessoa cadastrada: João Manoel
-Pessoa cadastrada: Rubens Coelho
-Pessoa cadastrada: Adriana
-Pessoa cadastrada: Priscila
-Pessoa cadastrada: Samara Coelho
-Pessoa cadastrada: Valdecir
-Pessoa cadastrada: Ângela
-Pessoa cadastrada: Marisilvia
-Pessoa cadastrada: Marli
-Pessoa cadastrada: Heitor
-Pessoa cadastrada: Luís Cláudio
-Pessoa cadastrada: Lídia
-Pessoa cadastrada: Diogo
-Pessoa cadastrada: Flaviana
-Pessoa cadastrada: Lana
-Pessoa cadastrada: Monique
-Pessoa cadastrada: Dariane
-Pessoa cadastrada: Lourenço
-Pessoa cadastrada: Rhuan
-Pessoa cadastrada: Elisandro
-Pessoa cadastrada: Mara
-Pessoa cadastrada: Sabrina
-Pessoa cadastrada: Reginaldo
-Pessoa cadastrada: Loili
-Pessoa cadastrada: Loreni
-Pessoa cadastrada: José de Quadros
-Pessoa cadastrada: Jéssica
-Pessoa cadastrada: Soeli
-Pessoa cadastrada: Mariane
-Pessoa cadastrada: João Vaz
-Pessoa cadastrada: Nelci
-Pessoa cadastrada: Jamyle
-Pessoa cadastrada: Josane
-Pessoa cadastrada: Simone
-Pessoa cadastrada: Dieisson
-Pessoa cadastrada: Anancí
-Pessoa cadastrada: Vagner
-Pessoa cadastrada: João de Deus
-Pessoa cadastrada: Armelindo
-Pessoa cadastrada: Erazi
-Pessoa cadastrada: Cirlene
-Inicialização do banco concluída.
+  <testcase name="deveListarTodasAsEscalas" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.749">
+    <system-out><![CDATA[Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
-  <testcase name="deveExcluirUmaEscala" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.474">
-    <system-out><![CDATA[Tabela 'pessoa' criada ou já existente.
-Tabela 'parte' criada ou já existente.
-Tabela 'parte_participacao_necessaria' criada ou já existente.
-Tabela 'historico_designacoes' criada ou já existente.
-Tabela 'escala' criada ou já existente.
-Tabela 'designacao' criada ou já existente.
-Pessoa cadastrada: Carlos Kovalski
-Pessoa cadastrada: Marcio Correa
-Pessoa cadastrada: Alef Dias
-Pessoa cadastrada: João Manoel
-Pessoa cadastrada: Rubens Coelho
-Pessoa cadastrada: Adriana
-Pessoa cadastrada: Priscila
-Pessoa cadastrada: Samara Coelho
-Pessoa cadastrada: Valdecir
-Pessoa cadastrada: Ângela
-Pessoa cadastrada: Marisilvia
-Pessoa cadastrada: Marli
-Pessoa cadastrada: Heitor
-Pessoa cadastrada: Luís Cláudio
-Pessoa cadastrada: Lídia
-Pessoa cadastrada: Diogo
-Pessoa cadastrada: Flaviana
-Pessoa cadastrada: Lana
-Pessoa cadastrada: Monique
-Pessoa cadastrada: Dariane
-Pessoa cadastrada: Lourenço
-Pessoa cadastrada: Rhuan
-Pessoa cadastrada: Elisandro
-Pessoa cadastrada: Mara
-Pessoa cadastrada: Sabrina
-Pessoa cadastrada: Reginaldo
-Pessoa cadastrada: Loili
-Pessoa cadastrada: Loreni
-Pessoa cadastrada: José de Quadros
-Pessoa cadastrada: Jéssica
-Pessoa cadastrada: Soeli
-Pessoa cadastrada: Mariane
-Pessoa cadastrada: João Vaz
-Pessoa cadastrada: Nelci
-Pessoa cadastrada: Jamyle
-Pessoa cadastrada: Josane
-Pessoa cadastrada: Simone
-Pessoa cadastrada: Dieisson
-Pessoa cadastrada: Anancí
-Pessoa cadastrada: Vagner
-Pessoa cadastrada: João de Deus
-Pessoa cadastrada: Armelindo
-Pessoa cadastrada: Erazi
-Pessoa cadastrada: Cirlene
-Inicialização do banco concluída.
+  <testcase name="deveExcluirUmaEscala" classname="br.com.geradordesignacoes.EscalaDAOTest" time="0.739">
+    <system-out><![CDATA[Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
 </testsuite>
