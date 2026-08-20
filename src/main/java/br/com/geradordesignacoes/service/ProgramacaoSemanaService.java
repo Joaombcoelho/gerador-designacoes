@@ -459,7 +459,8 @@ public class ProgramacaoSemanaService {
                                 programacaoParte ->
                                         programacaoParte
                                                 .getParte()
-                                                .equals(parte)
+                                                .getId()
+                                                .equals(parte.getId())
                         );
 
 

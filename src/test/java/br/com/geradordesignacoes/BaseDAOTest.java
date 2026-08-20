@@ -53,6 +53,14 @@ public abstract class BaseDAOTest {
             );
 
             statement.execute(
+                    "DELETE FROM programacao_parte"
+            );
+
+            statement.execute(
+                    "DELETE FROM programacao_semana"
+            );
+
+            statement.execute(
                     "DELETE FROM escala"
             );
 
