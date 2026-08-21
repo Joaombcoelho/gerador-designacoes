@@ -2,25 +2,45 @@ package br.com.geradordesignacoes.view.programacao;
 
 import br.com.geradordesignacoes.model.Parte;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ProgramacaoView {
 
     private final BorderPane root;
 
+    /*
+     * Agora representa o mês selecionado.
+     * Mantemos DatePicker para evitar alterar
+     * desnecessariamente a estrutura atual.
+     */
     private final DatePicker campoData;
+
+    private final ListView<LocalDate> listaSemanas;
+
+    private final ObservableList<LocalDate> semanas;
+
+    private final Map<LocalDate, Boolean> statusSemanas;
+
+    private final Button botaoAdicionarSemana;
+
+    private final Button botaoEditarSemana;
+
+    private final Button botaoGerar;
 
     private final ListView<Parte> listaPartesDisponiveis;
 
@@ -50,6 +70,39 @@ public class ProgramacaoView {
                 new DatePicker();
 
 
+        listaSemanas =
+                new ListView<>();
+
+
+        semanas =
+                FXCollections.observableArrayList();
+
+
+        statusSemanas =
+                new HashMap<>();
+
+
+        botaoAdicionarSemana =
+                new Button(
+                        "Adicionar semana"
+                );
+
+
+        botaoEditarSemana =
+                new Button(
+                        "Editar semana"
+                );
+
+
+        botaoGerar =
+                new Button(
+                        "Gerar"
+                );
+
+
+        botaoGerar.setDisable(true);
+
+
         listaPartesDisponiveis =
                 new ListView<>();
 
@@ -59,11 +112,15 @@ public class ProgramacaoView {
 
 
         botaoAdicionar =
-                new Button("Adicionar");
+                new Button(
+                        "Adicionar"
+                );
 
 
         botaoRemover =
-                new Button("Remover");
+                new Button(
+                        "Remover"
+                );
 
 
         campoTema =
@@ -76,14 +133,18 @@ public class ProgramacaoView {
 
 
         botaoSalvarTema =
-                new Button("Salvar Tema");
+                new Button(
+                        "Salvar Tema"
+                );
 
 
         labelStatus =
                 new Label(
-                        "Selecione uma data para configurar a programação."
+                        "Selecione um mês para configurar a programação."
                 );
 
+
+        configurarListaSemanas();
 
         configurarListas();
 
@@ -92,6 +153,81 @@ public class ProgramacaoView {
         criarConteudo();
 
         criarRodape();
+    }
+
+
+    private void configurarListaSemanas() {
+
+        listaSemanas.setItems(
+                semanas
+        );
+
+
+        listaSemanas.setCellFactory(
+                lista ->
+                        new ListCell<>() {
+
+                            @Override
+                            protected void updateItem(
+                                    LocalDate data,
+                                    boolean empty
+                            ) {
+
+                                super.updateItem(
+                                        data,
+                                        empty
+                                );
+
+
+                                if (
+                                        empty
+                                                || data == null
+                                ) {
+
+                                    setText(null);
+
+                                    setStyle("");
+
+                                    return;
+                                }
+
+
+                                boolean configurada =
+                                        statusSemanas.getOrDefault(
+                                                data,
+                                                false
+                                        );
+
+
+                                String status =
+                                        configurada
+                                                ? "✓ Configurada"
+                                                : "✗ Não configurada";
+
+
+                                setText(
+                                        "Reunião: "
+                                                + formatarData(data)
+                                                + "    "
+                                                + status
+                                );
+
+
+                                if (configurada) {
+
+                                    setStyle(
+                                            "-fx-background-color: #d5f5d5;"
+                                    );
+
+                                } else {
+
+                                    setStyle(
+                                            "-fx-background-color: #ffd6d6;"
+                                    );
+                                }
+                            }
+                        }
+        );
     }
 
 
@@ -170,24 +306,29 @@ public class ProgramacaoView {
 
         Label titulo =
                 new Label(
-                        "Programação Semanal"
+                        "Programação Mensal"
                 );
 
 
         titulo.setStyle(
-                "-fx-font-size: 20px;"
+                "-fx-font-size: 20px; -fx-font-weight: bold;"
         );
 
 
-        HBox linhaData =
+        campoData.setPromptText(
+                "Selecione o mês"
+        );
+
+
+        HBox linhaMes =
                 new HBox(
                         10,
-                        new Label("Data da reunião:"),
+                        new Label("Mês:"),
                         campoData
                 );
 
 
-        linhaData.setAlignment(
+        linhaMes.setAlignment(
                 Pos.CENTER_LEFT
         );
 
@@ -196,7 +337,7 @@ public class ProgramacaoView {
                 new VBox(
                         15,
                         titulo,
-                        linhaData
+                        linhaMes
                 );
 
 
@@ -207,6 +348,61 @@ public class ProgramacaoView {
 
 
     private void criarConteudo() {
+
+        Label tituloSemanas =
+                new Label(
+                        "Reuniões do mês"
+                );
+
+
+        tituloSemanas.setStyle(
+                "-fx-font-weight: bold;"
+        );
+
+
+        VBox painelSemanas =
+                new VBox(
+                        8,
+                        tituloSemanas,
+                        listaSemanas
+                );
+
+
+        VBox.setVgrow(
+                listaSemanas,
+                Priority.ALWAYS
+        );
+
+
+        HBox.setHgrow(
+                painelSemanas,
+                Priority.ALWAYS
+        );
+
+
+        HBox botoesSemana =
+                new HBox(
+                        10,
+                        botaoAdicionarSemana,
+                        botaoEditarSemana
+                );
+
+
+        botoesSemana.setAlignment(
+                Pos.CENTER
+        );
+
+
+        VBox painelMes =
+                new VBox(
+                        8,
+                        painelSemanas,
+                        botoesSemana
+                );
+
+
+        painelMes.setPrefWidth(350);
+
 
         Label tituloDisponiveis =
                 new Label(
@@ -274,7 +470,9 @@ public class ProgramacaoView {
         VBox painelTema =
                 new VBox(
                         8,
-                        new Label("Tema da parte selecionada:"),
+                        new Label(
+                                "Tema da parte selecionada:"
+                        ),
                         campoTema,
                         botaoSalvarTema
                 );
@@ -285,7 +483,7 @@ public class ProgramacaoView {
         );
 
 
-        HBox conteudo =
+        HBox editorPartes =
                 new HBox(
                         15,
                         painelDisponiveis,
@@ -294,21 +492,41 @@ public class ProgramacaoView {
                 );
 
 
-        conteudo.setAlignment(
+        editorPartes.setAlignment(
                 Pos.CENTER
         );
 
 
-        VBox centro =
+        VBox painelEditor =
                 new VBox(
                         15,
-                        conteudo,
+                        editorPartes,
                         painelTema
                 );
 
 
         VBox.setVgrow(
-                conteudo,
+                editorPartes,
+                Priority.ALWAYS
+        );
+
+
+        VBox.setVgrow(
+                painelEditor,
+                Priority.ALWAYS
+        );
+
+
+        HBox centro =
+                new HBox(
+                        20,
+                        painelMes,
+                        painelEditor
+                );
+
+
+        HBox.setHgrow(
+                painelEditor,
                 Priority.ALWAYS
         );
 
@@ -321,24 +539,44 @@ public class ProgramacaoView {
 
     private void criarRodape() {
 
-        HBox rodape =
+        HBox botoes =
                 new HBox(
-                        labelStatus
+                        10,
+                        labelStatus,
+                        botaoGerar
                 );
 
 
-        rodape.setAlignment(
+        HBox.setHgrow(
+                labelStatus,
+                Priority.ALWAYS
+        );
+
+
+        botoes.setAlignment(
                 Pos.CENTER_LEFT
         );
 
 
-        rodape.setPadding(
+        botoes.setPadding(
                 new Insets(15, 0, 0, 0)
         );
 
 
         root.setBottom(
-                rodape
+                botoes
+        );
+    }
+
+
+    private String formatarData(
+            LocalDate data
+    ) {
+
+        return data.format(
+                DateTimeFormatter.ofPattern(
+                        "dd/MM/yyyy"
+                )
         );
     }
 
@@ -352,6 +590,30 @@ public class ProgramacaoView {
     public DatePicker getCampoData() {
 
         return campoData;
+    }
+
+
+    public ListView<LocalDate> getListaSemanas() {
+
+        return listaSemanas;
+    }
+
+
+    public Button getBotaoAdicionarSemana() {
+
+        return botaoAdicionarSemana;
+    }
+
+
+    public Button getBotaoEditarSemana() {
+
+        return botaoEditarSemana;
+    }
+
+
+    public Button getBotaoGerar() {
+
+        return botaoGerar;
     }
 
 
@@ -397,6 +659,52 @@ public class ProgramacaoView {
 
         labelStatus.setText(
                 mensagem
+        );
+    }
+
+
+    public void atualizarSemanas(
+            List<LocalDate> novasSemanas,
+            Map<LocalDate, Boolean> status
+    ) {
+
+        semanas.setAll(
+                novasSemanas
+        );
+
+
+        statusSemanas.clear();
+
+        statusSemanas.putAll(
+                status
+        );
+
+
+        listaSemanas.refresh();
+    }
+
+
+    public void atualizarStatusSemana(
+            LocalDate data,
+            boolean configurada
+    ) {
+
+        statusSemanas.put(
+                data,
+                configurada
+        );
+
+
+        listaSemanas.refresh();
+    }
+
+
+    public void atualizarBotaoGerar(
+            boolean habilitado
+    ) {
+
+        botaoGerar.setDisable(
+                !habilitado
         );
     }
 }

@@ -31,6 +31,8 @@ public class ParteFormularioView {
 
     private final ComboBox<TipoParte> comboTipo;
 
+    private final ComboBox<SecaoParte> comboSecao;
+
     private final ComboBox<Privilegio> comboPrivilegio;
 
     private final ComboBox<SexoPermitido> comboSexo;
@@ -61,17 +63,26 @@ public class ParteFormularioView {
 
         campoNome = new TextField();
 
+
         comboTipo = new ComboBox<>();
         comboTipo.getItems()
                 .addAll(TipoParte.values());
+
+
+        comboSecao = new ComboBox<>();
+        comboSecao.getItems()
+                .addAll(SecaoParte.values());
+
 
         comboPrivilegio = new ComboBox<>();
         comboPrivilegio.getItems()
                 .addAll(Privilegio.values());
 
+
         comboSexo = new ComboBox<>();
         comboSexo.getItems()
                 .addAll(SexoPermitido.values());
+
 
         comboNivelLeitura = new ComboBox<>();
         comboNivelLeitura.getItems()
@@ -174,6 +185,8 @@ public class ParteFormularioView {
 
         comboTipo.setPrefWidth(250);
 
+        comboSecao.setPrefWidth(250);
+
         comboPrivilegio.setPrefWidth(250);
 
         comboSexo.setPrefWidth(250);
@@ -210,61 +223,74 @@ public class ParteFormularioView {
 
 
         root.add(
-                new Label("Privilégio mínimo:"),
+                new Label("Seção:"),
                 0,
                 3
         );
 
         root.add(
-                comboPrivilegio,
+                comboSecao,
                 1,
                 3
+        );
+
+
+        root.add(
+                new Label("Privilégio mínimo:"),
+                0,
+                4
+        );
+
+        root.add(
+                comboPrivilegio,
+                1,
+                4
         );
 
 
         root.add(
                 new Label("Sexo permitido:"),
                 0,
-                4
+                5
         );
 
         root.add(
                 comboSexo,
                 1,
-                4
+                5
         );
 
 
         root.add(
                 new Label("Nível leitura mínimo:"),
                 0,
-                5
+                6
         );
 
         root.add(
                 comboNivelLeitura,
                 1,
-                5
+                6
         );
 
 
         root.add(
                 new Label("Tipo de variação:"),
                 0,
-                6
+                7
         );
 
         root.add(
                 comboTipoVariacao,
                 1,
-                6
+                7
         );
 
 
         root.add(
                 checkExigeAjudante,
                 1,
-                7
+                8
         );
 
 
@@ -292,7 +318,7 @@ public class ParteFormularioView {
         root.add(
                 boxParticipacoes,
                 1,
-                8
+                9
         );
 
 
@@ -332,7 +358,7 @@ public class ParteFormularioView {
         root.add(
                 botoes,
                 1,
-                9
+                10
         );
     }
 
@@ -346,6 +372,11 @@ public class ParteFormularioView {
 
         comboTipo.setValue(
                 parteEdicao.getTipo()
+        );
+
+
+        comboSecao.setValue(
+                parteEdicao.getSecao()
         );
 
 
@@ -426,6 +457,36 @@ public class ParteFormularioView {
         }
 
 
+        if (comboSecao.getValue() == null) {
+
+            mostrarMensagem(
+                    "Informe a seção da Parte."
+            );
+
+            return;
+        }
+
+
+        if (comboPrivilegio.getValue() == null) {
+
+            mostrarMensagem(
+                    "Informe o privilégio mínimo da Parte."
+            );
+
+            return;
+        }
+
+
+        if (comboSexo.getValue() == null) {
+
+            mostrarMensagem(
+                    "Informe o sexo permitido da Parte."
+            );
+
+            return;
+        }
+
+
         if (comboTipoVariacao.getValue() == null) {
 
             mostrarMensagem(
@@ -497,9 +558,7 @@ public class ParteFormularioView {
 
                         nivelLeitura,
 
-                        parteEdicao == null
-                                ? null
-                                : parteEdicao.getSecao(),
+                        comboSecao.getValue(),
 
                         comboTipoVariacao.getValue(),
 
@@ -613,24 +672,6 @@ public class ParteFormularioView {
                 selecionarParticipacao(
                         TipoParticipacao.LEITOR
                 );
-            }
-        }
-    }
-
-
-    private void marcarParticipacao(
-            TipoParticipacao tipo
-    ) {
-
-        for (CheckBox check :
-                checkParticipacoes) {
-
-            if (check.getUserData()
-                    == tipo) {
-
-                check.setSelected(true);
-
-                break;
             }
         }
     }

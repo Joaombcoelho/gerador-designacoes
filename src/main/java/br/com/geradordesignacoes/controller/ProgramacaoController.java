@@ -7,14 +7,25 @@ import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProgramacaoController {
 
     private final ProgramacaoView view;
 
     private final ProgramacaoSemanaService service;
+
+
+    /*
+     * Mantém as semanas atualmente exibidas.
+     */
+    private final List<LocalDate> semanas;
 
 
     public ProgramacaoController(
@@ -26,22 +37,57 @@ public class ProgramacaoController {
         this.service =
                 new ProgramacaoSemanaService();
 
+        this.semanas =
+                new ArrayList<>();
+
         registrarEventos();
 
         view.atualizarStatus(
-                "Selecione uma data para configurar a programação."
+                "Selecione um mês para configurar a programação."
         );
     }
 
 
     private void registrarEventos() {
 
+        /*
+         * O DatePicker continua sendo usado,
+         * mas agora representa o mês.
+         */
         view.getCampoData()
                 .setOnAction(
-                        event -> carregarProgramacao()
+                        event -> carregarMes()
                 );
 
 
+        /*
+         * Selecionar uma semana passa a carregar
+         * a programação daquela reunião.
+         */
+        view.getListaSemanas()
+                .getSelectionModel()
+                .selectedItemProperty()
+                .addListener(
+                        (observable, anterior, atual) ->
+                                carregarSemana(atual)
+                );
+
+
+        view.getBotaoAdicionarSemana()
+                .setOnAction(
+                        event -> adicionarSemana()
+                );
+
+
+        view.getBotaoEditarSemana()
+                .setOnAction(
+                        event -> editarSemanaSelecionada()
+                );
+
+
+        /*
+         * Mantemos os eventos antigos.
+         */
         view.getBotaoAdicionar()
                 .setOnAction(
                         event -> adicionarParte()
@@ -70,7 +116,7 @@ public class ProgramacaoController {
     }
 
 
-    private void carregarProgramacao() {
+    private void carregarMes() {
 
         LocalDate data =
                 view.getCampoData()
@@ -82,6 +128,144 @@ public class ProgramacaoController {
             return;
         }
 
+
+        YearMonth mes =
+                YearMonth.from(data);
+
+
+        semanas.clear();
+
+        semanas.addAll(
+                obterSemanasIniciais(mes)
+        );
+
+
+        atualizarSemanas();
+
+
+        if (!semanas.isEmpty()) {
+
+            view.getListaSemanas()
+                    .getSelectionModel()
+                    .selectFirst();
+        }
+
+
+        view.atualizarStatus(
+                "Mês carregado. Selecione uma reunião para configurar."
+        );
+    }
+
+
+    private List<LocalDate> obterSemanasIniciais(
+            YearMonth mes
+    ) {
+
+        List<LocalDate> resultado =
+                new ArrayList<>();
+
+
+        LocalDate data =
+                mes.atDay(1);
+
+
+        /*
+         * A reunião semanal atualmente é considerada
+         * na quinta-feira.
+         *
+         * Procuramos as quatro primeiras quintas-feiras
+         * do mês.
+         */
+        while (
+                data.getMonth()
+                        == mes.getMonth()
+                        && resultado.size() < 4
+        ) {
+
+            if (data.getDayOfWeek()
+                    == DayOfWeek.THURSDAY) {
+
+                resultado.add(data);
+            }
+
+
+            data =
+                    data.plusDays(1);
+        }
+
+
+        return resultado;
+    }
+
+
+    private void atualizarSemanas() {
+
+        Map<LocalDate, Boolean> status =
+                new HashMap<>();
+
+
+        for (LocalDate data : semanas) {
+
+            status.put(
+                    data,
+                    service.estaConfigurada(data)
+            );
+        }
+
+
+        view.atualizarSemanas(
+                semanas,
+                status
+        );
+
+
+        atualizarBotaoGerar();
+    }
+
+
+    private void carregarSemana(
+            LocalDate data
+    ) {
+
+        if (data == null) {
+
+            return;
+        }
+
+
+        carregarProgramacao(
+                data
+        );
+    }
+
+
+    private void editarSemanaSelecionada() {
+
+        LocalDate data =
+                view.getListaSemanas()
+                        .getSelectionModel()
+                        .getSelectedItem();
+
+
+        if (data == null) {
+
+            view.atualizarStatus(
+                    "Selecione uma semana para editar."
+            );
+
+            return;
+        }
+
+
+        carregarProgramacao(
+                data
+        );
+    }
+
+
+    private void carregarProgramacao(
+            LocalDate data
+    ) {
 
         try {
 
@@ -95,7 +279,13 @@ public class ProgramacaoController {
 
 
             view.atualizarStatus(
-                    "Programação carregada."
+                    "Configurando a reunião de "
+                            + data
+                            .format(
+                                    java.time.format.DateTimeFormatter
+                                            .ofPattern("dd/MM/yyyy")
+                            )
+                            + "."
             );
 
 
@@ -161,20 +351,178 @@ public class ProgramacaoController {
 
         view.getCampoTema()
                 .clear();
+
+
+        atualizarStatusSemana(
+                programacao.data()
+        );
+    }
+
+
+    private void adicionarSemana() {
+
+        LocalDate ultimaSemana =
+                semanas.isEmpty()
+                        ? null
+                        : semanas.get(
+                        semanas.size() - 1
+                );
+
+
+        if (ultimaSemana == null) {
+
+            LocalDate mes =
+                    view.getCampoData()
+                            .getValue();
+
+
+            if (mes == null) {
+
+                view.atualizarStatus(
+                        "Selecione primeiro o mês."
+                );
+
+                return;
+            }
+
+
+            semanas.addAll(
+                    obterSemanasIniciais(
+                            YearMonth.from(mes)
+                    )
+            );
+
+        } else {
+
+            LocalDate novaSemana =
+                    ultimaSemana.plusWeeks(1);
+
+
+            YearMonth mes =
+                    YearMonth.from(
+                            view.getCampoData()
+                                    .getValue()
+                    );
+
+
+            /*
+             * A nova semana deve pertencer ao
+             * mês selecionado.
+             */
+            if (!YearMonth.from(novaSemana)
+                    .equals(mes)) {
+
+                view.atualizarStatus(
+                        "Não há outra quinta-feira neste mês."
+                );
+
+                return;
+            }
+
+
+            if (!semanas.contains(novaSemana)) {
+
+                semanas.add(
+                        novaSemana
+                );
+            }
+        }
+
+
+        atualizarSemanas();
+
+
+        view.getListaSemanas()
+                .getSelectionModel()
+                .select(
+                        semanas.size() - 1
+                );
+
+
+        view.atualizarStatus(
+                "Nova semana adicionada."
+        );
+    }
+
+
+    private void atualizarStatusSemana(
+            LocalDate data
+    ) {
+
+        if (!semanas.contains(data)) {
+
+            return;
+        }
+
+
+        boolean configurada =
+                service.estaConfigurada(data);
+
+
+        view.atualizarStatusSemana(
+                data,
+                configurada
+        );
+
+
+        atualizarBotaoGerar();
+    }
+
+
+    private void atualizarBotaoGerar() {
+
+        if (semanas.isEmpty()) {
+
+            view.atualizarBotaoGerar(
+                    false
+            );
+
+            return;
+        }
+
+
+        boolean todasConfiguradas =
+                semanas.stream()
+                        .allMatch(
+                                service::estaConfigurada
+                        );
+
+
+        view.atualizarBotaoGerar(
+                todasConfiguradas
+        );
+    }
+
+
+    private LocalDate obterDataSelecionada() {
+
+        LocalDate data =
+                view.getListaSemanas()
+                        .getSelectionModel()
+                        .getSelectedItem();
+
+
+        if (data != null) {
+
+            return data;
+        }
+
+
+        return view.getCampoData()
+                .getValue();
     }
 
 
     private void adicionarParte() {
 
         LocalDate data =
-                view.getCampoData()
-                        .getValue();
+                obterDataSelecionada();
 
 
         if (data == null) {
 
             view.atualizarStatus(
-                    "Informe a data da reunião."
+                    "Selecione uma reunião."
             );
 
             return;
@@ -205,7 +553,9 @@ public class ProgramacaoController {
             );
 
 
-            carregarProgramacao();
+            carregarProgramacao(
+                    data
+            );
 
 
             view.atualizarStatus(
@@ -228,14 +578,13 @@ public class ProgramacaoController {
     private void removerParte() {
 
         LocalDate data =
-                view.getCampoData()
-                        .getValue();
+                obterDataSelecionada();
 
 
         if (data == null) {
 
             view.atualizarStatus(
-                    "Informe a data da reunião."
+                    "Selecione uma reunião."
             );
 
             return;
@@ -266,7 +615,9 @@ public class ProgramacaoController {
             );
 
 
-            carregarProgramacao();
+            carregarProgramacao(
+                    data
+            );
 
 
             view.atualizarStatus(
@@ -300,8 +651,7 @@ public class ProgramacaoController {
 
 
         LocalDate data =
-                view.getCampoData()
-                        .getValue();
+                obterDataSelecionada();
 
 
         if (data == null) {
@@ -357,14 +707,13 @@ public class ProgramacaoController {
     private void salvarTema() {
 
         LocalDate data =
-                view.getCampoData()
-                        .getValue();
+                obterDataSelecionada();
 
 
         if (data == null) {
 
             view.atualizarStatus(
-                    "Informe a data da reunião."
+                    "Selecione uma reunião."
             );
 
             return;
