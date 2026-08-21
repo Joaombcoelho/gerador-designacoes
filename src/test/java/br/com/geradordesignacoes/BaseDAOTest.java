@@ -22,6 +22,8 @@ public abstract class BaseDAOTest {
         connection = ConnectionFactory.getConnection();
 
         limparBanco();
+
+        DatabaseInitializer.initialize();
     }
 
 

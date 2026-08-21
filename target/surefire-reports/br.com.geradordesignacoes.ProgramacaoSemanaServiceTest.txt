@@ -1,0 +1,224 @@
+-------------------------------------------------------------------------------
+Test set: br.com.geradordesignacoes.ProgramacaoSemanaServiceTest
+-------------------------------------------------------------------------------
+Tests run: 34, Failures: 6, Errors: 17, Skipped: 0, Time elapsed: 0.655 s <<< FAILURE! -- in br.com.geradordesignacoes.ProgramacaoSemanaServiceTest
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveCriarPartesNaOrdemCorreta -- Time elapsed: 0.054 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:31)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:231)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveCriarPartesNaOrdemCorreta(ProgramacaoSemanaServiceTeste.java:72)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarTrueComExatamenteTresPartesVariaveis -- Time elapsed: 0.015 s <<< ERROR!
+java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/java.util.ImmutableCollections$ListN.get(ImmutableCollections.java:687)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarTrueComExatamenteTresPartesVariaveis(ProgramacaoSemanaServiceTeste.java:898)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarVerdadeiroComTresPartesVariaveis -- Time elapsed: 0.031 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <3> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarVerdadeiroComTresPartesVariaveis(ProgramacaoSemanaServiceTeste.java:664)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveAlterarTemaDaParte -- Time elapsed: 0.031 s <<< ERROR!
+java.lang.IllegalArgumentException: Parte da programação não encontrada.
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.lambda$definirTema$1(ProgramacaoSemanaService.java:109)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.definirTema(ProgramacaoSemanaService.java:107)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveAlterarTemaDaParte(ProgramacaoSemanaServiceTeste.java:237)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarFalsoQuandoProgramacaoPossuiMenosDeTresPartesVariaveis -- Time elapsed: 0.032 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarFalsoQuandoProgramacaoPossuiMenosDeTresPartesVariaveis(ProgramacaoSemanaServiceTeste.java:632)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveDefinirTemaDaParte -- Time elapsed: 0.037 s <<< ERROR!
+java.lang.IllegalArgumentException: Parte da programação não encontrada.
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.lambda$definirTema$1(ProgramacaoSemanaService.java:109)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.definirTema(ProgramacaoSemanaService.java:107)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveDefinirTemaDaParte(ProgramacaoSemanaServiceTeste.java:198)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarTrueComExatamenteSeisPartesVariaveis -- Time elapsed: 0 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: É necessário possuir pelo menos 6 partes variáveis cadastradas. ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarTrueComExatamenteSeisPartesVariaveis(ProgramacaoSemanaServiceTeste.java:915)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirAdicionarParteComDataNula -- Time elapsed: 0 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirAdicionarParteComDataNula(ProgramacaoSemanaServiceTeste.java:695)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirAdicionarParteFixaComoVariavel -- Time elapsed: 0.032 s <<< ERROR!
+java.lang.IllegalStateException: Nenhuma parte fixa cadastrada.
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveImpedirAdicionarParteFixaComoVariavel$13(ProgramacaoSemanaServiceTeste.java:492)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirAdicionarParteFixaComoVariavel(ProgramacaoSemanaServiceTeste.java:490)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirAdicionarParteVariavelDuplicada -- Time elapsed: 0.016 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirAdicionarParteVariavelDuplicada(ProgramacaoSemanaServiceTeste.java:731)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirRemoverParteFixa -- Time elapsed: 0.016 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirRemoverParteFixa(ProgramacaoSemanaServiceTeste.java:571)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.devePersistirParteVariavelAdicionada -- Time elapsed: 0.019 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.devePersistirParteVariavelAdicionada(ProgramacaoSemanaServiceTeste.java:1060)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirAdicionarParteFixa -- Time elapsed: 0.016 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirAdicionarParteFixa(ProgramacaoSemanaServiceTeste.java:793)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirAdicionarParteVariavelDuplicada -- Time elapsed: 0.033 s <<< ERROR!
+java.lang.IllegalStateException: Nenhuma parte variável cadastrada.
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveImpedirAdicionarParteVariavelDuplicada$16(ProgramacaoSemanaServiceTeste.java:532)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirAdicionarParteVariavelDuplicada(ProgramacaoSemanaServiceTeste.java:530)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirMaisDeSeisPartesVariaveis -- Time elapsed: 0 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: É necessário possuir pelo menos 7 partes variáveis cadastradas. ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirMaisDeSeisPartesVariaveis(ProgramacaoSemanaServiceTeste.java:813)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveCriarProgramacaoParaNovaData -- Time elapsed: 0.032 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:31)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:231)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveCriarProgramacaoParaNovaData(ProgramacaoSemanaServiceTeste.java:51)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirRemoverParteQueNaoEstaNaProgramacao -- Time elapsed: 0 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirRemoverParteQueNaoEstaNaProgramacao(ProgramacaoSemanaServiceTeste.java:845)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirMaisDeSeisPartesVariaveis -- Time elapsed: 0.046 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirMaisDeSeisPartesVariaveis(ProgramacaoSemanaServiceTeste.java:436)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveAdicionarParteVariavelNaSemana -- Time elapsed: 0.023 s <<< ERROR!
+java.lang.IllegalStateException: Nenhuma parte variável cadastrada.
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveAdicionarParteVariavelNaSemana$4(ProgramacaoSemanaServiceTeste.java:301)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveAdicionarParteVariavelNaSemana(ProgramacaoSemanaServiceTeste.java:299)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRemoverParteVariavelDaSemana -- Time elapsed: 0.031 s <<< ERROR!
+java.lang.IllegalStateException: Nenhuma parte variável cadastrada.
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveRemoverParteVariavelDaSemana$7(ProgramacaoSemanaServiceTeste.java:355)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRemoverParteVariavelDaSemana(ProgramacaoSemanaServiceTeste.java:353)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRemoverParteVariavel -- Time elapsed: 0.016 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRemoverParteVariavel(ProgramacaoSemanaServiceTeste.java:1006)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirRemoverParteNaoConfigurada -- Time elapsed: 0.038 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirRemoverParteNaoConfigurada(ProgramacaoSemanaServiceTeste.java:602)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+
+br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.devePersistirRemocaoDaParteVariavel -- Time elapsed: 0 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.devePersistirRemocaoDaParteVariavel(ProgramacaoSemanaServiceTeste.java:1094)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+

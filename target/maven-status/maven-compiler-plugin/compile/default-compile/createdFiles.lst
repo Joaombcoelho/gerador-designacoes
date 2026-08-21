@@ -3,7 +3,6 @@ br\com\geradordesignacoes\model\TipoParte.class
 br\com\geradordesignacoes\service\SeletorPessoaService.class
 br\com\geradordesignacoes\model\SexoPermitido.class
 br\com\geradordesignacoes\view\escala\EscalaView.class
-br\com\geradordesignacoes\controller\PessoaController.class
 br\com\geradordesignacoes\service\GeradorEscala$MelhorDuplaDirigenteEstudo.class
 br\com\geradordesignacoes\service\BackupAutomaticoService.class
 br\com\geradordesignacoes\view\parte\ParteFormularioView$1.class
@@ -12,7 +11,6 @@ br\com\geradordesignacoes\model\Designacao$1.class
 br\com\geradordesignacoes\test\TesteGeradorEscala.class
 br\com\geradordesignacoes\dao\HistoricoDesignacoesDAO.class
 br\com\geradordesignacoes\service\GeradorEscala$MelhorDuplaDemonstracao.class
-br\com\geradordesignacoes\view\escala\EscalaResultadoView.class
 br\com\geradordesignacoes\view\pessoa\PessoaFormularioView.class
 br\com\geradordesignacoes\model\Pessoa$1.class
 br\com\geradordesignacoes\service\ControleDesignacoes.class
@@ -25,7 +23,6 @@ br\com\geradordesignacoes\model\TipoParticipacao.class
 br\com\geradordesignacoes\model\StatusEscala.class
 br\com\geradordesignacoes\view\pessoa\PessoaView.class
 br\com\geradordesignacoes\test\TesteHistoricoInfluenciaSelecao.class
-br\com\geradordesignacoes\database\ScriptExecutor.class
 br\com\geradordesignacoes\model\Parte.class
 br\com\geradordesignacoes\service\BackupService.class
 br\com\geradordesignacoes\controller\HistoricoController.class
@@ -38,7 +35,6 @@ br\com\geradordesignacoes\model\ResultadoAvaliacaoPessoa.class
 br\com\geradordesignacoes\database\BackupDatabase.class
 br\com\geradordesignacoes\test\TesteRankingAvaliacao.class
 br\com\geradordesignacoes\database\ConnectionFactory.class
-br\com\geradordesignacoes\controller\ParteController.class
 br\com\geradordesignacoes\MainApp.class
 br\com\geradordesignacoes\model\Designacao.class
 br\com\geradordesignacoes\model\Privilegio.class
@@ -61,6 +57,7 @@ br\com\geradordesignacoes\test\TesteHistoricoDesignacoes.class
 br\com\geradordesignacoes\view\historico\HistoricoView.class
 br\com\geradordesignacoes\service\ParteService.class
 br\com\geradordesignacoes\service\AvaliadorPessoaService.class
+br\com\geradordesignacoes\controller\ProgramacaoController.class
 br\com\geradordesignacoes\model\Sexo.class
 br\com\geradordesignacoes\model\Escala.class
 br\com\geradordesignacoes\service\HistoricoDesignacoesService.class

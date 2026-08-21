@@ -14,18 +14,21 @@ public class ParteDAO {
     public Parte salvar(Parte parte) {
 
         String sql = """
-                INSERT INTO parte (
-                    nome,
-                    tipo,
-                    privilegio_minimo,
-                    exige_ajudante,
-                    sexo_permitido,
-                    quantidade_minima_participantes,
-                    gera_formulario,
-                    nivel_leitura_minimo
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """;
+        INSERT INTO parte (
+            nome,
+            tipo,
+            privilegio_minimo,
+            exige_ajudante,
+            sexo_permitido,
+            quantidade_minima_participantes,
+            gera_formulario,
+            nivel_leitura_minimo,
+            secao,
+            tipo_variacao,
+            possui_tema
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
 
         try (
@@ -86,6 +89,9 @@ public class ParteDAO {
                                     parte.getQuantidadeMinimaParticipantes(),
                                     parte.geraFormulario(),
                                     parte.getNivelLeituraMinimo(),
+                                    parte.getSecao(),
+                                    parte.getTipoVariacao(),
+                                    parte.possuiTema(),
                                     parte.getParticipacoesNecessarias()
                             );
 
@@ -238,18 +244,21 @@ public class ParteDAO {
 
 
         String sql = """
-                UPDATE parte
-                SET
-                    nome = ?,
-                    tipo = ?,
-                    privilegio_minimo = ?,
-                    exige_ajudante = ?,
-                    sexo_permitido = ?,
-                    quantidade_minima_participantes = ?,
-                    gera_formulario = ?,
-                    nivel_leitura_minimo = ?
-                WHERE id = ?
-                """;
+        UPDATE parte
+        SET
+            nome = ?,
+            tipo = ?,
+            privilegio_minimo = ?,
+            exige_ajudante = ?,
+            sexo_permitido = ?,
+            quantidade_minima_participantes = ?,
+            gera_formulario = ?,
+            nivel_leitura_minimo = ?,
+            secao = ?,
+            tipo_variacao = ?,
+            possui_tema = ?
+        WHERE id = ?
+        """;
 
 
         try(
@@ -276,7 +285,7 @@ public class ParteDAO {
 
 
                 statement.setInt(
-                        9,
+                        12,
                         parte.getId()
                 );
 
@@ -371,6 +380,25 @@ public class ParteDAO {
         statement.setString(
                 8,
                 parte.getNivelLeituraMinimo().name()
+        );
+
+        statement.setString(
+                9,
+                parte.getSecao() == null
+                        ? null
+                        : parte.getSecao().name()
+        );
+
+        statement.setString(
+                10,
+                parte.getTipoVariacao() == null
+                        ? null
+                        : parte.getTipoVariacao().name()
+        );
+
+        statement.setBoolean(
+                11,
+                parte.possuiTema()
         );
     }
 

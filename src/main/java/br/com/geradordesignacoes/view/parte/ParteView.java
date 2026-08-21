@@ -102,10 +102,33 @@ public class ParteView {
         );
 
 
+        TableColumn<Parte, String> colunaVariacao =
+                new TableColumn<>("Variação");
+
+        colunaVariacao.setCellValueFactory(
+                data -> {
+
+                    if (data.getValue().getTipoVariacao() == null) {
+
+                        return new javafx.beans.property.SimpleStringProperty(
+                                ""
+                        );
+                    }
+
+                    return new javafx.beans.property.SimpleStringProperty(
+                            data.getValue()
+                                    .getTipoVariacao()
+                                    .toString()
+                    );
+                }
+        );
+
+
         tabela.getColumns().addAll(
                 colunaNome,
                 colunaTipo,
-                colunaPrivilegio
+                colunaPrivilegio,
+                colunaVariacao
         );
 
 
@@ -125,6 +148,7 @@ public class ParteView {
                 parteDAO.listarTodos()
         );
     }
+
 
     private void abrirFormulario(Parte parte) {
 
@@ -225,11 +249,11 @@ public class ParteView {
         return root;
     }
 
+
     private void voltarParaTabela() {
 
         carregarDados();
 
         root.setCenter(tabela);
-
     }
 }

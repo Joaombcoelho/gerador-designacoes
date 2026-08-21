@@ -48,56 +48,73 @@ public class ProgramacaoSemanaDAO {
                         )
         ) {
 
-            statement.setDate(
-                    1,
-                    Date.valueOf(
-                            programacaoSemana.data()
-                    )
-            );
+            connection.setAutoCommit(false);
 
 
-            statement.executeUpdate();
+            try {
+
+                statement.setDate(
+                        1,
+                        Date.valueOf(
+                                programacaoSemana.data()
+                        )
+                );
 
 
-            int id;
+                statement.executeUpdate();
 
 
-            try (
-                    ResultSet generatedKeys =
-                            statement.getGeneratedKeys()
-            ) {
+                int id;
 
-                if (!generatedKeys.next()) {
 
-                    throw new RuntimeException(
-                            "Não foi possível obter o ID " +
-                                    "da programação semanal."
+                try (
+                        ResultSet generatedKeys =
+                                statement.getGeneratedKeys()
+                ) {
+
+                    if (!generatedKeys.next()) {
+
+                        throw new SQLException(
+                                "Não foi possível obter o ID " +
+                                        "da programação semanal."
+                        );
+                    }
+
+
+                    id =
+                            generatedKeys.getInt(1);
+                }
+
+
+                for (
+                        ProgramacaoParte programacaoParte :
+                        programacaoSemana.partes()
+                ) {
+
+                    programacaoParteDAO.salvar(
+                            connection,
+                            id,
+                            programacaoParte
                     );
                 }
 
 
-                id =
-                        generatedKeys.getInt(1);
-            }
+                connection.commit();
 
 
-            for (
-                    ProgramacaoParte programacaoParte :
-                    programacaoSemana.partes()
-            ) {
-
-                programacaoParteDAO.salvar(
+                return new ProgramacaoSemana(
                         id,
-                        programacaoParte
+                        programacaoSemana.data(),
+                        programacaoSemana.partes()
                 );
+
+
+            } catch (Exception e) {
+
+                connection.rollback();
+
+                throw e;
             }
-
-
-            return new ProgramacaoSemana(
-                    id,
-                    programacaoSemana.data(),
-                    programacaoSemana.partes()
-            );
 
 
         } catch (SQLException e) {
@@ -154,6 +171,7 @@ public class ProgramacaoSemanaDAO {
 
                 List<ProgramacaoParte> partes =
                         programacaoParteDAO.listarPorSemana(
+                                connection,
                                 id
                         );
 

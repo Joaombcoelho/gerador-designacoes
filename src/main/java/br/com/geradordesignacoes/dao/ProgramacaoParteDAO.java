@@ -29,6 +29,33 @@ public class ProgramacaoParteDAO {
             ProgramacaoParte programacaoParte
     ) {
 
+        try (
+                Connection connection =
+                        ConnectionFactory.getConnection()
+        ) {
+
+            salvar(
+                    connection,
+                    programacaoSemanaId,
+                    programacaoParte
+            );
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao salvar parte da programação.",
+                    e
+            );
+        }
+    }
+
+
+    public void salvar(
+            Connection connection,
+            int programacaoSemanaId,
+            ProgramacaoParte programacaoParte
+    ) throws SQLException {
+
         String sql = """
             INSERT INTO programacao_parte (
                 programacao_semana_id,
@@ -41,9 +68,6 @@ public class ProgramacaoParteDAO {
 
 
         try (
-                Connection connection =
-                        ConnectionFactory.getConnection();
-
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
@@ -70,15 +94,8 @@ public class ProgramacaoParteDAO {
                     programacaoParte.getTema()
             );
 
+
             statement.executeUpdate();
-
-
-        } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Erro ao salvar parte da programação.",
-                    e
-            );
         }
     }
 
@@ -140,6 +157,31 @@ public class ProgramacaoParteDAO {
             int programacaoSemanaId
     ) {
 
+        try (
+                Connection connection =
+                        ConnectionFactory.getConnection()
+        ) {
+
+            return listarPorSemana(
+                    connection,
+                    programacaoSemanaId
+            );
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao listar partes da programação.",
+                    e
+            );
+        }
+    }
+
+
+    public List<ProgramacaoParte> listarPorSemana(
+            Connection connection,
+            int programacaoSemanaId
+    ) throws SQLException {
+
         String sql = """
             SELECT
                 id,
@@ -157,9 +199,6 @@ public class ProgramacaoParteDAO {
 
 
         try (
-                Connection connection =
-                        ConnectionFactory.getConnection();
-
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
@@ -208,19 +247,12 @@ public class ProgramacaoParteDAO {
                     );
                 }
             }
-
-
-        } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Erro ao listar partes da programação.",
-                    e
-            );
         }
 
 
         return partes;
     }
+
 
     public void excluir(
             int programacaoSemanaId,
@@ -228,10 +260,10 @@ public class ProgramacaoParteDAO {
     ) {
 
         String sql = """
-        DELETE FROM programacao_parte
-        WHERE programacao_semana_id = ?
-          AND parte_id = ?
-        """;
+            DELETE FROM programacao_parte
+            WHERE programacao_semana_id = ?
+              AND parte_id = ?
+            """;
 
 
         try (
@@ -274,6 +306,7 @@ public class ProgramacaoParteDAO {
         }
     }
 
+
     public void excluirPorSemana(
             int programacaoSemanaId
     ) {
@@ -296,6 +329,7 @@ public class ProgramacaoParteDAO {
                     1,
                     programacaoSemanaId
             );
+
 
             statement.executeUpdate();
 

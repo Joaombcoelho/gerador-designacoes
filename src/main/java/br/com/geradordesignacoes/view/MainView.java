@@ -8,6 +8,8 @@ import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
+import br.com.geradordesignacoes.controller.ProgramacaoController;
+import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,6 +40,10 @@ public class MainView {
             new EscalaView();
     private final HistoricoView historicoView =
             new HistoricoView();
+    private final ProgramacaoView programacaoView =
+            new ProgramacaoView();
+
+    private final ProgramacaoController programacaoController;
 
 
     public MainView() {
@@ -55,6 +61,11 @@ public class MainView {
         pessoaView =
                 new PessoaView(
                         pessoaService
+                );
+
+        programacaoController =
+                new ProgramacaoController(
+                        programacaoView
                 );
 
         criarMenu();
@@ -162,6 +173,28 @@ public class MainView {
                 itemPartes
         );
 
+        // =====================================================
+        // PROGRAMAÇÃO
+        // =====================================================
+
+        Menu menuProgramacao =
+                new Menu("Programação");
+
+        MenuItem itemProgramacao =
+                new MenuItem("Programação Semanal");
+
+
+        itemProgramacao.setOnAction(
+                event ->
+                        mostrarTela(
+                                programacaoView.getView()
+                        )
+        );
+
+
+        menuProgramacao.getItems().add(
+                itemProgramacao
+        );
 
         // =====================================================
         // ESCALA
@@ -245,6 +278,7 @@ public class MainView {
         menuBar.getMenus().addAll(
                 menuArquivo,
                 menuCadastros,
+                menuProgramacao,
                 menuEscala,
                 menuHistorico,
                 menuAjuda
@@ -360,9 +394,18 @@ public class MainView {
                         "Histórico"
                 );
 
+        Button botaoProgramacao =
+                new Button(
+                        "Programação"
+                );
+
 
         configurarBotaoPrincipal(
                 botaoGerarEscala
+        );
+
+        configurarBotaoPrincipal(
+                botaoProgramacao
         );
 
         configurarBotaoPrincipal(
@@ -385,6 +428,12 @@ public class MainView {
                         )
         );
 
+        botaoProgramacao.setOnAction(
+                event ->
+                        mostrarTela(
+                                programacaoView.getView()
+                        )
+        );
 
         botaoPessoas.setOnAction(
                 event ->
@@ -423,6 +472,7 @@ public class MainView {
 
         botoes.getChildren().addAll(
                 botaoGerarEscala,
+                botaoProgramacao,
                 botaoPessoas,
                 botaoPartes,
                 botaoHistorico

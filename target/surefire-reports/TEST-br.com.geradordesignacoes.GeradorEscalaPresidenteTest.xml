@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="3.692" tests="3" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="5.913" tests="3" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="22"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="BR"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-22\bin"/>
-    <property name="sun.java.command" value="C:\Users\João Manoel\AppData\Local\Temp\surefire14979592166522754707\surefirebooter-20260819173251668_3.jar C:\Users\João Manoel\AppData\Local\Temp\surefire14979592166522754707 2026-08-19T17-32-51_328-jvmRun1 surefire-20260819173251668_1tmp surefire_0-20260819173251668_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\João Manoel\AppData\Local\Temp\surefire221012554630573092\surefirebooter-20260820210606458_3.jar C:\Users\João Manoel\AppData\Local\Temp\surefire221012554630573092 2026-08-20T21-06-04_447-jvmRun1 surefire-20260820210606458_1tmp surefire_0-20260820210606458_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\target\test-classes;D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\target\classes;C:\Users\João Manoel\.m2\repository\org\xerial\sqlite-jdbc\3.50.3.0\sqlite-jdbc-3.50.3.0.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-controls\21.0.7\javafx-controls-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-controls\21.0.7\javafx-controls-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-graphics\21.0.7\javafx-graphics-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-graphics\21.0.7\javafx-graphics-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-base\21.0.7\javafx-base-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-base\21.0.7\javafx-base-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-fxml\21.0.7\javafx-fxml-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-fxml\21.0.7\javafx-fxml-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter\5.10.2\junit-jupiter-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\João Manoel\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\João Manoel\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;C:\Users\João Manoel\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\João Manoel\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\João Manoel\AppData\Local\Temp\surefire14979592166522754707\surefirebooter-20260819173251668_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\João Manoel\AppData\Local\Temp\surefire221012554630573092\surefirebooter-20260820210606458_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="22.0.2+9-70"/>
@@ -58,16 +58,19 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="66.0"/>
   </properties>
-  <testcase name="naoDeveDesignarPresidenteMulherOuNaoAnciao" classname="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="1.299">
+  <testcase name="naoDeveDesignarPresidenteMulherOuNaoAnciao" classname="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="2.206">
     <system-out><![CDATA[Inicialização do banco concluída.
+Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
-  <testcase name="deveDesignarPresidenteComoParticipacaoFixaDaEscala" classname="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="1.272">
+  <testcase name="deveDesignarPresidenteComoParticipacaoFixaDaEscala" classname="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="1.55">
     <system-out><![CDATA[Inicialização do banco concluída.
+Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
-  <testcase name="deveAplicarHistoricoNaEscolhaDoPresidente" classname="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="1.119">
+  <testcase name="deveAplicarHistoricoNaEscolhaDoPresidente" classname="br.com.geradordesignacoes.GeradorEscalaPresidenteTest" time="2.157">
     <system-out><![CDATA[Inicialização do banco concluída.
+Inicialização do banco concluída.
 ]]></system-out>
   </testcase>
 </testsuite>
