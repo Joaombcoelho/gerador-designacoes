@@ -1,5 +1,6 @@
 package br.com.geradordesignacoes.view;
 
+import br.com.geradordesignacoes.controller.EscalaController;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.BackupDatabase;
 import br.com.geradordesignacoes.database.RestaurarDatabase;
@@ -43,6 +44,8 @@ public class MainView {
     private final ProgramacaoView programacaoView =
             new ProgramacaoView();
 
+    private final EscalaController escalaController;
+
     private final ProgramacaoController programacaoController;
 
 
@@ -63,9 +66,15 @@ public class MainView {
                         pessoaService
                 );
 
+        escalaController =
+                new EscalaController(
+                        escalaView
+                );
+
         programacaoController =
                 new ProgramacaoController(
-                        programacaoView
+                        programacaoView,
+                        escalaController
                 );
 
         criarMenu();

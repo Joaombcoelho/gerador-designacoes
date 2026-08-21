@@ -8,7 +8,9 @@ import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -613,5 +615,40 @@ public class ProgramacaoSemanaService {
 
         return programacao
                 .possuiQuantidadeValidaDePartesVariaveis();
+    }
+    public List<ProgramacaoSemana> listarSemanasDoMes(
+            YearMonth mes
+    ) {
+
+        if (mes == null) {
+            throw new IllegalArgumentException(
+                    "O mês não pode ser nulo."
+            );
+        }
+
+        List<ProgramacaoSemana> semanas =
+                new ArrayList<>();
+
+        LocalDate data = mes.atDay(1);
+
+        while (
+                data.getMonth() == mes.getMonth()
+                        && semanas.size() < 4
+        ) {
+
+            if (data.getDayOfWeek() == DayOfWeek.THURSDAY) {
+
+                ProgramacaoSemana programacao =
+                        programacaoSemanaDAO.buscarPorData(data);
+
+                if (programacao != null) {
+                    semanas.add(programacao);
+                }
+            }
+
+            data = data.plusDays(1);
+        }
+
+        return semanas;
     }
 }

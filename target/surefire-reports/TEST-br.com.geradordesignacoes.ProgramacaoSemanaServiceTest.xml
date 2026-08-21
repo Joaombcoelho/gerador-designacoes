@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.655" tests="34" errors="17" skipped="0" failures="6">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="1.554" tests="34" errors="17" skipped="0" failures="6">
   <properties>
     <property name="java.specification.version" value="22"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="BR"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-22\bin"/>
-    <property name="sun.java.command" value="C:\Users\João Manoel\AppData\Local\Temp\surefire221012554630573092\surefirebooter-20260820210606458_3.jar C:\Users\João Manoel\AppData\Local\Temp\surefire221012554630573092 2026-08-20T21-06-04_447-jvmRun1 surefire-20260820210606458_1tmp surefire_0-20260820210606458_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\João Manoel\AppData\Local\Temp\surefire11523813764970024638\surefirebooter-20260821162441217_3.jar C:\Users\João Manoel\AppData\Local\Temp\surefire11523813764970024638 2026-08-21T16-24-40_620-jvmRun1 surefire-20260821162441217_1tmp surefire_0-20260821162441217_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\target\test-classes;D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\target\classes;C:\Users\João Manoel\.m2\repository\org\xerial\sqlite-jdbc\3.50.3.0\sqlite-jdbc-3.50.3.0.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-controls\21.0.7\javafx-controls-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-controls\21.0.7\javafx-controls-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-graphics\21.0.7\javafx-graphics-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-graphics\21.0.7\javafx-graphics-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-base\21.0.7\javafx-base-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-base\21.0.7\javafx-base-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-fxml\21.0.7\javafx-fxml-21.0.7.jar;C:\Users\João Manoel\.m2\repository\org\openjfx\javafx-fxml\21.0.7\javafx-fxml-21.0.7-win.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter\5.10.2\junit-jupiter-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\João Manoel\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\João Manoel\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\João Manoel\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;C:\Users\João Manoel\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\João Manoel\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\João Manoel\AppData\Local\Temp\surefire221012554630573092\surefirebooter-20260820210606458_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\João Manoel\AppData\Local\Temp\surefire11523813764970024638\surefirebooter-20260821162441217_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="22.0.2+9-70"/>
@@ -58,7 +58,7 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="66.0"/>
   </properties>
-  <testcase name="deveCriarPartesNaOrdemCorreta" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.054">
+  <testcase name="deveCriarPartesNaOrdemCorreta" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.07">
     <failure message="expected: &lt;false&gt; but was: &lt;true&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -72,8 +72,8 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></failure>
   </testcase>
-  <testcase name="deveRetornarFalseQuandoPossuirMenosDeTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0"/>
-  <testcase name="deveRetornarTrueComExatamenteTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.015">
+  <testcase name="deveRetornarFalseQuandoPossuirMenosDeTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.008"/>
+  <testcase name="deveRetornarTrueComExatamenteTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.025">
     <error message="Index 0 out of bounds for length 0" type="java.lang.ArrayIndexOutOfBoundsException"><![CDATA[java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
 	at java.base/java.util.ImmutableCollections$ListN.get(ImmutableCollections.java:687)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarTrueComExatamenteTresPartesVariaveis(ProgramacaoSemanaServiceTeste.java:898)
@@ -82,8 +82,8 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="partesDevemSerCriadasSemTemaInicialmente" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.017"/>
-  <testcase name="deveRetornarVerdadeiroComTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.031">
+  <testcase name="partesDevemSerCriadasSemTemaInicialmente" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.045"/>
+  <testcase name="deveRetornarVerdadeiroComTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.049">
     <failure message="expected: &lt;3&gt; but was: &lt;0&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <3> but was: <0>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -97,20 +97,20 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></failure>
   </testcase>
-  <testcase name="naoDevePermitirRemoverParteComIdInexistente" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.037"/>
-  <testcase name="deveRetornarFalseQuandoNaoExistirProgramacao" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0"/>
-  <testcase name="deveAlterarTemaDaParte" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.031">
+  <testcase name="naoDevePermitirRemoverParteComIdInexistente" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.054"/>
+  <testcase name="deveRetornarFalseQuandoNaoExistirProgramacao" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.008"/>
+  <testcase name="deveAlterarTemaDaParte" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.054">
     <error message="Parte da programação não encontrada." type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: Parte da programação não encontrada.
-	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.lambda$definirTema$1(ProgramacaoSemanaService.java:109)
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.lambda$definirTema$1(ProgramacaoSemanaService.java:111)
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
-	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.definirTema(ProgramacaoSemanaService.java:107)
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.definirTema(ProgramacaoSemanaService.java:109)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveAlterarTemaDaParte(ProgramacaoSemanaServiceTeste.java:237)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveRetornarFalsoQuandoProgramacaoPossuiMenosDeTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.032">
+  <testcase name="deveRetornarFalsoQuandoProgramacaoPossuiMenosDeTresPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.074">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRetornarFalsoQuandoProgramacaoPossuiMenosDeTresPartesVariaveis(ProgramacaoSemanaServiceTeste.java:632)
@@ -119,21 +119,21 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveDefinirTemaDaParte" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.037">
+  <testcase name="deveDefinirTemaDaParte" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.151">
     <error message="Parte da programação não encontrada." type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: Parte da programação não encontrada.
-	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.lambda$definirTema$1(ProgramacaoSemanaService.java:109)
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.lambda$definirTema$1(ProgramacaoSemanaService.java:111)
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
-	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.definirTema(ProgramacaoSemanaService.java:107)
+	at br.com.geradordesignacoes.service.ProgramacaoSemanaService.definirTema(ProgramacaoSemanaService.java:109)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveDefinirTemaDaParte(ProgramacaoSemanaServiceTeste.java:198)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="naoDevePermitirRemoverParteComDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.016"/>
-  <testcase name="naoDevePermitirAdicionarParteComDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0"/>
-  <testcase name="naoDevePermitirRemoverParteComIdNulo" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0"/>
-  <testcase name="deveRetornarTrueComExatamenteSeisPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0">
+  <testcase name="naoDevePermitirRemoverParteComDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.003"/>
+  <testcase name="naoDevePermitirAdicionarParteComDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.002"/>
+  <testcase name="naoDevePermitirRemoverParteComIdNulo" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.007"/>
+  <testcase name="deveRetornarTrueComExatamenteSeisPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.032">
     <failure message="É necessário possuir pelo menos 6 partes variáveis cadastradas. ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: É necessário possuir pelo menos 6 partes variáveis cadastradas. ==> expected: <true> but was: <false>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -146,8 +146,8 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></failure>
   </testcase>
-  <testcase name="deveRejeitarDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0"/>
-  <testcase name="deveImpedirAdicionarParteComDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0">
+  <testcase name="deveRejeitarDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.019"/>
+  <testcase name="deveImpedirAdicionarParteComDataNula" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.049">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirAdicionarParteComDataNula(ProgramacaoSemanaServiceTeste.java:695)
@@ -156,7 +156,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveImpedirAdicionarParteFixaComoVariavel" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.032">
+  <testcase name="deveImpedirAdicionarParteFixaComoVariavel" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.126">
     <error message="Nenhuma parte fixa cadastrada." type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: Nenhuma parte fixa cadastrada.
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveImpedirAdicionarParteFixaComoVariavel$13(ProgramacaoSemanaServiceTeste.java:492)
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
@@ -166,8 +166,8 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveRecuperarProgramacaoExistente" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.037"/>
-  <testcase name="naoDevePermitirAdicionarParteVariavelDuplicada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.016">
+  <testcase name="deveRecuperarProgramacaoExistente" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.051"/>
+  <testcase name="naoDevePermitirAdicionarParteVariavelDuplicada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.024">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirAdicionarParteVariavelDuplicada(ProgramacaoSemanaServiceTeste.java:731)
@@ -176,7 +176,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveImpedirRemoverParteFixa" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.016">
+  <testcase name="deveImpedirRemoverParteFixa" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.061">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirRemoverParteFixa(ProgramacaoSemanaServiceTeste.java:571)
@@ -185,7 +185,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="devePersistirParteVariavelAdicionada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.019">
+  <testcase name="devePersistirParteVariavelAdicionada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.007">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.devePersistirParteVariavelAdicionada(ProgramacaoSemanaServiceTeste.java:1060)
@@ -194,7 +194,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="naoDevePermitirAdicionarParteFixa" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.016">
+  <testcase name="naoDevePermitirAdicionarParteFixa" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.01">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirAdicionarParteFixa(ProgramacaoSemanaServiceTeste.java:793)
@@ -203,7 +203,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveImpedirAdicionarParteVariavelDuplicada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.033">
+  <testcase name="deveImpedirAdicionarParteVariavelDuplicada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.074">
     <error message="Nenhuma parte variável cadastrada." type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: Nenhuma parte variável cadastrada.
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveImpedirAdicionarParteVariavelDuplicada$16(ProgramacaoSemanaServiceTeste.java:532)
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
@@ -213,7 +213,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="naoDevePermitirMaisDeSeisPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0">
+  <testcase name="naoDevePermitirMaisDeSeisPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.005">
     <failure message="É necessário possuir pelo menos 7 partes variáveis cadastradas. ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: É necessário possuir pelo menos 7 partes variáveis cadastradas. ==> expected: <true> but was: <false>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -226,7 +226,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></failure>
   </testcase>
-  <testcase name="deveCriarProgramacaoParaNovaData" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.032">
+  <testcase name="deveCriarProgramacaoParaNovaData" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.049">
     <failure message="expected: &lt;false&gt; but was: &lt;true&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <false> but was: <true>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -240,7 +240,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></failure>
   </testcase>
-  <testcase name="naoDevePermitirRemoverParteQueNaoEstaNaProgramacao" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0">
+  <testcase name="naoDevePermitirRemoverParteQueNaoEstaNaProgramacao" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.01">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.naoDevePermitirRemoverParteQueNaoEstaNaProgramacao(ProgramacaoSemanaServiceTeste.java:845)
@@ -249,7 +249,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveImpedirMaisDeSeisPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.046">
+  <testcase name="deveImpedirMaisDeSeisPartesVariaveis" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.041">
     <failure message="expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -263,8 +263,8 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></failure>
   </testcase>
-  <testcase name="naoDevePermitirAdicionarParteComIdNulo" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0"/>
-  <testcase name="deveAdicionarParteVariavelNaSemana" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.023">
+  <testcase name="naoDevePermitirAdicionarParteComIdNulo" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.005"/>
+  <testcase name="deveAdicionarParteVariavelNaSemana" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.078">
     <error message="Nenhuma parte variável cadastrada." type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: Nenhuma parte variável cadastrada.
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveAdicionarParteVariavelNaSemana$4(ProgramacaoSemanaServiceTeste.java:301)
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
@@ -274,7 +274,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveRemoverParteVariavelDaSemana" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.031">
+  <testcase name="deveRemoverParteVariavelDaSemana" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.056">
     <error message="Nenhuma parte variável cadastrada." type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: Nenhuma parte variável cadastrada.
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.lambda$deveRemoverParteVariavelDaSemana$7(ProgramacaoSemanaServiceTeste.java:355)
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
@@ -284,7 +284,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveRemoverParteVariavel" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.016">
+  <testcase name="deveRemoverParteVariavel" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.062">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveRemoverParteVariavel(ProgramacaoSemanaServiceTeste.java:1006)
@@ -293,7 +293,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveImpedirRemoverParteNaoConfigurada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.038">
+  <testcase name="deveImpedirRemoverParteNaoConfigurada" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.06">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.deveImpedirRemoverParteNaoConfigurada(ProgramacaoSemanaServiceTeste.java:602)
@@ -302,7 +302,7 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="devePersistirRemocaoDaParteVariavel" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0">
+  <testcase name="devePersistirRemocaoDaParteVariavel" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.016">
     <error message="No value present" type="java.util.NoSuchElementException"><![CDATA[java.util.NoSuchElementException: No value present
 	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
 	at br.com.geradordesignacoes.ProgramacaoSemanaServiceTest.devePersistirRemocaoDaParteVariavel(ProgramacaoSemanaServiceTeste.java:1094)
@@ -311,5 +311,5 @@
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
 ]]></error>
   </testcase>
-  <testcase name="deveImpedirAdicionarParteComIdNulo" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.0"/>
+  <testcase name="deveImpedirAdicionarParteComIdNulo" classname="br.com.geradordesignacoes.ProgramacaoSemanaServiceTest" time="0.008"/>
 </testsuite>

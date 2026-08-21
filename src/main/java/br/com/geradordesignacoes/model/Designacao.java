@@ -3,7 +3,13 @@ package br.com.geradordesignacoes.model;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public record Designacao(LocalDate data, Parte parte, Pessoa responsavel, Pessoa ajudante) {
+public record Designacao(
+        Integer id,
+        LocalDate data,
+        Parte parte,
+        Pessoa responsavel,
+        Pessoa ajudante
+) {
 
     public Designacao(
             LocalDate data,
@@ -11,6 +17,26 @@ public record Designacao(LocalDate data, Parte parte, Pessoa responsavel, Pessoa
             Pessoa responsavel,
             Pessoa ajudante
     ) {
+
+        this(
+                null,
+                data,
+                parte,
+                responsavel,
+                ajudante
+        );
+    }
+
+
+    public Designacao(
+            Integer id,
+            LocalDate data,
+            Parte parte,
+            Pessoa responsavel,
+            Pessoa ajudante
+    ) {
+
+        this.id = id;
 
         this.data = Objects.requireNonNull(
                 data,
@@ -26,7 +52,6 @@ public record Designacao(LocalDate data, Parte parte, Pessoa responsavel, Pessoa
                 responsavel,
                 "O responsável não pode ser nulo."
         );
-
 
         if (parte.getExigeAjudante()
                 && ajudante == null) {

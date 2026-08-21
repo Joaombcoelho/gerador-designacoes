@@ -214,4 +214,161 @@ class EscalaDAOTest extends BaseDAOTest {
         return new br.com.geradordesignacoes.dao.ParteDAO()
                 .salvar(parte);
     }
+
+    @Test
+    void deveCriarDesignacaoSemId() {
+
+        Pessoa pessoa =
+                criarPessoa();
+
+        Parte parte =
+                criarParte();
+
+        Designacao designacao =
+                new Designacao(
+                        LocalDate.now(),
+                        parte,
+                        pessoa,
+                        null
+                );
+
+        assertNull(
+                designacao.id()
+        );
+    }
+
+
+    @Test
+    void deveCriarDesignacaoComId() {
+
+        Pessoa pessoa =
+                criarPessoa();
+
+        Parte parte =
+                criarParte();
+
+        Designacao designacao =
+                new Designacao(
+                        10,
+                        LocalDate.now(),
+                        parte,
+                        pessoa,
+                        null
+                );
+
+        assertEquals(
+                10,
+                designacao.id()
+        );
+    }
+    @Test
+    void deveRecuperarIdDaDesignacaoAoBuscarEscala() {
+
+        Pessoa pessoa =
+                criarPessoa();
+
+        Parte parte =
+                criarParte();
+
+        Designacao designacao =
+                new Designacao(
+                        LocalDate.now(),
+                        parte,
+                        pessoa,
+                        null
+                );
+
+        Escala escala =
+                new Escala(
+                        LocalDate.now(),
+                        List.of(designacao)
+                );
+
+        Escala salva =
+                escalaDAO.salvar(escala);
+
+        Escala encontrada =
+                escalaDAO.buscarPorId(
+                        salva.getId()
+                ).orElseThrow();
+
+        Designacao designacaoEncontrada =
+                encontrada.getDesignacoes()
+                        .get(0);
+
+        assertNotNull(
+                designacaoEncontrada.id()
+        );
+
+        assertTrue(
+                designacaoEncontrada.id() > 0
+        );
+    }
+
+    @Test
+    void deveAtualizarDesignacao() {
+
+        Pessoa responsavelOriginal =
+                criarPessoa();
+
+        Pessoa novoResponsavel =
+                criarPessoa();
+
+        Parte parte =
+                criarParte();
+
+        Designacao designacao =
+                new Designacao(
+                        LocalDate.now(),
+                        parte,
+                        responsavelOriginal,
+                        null
+                );
+
+        Escala escala =
+                new Escala(
+                        LocalDate.now(),
+                        List.of(designacao)
+                );
+
+        Escala salva =
+                escalaDAO.salvar(escala);
+
+        Escala encontrada =
+                escalaDAO.buscarPorId(
+                        salva.getId()
+                ).orElseThrow();
+
+        Designacao designacaoSalva =
+                encontrada.getDesignacoes()
+                        .get(0);
+
+        assertNotNull(
+                designacaoSalva.id()
+        );
+
+        escalaDAO.atualizarDesignacao(
+                designacaoSalva.id(),
+                novoResponsavel.getId(),
+                null
+        );
+
+        Escala escalaAtualizada =
+                escalaDAO.buscarPorId(
+                        salva.getId()
+                ).orElseThrow();
+
+        Designacao designacaoAtualizada =
+                escalaAtualizada.getDesignacoes()
+                        .get(0);
+
+        assertEquals(
+                novoResponsavel.getId(),
+                designacaoAtualizada.responsavel().getId()
+        );
+
+        assertNull(
+                designacaoAtualizada.ajudante()
+        );
+    }
 }

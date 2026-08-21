@@ -3,7 +3,6 @@ br\com\geradordesignacoes\model\TipoParte.class
 br\com\geradordesignacoes\service\SeletorPessoaService.class
 br\com\geradordesignacoes\model\SexoPermitido.class
 br\com\geradordesignacoes\view\escala\EscalaView.class
-br\com\geradordesignacoes\view\programacao\ProgramacaoView$3.class
 br\com\geradordesignacoes\service\GeradorEscala$MelhorDuplaDirigenteEstudo.class
 br\com\geradordesignacoes\service\BackupAutomaticoService.class
 br\com\geradordesignacoes\view\parte\ParteFormularioView$1.class
@@ -24,6 +23,7 @@ br\com\geradordesignacoes\model\TipoParticipacao.class
 br\com\geradordesignacoes\model\StatusEscala.class
 br\com\geradordesignacoes\view\pessoa\PessoaView.class
 br\com\geradordesignacoes\test\TesteHistoricoInfluenciaSelecao.class
+br\com\geradordesignacoes\view\historico\HistoricoView$1.class
 br\com\geradordesignacoes\model\Parte.class
 br\com\geradordesignacoes\service\BackupService.class
 br\com\geradordesignacoes\controller\HistoricoController.class

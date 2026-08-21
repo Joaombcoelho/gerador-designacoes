@@ -91,6 +91,7 @@ public class EscalaDAO {
         }
     }
 
+
     public Optional<Escala> buscarPorId(Integer id) {
 
         String sql = """
@@ -116,7 +117,6 @@ public class EscalaDAO {
                         LocalDate.parse(
                                 resultSet.getString("data")
                         );
-
 
                 Escala escala = new Escala(
                         data,
@@ -164,6 +164,7 @@ public class EscalaDAO {
         }
     }
 
+
     public List<Escala> listarTodas() {
 
         String sql = """
@@ -197,6 +198,7 @@ public class EscalaDAO {
         return escalas;
     }
 
+
     public void excluir(Integer escalaId) {
 
         if (escalaId == null) {
@@ -227,6 +229,85 @@ public class EscalaDAO {
         }
     }
 
+
+    public void atualizarDesignacao(
+            Integer designacaoId,
+            Integer responsavelId,
+            Integer ajudanteId
+    ) {
+
+        if (designacaoId == null) {
+            throw new IllegalArgumentException(
+                    "ID da designação não pode ser nulo."
+            );
+        }
+
+        if (responsavelId == null) {
+            throw new IllegalArgumentException(
+                    "ID do responsável não pode ser nulo."
+            );
+        }
+
+        String sql = """
+                UPDATE designacao
+                SET responsavel_id = ?,
+                    ajudante_id = ?
+                WHERE id = ?
+                """;
+
+        try (
+                Connection connection =
+                        ConnectionFactory.getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(
+                    1,
+                    responsavelId
+            );
+
+            if (ajudanteId == null) {
+
+                statement.setNull(
+                        2,
+                        java.sql.Types.INTEGER
+                );
+
+            } else {
+
+                statement.setInt(
+                        2,
+                        ajudanteId
+                );
+            }
+
+            statement.setInt(
+                    3,
+                    designacaoId
+            );
+
+            int linhasAfetadas =
+                    statement.executeUpdate();
+
+            if (linhasAfetadas != 1) {
+
+                throw new RuntimeException(
+                        "Designação não encontrada."
+                );
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao atualizar designação.",
+                    e
+            );
+        }
+    }
+
+
     private void salvarDesignacoes(
             Connection connection,
             Escala escala
@@ -247,13 +328,30 @@ public class EscalaDAO {
 
             for (Designacao designacao : escala.getDesignacoes()) {
 
-                statement.setInt(1, escala.getId());
-                statement.setInt(2, designacao.parte().getId());
-                statement.setInt(3, designacao.responsavel().getId());
+                statement.setInt(
+                        1,
+                        escala.getId()
+                );
+
+                statement.setInt(
+                        2,
+                        designacao.parte().getId()
+                );
+
+                statement.setInt(
+                        3,
+                        designacao.responsavel().getId()
+                );
 
                 if (designacao.ajudante() == null) {
-                    statement.setNull(4, java.sql.Types.INTEGER);
+
+                    statement.setNull(
+                            4,
+                            java.sql.Types.INTEGER
+                    );
+
                 } else {
+
                     statement.setInt(
                             4,
                             designacao.ajudante().getId()
@@ -265,6 +363,7 @@ public class EscalaDAO {
         }
     }
 
+
     private List<Designacao> buscarDesignacoes(
             Connection connection,
             Integer escalaId,
@@ -273,6 +372,7 @@ public class EscalaDAO {
 
         String sql = """
                 SELECT
+                    id,
                     parte_id,
                     responsavel_id,
                     ajudante_id
@@ -291,23 +391,32 @@ public class EscalaDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setInt(1, escalaId);
+            statement.setInt(
+                    1,
+                    escalaId
+            );
 
             try (ResultSet resultSet = statement.executeQuery()) {
 
                 while (resultSet.next()) {
 
-                    Parte parte = parteDAO.buscarPorId(
-                            resultSet.getInt("parte_id")
-                    ).orElseThrow(() ->
-                            new RuntimeException("Parte não encontrada.")
-                    );
+                    Parte parte =
+                            parteDAO.buscarPorId(
+                                    resultSet.getInt("parte_id")
+                            ).orElseThrow(() ->
+                                    new RuntimeException(
+                                            "Parte não encontrada."
+                                    )
+                            );
 
-                    Pessoa responsavel = pessoaDAO.buscarPorId(
-                            resultSet.getInt("responsavel_id")
-                    ).orElseThrow(() ->
-                            new RuntimeException("Responsável não encontrado.")
-                    );
+                    Pessoa responsavel =
+                            pessoaDAO.buscarPorId(
+                                    resultSet.getInt("responsavel_id")
+                            ).orElseThrow(() ->
+                                    new RuntimeException(
+                                            "Responsável não encontrado."
+                                    )
+                            );
 
                     Pessoa ajudante = null;
 
@@ -316,15 +425,19 @@ public class EscalaDAO {
 
                     if (!resultSet.wasNull()) {
 
-                        ajudante = pessoaDAO.buscarPorId(
-                                ajudanteId
-                        ).orElseThrow(() ->
-                                new RuntimeException("Ajudante não encontrado.")
-                        );
+                        ajudante =
+                                pessoaDAO.buscarPorId(
+                                        ajudanteId
+                                ).orElseThrow(() ->
+                                        new RuntimeException(
+                                                "Ajudante não encontrado."
+                                        )
+                                );
                     }
 
                     designacoes.add(
                             new Designacao(
+                                    resultSet.getInt("id"),
                                     data,
                                     parte,
                                     responsavel,
@@ -337,5 +450,4 @@ public class EscalaDAO {
 
         return designacoes;
     }
-
 }

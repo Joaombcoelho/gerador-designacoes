@@ -21,18 +21,20 @@ public class ProgramacaoController {
 
     private final ProgramacaoSemanaService service;
 
+    private final EscalaController escalaController;
 
-    /*
-     * Mantém as semanas atualmente exibidas.
-     */
     private final List<LocalDate> semanas;
 
 
     public ProgramacaoController(
-            ProgramacaoView view
+            ProgramacaoView view,
+            EscalaController escalaController
     ) {
 
         this.view = view;
+
+        this.escalaController =
+                escalaController;
 
         this.service =
                 new ProgramacaoSemanaService();
@@ -50,20 +52,12 @@ public class ProgramacaoController {
 
     private void registrarEventos() {
 
-        /*
-         * O DatePicker continua sendo usado,
-         * mas agora representa o mês.
-         */
         view.getCampoData()
                 .setOnAction(
                         event -> carregarMes()
                 );
 
 
-        /*
-         * Selecionar uma semana passa a carregar
-         * a programação daquela reunião.
-         */
         view.getListaSemanas()
                 .getSelectionModel()
                 .selectedItemProperty()
@@ -86,21 +80,19 @@ public class ProgramacaoController {
 
 
         /*
-         * Mantemos os eventos antigos.
+         * Agora a alteração da programação acontece
+         * diretamente através dos CheckBoxes.
          */
-        view.getBotaoAdicionar()
-                .setOnAction(
-                        event -> adicionarParte()
-                );
+        view.setOnParteSelecionadaChanged(
+                this::alterarParteSelecionada
+        );
 
 
-        view.getBotaoRemover()
-                .setOnAction(
-                        event -> removerParte()
-                );
-
-
-        view.getListaPartesSelecionadas()
+        /*
+         * Clicar em uma parte continua permitindo
+         * carregar o tema correspondente.
+         */
+        view.getListaPartes()
                 .getSelectionModel()
                 .selectedItemProperty()
                 .addListener(
@@ -113,6 +105,18 @@ public class ProgramacaoController {
                 .setOnAction(
                         event -> salvarTema()
                 );
+
+
+        view.getBotaoGerar()
+                .setOnAction(
+                        event -> gerarEscalas()
+                );
+
+
+        view.getBotaoSalvar()
+                .setOnAction(
+                        event -> salvarEscalas()
+                );
     }
 
 
@@ -124,7 +128,6 @@ public class ProgramacaoController {
 
 
         if (data == null) {
-
             return;
         }
 
@@ -135,12 +138,20 @@ public class ProgramacaoController {
 
         semanas.clear();
 
+
         semanas.addAll(
                 obterSemanasIniciais(mes)
         );
 
 
         atualizarSemanas();
+
+
+        /*
+         * Ao trocar de mês, ainda não existe
+         * uma escala gerada para o novo mês.
+         */
+        view.atualizarBotaoSalvar(false);
 
 
         if (!semanas.isEmpty()) {
@@ -169,13 +180,6 @@ public class ProgramacaoController {
                 mes.atDay(1);
 
 
-        /*
-         * A reunião semanal atualmente é considerada
-         * na quinta-feira.
-         *
-         * Procuramos as quatro primeiras quintas-feiras
-         * do mês.
-         */
         while (
                 data.getMonth()
                         == mes.getMonth()
@@ -228,14 +232,11 @@ public class ProgramacaoController {
     ) {
 
         if (data == null) {
-
             return;
         }
 
 
-        carregarProgramacao(
-                data
-        );
+        carregarProgramacao(data);
     }
 
 
@@ -257,9 +258,7 @@ public class ProgramacaoController {
         }
 
 
-        carregarProgramacao(
-                data
-        );
+        carregarProgramacao(data);
     }
 
 
@@ -273,18 +272,23 @@ public class ProgramacaoController {
                     service.obterOuCriar(data);
 
 
-            atualizarListas(
-                    programacao
-            );
+            atualizarListaPartes(programacao);
+
+
+            /*
+             * Ao entrar na configuração de uma semana,
+             * a geração anterior deixa de ser considerada
+             * como resultado atual.
+             */
+            view.atualizarBotaoSalvar(false);
 
 
             view.atualizarStatus(
                     "Configurando a reunião de "
-                            + data
-                            .format(
-                                    java.time.format.DateTimeFormatter
-                                            .ofPattern("dd/MM/yyyy")
-                            )
+                            + data.format(
+                            java.time.format.DateTimeFormatter
+                                    .ofPattern("dd/MM/yyyy")
+                    )
                             + "."
             );
 
@@ -301,7 +305,7 @@ public class ProgramacaoController {
     }
 
 
-    private void atualizarListas(
+    private void atualizarListaPartes(
             ProgramacaoSemana programacao
     ) {
 
@@ -309,43 +313,36 @@ public class ProgramacaoController {
                 service.listarPartesVariaveis();
 
 
-        List<Parte> partesSelecionadas =
-                programacao.partes()
-                        .stream()
-                        .filter(
-                                programacaoParte ->
-                                        programacaoParte
-                                                .getParte()
-                                                .getTipoVariacao()
-                                                == TipoVariacaoParte.VARIAVEL
-                        )
-                        .map(
-                                ProgramacaoParte::getParte
-                        )
-                        .toList();
+        /*
+         * Primeiro carregamos todas as partes variáveis.
+         */
+        view.carregarPartes(
+                partesVariaveis
+        );
 
 
-        view.getListaPartesSelecionadas()
-                .getItems()
-                .setAll(
-                        partesSelecionadas
-                );
-
-
-        List<Parte> partesDisponiveis =
-                partesVariaveis.stream()
-                        .filter(
-                                parte ->
-                                        !partesSelecionadas
-                                                .contains(parte)
-                        )
-                        .toList();
-
-
-        view.getListaPartesDisponiveis()
-                .getItems()
-                .setAll(
-                        partesDisponiveis
+        /*
+         * Depois marcamos somente as partes que
+         * pertencem à programação desta semana.
+         */
+        programacao.partes()
+                .stream()
+                .filter(
+                        programacaoParte ->
+                                programacaoParte
+                                        .getParte()
+                                        .getTipoVariacao()
+                                        == TipoVariacaoParte.VARIAVEL
+                )
+                .map(
+                        ProgramacaoParte::getParte
+                )
+                .forEach(
+                        parte ->
+                                view.marcarParte(
+                                        parte.getId(),
+                                        true
+                                )
                 );
 
 
@@ -356,6 +353,92 @@ public class ProgramacaoController {
         atualizarStatusSemana(
                 programacao.data()
         );
+    }
+
+
+    /**
+     * Adiciona ou remove uma parte da programação
+     * conforme o estado do CheckBox.
+     */
+    private void alterarParteSelecionada(
+            Parte parte
+    ) {
+
+        if (parte == null) {
+            return;
+        }
+
+
+        LocalDate data =
+                obterDataSelecionada();
+
+
+        if (data == null) {
+
+            view.atualizarStatus(
+                    "Selecione uma reunião."
+            );
+
+            return;
+        }
+
+
+        boolean selecionada =
+                view.isParteSelecionada(
+                        parte.getId()
+                );
+
+
+        try {
+
+            if (selecionada) {
+
+                service.adicionarParteVariavel(
+                        data,
+                        parte.getId()
+                );
+
+
+                view.atualizarStatus(
+                        "Parte adicionada à programação."
+                );
+
+            } else {
+
+                service.removerParteVariavel(
+                        data,
+                        parte.getId()
+                );
+
+
+                view.atualizarStatus(
+                        "Parte removida da programação."
+                );
+            }
+
+
+            atualizarStatusSemana(data);
+
+
+        } catch (Exception e) {
+
+            /*
+             * Se a operação falhar, desfazemos
+             * visualmente o CheckBox.
+             */
+            view.marcarParte(
+                    parte.getId(),
+                    !selecionada
+            );
+
+
+            view.atualizarStatus(
+                    "Não foi possível alterar a parte: "
+                            + e.getMessage()
+            );
+
+            e.printStackTrace();
+        }
     }
 
 
@@ -398,17 +481,20 @@ public class ProgramacaoController {
                     ultimaSemana.plusWeeks(1);
 
 
+            LocalDate dataMes =
+                    view.getCampoData()
+                            .getValue();
+
+
+            if (dataMes == null) {
+                return;
+            }
+
+
             YearMonth mes =
-                    YearMonth.from(
-                            view.getCampoData()
-                                    .getValue()
-                    );
+                    YearMonth.from(dataMes);
 
 
-            /*
-             * A nova semana deve pertencer ao
-             * mês selecionado.
-             */
             if (!YearMonth.from(novaSemana)
                     .equals(mes)) {
 
@@ -422,9 +508,7 @@ public class ProgramacaoController {
 
             if (!semanas.contains(novaSemana)) {
 
-                semanas.add(
-                        novaSemana
-                );
+                semanas.add(novaSemana);
             }
         }
 
@@ -450,7 +534,6 @@ public class ProgramacaoController {
     ) {
 
         if (!semanas.contains(data)) {
-
             return;
         }
 
@@ -473,9 +556,7 @@ public class ProgramacaoController {
 
         if (semanas.isEmpty()) {
 
-            view.atualizarBotaoGerar(
-                    false
-            );
+            view.atualizarBotaoGerar(false);
 
             return;
         }
@@ -503,137 +584,12 @@ public class ProgramacaoController {
 
 
         if (data != null) {
-
             return data;
         }
 
 
         return view.getCampoData()
                 .getValue();
-    }
-
-
-    private void adicionarParte() {
-
-        LocalDate data =
-                obterDataSelecionada();
-
-
-        if (data == null) {
-
-            view.atualizarStatus(
-                    "Selecione uma reunião."
-            );
-
-            return;
-        }
-
-
-        Parte parte =
-                view.getListaPartesDisponiveis()
-                        .getSelectionModel()
-                        .getSelectedItem();
-
-
-        if (parte == null) {
-
-            view.atualizarStatus(
-                    "Selecione uma parte para adicionar."
-            );
-
-            return;
-        }
-
-
-        try {
-
-            service.adicionarParteVariavel(
-                    data,
-                    parte.getId()
-            );
-
-
-            carregarProgramacao(
-                    data
-            );
-
-
-            view.atualizarStatus(
-                    "Parte adicionada à programação."
-            );
-
-
-        } catch (Exception e) {
-
-            view.atualizarStatus(
-                    "Erro ao adicionar parte: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-        }
-    }
-
-
-    private void removerParte() {
-
-        LocalDate data =
-                obterDataSelecionada();
-
-
-        if (data == null) {
-
-            view.atualizarStatus(
-                    "Selecione uma reunião."
-            );
-
-            return;
-        }
-
-
-        Parte parte =
-                view.getListaPartesSelecionadas()
-                        .getSelectionModel()
-                        .getSelectedItem();
-
-
-        if (parte == null) {
-
-            view.atualizarStatus(
-                    "Selecione uma parte para remover."
-            );
-
-            return;
-        }
-
-
-        try {
-
-            service.removerParteVariavel(
-                    data,
-                    parte.getId()
-            );
-
-
-            carregarProgramacao(
-                    data
-            );
-
-
-            view.atualizarStatus(
-                    "Parte removida da programação."
-            );
-
-
-        } catch (Exception e) {
-
-            view.atualizarStatus(
-                    "Erro ao remover parte: "
-                            + e.getMessage()
-            );
-
-            e.printStackTrace();
-        }
     }
 
 
@@ -655,7 +611,6 @@ public class ProgramacaoController {
 
 
         if (data == null) {
-
             return;
         }
 
@@ -721,7 +676,7 @@ public class ProgramacaoController {
 
 
         Parte parte =
-                view.getListaPartesSelecionadas()
+                view.getListaPartes()
                         .getSelectionModel()
                         .getSelectedItem();
 
@@ -730,6 +685,22 @@ public class ProgramacaoController {
 
             view.atualizarStatus(
                     "Selecione uma parte para informar o tema."
+            );
+
+            return;
+        }
+
+
+        /*
+         * Não permite salvar tema de uma parte
+         * que não esteja selecionada.
+         */
+        if (!view.isParteSelecionada(
+                parte.getId()
+        )) {
+
+            view.atualizarStatus(
+                    "Selecione a parte antes de informar o tema."
             );
 
             return;
@@ -787,6 +758,61 @@ public class ProgramacaoController {
             );
 
             e.printStackTrace();
+        }
+    }
+
+
+    private void gerarEscalas() {
+
+        LocalDate data =
+                view.getCampoData()
+                        .getValue();
+
+
+        if (data == null) {
+
+            view.atualizarStatus(
+                    "Selecione um mês."
+            );
+
+            return;
+        }
+
+
+        escalaController.gerarEscalasDoMes(
+                YearMonth.from(data)
+        );
+
+
+        /*
+         * Se chegamos até aqui, a geração foi executada.
+         * O botão Salvar fica disponível para persistir
+         * as escalas geradas.
+         */
+        view.atualizarBotaoSalvar(true);
+    }
+
+
+    private void salvarEscalas() {
+
+        boolean salvou =
+                escalaController.salvarEscalasGeradas();
+
+
+        if (salvou) {
+
+            view.atualizarStatus(
+                    "Escalas salvas com sucesso no banco de dados."
+            );
+
+
+            view.atualizarBotaoSalvar(false);
+
+        } else {
+
+            view.atualizarStatus(
+                    "Não foi possível salvar as escalas."
+            );
         }
     }
 }

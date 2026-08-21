@@ -1,17 +1,27 @@
 package br.com.geradordesignacoes.controller;
 
+import br.com.geradordesignacoes.dao.EscalaDAO;
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.Designacao;
+import br.com.geradordesignacoes.model.Escala;
 import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.ProgramacaoParte;
+import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
-import br.com.geradordesignacoes.service.*;
+import br.com.geradordesignacoes.service.BackupService;
+import br.com.geradordesignacoes.service.GeradorEscala;
+import br.com.geradordesignacoes.service.HistoricoDesignacoesService;
+import br.com.geradordesignacoes.service.ParteService;
+import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
+import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.escala.ItemEscala;
-import br.com.geradordesignacoes.dao.EscalaDAO;
-import br.com.geradordesignacoes.model.Escala;
-import java.time.LocalDate;
-import java.util.List;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EscalaController {
 
@@ -31,6 +41,11 @@ public class EscalaController {
 
     private final BackupService backupService;
 
+    private final ProgramacaoSemanaService programacaoSemanaService;
+
+    private final Map<LocalDate, ResultadoGeracaoEscala> resultadosGeracao;
+
+
     public EscalaController(EscalaView view) {
 
         this.view = view;
@@ -46,12 +61,25 @@ public class EscalaController {
                         new RegrasService()
                 );
 
+
         historicoService =
                 new HistoricoDesignacoesService();
 
-        escalaDAO = new EscalaDAO();
 
-        backupService = new BackupService();
+        escalaDAO =
+                new EscalaDAO();
+
+
+        backupService =
+                new BackupService();
+
+
+        programacaoSemanaService =
+                new ProgramacaoSemanaService();
+
+
+        resultadosGeracao =
+                new LinkedHashMap<>();
 
 
         registrarEventos();
@@ -61,6 +89,7 @@ public class EscalaController {
                 "Aguardando geração da escala..."
         );
 
+
         view.atualizarResumo("");
     }
 
@@ -68,15 +97,21 @@ public class EscalaController {
     private void registrarEventos() {
 
         view.getBotaoGerar()
-                .setOnAction(event -> gerarEscala());
+                .setOnAction(
+                        event -> gerarEscala()
+                );
 
 
         view.getBotaoGerarNovamente()
-                .setOnAction(event -> gerarNovamente());
+                .setOnAction(
+                        event -> gerarNovamente()
+                );
 
 
         view.getBotaoSalvar()
-                .setOnAction(event -> salvarEscala());
+                .setOnAction(
+                        event -> salvarEscala()
+                );
     }
 
 
@@ -115,6 +150,16 @@ public class EscalaController {
                             data,
                             partes
                     );
+
+
+            resultadosGeracao.clear();
+
+
+            resultadosGeracao.put(
+                    data,
+                    ultimoResultado
+            );
+
 
             escalaSalva = false;
 
@@ -156,7 +201,6 @@ public class EscalaController {
 
         for (Designacao designacao : designacoes) {
 
-
             String ajudante = "";
 
 
@@ -197,10 +241,14 @@ public class EscalaController {
                         .getDesignacoes()
                         .size();
 
-        StringBuilder resumo = new StringBuilder();
+
+        StringBuilder resumo =
+                new StringBuilder();
+
 
         resumo.append("Designações: ")
                 .append(quantidade);
+
 
         if (ultimoResultado.possuiErros()) {
 
@@ -208,7 +256,11 @@ public class EscalaController {
                     "Escala gerada com pendências."
             );
 
-            resumo.append("\n\nPartes não geradas:\n");
+
+            resumo.append(
+                    "\n\nPartes não geradas:\n"
+            );
+
 
             for (String erro : ultimoResultado.erros()) {
 
@@ -223,10 +275,16 @@ public class EscalaController {
                     "Escala gerada com sucesso."
             );
 
-            resumo.append("\n\nNenhuma pendência encontrada.");
+
+            resumo.append(
+                    "\n\nNenhuma pendência encontrada."
+            );
         }
 
-        view.atualizarResumo(resumo.toString());
+
+        view.atualizarResumo(
+                resumo.toString()
+        );
     }
 
 
@@ -238,6 +296,8 @@ public class EscalaController {
 
 
         ultimoResultado = null;
+
+        resultadosGeracao.clear();
 
         escalaSalva = false;
 
@@ -251,26 +311,133 @@ public class EscalaController {
     }
 
 
-    private void salvarEscala() {
+    private boolean salvarEscala() {
+
+        return salvarEscalasGeradas();
+    }
+
+
+    /**
+     * Salva no banco todas as escalas atualmente geradas.
+     *
+     * Este métodoo é utilizado tanto pela tela Escala
+     * quanto pela tela Programação.
+     *
+     * @return true se o salvamento foi realizado com sucesso.
+     */
+    public boolean salvarEscalasGeradas() {
 
         if (escalaSalva) {
 
             view.atualizarStatus(
-                    "Esta escala já foi salva."
+                    "As escalas já foram salvas."
             );
 
-            return;
+            return true;
         }
 
 
-        if (ultimoResultado == null) {
+        if (resultadosGeracao.isEmpty()) {
 
             view.atualizarStatus(
                     "Nenhuma escala gerada."
             );
 
+
             view.atualizarResumo(
                     "Gere uma escala antes de salvar."
+            );
+
+
+            return false;
+        }
+
+
+        try {
+
+            int quantidadeSalva = 0;
+
+
+            for (
+                    ResultadoGeracaoEscala resultado
+                    :
+                    resultadosGeracao.values()
+            ) {
+
+                if (resultado == null) {
+                    continue;
+                }
+
+
+                Escala escala =
+                        resultado.escala();
+
+
+                escalaDAO.salvar(
+                        escala
+                );
+
+
+                quantidadeSalva++;
+            }
+
+
+            if (quantidadeSalva == 0) {
+
+                throw new IllegalStateException(
+                        "Nenhuma escala válida para salvar."
+                );
+            }
+
+
+            backupService.criarBackup();
+
+
+            escalaSalva = true;
+
+
+            view.atualizarStatus(
+                    quantidadeSalva
+                            + " escala(s) salva(s) com sucesso."
+            );
+
+
+            view.atualizarResumo(
+                    "As designações foram salvas no histórico."
+            );
+
+
+            return true;
+
+
+        } catch (Exception e) {
+
+            view.atualizarStatus(
+                    "Erro ao salvar as escalas."
+            );
+
+
+            view.atualizarResumo(
+                    e.getMessage()
+            );
+
+
+            e.printStackTrace();
+
+
+            return false;
+        }
+    }
+
+
+    public void gerarEscalasDoMes(
+            YearMonth mes
+    ) {
+
+        if (mes == null) {
+
+            view.atualizarStatus(
+                    "Selecione um mês."
             );
 
             return;
@@ -279,28 +446,66 @@ public class EscalaController {
 
         try {
 
-            Escala escala =
-                    ultimoResultado.escala();
+            List<ProgramacaoSemana> semanas =
+                    programacaoSemanaService
+                            .listarSemanasDoMes(mes);
 
 
-            escalaDAO.salvar(
-                    escala
+            if (semanas.size() != 4) {
+
+                view.atualizarStatus(
+                        "É necessário possuir 4 programações configuradas."
+                );
+
+                return;
+            }
+
+
+            resultadosGeracao.clear();
+
+
+            for (ProgramacaoSemana semana : semanas) {
+
+                List<Parte> partes =
+                        semana.partes()
+                                .stream()
+                                .map(
+                                        ProgramacaoParte::getParte
+                                )
+                                .toList();
+
+
+                ResultadoGeracaoEscala resultado =
+                        geradorEscala.gerarEscala(
+                                semana.data(),
+                                partes
+                        );
+
+
+                resultadosGeracao.put(
+                        semana.data(),
+                        resultado
+                );
+            }
+
+
+            escalaSalva = false;
+
+
+            view.exibirEscalas(
+                    resultadosGeracao
             );
-            backupService.criarBackup();
-
-            escalaSalva = true;
 
 
             view.atualizarStatus(
-                    "Escala salva com sucesso."
+                    "4 escalas geradas com sucesso."
             );
 
 
         } catch (Exception e) {
 
-
             view.atualizarStatus(
-                    "Erro ao salvar a escala."
+                    "Erro ao gerar as escalas."
             );
 
 

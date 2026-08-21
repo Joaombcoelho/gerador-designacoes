@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.dao.EscalaDAO;
 import br.com.geradordesignacoes.model.Escala;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 
+import java.time.YearMonth;
 import java.util.List;
 
 
@@ -12,6 +13,8 @@ public class HistoricoController {
     private final HistoricoView view;
 
     private final EscalaDAO escalaDAO;
+
+    private List<Escala> escalas;
 
 
     public HistoricoController(
@@ -23,16 +26,14 @@ public class HistoricoController {
         this.escalaDAO =
                 new EscalaDAO();
 
-
         carregarHistorico();
     }
 
 
     private void carregarHistorico() {
 
-        List<Escala> escalas =
+        escalas =
                 escalaDAO.listarTodas();
-
 
         view.carregarEscalas(
                 escalas
@@ -42,14 +43,51 @@ public class HistoricoController {
 
     public void atualizarHistorico() {
 
-        List<Escala> escalas =
+        escalas =
                 escalaDAO.listarTodas();
 
-        view.carregarEscalas(escalas);
+        view.atualizarMeses(
+                escalas
+        );
+
+        view.carregarEscalas(
+                escalas
+        );
     }
 
 
-    public void carregarDetalhes(Escala escala) {
+    public void filtrarPorMes(
+            YearMonth mes
+    ) {
+
+        if (mes == null) {
+
+            view.carregarEscalas(
+                    escalas
+            );
+
+            return;
+        }
+
+        List<Escala> escalasFiltradas =
+                escalas.stream()
+                        .filter(
+                                escala ->
+                                        YearMonth.from(
+                                                escala.getData()
+                                        ).equals(mes)
+                        )
+                        .toList();
+
+        view.carregarEscalas(
+                escalasFiltradas
+        );
+    }
+
+
+    public void carregarDetalhes(
+            Escala escala
+    ) {
 
         if (escala == null) {
             return;
@@ -61,7 +99,9 @@ public class HistoricoController {
     }
 
 
-    public void excluirEscala(Escala escala) {
+    public void excluirEscala(
+            Escala escala
+    ) {
 
         if (escala == null) {
             return;

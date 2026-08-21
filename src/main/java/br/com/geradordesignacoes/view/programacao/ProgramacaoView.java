@@ -18,16 +18,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ProgramacaoView {
 
     private final BorderPane root;
 
-    /*
-     * Agora representa o mês selecionado.
-     * Mantemos DatePicker para evitar alterar
-     * desnecessariamente a estrutura atual.
-     */
     private final DatePicker campoData;
 
     private final ListView<LocalDate> listaSemanas;
@@ -42,19 +38,26 @@ public class ProgramacaoView {
 
     private final Button botaoGerar;
 
-    private final ListView<Parte> listaPartesDisponiveis;
+    private final Button botaoSalvar;
 
-    private final ListView<Parte> listaPartesSelecionadas;
-
-    private final Button botaoAdicionar;
-
-    private final Button botaoRemover;
+    /*
+     * Lista única das partes variáveis.
+     * Cada parte será exibida com um CheckBox.
+     */
+    private final ListView<Parte> listaPartes;
 
     private final TextField campoTema;
 
     private final Button botaoSalvarTema;
 
     private final Label labelStatus;
+
+    private Consumer<Parte> onParteSelecionadaChanged;
+
+    /*
+     * Guarda quais partes estão marcadas.
+     */
+    private final Map<Integer, Boolean> partesSelecionadas;
 
 
     public ProgramacaoView() {
@@ -82,6 +85,10 @@ public class ProgramacaoView {
                 new HashMap<>();
 
 
+        partesSelecionadas =
+                new HashMap<>();
+
+
         botaoAdicionarSemana =
                 new Button(
                         "Adicionar semana"
@@ -103,24 +110,17 @@ public class ProgramacaoView {
         botaoGerar.setDisable(true);
 
 
-        listaPartesDisponiveis =
-                new ListView<>();
-
-
-        listaPartesSelecionadas =
-                new ListView<>();
-
-
-        botaoAdicionar =
+        botaoSalvar =
                 new Button(
-                        "Adicionar"
+                        "Salvar Escalas"
                 );
 
 
-        botaoRemover =
-                new Button(
-                        "Remover"
-                );
+        botaoSalvar.setDisable(true);
+
+
+        listaPartes =
+                new ListView<>();
 
 
         campoTema =
@@ -146,7 +146,7 @@ public class ProgramacaoView {
 
         configurarListaSemanas();
 
-        configurarListas();
+        configurarListaPartes();
 
         criarCabecalho();
 
@@ -231,45 +231,42 @@ public class ProgramacaoView {
     }
 
 
-    private void configurarListas() {
+    private void configurarListaPartes() {
 
-        listaPartesDisponiveis.setCellFactory(
+        listaPartes.setCellFactory(
                 lista ->
                         new ListCell<>() {
 
-                            @Override
-                            protected void updateItem(
-                                    Parte parte,
-                                    boolean empty
-                            ) {
+                            private final CheckBox checkBox =
+                                    new CheckBox();
 
-                                super.updateItem(
-                                        parte,
-                                        empty
+
+                            {
+                                checkBox.setOnAction(
+                                        event -> {
+
+                                            Parte parte =
+                                                    getItem();
+
+                                            if (parte == null) {
+                                                return;
+                                            }
+
+                                            partesSelecionadas.put(
+                                                    parte.getId(),
+                                                    checkBox.isSelected()
+                                            );
+
+                                            if (onParteSelecionadaChanged != null) {
+
+                                                onParteSelecionadaChanged.accept(
+                                                        parte
+                                                );
+                                            }
+                                        }
                                 );
-
-
-                                if (
-                                        empty
-                                                || parte == null
-                                ) {
-
-                                    setText(null);
-
-                                } else {
-
-                                    setText(
-                                            parte.getNome()
-                                    );
-                                }
                             }
-                        }
-        );
 
-
-        listaPartesSelecionadas.setCellFactory(
-                lista ->
-                        new ListCell<>() {
 
                             @Override
                             protected void updateItem(
@@ -288,14 +285,30 @@ public class ProgramacaoView {
                                                 || parte == null
                                 ) {
 
+                                    setGraphic(null);
+
                                     setText(null);
 
-                                } else {
-
-                                    setText(
-                                            parte.getNome()
-                                    );
+                                    return;
                                 }
+
+
+                                checkBox.setText(
+                                        parte.getNome()
+                                );
+
+
+                                checkBox.setSelected(
+                                        partesSelecionadas.getOrDefault(
+                                                parte.getId(),
+                                                false
+                                        )
+                                );
+
+
+                                setGraphic(
+                                        checkBox
+                                );
                             }
                         }
         );
@@ -404,66 +417,46 @@ public class ProgramacaoView {
         painelMes.setPrefWidth(350);
 
 
-        Label tituloDisponiveis =
+        Label tituloPartes =
                 new Label(
-                        "Partes disponíveis"
+                        "Partes da reunião"
                 );
 
 
-        tituloDisponiveis.setStyle(
+        tituloPartes.setStyle(
                 "-fx-font-weight: bold;"
         );
 
 
-        Label tituloSelecionadas =
+        Label instrucao =
                 new Label(
-                        "Partes selecionadas"
+                        "Marque as partes variáveis desejadas:"
                 );
 
 
-        tituloSelecionadas.setStyle(
-                "-fx-font-weight: bold;"
+        instrucao.setStyle(
+                "-fx-text-fill: gray;"
         );
 
 
-        VBox painelDisponiveis =
+        VBox painelPartes =
                 new VBox(
                         8,
-                        tituloDisponiveis,
-                        listaPartesDisponiveis
+                        tituloPartes,
+                        instrucao,
+                        listaPartes
                 );
 
 
-        VBox painelSelecionadas =
-                new VBox(
-                        8,
-                        tituloSelecionadas,
-                        listaPartesSelecionadas
-                );
-
-
-        HBox.setHgrow(
-                painelDisponiveis,
+        VBox.setVgrow(
+                listaPartes,
                 Priority.ALWAYS
         );
 
 
         HBox.setHgrow(
-                painelSelecionadas,
+                painelPartes,
                 Priority.ALWAYS
-        );
-
-
-        HBox botoes =
-                new HBox(
-                        10,
-                        botaoAdicionar,
-                        botaoRemover
-                );
-
-
-        botoes.setAlignment(
-                Pos.CENTER
         );
 
 
@@ -483,30 +476,16 @@ public class ProgramacaoView {
         );
 
 
-        HBox editorPartes =
-                new HBox(
-                        15,
-                        painelDisponiveis,
-                        botoes,
-                        painelSelecionadas
-                );
-
-
-        editorPartes.setAlignment(
-                Pos.CENTER
-        );
-
-
         VBox painelEditor =
                 new VBox(
                         15,
-                        editorPartes,
+                        painelPartes,
                         painelTema
                 );
 
 
         VBox.setVgrow(
-                editorPartes,
+                painelPartes,
                 Priority.ALWAYS
         );
 
@@ -543,7 +522,8 @@ public class ProgramacaoView {
                 new HBox(
                         10,
                         labelStatus,
-                        botaoGerar
+                        botaoGerar,
+                        botaoSalvar
                 );
 
 
@@ -617,27 +597,27 @@ public class ProgramacaoView {
     }
 
 
+    public Button getBotaoSalvar() {
+
+        return botaoSalvar;
+    }
+
+
+    public ListView<Parte> getListaPartes() {
+
+        return listaPartes;
+    }
+
+
     public ListView<Parte> getListaPartesDisponiveis() {
 
-        return listaPartesDisponiveis;
+        return listaPartes;
     }
 
 
     public ListView<Parte> getListaPartesSelecionadas() {
 
-        return listaPartesSelecionadas;
-    }
-
-
-    public Button getBotaoAdicionar() {
-
-        return botaoAdicionar;
-    }
-
-
-    public Button getBotaoRemover() {
-
-        return botaoRemover;
+        return listaPartes;
     }
 
 
@@ -706,5 +686,71 @@ public class ProgramacaoView {
         botaoGerar.setDisable(
                 !habilitado
         );
+    }
+
+
+    public void atualizarBotaoSalvar(
+            boolean habilitado
+    ) {
+
+        botaoSalvar.setDisable(
+                !habilitado
+        );
+    }
+
+
+    public void carregarPartes(
+            List<Parte> partes
+    ) {
+
+        partesSelecionadas.clear();
+
+        listaPartes.setItems(
+                FXCollections.observableArrayList(
+                        partes
+                )
+        );
+    }
+
+
+    public void marcarParte(
+            Integer parteId,
+            boolean marcada
+    ) {
+
+        if (parteId == null) {
+            return;
+        }
+
+        partesSelecionadas.put(
+                parteId,
+                marcada
+        );
+
+        listaPartes.refresh();
+    }
+
+
+    public boolean isParteSelecionada(
+            Integer parteId
+    ) {
+
+        if (parteId == null) {
+            return false;
+        }
+
+        return partesSelecionadas.getOrDefault(
+                parteId,
+                false
+        );
+    }
+
+
+    public void setOnParteSelecionadaChanged(
+            Consumer<Parte> callback
+    ) {
+
+        this.onParteSelecionadaChanged =
+                callback;
     }
 }
