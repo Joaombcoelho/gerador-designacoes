@@ -273,6 +273,7 @@ public class EscalaView {
                 new ArrayList<>();
 
 
+
         DateTimeFormatter formatter =
                 DateTimeFormatter.ofPattern(
                         "dd/MM/yyyy"
@@ -295,12 +296,18 @@ public class EscalaView {
                                     entrada.getValue();
 
 
-                            for (
-                                    Designacao designacao
-                                    :
+                            List<Designacao> designacoes =
                                     resultado.escala()
-                                            .getDesignacoes()
+                                            .getDesignacoes();
+
+                            for (
+                                    int indice = 0;
+                                    indice < designacoes.size();
+                                    indice++
                             ) {
+
+                                Designacao designacao =
+                                        designacoes.get(indice);
 
                                 String parte =
                                         data.format(
@@ -325,6 +332,7 @@ public class EscalaView {
 
                                 itens.add(
                                         new ItemEscala(
+                                                indice,
                                                 parte,
                                                 responsavel,
                                                 ajudante

@@ -383,33 +383,38 @@ public class HistoricoView {
 
                 FXCollections.observableArrayList(
 
-                        designacoes.stream()
-                                .map(
-                                        designacao ->
-                                                new ItemEscala(
+                        java.util.stream.IntStream
+                                .range(0, designacoes.size())
+                                .mapToObj(i -> {
 
-                                                        designacao
-                                                                .parte()
-                                                                .getNome(),
+                                    Designacao designacao =
+                                            designacoes.get(i);
 
-                                                        designacao
-                                                                .responsavel()
-                                                                .getNome(),
+                                    return new ItemEscala(
 
-                                                        designacao
-                                                                .ajudante()
-                                                                == null
-                                                                ? ""
-                                                                : designacao
-                                                                .ajudante()
-                                                                .getNome()
-                                                )
-                                )
+                                            i + 1,
+
+                                            designacao
+                                                    .parte()
+                                                    .getNome(),
+
+                                            designacao
+                                                    .responsavel()
+                                                    .getNome(),
+
+                                            designacao
+                                                    .ajudante()
+                                                    == null
+                                                    ? ""
+                                                    : designacao
+                                                    .ajudante()
+                                                    .getNome()
+                                    );
+                                })
                                 .toList()
                 )
         );
     }
-
 
     public void atualizar() {
 

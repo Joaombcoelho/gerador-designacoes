@@ -91,6 +91,94 @@ public class EscalaDAO {
         }
     }
 
+    public void atualizar(Escala escala) {
+
+        if (escala == null) {
+            throw new IllegalArgumentException(
+                    "A escala não pode ser nula."
+            );
+        }
+
+        if (escala.getId() == null) {
+            throw new IllegalArgumentException(
+                    "A escala precisa possuir ID para atualização."
+            );
+        }
+
+        String sql = """
+            UPDATE escala
+            SET
+                status = ?,
+                data_salvamento = ?
+            WHERE id = ?
+            """;
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+
+            connection.setAutoCommit(false);
+
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(sql)
+            ) {
+
+                statement.setString(
+                        1,
+                        escala.getStatus().name()
+                );
+
+                if (escala.getDataSalvamento() == null) {
+                    statement.setNull(
+                            2,
+                            java.sql.Types.VARCHAR
+                    );
+                } else {
+                    statement.setString(
+                            2,
+                            escala.getDataSalvamento().toString()
+                    );
+                }
+
+                statement.setInt(
+                        3,
+                        escala.getId()
+                );
+
+                int linhasAfetadas =
+                        statement.executeUpdate();
+
+                if (linhasAfetadas != 1) {
+                    throw new RuntimeException(
+                            "Escala não encontrada para atualização."
+                    );
+                }
+
+                excluirDesignacoes(
+                        connection,
+                        escala.getId()
+                );
+
+                salvarDesignacoes(
+                        connection,
+                        escala
+                );
+
+                connection.commit();
+
+            } catch (SQLException | RuntimeException e) {
+
+                connection.rollback();
+                throw e;
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao atualizar escala.",
+                    e
+            );
+        }
+    }
 
     public Optional<Escala> buscarPorId(Integer id) {
 
@@ -307,6 +395,29 @@ public class EscalaDAO {
         }
     }
 
+    private void excluirDesignacoes(
+            Connection connection,
+            Integer escalaId
+    ) throws SQLException {
+
+        String sql = """
+            DELETE FROM designacao
+            WHERE escala_id = ?
+            """;
+
+        try (
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(
+                    1,
+                    escalaId
+            );
+
+            statement.executeUpdate();
+        }
+    }
 
     private void salvarDesignacoes(
             Connection connection,

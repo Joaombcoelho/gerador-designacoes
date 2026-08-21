@@ -16,7 +16,7 @@ import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.escala.ItemEscala;
-
+import br.com.geradordesignacoes.model.Pessoa;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
@@ -215,6 +215,8 @@ public class EscalaController {
 
             ItemEscala item =
                     new ItemEscala(
+                            designacoes.indexOf(designacao),
+
                             designacao
                                     .parte()
                                     .getNome(),
@@ -287,6 +289,54 @@ public class EscalaController {
         );
     }
 
+    private void substituirDesignacao(
+            int indice,
+            Pessoa novoResponsavel,
+            Pessoa novoAjudante
+    ) {
+
+        if (ultimoResultado == null) {
+            throw new IllegalStateException(
+                    "Nenhuma escala foi gerada."
+            );
+        }
+
+        Escala escala =
+                ultimoResultado.escala();
+
+        if (indice < 0
+                || indice >= escala.getDesignacoes().size()) {
+
+            throw new IndexOutOfBoundsException(
+                    "Índice da designação inválido."
+            );
+        }
+
+        Designacao designacaoAtual =
+                escala.getDesignacoes()
+                        .get(indice);
+
+        Designacao novaDesignacao =
+                new Designacao(
+                        designacaoAtual.data(),
+                        designacaoAtual.parte(),
+                        novoResponsavel,
+                        novoAjudante
+                );
+
+        escala.substituirDesignacao(
+                indice,
+                novaDesignacao
+        );
+
+        escalaSalva = false;
+
+        preencherTabela(
+                escala.getDesignacoes()
+        );
+
+        atualizarResumo();
+    }
 
     private void gerarNovamente() {
 

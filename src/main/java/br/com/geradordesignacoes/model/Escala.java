@@ -75,6 +75,26 @@ public class Escala {
         );
     }
 
+    public void substituirDesignacao(
+            int indice,
+            Designacao novaDesignacao
+    ) {
+
+        if (indice < 0 || indice >= designacoes.size()) {
+            throw new IndexOutOfBoundsException(
+                    "Índice da designação inválido."
+            );
+        }
+
+        designacoes.set(
+                indice,
+                Objects.requireNonNull(
+                        novaDesignacao,
+                        "A nova designação não pode ser nula."
+                )
+        );
+    }
+
     public StatusEscala getStatus() {
         return status;
     }

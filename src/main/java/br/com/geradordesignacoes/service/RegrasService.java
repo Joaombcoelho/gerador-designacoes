@@ -11,12 +11,12 @@ import java.util.List;
 import static br.com.geradordesignacoes.model.TipoParticipacao.*;
 
 public class RegrasService {
+
     public boolean podeDesignar(
             Pessoa pessoa,
             Parte parte,
             List<Pessoa> pessoasJaDesignadas
-    )
-    {
+    ) {
 
         if (pessoa == null
                 || parte == null
@@ -31,17 +31,14 @@ public class RegrasService {
             return false;
         }
 
-
         for (TipoParticipacao tipo :
                 parte.getParticipacoesNecessarias()) {
-
 
             if (tipo == PRESIDENTE
                     && !podePresidirReuniao(pessoa)) {
 
                 continue;
             }
-
 
             if (parte.pessoaPodeExercerParticipacao(
                     pessoa,
@@ -52,9 +49,10 @@ public class RegrasService {
             }
         }
 
-
         return false;
     }
+
+
     public boolean podeDesignar(
             Pessoa pessoa,
             Parte parte,
@@ -112,6 +110,42 @@ public class RegrasService {
         return false;
     }
 
+
+    /**
+     * Verifica se uma pessoa pode exercer
+     * uma participação específica em uma parte.
+     *
+     * Este método é utilizado quando precisamos
+     * validar uma participação individual, como
+     * durante a edição manual de uma designação.
+     */
+    public boolean podeExercerParticipacao(
+            Pessoa pessoa,
+            Parte parte,
+            TipoParticipacao tipoParticipacao
+    ) {
+
+        if (pessoa == null
+                || parte == null
+                || tipoParticipacao == null
+                || !pessoa.isAtivo()) {
+
+            return false;
+        }
+
+        if (tipoParticipacao == PRESIDENTE
+                && !podePresidirReuniao(pessoa)) {
+
+            return false;
+        }
+
+        return parte.pessoaPodeExercerParticipacao(
+                pessoa,
+                tipoParticipacao
+        );
+    }
+
+
     public boolean podePresidirReuniao(Pessoa pessoa) {
 
         return pessoa != null
@@ -121,7 +155,13 @@ public class RegrasService {
                 && pessoa.podeSerPresidente();
     }
 
-    public boolean podeFormarDemonstracao(Pessoa responsavel, Pessoa ajudante, List<Pessoa> pessoasJaDesignadas) {
+
+    public boolean podeFormarDemonstracao(
+            Pessoa responsavel,
+            Pessoa ajudante,
+            List<Pessoa> pessoasJaDesignadas
+    ) {
+
         return responsavel != null
                 && ajudante != null
                 && responsavel != ajudante
@@ -133,6 +173,7 @@ public class RegrasService {
                 && responsavel.podeExercer(TipoParticipacao.RESPONSAVEL)
                 && ajudante.podeExercer(TipoParticipacao.AJUDANTE);
     }
+
 
     public boolean podeFormarDemonstracao(
             Parte parte,
