@@ -187,7 +187,7 @@ public class ProgramacaoController {
         ) {
 
             if (data.getDayOfWeek()
-                    == DayOfWeek.THURSDAY) {
+                    == DayOfWeek.WEDNESDAY) {
 
                 resultado.add(data);
             }
@@ -499,7 +499,7 @@ public class ProgramacaoController {
                     .equals(mes)) {
 
                 view.atualizarStatus(
-                        "Não há outra quinta-feira neste mês."
+                    "Não há outra quarta-feira neste mês."
                 );
 
                 return;
@@ -779,17 +779,17 @@ public class ProgramacaoController {
         }
 
 
-        escalaController.gerarEscalasDoMes(
-                YearMonth.from(data)
-        );
+        boolean gerou =
+                escalaController.gerarEscalasDoMes(
+                        YearMonth.from(data)
+                );
 
 
         /*
-         * Se chegamos até aqui, a geração foi executada.
-         * O botão Salvar fica disponível para persistir
-         * as escalas geradas.
+         * O salvamento somente pode ser disponibilizado quando a
+         * geração mensal efetivamente produziu as quatro escalas.
          */
-        view.atualizarBotaoSalvar(true);
+        view.atualizarBotaoSalvar(gerou);
     }
 
 

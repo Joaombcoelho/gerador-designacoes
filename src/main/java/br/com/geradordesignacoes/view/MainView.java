@@ -6,6 +6,7 @@ import br.com.geradordesignacoes.database.BackupDatabase;
 import br.com.geradordesignacoes.database.RestaurarDatabase;
 import br.com.geradordesignacoes.service.PessoaService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
+import br.com.geradordesignacoes.view.edicao.EdicaoEscalaView;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
@@ -43,6 +44,8 @@ public class MainView {
             new HistoricoView();
     private final ProgramacaoView programacaoView =
             new ProgramacaoView();
+    private final EdicaoEscalaView edicaoEscalaView =
+            new EdicaoEscalaView();
 
     private final EscalaController escalaController;
 
@@ -215,6 +218,9 @@ public class MainView {
         MenuItem itemGerarEscala =
                 new MenuItem("Gerar Escala");
 
+        MenuItem itemEditarEscalas =
+                new MenuItem("Editar Escalas");
+
 
         itemGerarEscala.setOnAction(
                 event ->
@@ -223,9 +229,17 @@ public class MainView {
                         )
         );
 
+        itemEditarEscalas.setOnAction(
+                event ->
+                        mostrarTela(
+                                edicaoEscalaView.getView()
+                        )
+        );
 
-        menuEscala.getItems().add(
-                itemGerarEscala
+
+        menuEscala.getItems().addAll(
+                itemGerarEscala,
+                itemEditarEscalas
         );
 
 
