@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.DayOfWeek;
+import java.time.YearMonth;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,6 +52,47 @@ class ProgramacaoSemanaServiceTest {
 
         assertFalse(
                 programacao.partes().isEmpty()
+        );
+    }
+
+
+    @Test
+    void deveListarAsQuatroPrimeirasQuartasFeirasDoMes() {
+
+        YearMonth mes = YearMonth.of(2026, 8);
+
+        for (int dia : List.of(5, 12, 19, 26)) {
+            service.obterOuCriar(LocalDate.of(2026, 8, dia));
+        }
+
+        List<ProgramacaoSemana> semanas = service.listarSemanasDoMes(mes);
+
+        assertEquals(4, semanas.size());
+        assertEquals(
+                List.of(5, 12, 19, 26),
+                semanas.stream().map(semana -> semana.data().getDayOfMonth()).toList()
+        );
+        assertTrue(semanas.stream().allMatch(
+                semana -> semana.data().getDayOfWeek() == DayOfWeek.WEDNESDAY
+        ));
+    }
+
+
+    @Test
+    void deveListarQuartasQuandoOMesComecaNoFimDaSemana() {
+
+        YearMonth mes = YearMonth.of(2026, 5);
+
+        for (int dia : List.of(6, 13, 20, 27)) {
+            service.obterOuCriar(LocalDate.of(2026, 5, dia));
+        }
+
+        List<ProgramacaoSemana> semanas = service.listarSemanasDoMes(mes);
+
+        assertEquals(4, semanas.size());
+        assertEquals(
+                List.of(6, 13, 20, 27),
+                semanas.stream().map(semana -> semana.data().getDayOfMonth()).toList()
         );
     }
 
