@@ -636,7 +636,7 @@ public class ProgramacaoSemanaService {
                         && semanas.size() < 4
         ) {
 
-            if (data.getDayOfWeek() == DayOfWeek.THURSDAY) {
+            if (data.getDayOfWeek() == DayOfWeek.WEDNESDAY) {
 
                 ProgramacaoSemana programacao =
                         programacaoSemanaDAO.buscarPorData(data);

@@ -480,7 +480,7 @@ public class EscalaController {
     }
 
 
-    public void gerarEscalasDoMes(
+    public boolean gerarEscalasDoMes(
             YearMonth mes
     ) {
 
@@ -490,11 +490,17 @@ public class EscalaController {
                     "Selecione um mês."
             );
 
-            return;
+            return false;
         }
 
 
         try {
+
+            /*
+             * Não mantenha resultados de uma geração anterior se a
+             * configuração atual não puder ser gerada.
+             */
+            resultadosGeracao.clear();
 
             List<ProgramacaoSemana> semanas =
                     programacaoSemanaService
@@ -507,13 +513,8 @@ public class EscalaController {
                         "É necessário possuir 4 programações configuradas."
                 );
 
-                return;
+                return false;
             }
-
-
-            resultadosGeracao.clear();
-
-
             for (ProgramacaoSemana semana : semanas) {
 
                 List<Parte> partes =
@@ -532,9 +533,20 @@ public class EscalaController {
                         );
 
 
-                resultadosGeracao.put(
-                        semana.data(),
-                        resultado
+                if (resultado == null || resultado.escala() == null) {
+                    throw new IllegalStateException(
+                            "Não foi possível gerar a escala de "
+                                    + semana.data()
+                    );
+                }
+
+                resultadosGeracao.put(semana.data(), resultado);
+            }
+
+
+            if (resultadosGeracao.size() != 4) {
+                throw new IllegalStateException(
+                        "A geração mensal não produziu 4 escalas."
                 );
             }
 
@@ -552,6 +564,9 @@ public class EscalaController {
             );
 
 
+            return true;
+
+
         } catch (Exception e) {
 
             view.atualizarStatus(
@@ -565,6 +580,17 @@ public class EscalaController {
 
 
             e.printStackTrace();
+
+
+            resultadosGeracao.clear();
+
+            return false;
         }
+    }
+
+
+    public boolean possuiEscalasGeradas() {
+
+        return resultadosGeracao.size() == 4;
     }
 }

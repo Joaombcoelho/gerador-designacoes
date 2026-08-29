@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.controller.HistoricoController;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Escala;
 import br.com.geradordesignacoes.view.escala.ItemEscala;
+import br.com.geradordesignacoes.view.escala.EdicaoEscalaView;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -33,6 +34,8 @@ public class HistoricoView {
 
     private final Button botaoExcluir;
 
+    private final Button botaoEditar;
+
     private final ComboBox<YearMonth> comboMes;
 
 
@@ -46,6 +49,9 @@ public class HistoricoView {
 
         botaoExcluir =
                 new Button("Excluir escala");
+
+        botaoEditar =
+                new Button("Editar designações");
 
         comboMes =
                 new ComboBox<>();
@@ -74,7 +80,7 @@ public class HistoricoView {
         );
 
         root.setBottom(
-                botaoExcluir
+                new HBox(10, botaoEditar, botaoExcluir)
         );
 
 
@@ -85,6 +91,8 @@ public class HistoricoView {
         configurarSelecao();
 
         configurarExclusao();
+
+        configurarEdicao();
 
         configurarFiltro();
     }
@@ -506,5 +514,28 @@ public class HistoricoView {
 
                 }
         );
+    }
+
+
+    private void configurarEdicao() {
+
+        botaoEditar.setOnAction(event -> {
+
+            Escala escalaSelecionada =
+                    tabela.getSelectionModel()
+                            .getSelectedItem();
+
+            if (escalaSelecionada == null) {
+                Alert alerta = new Alert(Alert.AlertType.WARNING);
+                alerta.setTitle("Nenhuma escala selecionada");
+                alerta.setHeaderText(null);
+                alerta.setContentText("Selecione uma escala para editar.");
+                alerta.showAndWait();
+                return;
+            }
+
+            new EdicaoEscalaView(escalaSelecionada).mostrar();
+            controller.atualizarHistorico();
+        });
     }
 }
