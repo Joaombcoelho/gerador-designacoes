@@ -98,10 +98,6 @@ public class MainView {
          */
         historicoView =
                 new HistoricoView(
-                        () ->
-                                mostrarTela(
-                                        edicaoEscalaView.getView()
-                                )
                 );
 
 

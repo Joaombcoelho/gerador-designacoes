@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Escala;
+
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 

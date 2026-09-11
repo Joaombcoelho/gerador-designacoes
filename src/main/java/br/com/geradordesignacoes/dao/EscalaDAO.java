@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -393,6 +394,76 @@ public class EscalaDAO {
                     e
             );
         }
+    }
+
+
+    /**
+     * Lista as datas de outras designações da pessoa no mês informado,
+     * considerando tanto responsável quanto ajudante.
+     */
+    public List<LocalDate> listarDatasDeOutrasDesignacoesNoMes(
+            Integer pessoaId,
+            YearMonth mes,
+            Integer designacaoIgnoradaId
+    ) {
+
+        if (pessoaId == null) {
+            throw new IllegalArgumentException(
+                    "ID da pessoa não pode ser nulo."
+            );
+        }
+
+        if (mes == null) {
+            throw new IllegalArgumentException(
+                    "O mês não pode ser nulo."
+            );
+        }
+
+        String sql = """
+                SELECT DISTINCT e.data
+                FROM designacao d
+                JOIN escala e ON e.id = d.escala_id
+                WHERE (d.responsavel_id = ? OR d.ajudante_id = ?)
+                  AND e.data >= ?
+                  AND e.data < ?
+                  AND (? IS NULL OR d.id <> ?)
+                ORDER BY e.data
+                """;
+
+        List<LocalDate> datas = new ArrayList<>();
+
+        try (
+                Connection connection = ConnectionFactory.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(1, pessoaId);
+            statement.setInt(2, pessoaId);
+            statement.setString(3, mes.atDay(1).toString());
+            statement.setString(4, mes.plusMonths(1).atDay(1).toString());
+
+            if (designacaoIgnoradaId == null) {
+                statement.setNull(5, java.sql.Types.INTEGER);
+                statement.setNull(6, java.sql.Types.INTEGER);
+            } else {
+                statement.setInt(5, designacaoIgnoradaId);
+                statement.setInt(6, designacaoIgnoradaId);
+            }
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    datas.add(LocalDate.parse(resultSet.getString("data")));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao consultar designações da pessoa no mês.",
+                    e
+            );
+        }
+
+        return datas;
     }
 
     private void excluirDesignacoes(
