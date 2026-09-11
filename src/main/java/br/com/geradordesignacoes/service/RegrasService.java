@@ -25,8 +25,17 @@ public class RegrasService {
             return false;
         }
 
+        /*
+         * Presidente não pode receber uma segunda
+         * designação na mesma reunião.
+         *
+         * Esta sobrecarga não possui o ControleDesignacoes,
+         * portanto o bloqueio é mantido apenas pelo fato
+         * de a pessoa já estar na lista de designados.
+         */
         if (pessoasJaDesignadas.contains(pessoa)
-                && pessoa.getPrivilegio() != Privilegio.ANCIAO) {
+                && pessoa.getPrivilegio() != Privilegio.ANCIAO
+                && pessoa.getPrivilegio() != Privilegio.SERVO_MINISTERIAL) {
 
             return false;
         }
@@ -70,24 +79,35 @@ public class RegrasService {
         List<Pessoa> pessoasJaDesignadas =
                 controle.getPessoasDesignadas();
 
+
         if (pessoasJaDesignadas.contains(pessoa)) {
 
             /*
              * O presidente nunca pode receber
              * uma segunda designação.
+             *
+             * A exceção da oração final é tratada
+             * diretamente pelo GeradorEscala, que
+             * utiliza o presidente como responsável
+             * pela oração final.
              */
             if (controle.ehPresidente(pessoa)) {
+
                 return false;
             }
 
             /*
-             * Somente Anciãos podem acumular
-             * mais de uma designação.
+             * Anciãos e servos ministeriais podem
+             * receber mais de uma designação na
+             * mesma reunião.
              */
-            if (pessoa.getPrivilegio() != Privilegio.ANCIAO) {
+            if (pessoa.getPrivilegio() != Privilegio.ANCIAO
+                    && pessoa.getPrivilegio() != Privilegio.SERVO_MINISTERIAL) {
+
                 return false;
             }
         }
+
 
         for (TipoParticipacao tipo :
                 parte.getParticipacoesNecessarias()) {
@@ -146,12 +166,16 @@ public class RegrasService {
     }
 
 
-    public boolean podePresidirReuniao(Pessoa pessoa) {
+    public boolean podePresidirReuniao(
+            Pessoa pessoa
+    ) {
 
         return pessoa != null
                 && pessoa.isAtivo()
                 && pessoa.getSexo() == Sexo.MASCULINO
-                && pessoa.getPrivilegio().atende(Privilegio.BATIZADO)
+                && pessoa.getPrivilegio().atende(
+                Privilegio.BATIZADO
+        )
                 && pessoa.podeSerPresidente();
     }
 
@@ -165,13 +189,15 @@ public class RegrasService {
         return responsavel != null
                 && ajudante != null
                 && responsavel != ajudante
-                && !pessoasJaDesignadas.contains(responsavel)
-                && !pessoasJaDesignadas.contains(ajudante)
                 && responsavel.isAtivo()
                 && ajudante.isAtivo()
                 && responsavel.getSexo() == ajudante.getSexo()
-                && responsavel.podeExercer(TipoParticipacao.RESPONSAVEL)
-                && ajudante.podeExercer(TipoParticipacao.AJUDANTE);
+                && responsavel.podeExercer(
+                TipoParticipacao.RESPONSAVEL
+        )
+                && ajudante.podeExercer(
+                TipoParticipacao.AJUDANTE
+        );
     }
 
 

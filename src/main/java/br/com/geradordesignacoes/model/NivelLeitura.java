@@ -8,6 +8,11 @@ public enum NivelLeitura {
 
     public boolean atende(NivelLeitura exigido) {
 
-        return this == exigido;
+        if (exigido == null) {
+            return false;
+        }
+
+        return this.ordinal() >= exigido.ordinal();
     }
+
 }

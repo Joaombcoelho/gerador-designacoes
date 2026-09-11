@@ -1,5 +1,6 @@
 package br.com.geradordesignacoes.view.escala;
 
+import br.com.geradordesignacoes.controller.EscalaController;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
 import javafx.geometry.Insets;
@@ -413,5 +414,9 @@ public class EscalaView {
         labelResumo.setText(
                 mensagem
         );
+    }
+
+    public br.com.geradordesignacoes.controller.EscalaController getController() {
+        return controller;
     }
 }

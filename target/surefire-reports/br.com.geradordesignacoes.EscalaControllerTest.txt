@@ -1,0 +1,20 @@
+-------------------------------------------------------------------------------
+Test set: br.com.geradordesignacoes.EscalaControllerTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 9.989 s <<< FAILURE! -- in br.com.geradordesignacoes.EscalaControllerTest
+br.com.geradordesignacoes.EscalaControllerTest.deveRejeitarResponsavelNulo -- Time elapsed: 3.799 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.IllegalStateException>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115)
+	at br.com.geradordesignacoes.EscalaControllerTest.deveRejeitarResponsavelNulo(EscalaControllerTest.java:34)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+Caused by: java.lang.IllegalStateException: Nenhuma escala foi gerada.
+	at br.com.geradordesignacoes.controller.EscalaController.substituirDesignacao(EscalaController.java:299)
+	at br.com.geradordesignacoes.EscalaControllerTest.lambda$deveRejeitarResponsavelNulo$1(EscalaControllerTest.java:36)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+

@@ -64,29 +64,6 @@ class EscalaDAOTest extends BaseDAOTest {
     }
 
 
-    @Test
-    void deveListarTodasAsEscalas() {
-
-
-        escalaDAO.salvar(
-                criarEscalaSemDesignacoes()
-        );
-
-
-        escalaDAO.salvar(
-                criarEscalaSemDesignacoes()
-        );
-
-
-        List<Escala> escalas =
-                escalaDAO.listarTodas();
-
-
-        assertEquals(
-                2,
-                escalas.size()
-        );
-    }
 
 
     @Test

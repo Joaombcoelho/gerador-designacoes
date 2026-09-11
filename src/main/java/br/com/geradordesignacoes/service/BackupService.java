@@ -1,50 +1,73 @@
 package br.com.geradordesignacoes.service;
 
-
+import br.com.geradordesignacoes.database.BackupDatabase;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class BackupService {
 
-    private static final Path BANCO =
-            Path.of("data", "gerador-designacoes.db");
+    private final Path pastaBackup;
 
-    private static final Path PASTA_BACKUP =
-            Path.of("backup");
+    public BackupService() {
 
-    private static final DateTimeFormatter FORMATADOR =
-            DateTimeFormatter.ofPattern(
-                    "yyyy-MM-dd_HH-mm-ss"
+        String localAppData =
+                System.getenv("LOCALAPPDATA");
+
+        if (localAppData == null || localAppData.isBlank()) {
+            throw new IllegalStateException(
+                    "A variável de ambiente LOCALAPPDATA não está disponível."
             );
+        }
+
+        this.pastaBackup =
+                Path.of(
+                        localAppData,
+                        "GeradorDesignacoes",
+                        "backups"
+                );
+    }
 
 
+    /**
+     * Cria um backup do banco de dados.
+     *
+     * O arquivo recebe data e hora no nome para
+     * evitar que backups anteriores sejam sobrescritos.
+     */
     public void criarBackup() {
 
         try {
 
             Files.createDirectories(
-                    PASTA_BACKUP
+                    pastaBackup
             );
 
-            String nomeArquivo =
-                    "gerador-designacoes-"
-                            + LocalDateTime.now()
-                            .format(FORMATADOR)
-                            + ".db";
 
-            Path destino =
-                    PASTA_BACKUP.resolve(nomeArquivo);
+            String dataHora =
+                    LocalDateTime.now()
+                            .format(
+                                    DateTimeFormatter.ofPattern(
+                                            "yyyy-MM-dd_HH-mm-ss"
+                                    )
+                            );
 
-            Files.copy(
-                    BANCO,
-                    destino,
-                    StandardCopyOption.COPY_ATTRIBUTES
+
+            Path arquivoBackup =
+                    pastaBackup.resolve(
+                            "gerador-designacoes_"
+                                    + dataHora
+                                    + ".db"
+                    );
+
+
+            BackupDatabase.criarBackup(
+                    arquivoBackup
             );
+
 
         } catch (IOException e) {
 

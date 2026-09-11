@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.view.programacao;
 
 import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -41,8 +42,15 @@ public class ProgramacaoView {
     private final Button botaoSalvar;
 
     /*
-     * Lista única das partes variáveis.
-     * Cada parte será exibida com um CheckBox.
+     * Lista de todas as partes da reunião.
+     *
+     * Partes FIXAS:
+     * - aparecem marcadas;
+     * - ficam desabilitadas.
+     *
+     * Partes VARIÁVEIS:
+     * - podem ser marcadas;
+     * - podem ser desmarcadas.
      */
     private final ListView<Parte> listaPartes;
 
@@ -55,7 +63,7 @@ public class ProgramacaoView {
     private Consumer<Parte> onParteSelecionadaChanged;
 
     /*
-     * Guarda quais partes estão marcadas.
+     * Guarda o estado visual dos CheckBoxes.
      */
     private final Map<Integer, Boolean> partesSelecionadas;
 
@@ -252,12 +260,31 @@ public class ProgramacaoView {
                                                 return;
                                             }
 
+
+                                            /*
+                                             * Partes fixas não podem
+                                             * alterar seu estado.
+                                             */
+                                            if (
+                                                    parte.getTipoVariacao()
+                                                            == TipoVariacaoParte.FIXA
+                                            ) {
+                                                checkBox.setSelected(true);
+
+                                                return;
+                                            }
+
+
                                             partesSelecionadas.put(
                                                     parte.getId(),
                                                     checkBox.isSelected()
                                             );
 
-                                            if (onParteSelecionadaChanged != null) {
+
+                                            if (
+                                                    onParteSelecionadaChanged
+                                                            != null
+                                            ) {
 
                                                 onParteSelecionadaChanged.accept(
                                                         parte
@@ -293,17 +320,43 @@ public class ProgramacaoView {
                                 }
 
 
+                                boolean fixa =
+                                        parte.getTipoVariacao()
+                                                == TipoVariacaoParte.FIXA;
+
+
                                 checkBox.setText(
                                         parte.getNome()
                                 );
 
 
-                                checkBox.setSelected(
-                                        partesSelecionadas.getOrDefault(
-                                                parte.getId(),
-                                                false
-                                        )
-                                );
+                                /*
+                                 * Parte fixa:
+                                 * sempre marcada e desabilitada.
+                                 */
+                                if (fixa) {
+
+                                    checkBox.setSelected(true);
+
+                                    checkBox.setDisable(true);
+
+
+                                    partesSelecionadas.put(
+                                            parte.getId(),
+                                            true
+                                    );
+
+                                } else {
+
+                                    checkBox.setDisable(false);
+
+                                    checkBox.setSelected(
+                                            partesSelecionadas.getOrDefault(
+                                                    parte.getId(),
+                                                    false
+                                            )
+                                    );
+                                }
 
 
                                 setGraphic(
@@ -430,7 +483,8 @@ public class ProgramacaoView {
 
         Label instrucao =
                 new Label(
-                        "Marque as partes variáveis desejadas:"
+                        "Partes fixas são incluídas automaticamente. "
+                                + "Marque as partes variáveis desejadas:"
                 );
 
 
@@ -705,11 +759,33 @@ public class ProgramacaoView {
 
         partesSelecionadas.clear();
 
+
+        /*
+         * As partes fixas sempre começam marcadas.
+         */
+        for (Parte parte : partes) {
+
+            if (
+                    parte.getTipoVariacao()
+                            == TipoVariacaoParte.FIXA
+            ) {
+
+                partesSelecionadas.put(
+                        parte.getId(),
+                        true
+                );
+            }
+        }
+
+
         listaPartes.setItems(
                 FXCollections.observableArrayList(
                         partes
                 )
         );
+
+
+        listaPartes.refresh();
     }
 
 
@@ -722,10 +798,12 @@ public class ProgramacaoView {
             return;
         }
 
+
         partesSelecionadas.put(
                 parteId,
                 marcada
         );
+
 
         listaPartes.refresh();
     }
@@ -738,6 +816,7 @@ public class ProgramacaoView {
         if (parteId == null) {
             return false;
         }
+
 
         return partesSelecionadas.getOrDefault(
                 parteId,

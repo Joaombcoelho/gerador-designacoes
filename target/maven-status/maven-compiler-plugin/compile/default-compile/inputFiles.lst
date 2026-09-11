@@ -1,3 +1,4 @@
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\controller\EdicaoEscalaController.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\controller\EscalaController.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\controller\HistoricoController.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\controller\ProgramacaoController.java
@@ -57,6 +58,8 @@ D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-design
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\test\TestePersistenciaHistorico.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\test\TesteRankingAvaliacao.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\test\TesteRegrasService.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\edicao\EdicaoEscalaView.java
+D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\edicao\ItemEdicaoEscala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\escala\EscalaView.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\escala\ItemEscala.java
 D:\João Manoel\Documents\Curso Programação\gerador-designacoes\gerador-designacoes\src\main\java\br\com\geradordesignacoes\view\historico\HistoricoView.java

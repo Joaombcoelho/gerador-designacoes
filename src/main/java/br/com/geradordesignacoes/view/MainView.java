@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.BackupDatabase;
 import br.com.geradordesignacoes.database.RestaurarDatabase;
 import br.com.geradordesignacoes.service.PessoaService;
+import br.com.geradordesignacoes.view.edicao.EdicaoEscalaView;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
@@ -35,14 +36,20 @@ public class MainView {
     private final BorderPane root;
 
     private final PessoaView pessoaView;
+
     private final ParteView parteView =
             new ParteView();
+
     private final EscalaView escalaView =
             new EscalaView();
-    private final HistoricoView historicoView =
-            new HistoricoView();
+
     private final ProgramacaoView programacaoView =
             new ProgramacaoView();
+
+    private final EdicaoEscalaView edicaoEscalaView =
+            new EdicaoEscalaView();
+
+    private final HistoricoView historicoView;
 
     private final EscalaController escalaController;
 
@@ -51,25 +58,31 @@ public class MainView {
 
     public MainView() {
 
-        root = new BorderPane();
+        root =
+                new BorderPane();
+
 
         PessoaDAO pessoaDAO =
                 new PessoaDAO();
+
 
         PessoaService pessoaService =
                 new PessoaService(
                         pessoaDAO
                 );
 
+
         pessoaView =
                 new PessoaView(
                         pessoaService
                 );
 
+
         escalaController =
                 new EscalaController(
                         escalaView
                 );
+
 
         programacaoController =
                 new ProgramacaoController(
@@ -77,7 +90,23 @@ public class MainView {
                         escalaController
                 );
 
+
+        /*
+         * O Histórico recebe uma ação que permite
+         * solicitar ao MainView a abertura da tela
+         * de edição.
+         */
+        historicoView =
+                new HistoricoView(
+                        () ->
+                                mostrarTela(
+                                        edicaoEscalaView.getView()
+                                )
+                );
+
+
         criarMenu();
+
         criarTelaInicial();
     }
 
@@ -93,12 +122,17 @@ public class MainView {
         // =====================================================
 
         Button botaoInicio =
-                new Button("Início");
+                new Button(
+                        "Início"
+                );
 
-        botaoInicio.setPrefHeight(25);
+        botaoInicio.setPrefHeight(
+                25
+        );
 
         botaoInicio.setOnAction(
-                event -> criarTelaInicial()
+                event ->
+                        criarTelaInicial()
         );
 
 
@@ -107,30 +141,47 @@ public class MainView {
         // =====================================================
 
         Menu menuArquivo =
-                new Menu("Arquivo");
+                new Menu(
+                        "Arquivo"
+                );
+
 
         MenuItem itemBackup =
-                new MenuItem("Fazer Backup");
+                new MenuItem(
+                        "Fazer Backup"
+                );
+
 
         MenuItem itemRestaurarBackup =
-                new MenuItem("Restaurar Backup");
+                new MenuItem(
+                        "Restaurar Backup"
+                );
+
 
         MenuItem itemSair =
-                new MenuItem("Sair");
+                new MenuItem(
+                        "Sair"
+                );
 
 
         itemBackup.setOnAction(
-                event -> fazerBackup()
+                event ->
+                        fazerBackup()
         );
 
+
         itemRestaurarBackup.setOnAction(
-                event -> restaurarBackup()
+                event ->
+                        restaurarBackup()
         );
+
 
         itemSair.setOnAction(
                 event -> {
 
-                    if (root.getScene() != null) {
+                    if (
+                            root.getScene() != null
+                    ) {
 
                         root.getScene()
                                 .getWindow()
@@ -153,13 +204,21 @@ public class MainView {
         // =====================================================
 
         Menu menuCadastros =
-                new Menu("Cadastros");
+                new Menu(
+                        "Cadastros"
+                );
+
 
         MenuItem itemPessoas =
-                new MenuItem("Pessoas");
+                new MenuItem(
+                        "Pessoas"
+                );
+
 
         MenuItem itemPartes =
-                new MenuItem("Partes");
+                new MenuItem(
+                        "Partes"
+                );
 
 
         itemPessoas.setOnAction(
@@ -168,6 +227,7 @@ public class MainView {
                                 pessoaView.getView()
                         )
         );
+
 
         itemPartes.setOnAction(
                 event ->
@@ -182,15 +242,21 @@ public class MainView {
                 itemPartes
         );
 
+
         // =====================================================
         // PROGRAMAÇÃO
         // =====================================================
 
         Menu menuProgramacao =
-                new Menu("Programação");
+                new Menu(
+                        "Programação"
+                );
+
 
         MenuItem itemProgramacao =
-                new MenuItem("Programação Semanal");
+                new MenuItem(
+                        "Programação Semanal"
+                );
 
 
         itemProgramacao.setOnAction(
@@ -205,15 +271,27 @@ public class MainView {
                 itemProgramacao
         );
 
+
         // =====================================================
         // ESCALA
         // =====================================================
 
         Menu menuEscala =
-                new Menu("Escala");
+                new Menu(
+                        "Escala"
+                );
+
 
         MenuItem itemGerarEscala =
-                new MenuItem("Gerar Escala");
+                new MenuItem(
+                        "Gerar Escala"
+                );
+
+
+        MenuItem itemEditarEscalas =
+                new MenuItem(
+                        "Editar Escalas"
+                );
 
 
         itemGerarEscala.setOnAction(
@@ -224,8 +302,17 @@ public class MainView {
         );
 
 
-        menuEscala.getItems().add(
-                itemGerarEscala
+        itemEditarEscalas.setOnAction(
+                event ->
+                        mostrarTela(
+                                edicaoEscalaView.getView()
+                        )
+        );
+
+
+        menuEscala.getItems().addAll(
+                itemGerarEscala,
+                itemEditarEscalas
         );
 
 
@@ -234,7 +321,10 @@ public class MainView {
         // =====================================================
 
         Menu menuHistorico =
-                new Menu("Histórico");
+                new Menu(
+                        "Histórico"
+                );
+
 
         MenuItem itemConsultarHistorico =
                 new MenuItem(
@@ -264,14 +354,20 @@ public class MainView {
         // =====================================================
 
         Menu menuAjuda =
-                new Menu("Ajuda");
+                new Menu(
+                        "Ajuda"
+                );
+
 
         MenuItem itemSobre =
-                new MenuItem("Sobre");
+                new MenuItem(
+                        "Sobre"
+                );
 
 
         itemSobre.setOnAction(
-                event -> mostrarSobre()
+                event ->
+                        mostrarSobre()
         );
 
 
@@ -301,14 +397,24 @@ public class MainView {
         HBox barraSuperior =
                 new HBox();
 
+
         barraSuperior.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        barraSuperior.setSpacing(5);
+
+        barraSuperior.setSpacing(
+                5
+        );
+
 
         barraSuperior.setPadding(
-                new Insets(2, 5, 2, 5)
+                new Insets(
+                        2,
+                        5,
+                        2,
+                        5
+                )
         );
 
 
@@ -327,25 +433,28 @@ public class MainView {
     private void criarTelaInicial() {
 
         VBox painelPrincipal =
-                new VBox(20);
+                new VBox(
+                        20
+                );
+
 
         painelPrincipal.setAlignment(
                 Pos.CENTER
         );
 
+
         painelPrincipal.setPadding(
-                new Insets(40)
+                new Insets(
+                        40
+                )
         );
 
-
-        // =====================================================
-        // TÍTULO
-        // =====================================================
 
         Label titulo =
                 new Label(
                         "Gerador de Designações"
                 );
+
 
         titulo.setStyle(
                 "-fx-font-size: 28px;" +
@@ -359,19 +468,17 @@ public class MainView {
                                 "das designações das reuniões."
                 );
 
+
         subtitulo.setStyle(
                 "-fx-font-size: 15px;"
         );
 
 
-        // =====================================================
-        // STATUS
-        // =====================================================
-
         Label status =
                 new Label(
                         "● Sistema pronto"
                 );
+
 
         status.setStyle(
                 "-fx-font-size: 14px;" +
@@ -379,29 +486,29 @@ public class MainView {
         );
 
 
-        // =====================================================
-        // BOTÕES DE ACESSO RÁPIDO
-        // =====================================================
-
         Button botaoGerarEscala =
                 new Button(
                         "Gerar Escala"
                 );
+
 
         Button botaoPessoas =
                 new Button(
                         "Pessoas"
                 );
 
+
         Button botaoPartes =
                 new Button(
                         "Partes"
                 );
 
+
         Button botaoHistorico =
                 new Button(
                         "Histórico"
                 );
+
 
         Button botaoProgramacao =
                 new Button(
@@ -413,17 +520,21 @@ public class MainView {
                 botaoGerarEscala
         );
 
+
         configurarBotaoPrincipal(
                 botaoProgramacao
         );
+
 
         configurarBotaoPrincipal(
                 botaoPessoas
         );
 
+
         configurarBotaoPrincipal(
                 botaoPartes
         );
+
 
         configurarBotaoPrincipal(
                 botaoHistorico
@@ -437,12 +548,14 @@ public class MainView {
                         )
         );
 
+
         botaoProgramacao.setOnAction(
                 event ->
                         mostrarTela(
                                 programacaoView.getView()
                         )
         );
+
 
         botaoPessoas.setOnAction(
                 event ->
@@ -473,11 +586,15 @@ public class MainView {
 
 
         HBox botoes =
-                new HBox(15);
+                new HBox(
+                        15
+                );
+
 
         botoes.setAlignment(
                 Pos.CENTER
         );
+
 
         botoes.getChildren().addAll(
                 botaoGerarEscala,
@@ -488,15 +605,12 @@ public class MainView {
         );
 
 
-        // =====================================================
-        // INFORMAÇÃO
-        // =====================================================
-
         Label informacao =
                 new Label(
                         "Use o menu superior ou os atalhos " +
                                 "abaixo para começar."
                 );
+
 
         informacao.setStyle(
                 "-fx-font-size: 13px;"
@@ -522,8 +636,15 @@ public class MainView {
             Button botao
     ) {
 
-        botao.setPrefWidth(130);
-        botao.setPrefHeight(40);
+        botao.setPrefWidth(
+                130
+        );
+
+
+        botao.setPrefHeight(
+                40
+        );
+
 
         botao.setStyle(
                 "-fx-font-size: 14px;"
@@ -535,9 +656,14 @@ public class MainView {
             Parent view
     ) {
 
-        root.setCenter(null);
+        root.setCenter(
+                null
+        );
 
-        root.setCenter(view);
+
+        root.setCenter(
+                view
+        );
     }
 
 
@@ -556,9 +682,11 @@ public class MainView {
         FileChooser fileChooser =
                 new FileChooser();
 
+
         fileChooser.setTitle(
                 "Salvar backup do banco"
         );
+
 
         fileChooser.getExtensionFilters()
                 .add(
@@ -592,17 +720,21 @@ public class MainView {
                             Alert.AlertType.INFORMATION
                     );
 
+
             alerta.setTitle(
                     "Backup"
             );
+
 
             alerta.setHeaderText(
                     null
             );
 
+
             alerta.setContentText(
                     "Backup realizado com sucesso."
             );
+
 
             alerta.showAndWait();
 
@@ -614,18 +746,22 @@ public class MainView {
                             Alert.AlertType.ERROR
                     );
 
+
             alerta.setTitle(
                     "Erro"
             );
+
 
             alerta.setHeaderText(
                     null
             );
 
+
             alerta.setContentText(
                     "Não foi possível criar o backup.\n"
                             + e.getMessage()
             );
+
 
             alerta.showAndWait();
         }
@@ -640,6 +776,7 @@ public class MainView {
 
         FileChooser fileChooser =
                 new FileChooser();
+
 
         fileChooser.setTitle(
                 "Selecionar backup do banco"
@@ -676,9 +813,11 @@ public class MainView {
                 "Restaurar backup"
         );
 
+
         confirmacao.setHeaderText(
                 "Atenção: os dados atuais serão substituídos."
         );
+
 
         confirmacao.setContentText(
                 "Deseja realmente restaurar este backup?"
@@ -686,19 +825,21 @@ public class MainView {
 
 
         confirmacao.showAndWait()
-                .ifPresent(resposta -> {
+                .ifPresent(
+                        resposta -> {
 
-                    if (
-                            resposta ==
-                                    javafx.scene.control.ButtonType.OK
-                    ) {
+                            if (
+                                    resposta ==
+                                            javafx.scene.control.ButtonType.OK
+                            ) {
 
-                        executarRestauracao(
-                                arquivo
-                        );
-                    }
+                                executarRestauracao(
+                                        arquivo
+                                );
+                            }
 
-                });
+                        }
+                );
     }
 
 
@@ -723,9 +864,11 @@ public class MainView {
                     "Restauração concluída"
             );
 
+
             alerta.setHeaderText(
                     null
             );
+
 
             alerta.setContentText(
                     "Backup restaurado com sucesso.\n"
@@ -748,9 +891,11 @@ public class MainView {
                     "Erro na restauração"
             );
 
+
             alerta.setHeaderText(
                     null
             );
+
 
             alerta.setContentText(
                     e.getMessage()
@@ -773,19 +918,23 @@ public class MainView {
                         Alert.AlertType.INFORMATION
                 );
 
+
         alerta.setTitle(
                 "Sobre"
         );
 
+
         alerta.setHeaderText(
                 "Gerador de Designações"
         );
+
 
         alerta.setContentText(
                 "Sistema para gerenciamento e geração "
                         + "automática de designações.\n\n"
                         + "Versão 1.0"
         );
+
 
         alerta.showAndWait();
     }
