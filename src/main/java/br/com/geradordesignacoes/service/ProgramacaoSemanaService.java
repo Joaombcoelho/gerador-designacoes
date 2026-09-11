@@ -38,63 +38,15 @@ public class ProgramacaoSemanaService {
 
 
     /**
-     * Lista todas as partes cadastradas no sistema.
-     *
-     * Inclui partes FIXAS e VARIÁVEIS.
-     *
-     * A ordenação segue a ordem padrão das partes
-     * da reunião.
-     */
-    public List<Parte> listarTodas() {
-
-        return parteDAO.listarTodos()
-                .stream()
-                .sorted(
-                        Comparator.comparingInt(
-                                this::obterOrdemParte
-                        )
-                )
-                .toList();
-    }
-
-
-    /**
-     * Lista somente as partes variáveis.
-     */
-    public List<Parte> listarPartesVariaveis() {
-
-        return parteDAO.listarTodos()
-                .stream()
-                .filter(
-                        parte ->
-                                parte.getTipoVariacao()
-                                        == TipoVariacaoParte.VARIAVEL
-                )
-                .sorted(
-                        Comparator.comparingInt(
-                                this::obterOrdemParte
-                        )
-                )
-                .toList();
-    }
-
-
-    /**
      * Busca a programação de uma semana já cadastrada.
-     *
-     * Caso não exista, cria uma nova programação contendo
-     * todas as partes fixas.
-     *
-     * Caso já exista, garante que todas as partes fixas
-     * atualmente cadastradas no sistema também estejam
-     * presentes na programação.
+     * Caso não exista, cria uma nova programação
+     * contendo as partes cadastradas no sistema.
      */
     public ProgramacaoSemana obterOuCriar(
             LocalDate data
     ) {
 
         if (data == null) {
-
             throw new IllegalArgumentException(
                     "A data não pode ser nula."
             );
@@ -106,15 +58,7 @@ public class ProgramacaoSemanaService {
 
 
         if (existente != null) {
-
-            sincronizarPartesFixas(
-                    existente
-            );
-
-
-            return programacaoSemanaDAO.buscarPorData(
-                    data
-            );
+            return existente;
         }
 
 
@@ -122,157 +66,7 @@ public class ProgramacaoSemanaService {
                 criarProgramacao(data);
 
 
-        return programacaoSemanaDAO.salvar(
-                nova
-        );
-    }
-
-
-    /**
-     * Garante que todas as partes fixas cadastradas
-     * no sistema estejam presentes na programação.
-     *
-     * Partes variáveis não são alteradas.
-     */
-    private void sincronizarPartesFixas(
-            ProgramacaoSemana programacao
-    ) {
-
-        List<Parte> todasPartes =
-                parteDAO.listarTodos();
-
-
-        List<Parte> partesFixas =
-                todasPartes
-                        .stream()
-                        .filter(
-                                parte ->
-                                        parte.getTipoVariacao()
-                                                == TipoVariacaoParte.FIXA
-                        )
-                        .sorted(
-                                Comparator.comparingInt(
-                                        this::obterOrdemParte
-                                )
-                        )
-                        .toList();
-
-
-        for (Parte parteFixa : partesFixas) {
-
-            boolean jaExiste =
-                    programacao.partes()
-                            .stream()
-                            .anyMatch(
-                                    programacaoParte ->
-                                            programacaoParte
-                                                    .getParte()
-                                                    .getId()
-                                                    .equals(
-                                                            parteFixa.getId()
-                                                    )
-                            );
-
-
-            if (jaExiste) {
-                continue;
-            }
-
-
-            int novaOrdem =
-                    calcularNovaOrdem(
-                            programacao,
-                            parteFixa
-                    );
-
-
-            ProgramacaoParte programacaoParte =
-                    new ProgramacaoParte(
-                            parteFixa,
-                            novaOrdem
-                    );
-
-
-            programacaoParteDAO.salvar(
-                    programacao.id(),
-                    programacaoParte
-            );
-        }
-    }
-
-
-    /**
-     * Calcula a ordem que uma nova parte deve receber.
-     */
-    private int calcularNovaOrdem(
-            ProgramacaoSemana programacao,
-            Parte novaParte
-    ) {
-
-        List<Parte> partes =
-                new ArrayList<>();
-
-
-        partes.addAll(
-                programacao.partes()
-                        .stream()
-                        .map(
-                                ProgramacaoParte::getParte
-                        )
-                        .toList()
-        );
-
-
-        if (
-                partes.stream()
-                        .noneMatch(
-                                parte ->
-                                        parte.getId()
-                                                .equals(
-                                                        novaParte.getId()
-                                                )
-                        )
-        ) {
-
-            partes.add(
-                    novaParte
-            );
-        }
-
-
-        partes.sort(
-                Comparator.comparingInt(
-                        this::obterOrdemParte
-                )
-        );
-
-
-        for (
-                int i = 0;
-                i < partes.size();
-                i++
-        ) {
-
-            if (
-                    partes.get(i)
-                            .getId()
-                            .equals(
-                                    novaParte.getId()
-                            )
-            ) {
-
-                return i + 1;
-            }
-        }
-
-
-        return programacao.partes()
-                .stream()
-                .mapToInt(
-                        ProgramacaoParte::getOrdem
-                )
-                .max()
-                .orElse(0) + 1;
+        return programacaoSemanaDAO.salvar(nova);
     }
 
 
@@ -287,7 +81,6 @@ public class ProgramacaoSemanaService {
     ) {
 
         if (data == null) {
-
             throw new IllegalArgumentException(
                     "A data não pode ser nula."
             );
@@ -295,7 +88,6 @@ public class ProgramacaoSemanaService {
 
 
         if (ordem <= 0) {
-
             throw new IllegalArgumentException(
                     "A ordem deve ser maior que zero."
             );
@@ -311,8 +103,7 @@ public class ProgramacaoSemanaService {
                         .stream()
                         .filter(
                                 parte ->
-                                        parte.getOrdem()
-                                                == ordem
+                                        parte.getOrdem() == ordem
                         )
                         .findFirst()
                         .orElseThrow(
@@ -323,9 +114,7 @@ public class ProgramacaoSemanaService {
                         );
 
 
-        programacaoParte.setTema(
-                tema
-        );
+        programacaoParte.setTema(tema);
 
 
         programacaoParteDAO.atualizarTema(
@@ -336,10 +125,7 @@ public class ProgramacaoSemanaService {
 
 
     /**
-     * Cria uma nova programação semanal.
-     *
-     * Uma nova programação recebe automaticamente
-     * todas as partes fixas.
+     * Cria a programação semanal em memória.
      */
     private ProgramacaoSemana criarProgramacao(
             LocalDate data
@@ -351,10 +137,9 @@ public class ProgramacaoSemanaService {
 
         List<Parte> partesFixas =
                 partes.stream()
-                        .filter(
-                                parte ->
-                                        parte.getTipoVariacao()
-                                                == TipoVariacaoParte.FIXA
+                        .filter(parte ->
+                                parte.getTipoVariacao()
+                                        == TipoVariacaoParte.FIXA
                         )
                         .sorted(
                                 Comparator.comparingInt(
@@ -387,16 +172,14 @@ public class ProgramacaoSemanaService {
 
 
     /**
-     * Ordena as partes pela ordem padrão da reunião.
+     * Define a ordem padrão das partes da reunião.
      */
     private List<Parte> ordenarPartes(
             List<Parte> partes
     ) {
 
         List<Parte> ordenadas =
-                new ArrayList<>(
-                        partes
-                );
+                new ArrayList<>(partes);
 
 
         ordenadas.sort(
@@ -411,7 +194,10 @@ public class ProgramacaoSemanaService {
 
 
     /**
-     * Ordem padrão das partes da reunião.
+     * Ordem padrão das partes da reunião
+     * A ordem é baseada no nome da parte porque,
+     * neste momento, a tabela parte ainda não possui
+     * uma coluna específica para armazenar a ordem.
      */
     private int obterOrdemParte(
             Parte parte
@@ -419,54 +205,88 @@ public class ProgramacaoSemanaService {
 
         return switch (parte.getNome()) {
 
-            case "Presidente" -> 1;
+            case "Presidente" ->
+                    1;
 
-            case "Oração inicial" -> 2;
+            case "Oração inicial" ->
+                    2;
 
-            case "Discurso — Tesouros" -> 3;
+            case "Discurso — Tesouros" ->
+                    3;
 
-            case "Joias Espirituais" -> 4;
+            case "Joias Espirituais" ->
+                    4;
 
-            case "Leitura" -> 5;
+            case "Leitura" ->
+                    5;
 
-            case "Iniciando Conversas" -> 6;
+            case "Iniciando Conversas" ->
+                    6;
 
-            case "Cultivando Interesse" -> 7;
+            case "Cultivando Interesse" ->
+                    7;
 
-            case "O Que Você Diria?" -> 8;
+            case "O Que Você Diria?" ->
+                    8;
 
-            case "Fazendo Discípulos" -> 9;
+            case "Fazendo Discípulos" ->
+                    9;
 
-            case "Explicando suas crenças" -> 10;
+            case "Explicando suas crenças" ->
+                    10;
 
-            case "Discurso — Ministério" -> 11;
+            case "Discurso — Ministério" ->
+                    11;
 
-            case "Parte 1" -> 12;
+            case "Parte 1" ->
+                    12;
 
-            case "Parte 2" -> 13;
+            case "Parte 2" ->
+                    13;
 
-            case "Parte 3" -> 14;
+            case "Parte 3" ->
+                    14;
 
-            case "Necessidades Locais" -> 15;
+            case "Necessidades Locais" ->
+                    15;
 
-            case "Estudo Bíblico" -> 16;
+            case "Estudo Bíblico" ->
+                    16;
 
-            case "Oração final" -> 17;
+            case "Oração final" ->
+                    17;
 
-            default -> 999;
+            default ->
+                    999;
         };
     }
 
 
-    /**
-     * Valida a quantidade de partes variáveis.
-     */
+    public List<Parte> listarPartesVariaveis() {
+
+        return parteDAO.listarTodos()
+                .stream()
+                .filter(parte ->
+                        parte.getTipoVariacao()
+                                == TipoVariacaoParte.VARIAVEL
+                )
+                .sorted(
+                        Comparator.comparing(
+                                Parte::getSecao,
+                                Comparator.nullsLast(
+                                        Comparator.naturalOrder()
+                                )
+                        )
+                )
+                .toList();
+    }
+
+
     public void validarPartesVariaveis(
             List<Parte> partesSelecionadas
     ) {
 
         if (partesSelecionadas == null) {
-
             throw new IllegalArgumentException(
                     "A lista de partes selecionadas não pode ser nula."
             );
@@ -477,10 +297,7 @@ public class ProgramacaoSemanaService {
                 partesSelecionadas.size();
 
 
-        if (
-                quantidade < 3
-                        || quantidade > 6
-        ) {
+        if (quantidade < 3 || quantidade > 6) {
 
             throw new IllegalArgumentException(
                     "A programação deve possuir entre "
@@ -491,10 +308,9 @@ public class ProgramacaoSemanaService {
 
         boolean possuiParteNaoVariavel =
                 partesSelecionadas.stream()
-                        .anyMatch(
-                                parte ->
-                                        parte.getTipoVariacao()
-                                                != TipoVariacaoParte.VARIAVEL
+                        .anyMatch(parte ->
+                                parte.getTipoVariacao()
+                                        != TipoVariacaoParte.VARIAVEL
                         );
 
 
@@ -508,9 +324,7 @@ public class ProgramacaoSemanaService {
 
         boolean possuiParteDuplicada =
                 partesSelecionadas.stream()
-                        .map(
-                                Parte::getId
-                        )
+                        .map(Parte::getId)
                         .distinct()
                         .count()
                         != partesSelecionadas.size();
@@ -519,23 +333,18 @@ public class ProgramacaoSemanaService {
         if (possuiParteDuplicada) {
 
             throw new IllegalArgumentException(
-                    "Não é permitido selecionar a mesma "
-                            + "parte variável mais de uma vez."
+                    "Não é permitido selecionar a mesma parte variável mais de uma vez."
             );
         }
     }
 
 
-    /**
-     * Monta uma programação completa em memória.
-     */
     public ProgramacaoSemana montarProgramacao(
             LocalDate data,
             List<Parte> partesVariaveisSelecionadas
     ) {
 
         if (data == null) {
-
             throw new IllegalArgumentException(
                     "A data não pode ser nula."
             );
@@ -553,10 +362,9 @@ public class ProgramacaoSemanaService {
 
         List<Parte> partesFixas =
                 todasPartes.stream()
-                        .filter(
-                                parte ->
-                                        parte.getTipoVariacao()
-                                                == TipoVariacaoParte.FIXA
+                        .filter(parte ->
+                                parte.getTipoVariacao()
+                                        == TipoVariacaoParte.FIXA
                         )
                         .toList();
 
@@ -568,7 +376,6 @@ public class ProgramacaoSemanaService {
         partesSelecionadas.addAll(
                 partesFixas
         );
-
 
         partesSelecionadas.addAll(
                 partesVariaveisSelecionadas
@@ -603,16 +410,12 @@ public class ProgramacaoSemanaService {
     }
 
 
-    /**
-     * Adiciona uma parte variável à semana.
-     */
     public void adicionarParteVariavel(
             LocalDate data,
             Integer parteId
     ) {
 
         if (data == null) {
-
             throw new IllegalArgumentException(
                     "A data não pode ser nula."
             );
@@ -620,7 +423,6 @@ public class ProgramacaoSemanaService {
 
 
         if (parteId == null) {
-
             throw new IllegalArgumentException(
                     "O ID da parte não pode ser nulo."
             );
@@ -641,10 +443,8 @@ public class ProgramacaoSemanaService {
                         );
 
 
-        if (
-                parte.getTipoVariacao()
-                        != TipoVariacaoParte.VARIAVEL
-        ) {
+        if (parte.getTipoVariacao()
+                != TipoVariacaoParte.VARIAVEL) {
 
             throw new IllegalArgumentException(
                     "Somente partes variáveis podem ser adicionadas."
@@ -660,9 +460,7 @@ public class ProgramacaoSemanaService {
                                         programacaoParte
                                                 .getParte()
                                                 .getId()
-                                                .equals(
-                                                        parte.getId()
-                                                )
+                                                .equals(parte.getId())
                         );
 
 
@@ -702,7 +500,8 @@ public class ProgramacaoSemanaService {
                                 ProgramacaoParte::getOrdem
                         )
                         .max()
-                        .orElse(0) + 1;
+                        .orElse(0)
+                        + 1;
 
 
         ProgramacaoParte programacaoParte =
@@ -716,36 +515,23 @@ public class ProgramacaoSemanaService {
                 programacao.id(),
                 programacaoParte
         );
-
-
         ProgramacaoSemana atualizada =
-                programacaoSemanaDAO.buscarPorData(
-                        data
-                );
-
+                programacaoSemanaDAO.buscarPorData(data);
 
         if (atualizada == null) {
-
             throw new IllegalStateException(
-                    "A programação não foi encontrada após "
-                            + "adicionar a parte variável."
+                    "A programação não foi encontrada após adicionar a parte variável."
             );
         }
     }
 
 
-    /**
-     * Remove uma parte variável da semana.
-     *
-     * Partes fixas nunca podem ser removidas.
-     */
     public void removerParteVariavel(
             LocalDate data,
             Integer parteId
     ) {
 
         if (data == null) {
-
             throw new IllegalArgumentException(
                     "A data não pode ser nula."
             );
@@ -753,7 +539,6 @@ public class ProgramacaoSemanaService {
 
 
         if (parteId == null) {
-
             throw new IllegalArgumentException(
                     "O ID da parte não pode ser nulo."
             );
@@ -761,9 +546,7 @@ public class ProgramacaoSemanaService {
 
 
         ProgramacaoSemana programacao =
-                programacaoSemanaDAO.buscarPorData(
-                        data
-                );
+                programacaoSemanaDAO.buscarPorData(data);
 
 
         if (programacao == null) {
@@ -781,9 +564,7 @@ public class ProgramacaoSemanaService {
                                 parte ->
                                         parte.getParte()
                                                 .getId()
-                                                .equals(
-                                                        parteId
-                                                )
+                                                .equals(parteId)
                         )
                         .findFirst()
                         .orElseThrow(
@@ -794,11 +575,10 @@ public class ProgramacaoSemanaService {
                         );
 
 
-        if (
-                programacaoParte.getParte()
-                        .getTipoVariacao()
-                        != TipoVariacaoParte.VARIAVEL
-        ) {
+        if (programacaoParte
+                .getParte()
+                .getTipoVariacao()
+                != TipoVariacaoParte.VARIAVEL) {
 
             throw new IllegalArgumentException(
                     "Partes fixas não podem ser removidas."
@@ -813,16 +593,11 @@ public class ProgramacaoSemanaService {
     }
 
 
-    /**
-     * Verifica se a programação possui entre 3 e 6
-     * partes variáveis.
-     */
     public boolean estaConfigurada(
             LocalDate data
     ) {
 
         if (data == null) {
-
             throw new IllegalArgumentException(
                     "A data não pode ser nula."
             );
@@ -830,64 +605,49 @@ public class ProgramacaoSemanaService {
 
 
         ProgramacaoSemana programacao =
-                obterOuCriar(data);
+                programacaoSemanaDAO.buscarPorData(data);
+
+
+        if (programacao == null) {
+            return false;
+        }
 
 
         return programacao
                 .possuiQuantidadeValidaDePartesVariaveis();
     }
-
-
-    /**
-     * Lista as quatro reuniões do mês.
-     */
     public List<ProgramacaoSemana> listarSemanasDoMes(
             YearMonth mes
     ) {
 
         if (mes == null) {
-
             throw new IllegalArgumentException(
                     "O mês não pode ser nulo."
             );
         }
 
-
         List<ProgramacaoSemana> semanas =
                 new ArrayList<>();
 
-
-        LocalDate data =
-                mes.atDay(1);
-
+        LocalDate data = mes.atDay(1);
 
         while (
                 data.getMonth() == mes.getMonth()
                         && semanas.size() < 4
         ) {
 
-            if (
-                    data.getDayOfWeek()
-                            == DayOfWeek.WEDNESDAY
-            ) {
+            if (data.getDayOfWeek() == DayOfWeek.THURSDAY) {
 
                 ProgramacaoSemana programacao =
-                        obterOuCriar(data);
-
+                        programacaoSemanaDAO.buscarPorData(data);
 
                 if (programacao != null) {
-
-                    semanas.add(
-                            programacao
-                    );
+                    semanas.add(programacao);
                 }
             }
 
-
-            data =
-                    data.plusDays(1);
+            data = data.plusDays(1);
         }
-
 
         return semanas;
     }

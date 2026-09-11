@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -317,6 +318,44 @@ class EscalaDAOTest extends BaseDAOTest {
                         .ajudante()
                         .getId()
         );
+    }
+
+
+    @Test
+    void deveEncontrarSomenteOutrasDesignacoesDaPessoaNoMesmoMes() {
+
+        Pessoa pessoa = criarPessoa();
+        Pessoa outraPessoa = criarPessoa();
+        Parte parte = criarParte();
+
+        Escala escalaAtual = escalaDAO.salvar(new Escala(
+                LocalDate.of(2026, 8, 5),
+                List.of(new Designacao(LocalDate.of(2026, 8, 5), parte, pessoa, null))
+        ));
+        Designacao designacaoAtual = escalaDAO.buscarPorId(escalaAtual.getId())
+                .orElseThrow().getDesignacoes().get(0);
+
+        escalaDAO.salvar(new Escala(
+                LocalDate.of(2026, 8, 19),
+                List.of(new Designacao(LocalDate.of(2026, 8, 19), parte, pessoa, null))
+        ));
+        escalaDAO.salvar(new Escala(
+                LocalDate.of(2026, 8, 26),
+                List.of(new Designacao(LocalDate.of(2026, 8, 26), parte, outraPessoa, pessoa))
+        ));
+        escalaDAO.salvar(new Escala(
+                LocalDate.of(2026, 9, 2),
+                List.of(new Designacao(LocalDate.of(2026, 9, 2), parte, pessoa, null))
+        ));
+
+        List<LocalDate> datas = escalaDAO.listarDatasDeOutrasDesignacoesNoMes(
+                pessoa.getId(), YearMonth.of(2026, 8), designacaoAtual.id()
+        );
+
+        assertEquals(List.of(
+                LocalDate.of(2026, 8, 19),
+                LocalDate.of(2026, 8, 26)
+        ), datas);
     }
 
     private Escala criarEscalaSemDesignacoes() {

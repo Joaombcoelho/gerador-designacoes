@@ -79,11 +79,19 @@ public class ProgramacaoController {
                 );
 
 
+        /*
+         * Agora a alteração da programação acontece
+         * diretamente através dos CheckBoxes.
+         */
         view.setOnParteSelecionadaChanged(
                 this::alterarParteSelecionada
         );
 
 
+        /*
+         * Clicar em uma parte continua permitindo
+         * carregar o tema correspondente.
+         */
         view.getListaPartes()
                 .getSelectionModel()
                 .selectedItemProperty()
@@ -139,6 +147,10 @@ public class ProgramacaoController {
         atualizarSemanas();
 
 
+        /*
+         * Ao trocar de mês, ainda não existe
+         * uma escala gerada para o novo mês.
+         */
         view.atualizarBotaoSalvar(false);
 
 
@@ -174,10 +186,8 @@ public class ProgramacaoController {
                         && resultado.size() < 4
         ) {
 
-            if (
-                    data.getDayOfWeek()
-                            == DayOfWeek.WEDNESDAY
-            ) {
+            if (data.getDayOfWeek()
+                    == DayOfWeek.THURSDAY) {
 
                 resultado.add(data);
             }
@@ -265,6 +275,11 @@ public class ProgramacaoController {
             atualizarListaPartes(programacao);
 
 
+            /*
+             * Ao entrar na configuração de uma semana,
+             * a geração anterior deixa de ser considerada
+             * como resultado atual.
+             */
             view.atualizarBotaoSalvar(false);
 
 
@@ -294,27 +309,21 @@ public class ProgramacaoController {
             ProgramacaoSemana programacao
     ) {
 
+        List<Parte> partesVariaveis =
+                service.listarPartesVariaveis();
+
+
         /*
-         * Agora carregamos TODAS as partes.
-         *
-         * As partes fixas serão automaticamente
-         * exibidas marcadas e desabilitadas pela View.
+         * Primeiro carregamos todas as partes variáveis.
          */
-        List<Parte> todasPartes =
-                service.listarTodas();
-
-
         view.carregarPartes(
-                todasPartes
+                partesVariaveis
         );
 
 
         /*
-         * Depois marcamos as partes que realmente
-         * estão presentes na programação da semana.
-         *
-         * As partes fixas já estão marcadas pela View.
-         * Aqui marcamos as variáveis salvas no banco.
+         * Depois marcamos somente as partes que
+         * pertencem à programação desta semana.
          */
         programacao.partes()
                 .stream()
@@ -347,23 +356,15 @@ public class ProgramacaoController {
     }
 
 
+    /**
+     * Adiciona ou remove uma parte da programação
+     * conforme o estado do CheckBox.
+     */
     private void alterarParteSelecionada(
             Parte parte
     ) {
 
         if (parte == null) {
-            return;
-        }
-
-
-        /*
-         * Segurança adicional:
-         * partes fixas nunca devem chegar aqui.
-         */
-        if (
-                parte.getTipoVariacao()
-                        == TipoVariacaoParte.FIXA
-        ) {
             return;
         }
 
@@ -494,13 +495,11 @@ public class ProgramacaoController {
                     YearMonth.from(dataMes);
 
 
-            if (
-                    !YearMonth.from(novaSemana)
-                            .equals(mes)
-            ) {
+            if (!YearMonth.from(novaSemana)
+                    .equals(mes)) {
 
                 view.atualizarStatus(
-                        "Não há outra quarta-feira neste mês."
+                        "Não há outra quinta-feira neste mês."
                 );
 
                 return;
@@ -692,6 +691,10 @@ public class ProgramacaoController {
         }
 
 
+        /*
+         * Não permite salvar tema de uma parte
+         * que não esteja selecionada.
+         */
         if (!view.isParteSelecionada(
                 parte.getId()
         )) {
@@ -776,15 +779,17 @@ public class ProgramacaoController {
         }
 
 
-        boolean gerou =
-                escalaController.gerarEscalasDoMes(
-                        YearMonth.from(data)
-                );
-
-
-        view.atualizarBotaoSalvar(
-                gerou
+        escalaController.gerarEscalasDoMes(
+                YearMonth.from(data)
         );
+
+
+        /*
+         * Se chegamos até aqui, a geração foi executada.
+         * O botão Salvar fica disponível para persistir
+         * as escalas geradas.
+         */
+        view.atualizarBotaoSalvar(true);
     }
 
 
