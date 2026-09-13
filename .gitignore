@@ -1,0 +1,30 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Maven
+-target/
+target/
+
+# Build/distribution artifacts
+dist/
+*.jar
+*.exe
+
+# Databases and local backups
+*.db
+*.db-shm
+*.db-wal
+backup/
+
+# Temporary/test archives
+*.zip
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
