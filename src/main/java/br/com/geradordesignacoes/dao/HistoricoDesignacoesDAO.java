@@ -1,11 +1,7 @@
 package br.com.geradordesignacoes.dao;
 
 import br.com.geradordesignacoes.database.ConnectionFactory;
-import br.com.geradordesignacoes.model.HistoricoDesignacoes;
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
-import br.com.geradordesignacoes.model.Pessoa;
-import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,7 +19,6 @@ public class HistoricoDesignacoesDAO {
     private final ParteDAO parteDAO;
 
 
-
     public HistoricoDesignacoesDAO() {
 
         this.pessoaDAO =
@@ -32,7 +27,6 @@ public class HistoricoDesignacoesDAO {
         this.parteDAO =
                 new ParteDAO();
     }
-
 
 
     public void salvar(
@@ -216,7 +210,6 @@ public class HistoricoDesignacoesDAO {
     }
 
 
-
     public List<ParticipacaoDesignacao> listarTodas() {
 
 
@@ -265,7 +258,6 @@ public class HistoricoDesignacoesDAO {
     }
 
 
-
     public HistoricoDesignacoes carregarHistorico() {
 
 
@@ -281,7 +273,6 @@ public class HistoricoDesignacoesDAO {
 
         return historico;
     }
-
 
 
     private ParticipacaoDesignacao mapearParticipacao(
@@ -307,7 +298,6 @@ public class HistoricoDesignacoesDAO {
                 resultSet.getInt("parte_id");
 
 
-
         Pessoa pessoa =
                 pessoaDAO.buscarPorId(pessoaId)
                         .orElseThrow(
@@ -316,7 +306,6 @@ public class HistoricoDesignacoesDAO {
                                                 + pessoaId
                                 )
                         );
-
 
 
         Parte parte =
@@ -329,14 +318,12 @@ public class HistoricoDesignacoesDAO {
                         );
 
 
-
         TipoParticipacao tipoParticipacao =
                 TipoParticipacao.valueOf(
                         resultSet.getString(
                                 "tipo_participacao"
                         )
                 );
-
 
 
         return new ParticipacaoDesignacao(
@@ -347,7 +334,6 @@ public class HistoricoDesignacoesDAO {
                 tipoParticipacao
         );
     }
-
 
 
     private void validarParticipacao(
@@ -384,8 +370,8 @@ public class HistoricoDesignacoesDAO {
     public void limpar() {
 
         String sql = """
-            DELETE FROM historico_designacoes
-            """;
+                DELETE FROM historico_designacoes
+                """;
 
         try (
                 Connection connection =
@@ -415,11 +401,11 @@ public class HistoricoDesignacoesDAO {
 
 
         String sql = """
-            SELECT *
-            FROM historico_designacoes
-            WHERE pessoa_id = ?
-            ORDER BY data, id
-            """;
+                SELECT *
+                FROM historico_designacoes
+                WHERE pessoa_id = ?
+                ORDER BY data, id
+                """;
 
 
         try (
@@ -468,11 +454,11 @@ public class HistoricoDesignacoesDAO {
 
 
         String sql = """
-            SELECT *
-            FROM historico_designacoes
-            WHERE parte_id = ?
-            ORDER BY data, id
-            """;
+                SELECT *
+                FROM historico_designacoes
+                WHERE parte_id = ?
+                ORDER BY data, id
+                """;
 
 
         try (

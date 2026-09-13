@@ -4,12 +4,7 @@ import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,11 +25,11 @@ public class ProgramacaoSemanaDAO {
     ) {
 
         String sql = """
-            INSERT INTO programacao_semana (
-                data
-            )
-            VALUES (?)
-            """;
+                INSERT INTO programacao_semana (
+                    data
+                )
+                VALUES (?)
+                """;
 
 
         try (
@@ -132,12 +127,12 @@ public class ProgramacaoSemanaDAO {
     ) {
 
         String sql = """
-            SELECT
-                id,
-                data
-            FROM programacao_semana
-            WHERE data = ?
-            """;
+                SELECT
+                    id,
+                    data
+                FROM programacao_semana
+                WHERE data = ?
+                """;
 
 
         try (
@@ -200,9 +195,9 @@ public class ProgramacaoSemanaDAO {
     ) {
 
         String sql = """
-            DELETE FROM programacao_semana
-            WHERE id = ?
-            """;
+                DELETE FROM programacao_semana
+                WHERE id = ?
+                """;
 
 
         try (

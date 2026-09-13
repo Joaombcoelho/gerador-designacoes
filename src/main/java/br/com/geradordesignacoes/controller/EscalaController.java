@@ -2,21 +2,11 @@ package br.com.geradordesignacoes.controller;
 
 import br.com.geradordesignacoes.dao.EscalaDAO;
 import br.com.geradordesignacoes.dao.ParteDAO;
-import br.com.geradordesignacoes.model.Designacao;
-import br.com.geradordesignacoes.model.Escala;
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.ProgramacaoParte;
-import br.com.geradordesignacoes.model.ProgramacaoSemana;
-import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
-import br.com.geradordesignacoes.service.BackupService;
-import br.com.geradordesignacoes.service.GeradorEscala;
-import br.com.geradordesignacoes.service.HistoricoDesignacoesService;
-import br.com.geradordesignacoes.service.ParteService;
-import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
-import br.com.geradordesignacoes.service.RegrasService;
+import br.com.geradordesignacoes.model.*;
+import br.com.geradordesignacoes.service.*;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.escala.ItemEscala;
-import br.com.geradordesignacoes.model.Pessoa;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
@@ -369,7 +359,7 @@ public class EscalaController {
 
     /**
      * Salva no banco todas as escalas atualmente geradas.
-     *
+     * <p>
      * Este métodoo é utilizado tanto pela tela Escala
      * quanto pela tela Programação.
      *

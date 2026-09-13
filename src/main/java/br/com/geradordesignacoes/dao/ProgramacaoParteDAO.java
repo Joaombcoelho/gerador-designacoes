@@ -57,14 +57,14 @@ public class ProgramacaoParteDAO {
     ) throws SQLException {
 
         String sql = """
-            INSERT INTO programacao_parte (
-                programacao_semana_id,
-                parte_id,
-                ordem,
-                tema
-            )
-            VALUES (?, ?, ?, ?)
-            """;
+                INSERT INTO programacao_parte (
+                    programacao_semana_id,
+                    parte_id,
+                    ordem,
+                    tema
+                )
+                VALUES (?, ?, ?, ?)
+                """;
 
 
         try (
@@ -106,10 +106,10 @@ public class ProgramacaoParteDAO {
     ) {
 
         String sql = """
-            UPDATE programacao_parte
-            SET tema = ?
-            WHERE id = ?
-            """;
+                UPDATE programacao_parte
+                SET tema = ?
+                WHERE id = ?
+                """;
 
 
         try (
@@ -183,15 +183,15 @@ public class ProgramacaoParteDAO {
     ) throws SQLException {
 
         String sql = """
-            SELECT
-                id,
-                parte_id,
-                ordem,
-                tema
-            FROM programacao_parte
-            WHERE programacao_semana_id = ?
-            ORDER BY ordem
-            """;
+                SELECT
+                    id,
+                    parte_id,
+                    ordem,
+                    tema
+                FROM programacao_parte
+                WHERE programacao_semana_id = ?
+                ORDER BY ordem
+                """;
 
 
         List<ProgramacaoParte> partes =
@@ -260,10 +260,10 @@ public class ProgramacaoParteDAO {
     ) {
 
         String sql = """
-            DELETE FROM programacao_parte
-            WHERE programacao_semana_id = ?
-              AND parte_id = ?
-            """;
+                DELETE FROM programacao_parte
+                WHERE programacao_semana_id = ?
+                  AND parte_id = ?
+                """;
 
 
         try (
@@ -312,9 +312,9 @@ public class ProgramacaoParteDAO {
     ) {
 
         String sql = """
-            DELETE FROM programacao_parte
-            WHERE programacao_semana_id = ?
-            """;
+                DELETE FROM programacao_parte
+                WHERE programacao_semana_id = ?
+                """;
 
 
         try (

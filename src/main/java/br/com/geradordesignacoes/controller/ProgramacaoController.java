@@ -89,7 +89,7 @@ public class ProgramacaoController {
 
 
         /*
-         * Clicar em uma parte continua permitindo
+         * Clicar numa parte continua permitindo
          * carregar o tema correspondente.
          */
         view.getListaPartes()

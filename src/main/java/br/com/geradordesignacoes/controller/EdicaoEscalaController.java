@@ -8,69 +8,26 @@ import br.com.geradordesignacoes.model.Pessoa;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Regras de consulta, validação e persistência da edição de escalas.
+ */
 public class EdicaoEscalaController {
 
-    private final EscalaDAO escalaDAO;
+    private final EscalaDAO escalaDAO =
+            new EscalaDAO();
 
     private Escala escalaSelecionada;
 
 
-    public EdicaoEscalaController() {
-        this.escalaDAO = new EscalaDAO();
-    }
-
-
-    /**
-     * Seleciona uma escala pelo ID e mantém a escala carregada
-     * para as demais operações da tela.
-     */
-    public Escala selecionarEscala(Integer escalaId) {
-
-        if (escalaId == null) {
-            throw new IllegalArgumentException(
-                    "O ID da escala não pode ser nulo."
-            );
-        }
-
-        Optional<Escala> escala =
-                escalaDAO.buscarPorId(escalaId);
-
-        if (escala.isEmpty()) {
-            throw new RuntimeException(
-                    "Escala não encontrada."
-            );
-        }
-
-        escalaSelecionada = escala.get();
-
-        return escalaSelecionada;
-    }
-
-
-    /**
-     * Retorna as designações da escala atualmente selecionada.
-     */
-    public List<Designacao> listarDesignacoesSelecionadas() {
-
-        if (escalaSelecionada == null) {
-            return List.of();
-        }
-
-        return escalaSelecionada.getDesignacoes();
-    }
-
-
-    /**
-     * Lista todas as escalas existentes no mês informado.
-     */
-    public List<Escala> listarEscalasDoMes(YearMonth mes) {
+    public List<Escala> listarEscalasDoMes(
+            YearMonth mes
+    ) {
 
         if (mes == null) {
+
             throw new IllegalArgumentException(
                     "O mês não pode ser nulo."
             );
@@ -78,10 +35,13 @@ public class EdicaoEscalaController {
 
         return escalaDAO.listarTodas()
                 .stream()
-                .filter(escala ->
-                        YearMonth.from(
-                                escala.getData()
-                        ).equals(mes)
+                .filter(
+                        escala ->
+                                YearMonth
+                                        .from(
+                                                escala.getData()
+                                        )
+                                        .equals(mes)
                 )
                 .sorted(
                         java.util.Comparator.comparing(
@@ -92,9 +52,133 @@ public class EdicaoEscalaController {
     }
 
 
-    /**
-     * Adiciona uma nova parte à escala atualmente selecionada.
-     */
+    public Escala selecionarEscala(
+            Integer escalaId
+    ) {
+
+        escalaSelecionada =
+                escalaDAO
+                        .buscarPorId(escalaId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Escala não encontrada."
+                                        )
+                        );
+
+        return escalaSelecionada;
+    }
+
+
+    public List<Designacao> listarDesignacoesSelecionadas() {
+
+        if (escalaSelecionada == null) {
+
+            return List.of();
+        }
+
+        return escalaSelecionada.getDesignacoes();
+    }
+
+
+    public List<LocalDate> verificarConflitos(
+            Integer designacaoId,
+            Pessoa novoResponsavel,
+            Pessoa novoAjudante
+    ) {
+
+        Designacao designacao =
+                obterDesignacao(
+                        designacaoId
+                );
+
+
+        YearMonth mes =
+                YearMonth.from(
+                        escalaSelecionada.getData()
+                );
+
+
+        LinkedHashSet<LocalDate> datas =
+                new LinkedHashSet<>();
+
+
+        datas.addAll(
+                escalaDAO
+                        .listarDatasDeOutrasDesignacoesNoMes(
+                                novoResponsavel.getId(),
+                                mes,
+                                designacao.id()
+                        )
+        );
+
+
+        if (novoAjudante != null) {
+
+            datas.addAll(
+                    escalaDAO
+                            .listarDatasDeOutrasDesignacoesNoMes(
+                                    novoAjudante.getId(),
+                                    mes,
+                                    designacao.id()
+                            )
+            );
+        }
+
+
+        return datas
+                .stream()
+                .sorted()
+                .toList();
+    }
+
+
+    public void salvarAlteracoes(
+            Integer designacaoId,
+            Pessoa novoResponsavel,
+            Pessoa novoAjudante
+    ) {
+
+        Designacao designacao =
+                obterDesignacao(
+                        designacaoId
+                );
+
+
+        if (novoResponsavel == null) {
+
+            throw new IllegalArgumentException(
+                    "Selecione um responsável."
+            );
+        }
+
+
+        if (designacao
+                .parte()
+                .getExigeAjudante()
+                && novoAjudante == null) {
+
+            throw new IllegalArgumentException(
+                    "Esta parte exige um ajudante."
+            );
+        }
+
+
+        escalaDAO.atualizarDesignacao(
+                designacao.id(),
+                novoResponsavel.getId(),
+                novoAjudante == null
+                        ? null
+                        : novoAjudante.getId()
+        );
+
+
+        selecionarEscala(
+                escalaSelecionada.getId()
+        );
+    }
+
+
     public void adicionarParte(
             Parte parte,
             Pessoa responsavel,
@@ -102,23 +186,73 @@ public class EdicaoEscalaController {
     ) {
 
         if (escalaSelecionada == null) {
+
             throw new IllegalStateException(
-                    "Nenhuma escala foi selecionada."
+                    "Selecione uma escala."
             );
         }
+
 
         if (parte == null) {
+
             throw new IllegalArgumentException(
-                    "A parte não pode ser nula."
+                    "Selecione uma parte."
             );
         }
+
 
         if (responsavel == null) {
+
             throw new IllegalArgumentException(
-                    "O responsável não pode ser nulo."
+                    "Selecione um responsável."
             );
         }
 
+
+        /*
+         * Verifica se a parte já existe nesta escala.
+         */
+        boolean parteJaExiste =
+                escalaSelecionada
+                        .getDesignacoes()
+                        .stream()
+                        .anyMatch(
+                                designacao ->
+                                        designacao
+                                                .parte()
+                                                .equals(parte)
+                        );
+
+
+        if (parteJaExiste) {
+
+            throw new IllegalArgumentException(
+                    "Esta parte já está adicionada nesta escala."
+            );
+        }
+
+
+        /*
+         * Na edição manual validamos se a pessoa pode
+         * realizar a parte pelas regras básicas.
+         *
+         * Não exigimos que a parte tenha explicitamente
+         * RESPONSAVEL em participacoesNecessarias,
+         * pois partes cadastradas manualmente podem não
+         * possuir essa configuração.
+         */
+        if (!parte.podeSerRealizadaPor(responsavel)) {
+
+            throw new IllegalArgumentException(
+                    "O responsável selecionado não pode realizar esta parte."
+            );
+        }
+
+
+        /*
+         * Se a parte exige ajudante,
+         * ele é obrigatório.
+         */
         if (parte.getExigeAjudante()
                 && ajudante == null) {
 
@@ -127,181 +261,87 @@ public class EdicaoEscalaController {
             );
         }
 
+
+        /*
+         * Se existir ajudante, validamos se ele também
+         * atende às regras básicas da parte.
+         */
         if (ajudante != null
-                && responsavel.getId() != null
-                && responsavel.getId().equals(ajudante.getId())) {
+                && !parte.podeSerRealizadaPor(ajudante)) {
 
             throw new IllegalArgumentException(
-                    "O responsável e o ajudante não podem ser a mesma pessoa."
+                    "O ajudante selecionado não pode realizar esta parte."
             );
         }
 
-        Designacao novaDesignacao =
-                new Designacao(
-                        null,
-                        escalaSelecionada.getData(),
-                        parte,
-                        responsavel,
-                        ajudante
-                );
 
-        escalaSelecionada.adicionarDesignacao(
-                novaDesignacao
-        );
-
-        escalaDAO.atualizar(
-                escalaSelecionada
-        );
-    }
-
-
-    /**
-     * Verifica conflitos da nova combinação de responsável e ajudante
-     * dentro do mês da escala selecionada.
-     */
-    public List<LocalDate> verificarConflitos(
-            Integer designacaoId,
-            Pessoa responsavel,
-            Pessoa ajudante
-    ) {
-
-        if (escalaSelecionada == null) {
-            throw new IllegalStateException(
-                    "Nenhuma escala foi selecionada."
-            );
-        }
-
-        if (responsavel == null) {
-            throw new IllegalArgumentException(
-                    "O responsável não pode ser nulo."
-            );
-        }
-
-        YearMonth mes =
-                YearMonth.from(
-                        escalaSelecionada.getData()
-                );
-
-        LinkedHashSet<LocalDate> conflitos =
-                new LinkedHashSet<>();
-
-        conflitos.addAll(
-                escalaDAO.listarDatasDeOutrasDesignacoesNoMes(
-                        responsavel.getId(),
-                        mes,
-                        designacaoId
-                )
-        );
-
-        if (ajudante != null) {
-
-            conflitos.addAll(
-                    escalaDAO.listarDatasDeOutrasDesignacoesNoMes(
-                            ajudante.getId(),
-                            mes,
-                            designacaoId
-                    )
-            );
-        }
-
-        return conflitos.stream()
-                .sorted()
-                .toList();
-    }
-
-
-    /**
-     * Salva a alteração de responsável e ajudante de uma designação.
-     */
-    public void salvarAlteracoes(
-            Integer designacaoId,
-            Pessoa novoResponsavel,
-            Pessoa novoAjudante
-    ) {
-
-        if (escalaSelecionada == null) {
-            throw new IllegalStateException(
-                    "Nenhuma escala foi selecionada."
-            );
-        }
-
-        if (designacaoId == null) {
-            throw new IllegalArgumentException(
-                    "O ID da designação não pode ser nulo."
-            );
-        }
-
-        if (novoResponsavel == null) {
-            throw new IllegalArgumentException(
-                    "O responsável não pode ser nulo."
-            );
-        }
-
-        Designacao designacaoEncontrada = null;
-        int indice = -1;
-
-        List<Designacao> designacoes =
-                escalaSelecionada.getDesignacoes();
-
-        for (int i = 0; i < designacoes.size(); i++) {
-
-            Designacao designacao =
-                    designacoes.get(i);
-
-            if (designacao.id() != null
-                    && designacao.id().equals(designacaoId)) {
-
-                designacaoEncontrada = designacao;
-                indice = i;
-                break;
-            }
-        }
-
-        if (designacaoEncontrada == null) {
-            throw new RuntimeException(
-                    "Designação não encontrada na escala."
-            );
-        }
-
-        if (designacaoEncontrada.parte().getExigeAjudante()
-                && novoAjudante == null) {
+        /*
+         * Responsável e ajudante devem ser diferentes.
+         */
+        if (ajudante != null
+                && responsavel
+                .getId()
+                .equals(
+                        ajudante.getId()
+                )) {
 
             throw new IllegalArgumentException(
-                    "Esta parte exige um ajudante."
+                    "O responsável e o ajudante devem ser pessoas diferentes."
             );
         }
 
-        if (novoAjudante != null
-                && novoResponsavel.getId() != null
-                && novoResponsavel.getId().equals(
-                novoAjudante.getId()
-        )) {
 
-            throw new IllegalArgumentException(
-                    "O responsável e o ajudante não podem ser a mesma pessoa."
-            );
-        }
-
-        escalaDAO.atualizarDesignacao(
-                designacaoId,
-                novoResponsavel.getId(),
-                novoAjudante == null
+        /*
+         * Insere a nova designação no banco.
+         */
+        escalaDAO.adicionarDesignacao(
+                escalaSelecionada.getId(),
+                parte.getId(),
+                responsavel.getId(),
+                ajudante == null
                         ? null
-                        : novoAjudante.getId()
+                        : ajudante.getId()
         );
 
-        Designacao novaDesignacao =
-                new Designacao(
-                        designacaoEncontrada.id(),
-                        designacaoEncontrada.data(),
-                        designacaoEncontrada.parte(),
-                        novoResponsavel,
-                        novoAjudante
+
+        /*
+         * Recarrega a escala.
+         */
+        selecionarEscala(
+                escalaSelecionada.getId()
+        );
+    }
+
+
+    private Designacao obterDesignacao(
+            Integer designacaoId
+    ) {
+
+        if (escalaSelecionada == null) {
+
+            throw new IllegalStateException(
+                    "Selecione uma escala."
+            );
+        }
+
+
+        return escalaSelecionada
+                .getDesignacoes()
+                .stream()
+                .filter(
+                        designacao ->
+                                designacao
+                                        .id()
+                                        .equals(
+                                                designacaoId
+                                        )
+                )
+                .findFirst()
+                .orElseThrow(
+                        () ->
+                                new IllegalArgumentException(
+                                        "Designação não encontrada."
+                                )
                 );
-
-        escalaSelecionada.substituirDesignacao(
-                indice,
-                novaDesignacao
-        );
     }
 }

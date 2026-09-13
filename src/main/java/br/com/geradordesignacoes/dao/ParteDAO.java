@@ -14,21 +14,21 @@ public class ParteDAO {
     public Parte salvar(Parte parte) {
 
         String sql = """
-        INSERT INTO parte (
-            nome,
-            tipo,
-            privilegio_minimo,
-            exige_ajudante,
-            sexo_permitido,
-            quantidade_minima_participantes,
-            gera_formulario,
-            nivel_leitura_minimo,
-            secao,
-            tipo_variacao,
-            possui_tema
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+                INSERT INTO parte (
+                    nome,
+                    tipo,
+                    privilegio_minimo,
+                    exige_ajudante,
+                    sexo_permitido,
+                    quantidade_minima_participantes,
+                    gera_formulario,
+                    nivel_leitura_minimo,
+                    secao,
+                    tipo_variacao,
+                    possui_tema
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
 
         try (
@@ -65,9 +65,8 @@ public class ParteDAO {
                 }
 
 
-
-                try(ResultSet generatedKeys =
-                            statement.getGeneratedKeys()) {
+                try (ResultSet generatedKeys =
+                             statement.getGeneratedKeys()) {
 
 
                     if (!generatedKeys.next()) {
@@ -109,14 +108,14 @@ public class ParteDAO {
                 }
 
 
-            } catch(SQLException | RuntimeException e){
+            } catch (SQLException | RuntimeException e) {
 
                 connection.rollback();
                 throw e;
             }
 
 
-        } catch(SQLException e){
+        } catch (SQLException e) {
 
             throw new RuntimeException(
                     "Erro ao salvar parte.",
@@ -126,8 +125,7 @@ public class ParteDAO {
     }
 
 
-
-    public List<Parte> listarTodos(){
+    public List<Parte> listarTodos() {
 
         List<Parte> partes =
                 new ArrayList<>();
@@ -140,7 +138,7 @@ public class ParteDAO {
                 """;
 
 
-        try(
+        try (
                 Connection connection =
                         ConnectionFactory.getConnection();
 
@@ -150,9 +148,9 @@ public class ParteDAO {
                 ResultSet resultSet =
                         statement.executeQuery()
 
-        ){
+        ) {
 
-            while(resultSet.next()){
+            while (resultSet.next()) {
 
                 partes.add(
                         mapearParte(
@@ -163,7 +161,7 @@ public class ParteDAO {
             }
 
 
-        }catch(SQLException e){
+        } catch (SQLException e) {
 
             throw new RuntimeException(
                     "Erro ao listar partes.",
@@ -176,9 +174,7 @@ public class ParteDAO {
     }
 
 
-
-
-    public Optional<Parte> buscarPorId(Integer id){
+    public Optional<Parte> buscarPorId(Integer id) {
 
 
         String sql = """
@@ -188,23 +184,23 @@ public class ParteDAO {
                 """;
 
 
-        try(
+        try (
                 Connection connection =
                         ConnectionFactory.getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
 
-        ){
+        ) {
 
-            statement.setInt(1,id);
-
-
-            try(ResultSet rs =
-                        statement.executeQuery()){
+            statement.setInt(1, id);
 
 
-                if(rs.next()){
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+
+                if (rs.next()) {
 
                     return Optional.of(
                             mapearParte(
@@ -216,7 +212,7 @@ public class ParteDAO {
             }
 
 
-        }catch(SQLException e){
+        } catch (SQLException e) {
 
             throw new RuntimeException(
                     "Erro ao buscar parte.",
@@ -229,12 +225,10 @@ public class ParteDAO {
     }
 
 
+    public void atualizar(Parte parte) {
 
 
-    public void atualizar(Parte parte){
-
-
-        if(parte.getId() == null){
+        if (parte.getId() == null) {
 
             throw new IllegalArgumentException(
                     "Parte sem ID."
@@ -242,40 +236,38 @@ public class ParteDAO {
         }
 
 
-
         String sql = """
-        UPDATE parte
-        SET
-            nome = ?,
-            tipo = ?,
-            privilegio_minimo = ?,
-            exige_ajudante = ?,
-            sexo_permitido = ?,
-            quantidade_minima_participantes = ?,
-            gera_formulario = ?,
-            nivel_leitura_minimo = ?,
-            secao = ?,
-            tipo_variacao = ?,
-            possui_tema = ?
-        WHERE id = ?
-        """;
+                UPDATE parte
+                SET
+                    nome = ?,
+                    tipo = ?,
+                    privilegio_minimo = ?,
+                    exige_ajudante = ?,
+                    sexo_permitido = ?,
+                    quantidade_minima_participantes = ?,
+                    gera_formulario = ?,
+                    nivel_leitura_minimo = ?,
+                    secao = ?,
+                    tipo_variacao = ?,
+                    possui_tema = ?
+                WHERE id = ?
+                """;
 
 
-        try(
+        try (
                 Connection connection =
                         ConnectionFactory.getConnection()
 
-        ){
+        ) {
 
             connection.setAutoCommit(false);
 
 
-
-            try(
+            try (
                     PreparedStatement statement =
                             connection.prepareStatement(sql)
 
-            ){
+            ) {
 
 
                 preencherStatement(
@@ -293,7 +285,6 @@ public class ParteDAO {
                 statement.executeUpdate();
 
 
-
                 excluirParticipacoesNecessarias(
                         connection,
                         parte.getId()
@@ -309,14 +300,14 @@ public class ParteDAO {
                 connection.commit();
 
 
-            }catch(SQLException | RuntimeException e){
+            } catch (SQLException | RuntimeException e) {
 
                 connection.rollback();
                 throw e;
             }
 
 
-        }catch(SQLException e){
+        } catch (SQLException e) {
 
             throw new RuntimeException(
                     "Erro ao atualizar parte.",
@@ -324,9 +315,6 @@ public class ParteDAO {
             );
         }
     }
-
-
-
 
 
     private void preencherStatement(
@@ -401,9 +389,6 @@ public class ParteDAO {
                 parte.possuiTema()
         );
     }
-
-
-
 
 
     private Parte mapearParte(
@@ -506,17 +491,17 @@ public class ParteDAO {
                 """;
 
 
-        try(
+        try (
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
 
-        ){
+        ) {
 
             int ordem = 0;
 
 
-            for(TipoParticipacao participacao :
-                    parte.getParticipacoesNecessarias()){
+            for (TipoParticipacao participacao :
+                    parte.getParticipacoesNecessarias()) {
 
 
                 statement.setInt(
@@ -548,9 +533,6 @@ public class ParteDAO {
     }
 
 
-
-
-
     private List<TipoParticipacao> buscarParticipacoesNecessarias(
             Connection connection,
             Integer parteId
@@ -569,12 +551,11 @@ public class ParteDAO {
                 """;
 
 
-
-        try(
+        try (
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
 
-        ){
+        ) {
 
             statement.setInt(
                     1,
@@ -582,11 +563,11 @@ public class ParteDAO {
             );
 
 
-            try(ResultSet rs =
-                        statement.executeQuery()){
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
 
-                while(rs.next()){
+                while (rs.next()) {
 
 
                     lista.add(
@@ -608,8 +589,6 @@ public class ParteDAO {
     }
 
 
-
-
     private void excluirParticipacoesNecessarias(
             Connection connection,
             Integer parteId
@@ -622,11 +601,11 @@ public class ParteDAO {
                 """;
 
 
-        try(
+        try (
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
 
-        ){
+        ) {
 
             statement.setInt(
                     1,
@@ -636,12 +615,13 @@ public class ParteDAO {
             statement.executeUpdate();
         }
     }
+
     public void excluir(Integer id) {
 
         String sql = """
-            DELETE FROM parte
-            WHERE id = ?
-            """;
+                DELETE FROM parte
+                WHERE id = ?
+                """;
 
         try (Connection connection = ConnectionFactory.getConnection()) {
 

@@ -1,7 +1,10 @@
 package br.com.geradordesignacoes.dao;
 
 import br.com.geradordesignacoes.database.ConnectionFactory;
-import br.com.geradordesignacoes.model.*;
+import br.com.geradordesignacoes.model.NivelLeitura;
+import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.Privilegio;
+import br.com.geradordesignacoes.model.Sexo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -98,7 +101,6 @@ public class PessoaDAO {
     }
 
 
-
     public List<Pessoa> listarTodos() {
 
         List<Pessoa> pessoas =
@@ -142,8 +144,6 @@ public class PessoaDAO {
 
         return pessoas;
     }
-
-
 
 
     public Optional<Pessoa> buscarPorId(Integer id) {
@@ -197,9 +197,6 @@ public class PessoaDAO {
     }
 
 
-
-
-
     public void atualizar(Pessoa pessoa) {
 
 
@@ -228,7 +225,6 @@ public class PessoaDAO {
                     nivel_leitura = ?
                 WHERE id = ?
                 """;
-
 
 
         try (
@@ -272,9 +268,6 @@ public class PessoaDAO {
             );
         }
     }
-
-
-
 
 
     public void excluir(Integer id) {
@@ -321,9 +314,6 @@ public class PessoaDAO {
             );
         }
     }
-
-
-
 
 
     private void preencherStatement(
@@ -392,9 +382,6 @@ public class PessoaDAO {
                 pessoa.getNivelLeitura().name()
         );
     }
-
-
-
 
 
     private Pessoa mapearPessoa(
