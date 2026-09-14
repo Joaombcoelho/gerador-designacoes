@@ -15,16 +15,13 @@ public class SeletorPessoaService {
     private final RegrasService regrasService;
     private final AvaliadorPessoaService avaliadorPessoaService;
 
-
     public SeletorPessoaService(
             RegrasService regrasService,
             AvaliadorPessoaService avaliadorPessoaService
     ) {
-
         this.regrasService = regrasService;
         this.avaliadorPessoaService = avaliadorPessoaService;
     }
-
 
     public Optional<Pessoa> selecionarMelhorPessoa(
             Parte parte,
@@ -32,45 +29,21 @@ public class SeletorPessoaService {
             ControleDesignacoes controle
     ) {
 
-        Pessoa melhorPessoa = null;
-        ResultadoAvaliacaoPessoa melhorResultado = null;
+        List<ResultadoAvaliacaoPessoa> candidatos =
+                avaliarPessoasElegiveis(
+                        parte,
+                        pessoas,
+                        controle
+                );
 
-
-        for (Pessoa pessoa : pessoas) {
-
-            boolean podeSerDesignada =
-                    regrasService.podeDesignar(
-                            pessoa,
-                            parte,
-                            controle
-                    );
-
-
-            if (!podeSerDesignada) {
-                continue;
-            }
-
-
-            ResultadoAvaliacaoPessoa resultado =
-                    avaliadorPessoaService.avaliar(
-                            pessoa,
-                            parte,
-                            controle
-                    );
-
-
-            if (melhorResultado == null ||
-                    resultado.getTotal() > melhorResultado.getTotal()) {
-
-                melhorResultado = resultado;
-                melhorPessoa = pessoa;
-            }
-        }
-
-
-        return Optional.ofNullable(melhorPessoa);
+        return candidatos.stream()
+                .max(
+                        Comparator.comparingInt(
+                                ResultadoAvaliacaoPessoa::getTotal
+                        )
+                )
+                .map(ResultadoAvaliacaoPessoa::getPessoa);
     }
-
 
     public List<ResultadoAvaliacaoPessoa> avaliarCandidatos(
             Parte parte,
@@ -78,38 +51,12 @@ public class SeletorPessoaService {
             ControleDesignacoes controle
     ) {
 
-        List<ResultadoAvaliacaoPessoa> resultados =
-                new ArrayList<>();
-
-
-        for (Pessoa pessoa : pessoas) {
-
-            boolean podeSerDesignada =
-                    regrasService.podeDesignar(
-                            pessoa,
-                            parte,
-                            controle
-                    );
-
-
-            if (!podeSerDesignada) {
-                continue;
-            }
-
-
-            resultados.add(
-                    avaliadorPessoaService.avaliar(
-                            pessoa,
-                            parte,
-                            controle
-                    )
-            );
-        }
-
-
-        return resultados;
+        return avaliarPessoasElegiveis(
+                parte,
+                pessoas,
+                controle
+        );
     }
-
 
     public DiagnosticoSelecaoPessoa selecionarComDiagnostico(
             Parte parte,
@@ -124,7 +71,6 @@ public class SeletorPessoaService {
                         controle
                 );
 
-
         ResultadoAvaliacaoPessoa escolhido =
                 candidatos.stream()
                         .max(
@@ -134,11 +80,41 @@ public class SeletorPessoaService {
                         )
                         .orElse(null);
 
-
         return new DiagnosticoSelecaoPessoa(
                 parte,
                 candidatos,
                 escolhido
         );
+    }
+
+    private List<ResultadoAvaliacaoPessoa> avaliarPessoasElegiveis(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controle
+    ) {
+
+        List<ResultadoAvaliacaoPessoa> resultados =
+                new ArrayList<>();
+
+        for (Pessoa pessoa : pessoas) {
+
+            if (!regrasService.podeDesignar(
+                    pessoa,
+                    parte,
+                    controle
+            )) {
+                continue;
+            }
+
+            resultados.add(
+                    avaliadorPessoaService.avaliar(
+                            pessoa,
+                            parte,
+                            controle
+                    )
+            );
+        }
+
+        return resultados;
     }
 }

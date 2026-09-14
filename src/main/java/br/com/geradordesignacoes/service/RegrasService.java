@@ -2,9 +2,9 @@ package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
-import br.com.geradordesignacoes.model.TipoParticipacao;
 import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.Sexo;
+import br.com.geradordesignacoes.model.TipoParticipacao;
 
 import java.util.List;
 
@@ -34,31 +34,12 @@ public class RegrasService {
          * de a pessoa já estar na lista de designados.
          */
         if (pessoasJaDesignadas.contains(pessoa)
-                && pessoa.getPrivilegio() != Privilegio.ANCIAO
-                && pessoa.getPrivilegio() != Privilegio.SERVO_MINISTERIAL) {
+                && !podeReceberMaisDeUmaDesignacao(pessoa)) {
 
             return false;
         }
 
-        for (TipoParticipacao tipo :
-                parte.getParticipacoesNecessarias()) {
-
-            if (tipo == PRESIDENTE
-                    && !podePresidirReuniao(pessoa)) {
-
-                continue;
-            }
-
-            if (parte.pessoaPodeExercerParticipacao(
-                    pessoa,
-                    tipo
-            )) {
-
-                return true;
-            }
-        }
-
-        return false;
+        return podeExercerAlgumaParticipacao(pessoa, parte);
     }
 
 
@@ -79,7 +60,6 @@ public class RegrasService {
         List<Pessoa> pessoasJaDesignadas =
                 controle.getPessoasDesignadas();
 
-
         if (pessoasJaDesignadas.contains(pessoa)) {
 
             /*
@@ -92,7 +72,6 @@ public class RegrasService {
              * pela oração final.
              */
             if (controle.ehPresidente(pessoa)) {
-
                 return false;
             }
 
@@ -101,13 +80,23 @@ public class RegrasService {
              * receber mais de uma designação na
              * mesma reunião.
              */
-            if (pessoa.getPrivilegio() != Privilegio.ANCIAO
-                    && pessoa.getPrivilegio() != Privilegio.SERVO_MINISTERIAL) {
-
+            if (!podeReceberMaisDeUmaDesignacao(pessoa)) {
                 return false;
             }
         }
 
+        return podeExercerAlgumaParticipacao(pessoa, parte);
+    }
+
+
+    /**
+     * Verifica se a pessoa pode exercer pelo menos
+     * uma das participações necessárias da parte.
+     */
+    private boolean podeExercerAlgumaParticipacao(
+            Pessoa pessoa,
+            Parte parte
+    ) {
 
         for (TipoParticipacao tipo :
                 parte.getParticipacoesNecessarias()) {
@@ -132,10 +121,22 @@ public class RegrasService {
 
 
     /**
+     * Verifica se o privilégio da pessoa permite
+     * receber mais de uma designação na mesma reunião.
+     */
+    private boolean podeReceberMaisDeUmaDesignacao(
+            Pessoa pessoa
+    ) {
+
+        return pessoa.getPrivilegio() == Privilegio.ANCIAO
+                || pessoa.getPrivilegio() == Privilegio.SERVO_MINISTERIAL;
+    }
+
+
+    /**
      * Verifica se uma pessoa pode exercer
-     * uma participação específica em uma parte.
-     *
-     * Este método é utilizado quando precisamos
+     * uma participação específica numa parte.
+     * Este métodoo é utilizado quando precisamos
      * validar uma participação individual, como
      * durante a edição manual de uma designação.
      */

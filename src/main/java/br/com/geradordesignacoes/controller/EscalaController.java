@@ -2,8 +2,18 @@ package br.com.geradordesignacoes.controller;
 
 import br.com.geradordesignacoes.dao.EscalaDAO;
 import br.com.geradordesignacoes.dao.ParteDAO;
-import br.com.geradordesignacoes.model.*;
-import br.com.geradordesignacoes.service.*;
+import br.com.geradordesignacoes.model.Designacao;
+import br.com.geradordesignacoes.model.Escala;
+import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.ProgramacaoParte;
+import br.com.geradordesignacoes.model.ProgramacaoSemana;
+import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
+import br.com.geradordesignacoes.service.BackupService;
+import br.com.geradordesignacoes.service.GeradorEscala;
+import br.com.geradordesignacoes.service.ParteService;
+import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
+import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.escala.ItemEscala;
 
@@ -16,25 +26,15 @@ import java.util.Map;
 public class EscalaController {
 
     private final EscalaView view;
-
     private final ParteService parteService;
-
     private final GeradorEscala geradorEscala;
-
-    private final HistoricoDesignacoesService historicoService;
-
-    private ResultadoGeracaoEscala ultimoResultado;
-
-    private boolean escalaSalva;
-
     private final EscalaDAO escalaDAO;
-
     private final BackupService backupService;
-
     private final ProgramacaoSemanaService programacaoSemanaService;
-
     private final Map<LocalDate, ResultadoGeracaoEscala> resultadosGeracao;
 
+    private ResultadoGeracaoEscala ultimoResultado;
+    private boolean escalaSalva;
 
     public EscalaController(EscalaView view) {
 
@@ -45,44 +45,31 @@ public class EscalaController {
                         new ParteDAO()
                 );
 
-
         geradorEscala =
                 new GeradorEscala(
                         new RegrasService()
                 );
 
-
-        historicoService =
-                new HistoricoDesignacoesService();
-
-
         escalaDAO =
                 new EscalaDAO();
-
 
         backupService =
                 new BackupService();
 
-
         programacaoSemanaService =
                 new ProgramacaoSemanaService();
-
 
         resultadosGeracao =
                 new LinkedHashMap<>();
 
-
         registrarEventos();
-
 
         view.atualizarStatus(
                 "Aguardando geração da escala..."
         );
 
-
         view.atualizarResumo("");
     }
-
 
     private void registrarEventos() {
 
@@ -91,12 +78,10 @@ public class EscalaController {
                         event -> gerarEscala()
                 );
 
-
         view.getBotaoGerarNovamente()
                 .setOnAction(
                         event -> gerarNovamente()
                 );
-
 
         view.getBotaoSalvar()
                 .setOnAction(
@@ -104,36 +89,24 @@ public class EscalaController {
                 );
     }
 
-
     private void gerarEscala() {
 
         try {
 
             LocalDate data =
-                    view.getCampoData()
-                            .getValue();
-
+                    obterDataSelecionada();
 
             if (data == null) {
-
-                view.atualizarStatus(
-                        "Informe a data da reunião."
-                );
-
-                view.atualizarResumo("");
-
+                informarDataObrigatoria();
                 return;
             }
-
 
             view.atualizarStatus(
                     "Gerando escala..."
             );
 
-
             List<Parte> partes =
                     parteService.listarTodas();
-
 
             ultimoResultado =
                     geradorEscala.gerarEscala(
@@ -141,18 +114,10 @@ public class EscalaController {
                             partes
                     );
 
-
-            resultadosGeracao.clear();
-
-
-            resultadosGeracao.put(
+            registrarResultado(
                     data,
                     ultimoResultado
             );
-
-
-            escalaSalva = false;
-
 
             preencherTabela(
                     ultimoResultado
@@ -160,25 +125,45 @@ public class EscalaController {
                             .getDesignacoes()
             );
 
-
             atualizarResumo();
-
 
         } catch (Exception e) {
 
-            view.atualizarStatus(
-                    "Erro ao gerar escala."
+            tratarErroGeracao(
+                    "Erro ao gerar escala.",
+                    e
             );
-
-
-            view.atualizarResumo(
-                    e.getMessage()
-            );
-
-            e.printStackTrace();
         }
     }
 
+    private LocalDate obterDataSelecionada() {
+
+        return view.getCampoData()
+                .getValue();
+    }
+
+    private void informarDataObrigatoria() {
+
+        view.atualizarStatus(
+                "Informe a data da reunião."
+        );
+
+        view.atualizarResumo("");
+    }
+
+    private void registrarResultado(
+            LocalDate data,
+            ResultadoGeracaoEscala resultado
+    ) {
+        resultadosGeracao.clear();
+
+        resultadosGeracao.put(
+                data,
+                resultado
+        );
+
+        escalaSalva = false;
+    }
 
     private void preencherTabela(
             List<Designacao> designacoes
@@ -188,36 +173,27 @@ public class EscalaController {
                 .getItems()
                 .clear();
 
+        for (
+                int indice = 0;
+                indice < designacoes.size();
+                indice++
+        ) {
 
-        for (Designacao designacao : designacoes) {
+            Designacao designacao =
+                    designacoes.get(indice);
 
-            String ajudante = "";
-
-
-            if (designacao.ajudante() != null) {
-
-                ajudante =
-                        designacao
-                                .ajudante()
-                                .getNome();
-            }
-
+            String ajudante =
+                    obterNomeAjudante(
+                            designacao
+                    );
 
             ItemEscala item =
                     new ItemEscala(
-                            designacoes.indexOf(designacao),
-
-                            designacao
-                                    .parte()
-                                    .getNome(),
-
-                            designacao
-                                    .responsavel()
-                                    .getNome(),
-
+                            indice,
+                            designacao.parte().getNome(),
+                            designacao.responsavel().getNome(),
                             ajudante
                     );
-
 
             view.getTabela()
                     .getItems()
@@ -225,6 +201,17 @@ public class EscalaController {
         }
     }
 
+    private String obterNomeAjudante(
+            Designacao designacao
+    ) {
+
+        if (designacao.ajudante() == null) {
+            return "";
+        }
+
+        return designacao.ajudante()
+                .getNome();
+    }
 
     private void atualizarResumo() {
 
@@ -233,14 +220,11 @@ public class EscalaController {
                         .getDesignacoes()
                         .size();
 
-
         StringBuilder resumo =
                 new StringBuilder();
 
-
         resumo.append("Designações: ")
                 .append(quantidade);
-
 
         if (ultimoResultado.possuiErros()) {
 
@@ -248,18 +232,9 @@ public class EscalaController {
                     "Escala gerada com pendências."
             );
 
-
-            resumo.append(
-                    "\n\nPartes não geradas:\n"
+            adicionarErrosAoResumo(
+                    resumo
             );
-
-
-            for (String erro : ultimoResultado.erros()) {
-
-                resumo.append("• ")
-                        .append(erro)
-                        .append("\n");
-            }
 
         } else {
 
@@ -267,16 +242,30 @@ public class EscalaController {
                     "Escala gerada com sucesso."
             );
 
-
             resumo.append(
                     "\n\nNenhuma pendência encontrada."
             );
         }
 
-
         view.atualizarResumo(
                 resumo.toString()
         );
+    }
+
+    private void adicionarErrosAoResumo(
+            StringBuilder resumo
+    ) {
+
+        resumo.append(
+                "\n\nPartes não geradas:\n"
+        );
+
+        for (String erro : ultimoResultado.erros()) {
+
+            resumo.append("• ")
+                    .append(erro)
+                    .append("\n");
+        }
     }
 
     public void substituirDesignacao(
@@ -294,13 +283,10 @@ public class EscalaController {
         Escala escala =
                 ultimoResultado.escala();
 
-        if (indice < 0
-                || indice >= escala.getDesignacoes().size()) {
-
-            throw new IndexOutOfBoundsException(
-                    "Índice da designação inválido."
-            );
-        }
+        validarIndiceDesignacao(
+                indice,
+                escala
+        );
 
         Designacao designacaoAtual =
                 escala.getDesignacoes()
@@ -328,12 +314,26 @@ public class EscalaController {
         atualizarResumo();
     }
 
+    private void validarIndiceDesignacao(
+            int indice,
+            Escala escala
+    ) {
+
+        if (
+                indice < 0
+                        || indice >= escala.getDesignacoes().size()
+        ) {
+            throw new IndexOutOfBoundsException(
+                    "Índice da designação inválido."
+            );
+        }
+    }
+
     private void gerarNovamente() {
 
         view.getTabela()
                 .getItems()
                 .clear();
-
 
         ultimoResultado = null;
 
@@ -341,26 +341,22 @@ public class EscalaController {
 
         escalaSalva = false;
 
-
         view.atualizarStatus(
                 "Aguardando geração da escala..."
         );
 
-
         view.atualizarResumo("");
     }
-
 
     private boolean salvarEscala() {
 
         return salvarEscalasGeradas();
     }
 
-
     /**
      * Salva no banco todas as escalas atualmente geradas.
-     * <p>
-     * Este métodoo é utilizado tanto pela tela Escala
+     *
+     * Este método é utilizado tanto pela tela Escala
      * quanto pela tela Programação.
      *
      * @return true se o salvamento foi realizado com sucesso.
@@ -376,99 +372,105 @@ public class EscalaController {
             return true;
         }
 
-
         if (resultadosGeracao.isEmpty()) {
 
-            view.atualizarStatus(
-                    "Nenhuma escala gerada."
-            );
-
-
-            view.atualizarResumo(
-                    "Gere uma escala antes de salvar."
-            );
-
+            informarNenhumaEscalaGerada();
 
             return false;
         }
 
-
         try {
 
-            int quantidadeSalva = 0;
-
-
-            for (
-                    ResultadoGeracaoEscala resultado
-                    :
-                    resultadosGeracao.values()
-            ) {
-
-                if (resultado == null) {
-                    continue;
-                }
-
-
-                Escala escala =
-                        resultado.escala();
-
-
-                escalaDAO.salvar(
-                        escala
-                );
-
-
-                quantidadeSalva++;
-            }
-
+            int quantidadeSalva =
+                    salvarResultadosGeracao();
 
             if (quantidadeSalva == 0) {
-
                 throw new IllegalStateException(
                         "Nenhuma escala válida para salvar."
                 );
             }
 
-
             backupService.criarBackup();
-
 
             escalaSalva = true;
 
-
-            view.atualizarStatus(
+            informarSalvamentoSucesso(
                     quantidadeSalva
-                            + " escala(s) salva(s) com sucesso."
             );
-
-
-            view.atualizarResumo(
-                    "As designações foram salvas no histórico."
-            );
-
 
             return true;
 
-
         } catch (Exception e) {
 
-            view.atualizarStatus(
-                    "Erro ao salvar as escalas."
-            );
-
-
-            view.atualizarResumo(
-                    e.getMessage()
-            );
-
-
-            e.printStackTrace();
-
+            informarErroSalvamento(e);
 
             return false;
         }
     }
 
+    private int salvarResultadosGeracao() {
+
+        int quantidadeSalva = 0;
+
+        for (
+                ResultadoGeracaoEscala resultado
+                :
+                resultadosGeracao.values()
+        ) {
+
+            if (resultado == null) {
+                continue;
+            }
+
+            escalaDAO.salvar(
+                    resultado.escala()
+            );
+
+            quantidadeSalva++;
+        }
+
+        return quantidadeSalva;
+    }
+
+    private void informarNenhumaEscalaGerada() {
+
+        view.atualizarStatus(
+                "Nenhuma escala gerada."
+        );
+
+        view.atualizarResumo(
+                "Gere uma escala antes de salvar."
+        );
+    }
+
+    private void informarSalvamentoSucesso(
+            int quantidadeSalva
+    ) {
+
+        view.atualizarStatus(
+                quantidadeSalva
+                        + " escala(s) salva(s) com sucesso."
+        );
+
+        view.atualizarResumo(
+                "As designações foram salvas no histórico."
+        );
+    }
+
+    private void informarErroSalvamento(
+            Exception e
+    ) {
+
+        view.atualizarStatus(
+                "Erro ao salvar as escalas."
+        );
+
+        view.atualizarResumo(
+                e.getMessage()
+        );
+
+        e.printStackTrace();
+    }
 
     public boolean gerarEscalasDoMes(
             YearMonth mes
@@ -483,19 +485,13 @@ public class EscalaController {
             return false;
         }
 
-
         try {
 
-            /*
-             * Não mantenha resultados de uma geração anterior se a
-             * configuração atual não puder ser gerada.
-             */
             resultadosGeracao.clear();
 
             List<ProgramacaoSemana> semanas =
                     programacaoSemanaService
                             .listarSemanasDoMes(mes);
-
 
             if (semanas.size() != 4) {
 
@@ -505,79 +501,131 @@ public class EscalaController {
 
                 return false;
             }
-            for (ProgramacaoSemana semana : semanas) {
 
-                List<Parte> partes =
-                        semana.partes()
-                                .stream()
-                                .map(
-                                        ProgramacaoParte::getParte
-                                )
-                                .toList();
+            gerarEscalasDasSemanas(
+                    semanas
+            );
 
-
-                ResultadoGeracaoEscala resultado =
-                        geradorEscala.gerarEscala(
-                                semana.data(),
-                                partes
-                        );
-
-
-                if (resultado == null || resultado.escala() == null) {
-                    throw new IllegalStateException(
-                            "Não foi possível gerar a escala de "
-                                    + semana.data()
-                    );
-                }
-
-                resultadosGeracao.put(semana.data(), resultado);
-            }
-
-
-            if (resultadosGeracao.size() != 4) {
-                throw new IllegalStateException(
-                        "A geração mensal não produziu 4 escalas."
-                );
-            }
-
+            validarQuantidadeEscalasGeradas();
 
             escalaSalva = false;
-
 
             view.exibirEscalas(
                     resultadosGeracao
             );
 
-
             view.atualizarStatus(
                     "4 escalas geradas com sucesso."
             );
 
-
             return true;
-
 
         } catch (Exception e) {
 
-            view.atualizarStatus(
-                    "Erro ao gerar as escalas."
-            );
-
-
-            view.atualizarResumo(
-                    e.getMessage()
-            );
-
-
-            e.printStackTrace();
-
-
-            resultadosGeracao.clear();
+            tratarErroGeracaoMensal(e);
 
             return false;
         }
     }
 
+    private void gerarEscalasDasSemanas(
+            List<ProgramacaoSemana> semanas
+    ) {
+
+        for (ProgramacaoSemana semana : semanas) {
+
+            ResultadoGeracaoEscala resultado =
+                    gerarEscalaDaSemana(
+                            semana
+                    );
+
+            resultadosGeracao.put(
+                    semana.data(),
+                    resultado
+            );
+        }
+    }
+
+    private ResultadoGeracaoEscala gerarEscalaDaSemana(
+            ProgramacaoSemana semana
+    ) {
+
+        List<Parte> partes =
+                obterPartesDaSemana(
+                        semana
+                );
+
+        ResultadoGeracaoEscala resultado =
+                geradorEscala.gerarEscala(
+                        semana.data(),
+                        partes
+                );
+
+        if (
+                resultado == null
+                        || resultado.escala() == null
+        ) {
+            throw new IllegalStateException(
+                    "Não foi possível gerar a escala de "
+                            + semana.data()
+            );
+        }
+
+        return resultado;
+    }
+
+    private List<Parte> obterPartesDaSemana(
+            ProgramacaoSemana semana
+    ) {
+
+        return semana.partes()
+                .stream()
+                .map(ProgramacaoParte::getParte)
+                .toList();
+    }
+
+    private void validarQuantidadeEscalasGeradas() {
+
+        if (resultadosGeracao.size() != 4) {
+
+            throw new IllegalStateException(
+                    "A geração mensal não produziu 4 escalas."
+            );
+        }
+    }
+
+    private void tratarErroGeracaoMensal(
+            Exception e
+    ) {
+
+        view.atualizarStatus(
+                "Erro ao gerar as escalas."
+        );
+
+        view.atualizarResumo(
+                e.getMessage()
+        );
+
+        e.printStackTrace();
+
+        resultadosGeracao.clear();
+    }
+
+    private void tratarErroGeracao(
+            String mensagem,
+            Exception e
+    ) {
+
+        view.atualizarStatus(
+                mensagem
+        );
+
+        view.atualizarResumo(
+                e.getMessage()
+        );
+
+        e.printStackTrace();
+    }
 
     public boolean possuiEscalasGeradas() {
 

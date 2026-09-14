@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class GeradorEscala {
 
     private final RegrasService regrasService;
@@ -16,21 +15,17 @@ public class GeradorEscala {
     private final HistoricoDesignacoesService historicoService;
     private final PessoaService pessoaService;
 
-
     public GeradorEscala(RegrasService regrasService) {
-
         this.regrasService = regrasService;
 
         this.avaliadorPessoaService =
                 new AvaliadorPessoaService();
-
 
         this.seletorPessoaService =
                 new SeletorPessoaService(
                         regrasService,
                         avaliadorPessoaService
                 );
-
 
         this.historicoService =
                 new HistoricoDesignacoesService();
@@ -41,12 +36,10 @@ public class GeradorEscala {
                 );
     }
 
-
     public ResultadoGeracaoEscala gerarEscala(
             LocalDate data,
             List<Parte> partes
     ) {
-
         return gerarEscala(
                 data,
                 partes,
@@ -54,13 +47,11 @@ public class GeradorEscala {
         );
     }
 
-
     public ResultadoGeracaoEscala gerarEscala(
             LocalDate data,
             List<Parte> partes,
             List<Pessoa> pessoas
     ) {
-
         return gerar(
                 data,
                 partes,
@@ -68,13 +59,11 @@ public class GeradorEscala {
         );
     }
 
-
     public ResultadoGeracaoEscala gerar(
             LocalDate data,
             List<Parte> partes,
             List<Pessoa> pessoas
     ) {
-
         return gerar(
                 data,
                 partes,
@@ -83,14 +72,12 @@ public class GeradorEscala {
         );
     }
 
-
     public ResultadoGeracaoEscala gerar(
             LocalDate data,
             List<Parte> partes,
             List<Pessoa> pessoas,
             List<ParticipacaoDesignacao> historico
     ) {
-
         return gerar(
                 data,
                 partes,
@@ -99,98 +86,97 @@ public class GeradorEscala {
         );
     }
 
-
     public ResultadoGeracaoEscala gerar(
             LocalDate data,
             List<Parte> partes,
             List<Pessoa> pessoas,
             HistoricoDesignacoes historico
     ) {
-
-
-        List<Designacao> designacoes =
-                new ArrayList<>();
-
-        List<String> erros =
-                new ArrayList<>();
-
-        List<DiagnosticoSelecaoPessoa> diagnosticos =
-                new ArrayList<>();
-
-        Pessoa presidenteDaReuniao = null;
+        List<Designacao> designacoes = new ArrayList<>();
+        List<String> erros = new ArrayList<>();
+        List<DiagnosticoSelecaoPessoa> diagnosticos = new ArrayList<>();
 
         List<Parte> partesOrdenadas =
                 ordenarPartesComPresidentePrimeiro(partes);
 
+        ControleDesignacoes controleDesignacoes =
+                criarControleDesignacoes(historico);
+
+        Pessoa presidenteDaReuniao =
+                processarPartes(
+                        data,
+                        partesOrdenadas,
+                        pessoas,
+                        designacoes,
+                        controleDesignacoes,
+                        diagnosticos,
+                        erros
+                );
+
+        salvarNovasParticipacoes(
+                controleDesignacoes,
+                historico
+        );
+
+        Escala escala =
+                criarEscala(
+                        data,
+                        designacoes,
+                        presidenteDaReuniao
+                );
+
+        return new ResultadoGeracaoEscala(
+                escala,
+                controleDesignacoes.getParticipacoes(),
+                erros,
+                diagnosticos
+        );
+    }
+
+    private ControleDesignacoes criarControleDesignacoes(
+            HistoricoDesignacoes historico
+    ) {
         HistoricoDesignacoes historicoControle =
                 new HistoricoDesignacoes(
                         historico.participacoes()
                 );
 
+        return new ControleDesignacoes(
+                historicoControle
+        );
+    }
 
-        ControleDesignacoes controleDesignacoes =
-                new ControleDesignacoes(
-                        historicoControle
-                );
-
-
-        int quantidadeHistorica =
-                controleDesignacoes
-                        .getParticipacoes()
-                        .size();
+    private Pessoa processarPartes(
+            LocalDate data,
+            List<Parte> partesOrdenadas,
+            List<Pessoa> pessoas,
+            List<Designacao> designacoes,
+            ControleDesignacoes controleDesignacoes,
+            List<DiagnosticoSelecaoPessoa> diagnosticos,
+            List<String> erros
+    ) {
+        Pessoa presidenteDaReuniao = null;
 
         for (Parte parte : partesOrdenadas) {
 
-            boolean gerou;
-
-
-            if (parte.getTipo() == TipoParte.DEMONSTRACAO) {
-
-
-                gerou =
-                        designarDemonstracao(
-                                data,
-                                parte,
-                                pessoas,
-                                designacoes,
-                                controleDesignacoes
-                        );
-
-
-            } else if (parte.getTipo() == TipoParte.DIRIGENTE_ESTUDO) {
-
-
-                gerou =
-                        designarDirigenteEstudo(
-                                data,
-                                parte,
-                                pessoas,
-                                designacoes,
-                                controleDesignacoes,
-                                diagnosticos
-                        );
-
-
-            } else {
-
-                gerou =
-                        designarParteIndividual(
-                                data,
-                                parte,
-                                pessoas,
-                                designacoes,
-                                controleDesignacoes,
-                                diagnosticos,
-                                presidenteDaReuniao
-                        );
-
-            }
+            boolean gerou =
+                    processarParte(
+                            data,
+                            parte,
+                            pessoas,
+                            designacoes,
+                            controleDesignacoes,
+                            diagnosticos,
+                            presidenteDaReuniao
+                    );
 
             if (gerou
-                    && parte.getTipo() == TipoParte.PRESIDENTE_REUNIAO) {
+                    && parte.getTipo()
+                    == TipoParte.PRESIDENTE_REUNIAO) {
 
                 presidenteDaReuniao =
-                        designacoes.get(designacoes.size() - 1)
+                        designacoes
+                                .get(designacoes.size() - 1)
                                 .responsavel();
 
                 controleDesignacoes.definirPresidente(
@@ -199,7 +185,6 @@ public class GeradorEscala {
             }
 
             if (!gerou) {
-
                 erros.add(
                         "Não foi possível gerar a parte: "
                                 + parte.getNome()
@@ -207,63 +192,107 @@ public class GeradorEscala {
             }
         }
 
+        return presidenteDaReuniao;
+    }
+
+    private boolean processarParte(
+            LocalDate data,
+            Parte parte,
+            List<Pessoa> pessoas,
+            List<Designacao> designacoes,
+            ControleDesignacoes controleDesignacoes,
+            List<DiagnosticoSelecaoPessoa> diagnosticos,
+            Pessoa presidenteDaReuniao
+    ) {
+        if (parte.getTipo() == TipoParte.DEMONSTRACAO) {
+            return designarDemonstracao(
+                    data,
+                    parte,
+                    pessoas,
+                    designacoes,
+                    controleDesignacoes
+            );
+        }
+
+        if (parte.getTipo() == TipoParte.DIRIGENTE_ESTUDO) {
+            return designarDirigenteEstudo(
+                    data,
+                    parte,
+                    pessoas,
+                    designacoes,
+                    controleDesignacoes,
+                    diagnosticos
+            );
+        }
+
+        return designarParteIndividual(
+                data,
+                parte,
+                pessoas,
+                designacoes,
+                controleDesignacoes,
+                diagnosticos,
+                presidenteDaReuniao
+        );
+    }
+
+    private void salvarNovasParticipacoes(
+            ControleDesignacoes controleDesignacoes,
+            HistoricoDesignacoes historico
+    ) {
+        int quantidadeHistorica =
+                historico.participacoes().size();
 
         List<ParticipacaoDesignacao> todasParticipacoes =
                 controleDesignacoes.getParticipacoes();
 
-
         List<ParticipacaoDesignacao> novasParticipacoes =
-                todasParticipacoes
-                        .subList(
-                                quantidadeHistorica,
-                                todasParticipacoes.size()
-                        );
+                todasParticipacoes.subList(
+                        quantidadeHistorica,
+                        todasParticipacoes.size()
+                );
 
-
-        salvarHistorico(
-                novasParticipacoes
-        );
-
-
-        Escala escala = new Escala(
-                data,
-                designacoes
-        );
-
-        escala.setPresidente(presidenteDaReuniao);
-
-        return new ResultadoGeracaoEscala(
-                escala,
-                todasParticipacoes,
-                erros,
-                diagnosticos
-        );
+        salvarHistorico(novasParticipacoes);
     }
 
+    private Escala criarEscala(
+            LocalDate data,
+            List<Designacao> designacoes,
+            Pessoa presidenteDaReuniao
+    ) {
+        Escala escala =
+                new Escala(
+                        data,
+                        designacoes
+                );
 
+        escala.setPresidente(
+                presidenteDaReuniao
+        );
+
+        return escala;
+    }
 
     private List<Parte> ordenarPartesComPresidentePrimeiro(
             List<Parte> partes
     ) {
-
         List<Parte> partesOrdenadas =
                 new ArrayList<>();
 
-
         partes.stream()
                 .filter(parte ->
-                        parte.getTipo() == TipoParte.PRESIDENTE_REUNIAO
+                        parte.getTipo()
+                                == TipoParte.PRESIDENTE_REUNIAO
                 )
                 .findFirst()
                 .ifPresent(partesOrdenadas::add);
 
-
         partes.stream()
                 .filter(parte ->
-                        parte.getTipo() != TipoParte.PRESIDENTE_REUNIAO
+                        parte.getTipo()
+                                != TipoParte.PRESIDENTE_REUNIAO
                 )
                 .forEach(partesOrdenadas::add);
-
 
         return partesOrdenadas;
     }
@@ -277,22 +306,18 @@ public class GeradorEscala {
             List<DiagnosticoSelecaoPessoa> diagnosticos,
             Pessoa presidenteDaReuniao
     ) {
-
         Pessoa participante;
 
-
         if (parte.necessitaParticipacao(
-                TipoParticipacao.ORACAO_FINAL)) {
-
+                TipoParticipacao.ORACAO_FINAL
+        )) {
             if (presidenteDaReuniao == null) {
                 return false;
             }
 
             participante = presidenteDaReuniao;
 
-
         } else {
-
             DiagnosticoSelecaoPessoa diagnostico =
                     seletorPessoaService.selecionarComDiagnostico(
                             parte,
@@ -300,29 +325,19 @@ public class GeradorEscala {
                             controleDesignacoes
                     );
 
-
-            diagnosticos.add(
-                    diagnostico
-            );
-
+            diagnosticos.add(diagnostico);
 
             if (diagnostico.escolhido() == null) {
-
                 return false;
             }
-
 
             participante =
                     diagnostico.escolhido()
                             .getPessoa();
         }
 
-
         TipoParticipacao tipoParticipacao =
-                determinarParticipacaoIndividual(
-                        parte
-                );
-
+                determinarParticipacaoIndividual(parte);
 
         designacoes.add(
                 new Designacao(
@@ -333,7 +348,6 @@ public class GeradorEscala {
                 )
         );
 
-
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
                         data,
@@ -342,7 +356,6 @@ public class GeradorEscala {
                         tipoParticipacao
                 )
         );
-
 
         return true;
     }
@@ -354,8 +367,6 @@ public class GeradorEscala {
             List<Designacao> designacoes,
             ControleDesignacoes controleDesignacoes
     ) {
-
-
         MelhorDuplaDemonstracao dupla =
                 selecionarMelhorDuplaDemonstracao(
                         parte,
@@ -363,12 +374,9 @@ public class GeradorEscala {
                         controleDesignacoes
                 );
 
-
         if (dupla == null) {
-
             return false;
         }
-
 
         designacoes.add(
                 new Designacao(
@@ -379,26 +387,29 @@ public class GeradorEscala {
                 )
         );
 
-
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
                         data,
                         dupla.responsavel(),
                         parte,
-                        encontrarParticipacao(parte, TipoParticipacao.RESPONSAVEL)
+                        encontrarParticipacao(
+                                parte,
+                                TipoParticipacao.RESPONSAVEL
+                        )
                 )
         );
-
 
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
                         data,
                         dupla.ajudante(),
                         parte,
-                        encontrarParticipacao(parte, TipoParticipacao.AJUDANTE)
+                        encontrarParticipacao(
+                                parte,
+                                TipoParticipacao.AJUDANTE
+                        )
                 )
         );
-
 
         return true;
     }
@@ -411,8 +422,6 @@ public class GeradorEscala {
             ControleDesignacoes controleDesignacoes,
             List<DiagnosticoSelecaoPessoa> diagnosticos
     ) {
-
-
         MelhorDuplaDirigenteEstudo dupla =
                 selecionarDirigenteELeitor(
                         parte,
@@ -420,12 +429,9 @@ public class GeradorEscala {
                         controleDesignacoes
                 );
 
-
         if (dupla == null) {
-
             return false;
         }
-
 
         designacoes.add(
                 new Designacao(
@@ -436,7 +442,6 @@ public class GeradorEscala {
                 )
         );
 
-
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
                         data,
@@ -445,7 +450,6 @@ public class GeradorEscala {
                         TipoParticipacao.DIRIGENTE
                 )
         );
-
 
         controleDesignacoes.registrarParticipacao(
                 new ParticipacaoDesignacao(
@@ -456,7 +460,6 @@ public class GeradorEscala {
                 )
         );
 
-
         return true;
     }
 
@@ -465,28 +468,18 @@ public class GeradorEscala {
             List<Pessoa> pessoas,
             ControleDesignacoes controleDesignacoes
     ) {
-
-
         List<Pessoa> pessoasJaDesignadas =
-                controleDesignacoes
-                        .getPessoasDesignadas();
+                controleDesignacoes.getPessoasDesignadas();
 
-
-        MelhorDuplaDemonstracao melhor =
-                null;
-
+        MelhorDuplaDemonstracao melhor = null;
 
         for (Pessoa responsavel : pessoas) {
 
-
             for (Pessoa ajudante : pessoas) {
 
-
                 if (responsavel.equals(ajudante)) {
-
                     continue;
                 }
-
 
                 if (!regrasService.podeFormarDemonstracao(
                         parte,
@@ -494,10 +487,8 @@ public class GeradorEscala {
                         ajudante,
                         pessoasJaDesignadas
                 )) {
-
                     continue;
                 }
-
 
                 ResultadoAvaliacaoPessoa avaliacaoResponsavel =
                         avaliadorPessoaService.avaliar(
@@ -506,7 +497,6 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
-
                 ResultadoAvaliacaoPessoa avaliacaoAjudante =
                         avaliadorPessoaService.avaliar(
                                 ajudante,
@@ -514,30 +504,22 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
-
                 MelhorDuplaDemonstracao candidata =
                         new MelhorDuplaDemonstracao(
                                 responsavel,
                                 ajudante,
                                 avaliacaoResponsavel.getTotal()
-                                        +
-                                        avaliacaoAjudante.getTotal()
+                                        + avaliacaoAjudante.getTotal()
                         );
 
-
                 if (melhor == null
-                        ||
-                        candidata.pontuacaoTotal()
-                                >
-                                melhor.pontuacaoTotal()) {
+                        || candidata.pontuacaoTotal()
+                        > melhor.pontuacaoTotal()) {
 
-
-                    melhor =
-                            candidata;
+                    melhor = candidata;
                 }
             }
         }
-
 
         return melhor;
     }
@@ -546,19 +528,13 @@ public class GeradorEscala {
             Parte parte,
             List<Pessoa> pessoas,
             ControleDesignacoes controleDesignacoes
-
     ) {
-
         List<Pessoa> pessoasJaDesignadas =
                 controleDesignacoes.getPessoasDesignadas();
 
-
-        MelhorDuplaDirigenteEstudo melhor =
-                null;
-
+        MelhorDuplaDirigenteEstudo melhor = null;
 
         for (Pessoa dirigente : pessoas) {
-
 
             if (!parte.pessoaPodeExercerParticipacao(
                     dirigente,
@@ -567,20 +543,15 @@ public class GeradorEscala {
                 continue;
             }
 
-
             if (pessoasJaDesignadas.contains(dirigente)) {
                 continue;
             }
 
-
-
             for (Pessoa leitor : pessoas) {
-
 
                 if (dirigente.equals(leitor)) {
                     continue;
                 }
-
 
                 if (!parte.pessoaPodeExercerParticipacao(
                         leitor,
@@ -589,12 +560,9 @@ public class GeradorEscala {
                     continue;
                 }
 
-
                 if (pessoasJaDesignadas.contains(leitor)) {
                     continue;
                 }
-
-
 
                 ResultadoAvaliacaoPessoa avaliacaoDirigente =
                         avaliadorPessoaService.avaliar(
@@ -603,7 +571,6 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
-
                 ResultadoAvaliacaoPessoa avaliacaoLeitor =
                         avaliadorPessoaService.avaliar(
                                 leitor,
@@ -611,31 +578,22 @@ public class GeradorEscala {
                                 controleDesignacoes
                         );
 
-
-
                 MelhorDuplaDirigenteEstudo candidata =
                         new MelhorDuplaDirigenteEstudo(
                                 dirigente,
                                 leitor,
                                 avaliacaoDirigente.getTotal()
-                                        +
-                                        avaliacaoLeitor.getTotal()
+                                        + avaliacaoLeitor.getTotal()
                         );
 
-
-
                 if (melhor == null
-                        ||
-                        candidata.pontuacaoTotal()
-                                >
-                                melhor.pontuacaoTotal()) {
-
+                        || candidata.pontuacaoTotal()
+                        > melhor.pontuacaoTotal()) {
 
                     melhor = candidata;
                 }
             }
         }
-
 
         return melhor;
     }
@@ -644,7 +602,6 @@ public class GeradorEscala {
             Parte parte,
             TipoParticipacao esperada
     ) {
-
         return parte.getParticipacoesNecessarias()
                 .stream()
                 .filter(tipo -> tipo == esperada)
@@ -662,8 +619,6 @@ public class GeradorEscala {
     private TipoParticipacao determinarParticipacaoIndividual(
             Parte parte
     ) {
-
-
         return parte.getParticipacoesNecessarias()
                 .stream()
                 .findFirst()
@@ -672,9 +627,8 @@ public class GeradorEscala {
                                 "Parte sem participação definida: "
                                         + parte.getNome()
                         )
-                );
+                        );
     }
-
 
     private record MelhorDuplaDemonstracao(
             Pessoa responsavel,
@@ -683,17 +637,16 @@ public class GeradorEscala {
     ) {
     }
 
-    private void salvarHistorico(
-            List<ParticipacaoDesignacao> participacoes
-    ) {
-
-        historicoService.salvarGeracao(participacoes);
-
-    }
     private record MelhorDuplaDirigenteEstudo(
             Pessoa dirigente,
             Pessoa leitor,
             int pontuacaoTotal
     ) {
+    }
+
+    private void salvarHistorico(
+            List<ParticipacaoDesignacao> participacoes
+    ) {
+        historicoService.salvarGeracao(participacoes);
     }
 }

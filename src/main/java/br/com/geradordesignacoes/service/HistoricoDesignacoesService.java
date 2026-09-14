@@ -9,67 +9,49 @@ import java.util.List;
 
 public class HistoricoDesignacoesService {
 
-
     private final HistoricoDesignacoesDAO historicoDAO;
 
     private HistoricoDesignacoes historico;
-
-    private boolean escalaSalva;
 
     public HistoricoDesignacoesService() {
         this(new HistoricoDesignacoesDAO());
     }
 
-    public HistoricoDesignacoesService(HistoricoDesignacoesDAO historicoDAO) {
+    public HistoricoDesignacoesService(
+            HistoricoDesignacoesDAO historicoDAO
+    ) {
         this.historicoDAO = historicoDAO;
         carregar();
     }
-
 
     /**
      * Carrega o histórico persistido no banco.
      */
     public final void carregar() {
-
         this.historico =
                 historicoDAO.carregarHistorico();
     }
-
 
     /**
      * Retorna o histórico atual em memória.
      */
     public HistoricoDesignacoes getHistorico() {
-
         return historico;
     }
-
 
     /**
      * Adiciona uma participação:
      * 1 - salva no banco
-     * 2 - atualiza memória
+     * 2 - atualiza memória.
      */
     public void adicionar(
             ParticipacaoDesignacao participacao
     ) {
+        validarParticipacao(participacao);
 
-
-        validarParticipacao(
-                participacao
-        );
-
-
-        historicoDAO.salvar(
-                participacao
-        );
-
-
-        historico.adicionar(
-                participacao
-        );
+        historicoDAO.salvar(participacao);
+        historico.adicionar(participacao);
     }
-
 
     /**
      * Salva várias participações geradas.
@@ -77,18 +59,12 @@ public class HistoricoDesignacoesService {
     public void adicionarTodos(
             List<ParticipacaoDesignacao> participacoes
     ) {
-
-
         for (ParticipacaoDesignacao participacao :
                 participacoes) {
 
-
-            adicionar(
-                    participacao
-            );
+            adicionar(participacao);
         }
     }
-
 
     /**
      * Registra somente participações válidas
@@ -97,82 +73,71 @@ public class HistoricoDesignacoesService {
     public void registrarGeracao(
             List<ParticipacaoDesignacao> participacoes
     ) {
-
-
         for (ParticipacaoDesignacao participacao :
                 participacoes) {
 
-
-            if (participacao.pessoa().getId() == null) {
+            if (!possuiIdsParaPersistencia(participacao)) {
                 continue;
             }
 
-
-            if (participacao.parte().getId() == null) {
-                continue;
-            }
-
-
-            adicionar(
-                    participacao
-            );
+            adicionar(participacao);
         }
     }
 
+    private boolean possuiIdsParaPersistencia(
+            ParticipacaoDesignacao participacao
+    ) {
+        return participacao != null
+                && participacao.pessoa() != null
+                && participacao.parte() != null
+                && participacao.pessoa().getId() != null
+                && participacao.parte().getId() != null;
+    }
 
     private void validarParticipacao(
             ParticipacaoDesignacao participacao
     ) {
-
-
         if (participacao == null) {
-
             throw new IllegalArgumentException(
                     "Participação não pode ser nula."
             );
         }
 
-
         if (participacao.pessoa() == null) {
-
             throw new IllegalArgumentException(
                     "Participação sem pessoa."
             );
         }
 
-
         if (participacao.parte() == null) {
-
             throw new IllegalArgumentException(
                     "Participação sem parte."
             );
         }
 
-
         if (participacao.pessoa().getId() == null) {
-
             throw new IllegalArgumentException(
                     "Pessoa sem ID para persistência."
             );
         }
 
-
         if (participacao.parte().getId() == null) {
-
             throw new IllegalArgumentException(
                     "Parte sem ID para persistência."
             );
         }
     }
+
     public void salvarGeracao(
             List<ParticipacaoDesignacao> participacoes
     ) {
-
-        if (participacoes == null || participacoes.isEmpty()) {
+        if (participacoes == null
+                || participacoes.isEmpty()) {
             return;
         }
 
-        LocalDate data = participacoes.get(0).data();
+        LocalDate data =
+                participacoes.get(0).data();
 
         historicoDAO.substituirParticipacoesDaData(
                 data,
