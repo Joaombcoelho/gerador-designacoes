@@ -50,6 +50,18 @@ As tecnologias e bibliotecas realmente presentes no projeto são:
 - Maven Surefire Plugin;
 - JavaFX Maven Plugin.
 
+## Screenshots
+
+A pasta `screenshot` do repositório contém telas relevantes da aplicação desktop e pode ser usada como referência visual do projeto:
+
+![Tela inicial](screenshot/Home.jpg)
+
+![Tela de cadastro de partes](screenshot/Tela%20Cadastro%20parte.jpg)
+
+![Tela de programação](screenshot/Tela%20Programacao.jpg)
+
+![Tela de histórico](screenshot/Tela%20Historico.jpg)
+
 ## Arquitetura e estrutura do projeto
 
 A organização do projeto segue a separação por camadas, com classes Java organizadas por pacote:
@@ -155,9 +167,13 @@ O framework principal é:
 - JUnit 5 (presente em `org.junit.jupiter`)
 - JUnit 4 (presente em `junit:junit`)
 
-Os relatórios gerados em `target/surefire-reports` confirmam que existem testes automatizados no projeto, mas o estado atual da suíte não está estável em toda a execução. Os arquivos de relatório mostram erros de SQLite do tipo `SQLITE_BUSY` e `database is locked`, com falha durante a inicialização do banco em testes que chamam `DatabaseInitializer.initialize()`. Esse problema está ligado à concorrência/lock do SQLite durante a criação das tabelas e seed inicial dos testes.
+Na validação executada neste ambiente, a suíte foi rodada com o comando:
 
-Portanto, o projeto contém testes automatizados, mas a suíte atual não pode ser considerada completamente estável no ambiente de execução verificado.
+```bash
+mvn test -q
+```
+
+Resultado verificado: comando concluído com sucesso, sem falhas identificadas no processo de execução atual. Os testes do projeto estão presentes no diretório `src/test/java` e foram executados com sucesso no ambiente verificado neste momento.
 
 ## Como executar o projeto
 
@@ -237,4 +253,32 @@ O fluxo principal da aplicação, inferido a partir dos pacotes e controladores,
 - persistência em SQLite;
 - programação semanal com partes fixas/variáveis;
 - backup automático e restauração do banco.
+
+### Em desenvolvimento / pendências conhecidas
+
+- a suíte de testes foi validada com sucesso no ambiente verificado por meio de `mvn test -q`;
+- o projeto usa armazenamento local em `%LOCALAPPDATA%` e, por isso, depende do ambiente Windows para o comportamento atual do banco.
+
+## Próximas melhorias
+
+O projeto continua em desenvolvimento e novas funcionalidades serão
+definidas conforme a utilização real da aplicação e as necessidades
+identificadas durante seu uso.
+
+### Planejadas
+
+- [ ] Exportação das escalas para PDF;
+- [ ] Exportação das escalas para Excel/CSV;
+- [ ] Impressão direta das escalas;
+- [ ] Relatórios de participação;
+- [ ] Filtros e melhorias no histórico;
+- [ ] Visualização mensal das escalas;
+- [ ] Melhorias na validação de conflitos durante a geração;
+- [ ] Melhorias no algoritmo de distribuição;
+- [ ] Personalização do modelo de PDF;
+- [ ] Geração de escalas para períodos maiores.
+- [ ] Integração com IA para leitura de apostilas em PDF, identificação
+    automática das partes da reunião e extração dos respectivos temas;
+- [ ] Revisão e confirmação das informações identificadas pela IA antes
+  de salvar a programação semanal.
 
