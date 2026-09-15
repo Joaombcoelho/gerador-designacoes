@@ -783,7 +783,7 @@ public class DatabaseInitializer {
                     false,
 
                     TipoParticipacao.DIRIGENTE,
-                    TipoParticipacao.LEITOR
+                    TipoParticipacao.AJUDANTE
             );
 
 
