@@ -175,32 +175,23 @@ public class ProgramacaoController {
         List<LocalDate> resultado =
                 new ArrayList<>();
 
-
         LocalDate data =
                 mes.atDay(1);
 
-
-        while (
-                data.getMonth()
-                        == mes.getMonth()
-                        && resultado.size() < 4
-        ) {
+        while (data.getMonth()
+                == mes.getMonth()) {
 
             if (data.getDayOfWeek()
-                    == DayOfWeek.THURSDAY) {
+                    == DayOfWeek.WEDNESDAY) {
 
                 resultado.add(data);
             }
 
-
-            data =
-                    data.plusDays(1);
+            data = data.plusDays(1);
         }
-
 
         return resultado;
     }
-
 
     private void atualizarSemanas() {
 
@@ -309,15 +300,17 @@ public class ProgramacaoController {
             ProgramacaoSemana programacao
     ) {
 
-        List<Parte> partesVariaveis =
-                service.listarPartesVariaveis();
+        List<Parte> todasAsPartes =
+                service.listarTodas();
+
+
 
 
         /*
          * Primeiro carregamos todas as partes variáveis.
          */
         view.carregarPartes(
-                partesVariaveis
+                todasAsPartes
         );
 
 
@@ -499,7 +492,7 @@ public class ProgramacaoController {
                     .equals(mes)) {
 
                 view.atualizarStatus(
-                        "Não há outra quinta-feira neste mês."
+                        "Não há outra quarta-feira neste mês."
                 );
 
                 return;

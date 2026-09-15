@@ -11,25 +11,14 @@ public class Parte {
     private final TipoParte tipo;
     private final Privilegio privilegioMinimo;
     private final List<TipoParticipacao> participacoesNecessarias;
-
     private final boolean exigeAjudante;
     private final SexoPermitido sexoPermitido;
     private final boolean geraFormulario;
     private final int quantidadeMinimaParticipantes;
     private final NivelLeitura nivelLeituraMinimo;
-
-    /*
-     * Classificação utilizada na programação semanal.
-     */
     private final SecaoParte secao;
     private final TipoVariacaoParte tipoVariacao;
-
-    /*
-     * Indica se a parte precisa receber um tema
-     * durante a programação da semana.
-     */
     private final boolean possuiTema;
-
 
     /**
      * Construtor principal.
@@ -49,35 +38,22 @@ public class Parte {
             boolean possuiTema,
             List<TipoParticipacao> participacoesNecessarias
     ) {
-
         this.id = id;
-
         this.nome = Objects.requireNonNull(nome);
         this.tipo = Objects.requireNonNull(tipo);
-
         this.privilegioMinimo =
                 Objects.requireNonNull(privilegioMinimo);
-
         this.exigeAjudante = exigeAjudante;
-
         this.sexoPermitido =
                 Objects.requireNonNull(sexoPermitido);
-
         this.quantidadeMinimaParticipantes =
                 quantidadeMinimaParticipantes;
-
-        this.geraFormulario =
-                geraFormulario;
-
+        this.geraFormulario = geraFormulario;
         this.nivelLeituraMinimo =
                 Objects.requireNonNull(nivelLeituraMinimo);
-
         this.secao = secao;
-
         this.tipoVariacao = tipoVariacao;
-
         this.possuiTema = possuiTema;
-
         this.participacoesNecessarias =
                 List.copyOf(
                         Objects.requireNonNull(
@@ -85,7 +61,6 @@ public class Parte {
                         )
                 );
     }
-
 
     /**
      * Construtor utilizado pelo cadastro normal.
@@ -104,7 +79,6 @@ public class Parte {
             boolean possuiTema,
             List<TipoParticipacao> participacoesNecessarias
     ) {
-
         this(
                 null,
                 nome,
@@ -122,11 +96,9 @@ public class Parte {
         );
     }
 
-
     /**
      * Construtor utilizado pelo cadastro normal
      * sem classificação de seção/variação.
-     * Mantido para compatibilidade.
      */
     public Parte(
             String nome,
@@ -139,7 +111,6 @@ public class Parte {
             NivelLeitura nivelLeituraMinimo,
             List<TipoParticipacao> participacoesNecessarias
     ) {
-
         this(
                 null,
                 nome,
@@ -156,7 +127,6 @@ public class Parte {
                 participacoesNecessarias
         );
     }
-
 
     /**
      * Construtor utilizado pelo DAO e mantido
@@ -174,7 +144,6 @@ public class Parte {
             NivelLeitura nivelLeituraMinimo,
             List<TipoParticipacao> participacoesNecessarias
     ) {
-
         this(
                 id,
                 nome,
@@ -192,11 +161,9 @@ public class Parte {
         );
     }
 
-
     /**
      * Construtor legado.
-     * Mantido para compatibilidade
-     * com testes antigos.
+     * Mantido para compatibilidade com testes antigos.
      */
     public Parte(
             String nome,
@@ -208,7 +175,6 @@ public class Parte {
             boolean geraFormulario,
             List<TipoParticipacao> participacoesNecessarias
     ) {
-
         this(
                 null,
                 nome,
@@ -226,96 +192,76 @@ public class Parte {
         );
     }
 
-
     public Integer getId() {
         return id;
     }
-
 
     public String getNome() {
         return nome;
     }
 
-
     public TipoParte getTipo() {
         return tipo;
     }
-
 
     public Privilegio getPrivilegioMinimo() {
         return privilegioMinimo;
     }
 
-
     public boolean getExigeAjudante() {
         return exigeAjudante;
     }
-
 
     public SexoPermitido getSexoPermitido() {
         return sexoPermitido;
     }
 
-
     public int getQuantidadeMinimaParticipantes() {
         return quantidadeMinimaParticipantes;
     }
-
 
     public boolean geraFormulario() {
         return geraFormulario;
     }
 
-
     public NivelLeitura getNivelLeituraMinimo() {
         return nivelLeituraMinimo;
     }
-
 
     public SecaoParte getSecao() {
         return secao;
     }
 
-
     public TipoVariacaoParte getTipoVariacao() {
         return tipoVariacao;
     }
-
 
     public boolean possuiTema() {
         return possuiTema;
     }
 
-
     public List<TipoParticipacao> getParticipacoesNecessarias() {
-
         return Collections.unmodifiableList(
                 participacoesNecessarias
         );
     }
 
-
     public boolean necessitaParticipacao(
             TipoParticipacao tipo
     ) {
-
         return participacoesNecessarias.contains(tipo);
     }
-
 
     public boolean podeSerRealizadaPor(
             Pessoa pessoa
     ) {
-
         return regrasBasicasAtendidas(pessoa);
     }
-
 
     public boolean pessoaPodeExercerParticipacao(
             Pessoa pessoa,
             TipoParticipacao tipo
     ) {
-
         if (tipo == null) {
             return false;
         }
@@ -324,23 +270,93 @@ public class Parte {
             return false;
         }
 
+        /*
+         * Regra específica do Estudo Bíblico:
+         *
+         * O leitor é registrado como AJUDANTE.
+         * Ele deve ser um irmão batizado experiente,
+         * mas não deve ser Servo Ministerial nem Ancião.
+         *
+         * Essa verificação acontece antes das regras
+         * básicas porque o privilégio mínimo geral da
+         * parte é utilizado principalmente para o dirigente.
+         */
+        if (ehLeitorDoEstudoBiblico(pessoa, tipo)) {
+            return podeSerLeitorDoEstudoBiblico(pessoa);
+        }
+
         if (!regrasBasicasAtendidas(pessoa)) {
             return false;
         }
 
+        /*
+         * Regra específica da parte LEITURA:
+         *
+         * Somente pessoas com nível BASICO podem
+         * ser designadas para a parte Leitura.
+         */
         if (tipo == TipoParticipacao.LEITOR) {
-
             return nivelLeituraPermitido(pessoa);
         }
 
         return pessoa.podeExercer(tipo);
     }
 
+    private boolean ehLeitorDoEstudoBiblico(
+            Pessoa pessoa,
+            TipoParticipacao tipo
+    ) {
+        return pessoa != null
+                && this.tipo == TipoParte.DIRIGENTE_ESTUDO
+                && tipo == TipoParticipacao.AJUDANTE;
+    }
+
+    private boolean podeSerLeitorDoEstudoBiblico(
+            Pessoa pessoa
+    ) {
+        if (pessoa == null
+                || !pessoa.isAtivo()) {
+            return false;
+        }
+
+        /*
+         * O leitor precisa ser pelo menos batizado.
+         */
+        if (!pessoa.getPrivilegio().atende(
+                Privilegio.BATIZADO
+        )) {
+            return false;
+        }
+
+        /*
+         * Servo Ministerial e Ancião ficam reservados
+         * para a função de dirigente ou outras partes.
+         */
+        if (pessoa.getPrivilegio() == Privilegio.SERVO_MINISTERIAL
+                || pessoa.getPrivilegio() == Privilegio.ANCIAO) {
+            return false;
+        }
+
+        /*
+         * O leitor do Estudo Bíblico precisa ter
+         * nível de leitura EXPERIENTE.
+         */
+        if (pessoa.getNivelLeitura()
+                != NivelLeitura.EXPERIENTE) {
+            return false;
+        }
+
+        /*
+         * A pessoa precisa estar habilitada como ajudante.
+         */
+        return pessoa.podeExercer(
+                TipoParticipacao.AJUDANTE
+        );
+    }
 
     private boolean regrasBasicasAtendidas(
             Pessoa pessoa
     ) {
-
         if (pessoa == null) {
             return false;
         }
@@ -356,59 +372,49 @@ public class Parte {
         return sexoPermitido(pessoa);
     }
 
-
     private boolean privilegioPermitido(
             Pessoa pessoa
     ) {
-
-        return pessoa.getPrivilegio()
-                .atende(privilegioMinimo);
+        return pessoa.getPrivilegio().atende(
+                privilegioMinimo
+        );
     }
-
 
     private boolean sexoPermitido(
             Pessoa pessoa
     ) {
-
         if (sexoPermitido == SexoPermitido.AMBOS) {
             return true;
         }
 
-        return
-                (sexoPermitido == SexoPermitido.MASCULINO
-                        &&
-                        pessoa.getSexo() == Sexo.MASCULINO)
-
-                        ||
-
-                        (sexoPermitido == SexoPermitido.FEMININO
-                                &&
-                                pessoa.getSexo() == Sexo.FEMININO);
+        return (sexoPermitido == SexoPermitido.MASCULINO
+                && pessoa.getSexo() == Sexo.MASCULINO)
+                || (sexoPermitido == SexoPermitido.FEMININO
+                && pessoa.getSexo() == Sexo.FEMININO);
     }
-
 
     private boolean nivelLeituraPermitido(
             Pessoa pessoa
     ) {
+        if (tipo == TipoParte.LEITURA) {
+            return pessoa.getNivelLeitura()
+                    == NivelLeitura.BASICO;
+        }
 
         return pessoa.getNivelLeitura()
                 .atende(nivelLeituraMinimo);
     }
 
-
     @Override
     public String toString() {
-
-        return nome +
-                (id != null
-                        ? " [id=" + id + "]"
-                        : "");
+        return nome
+                + (id != null
+                ? " [id=" + id + "]"
+                : "");
     }
-
 
     @Override
     public boolean equals(Object o) {
-
         if (this == o) {
             return true;
         }
@@ -424,10 +430,8 @@ public class Parte {
         return id.equals(outra.id);
     }
 
-
     @Override
     public int hashCode() {
-
         return Objects.hash(id);
     }
 }

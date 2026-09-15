@@ -27,6 +27,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
     private final PessoaDAO pessoaDAO = new PessoaDAO();
     private final ParteDAO parteDAO = new ParteDAO();
     private final EscalaDAO escalaDAO = new EscalaDAO();
+
     private final ProgramacaoSemanaService programacaoService =
             new ProgramacaoSemanaService();
 
@@ -40,14 +41,18 @@ class IntegracaoEscalaTest extends BaseDAOTest {
             return;
         }
 
-        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch =
+                new CountDownLatch(1);
 
         try {
 
             Platform.startup(latch::countDown);
 
             assertTrue(
-                    latch.await(10, TimeUnit.SECONDS),
+                    latch.await(
+                            10,
+                            TimeUnit.SECONDS
+                    ),
                     "JavaFX não foi inicializado."
             );
 
@@ -63,7 +68,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
 
 
     @Test
-    void deveGerarQuatroSemanasConfiguradas() throws Exception {
+    void deveGerarTodasAsSemanasConfiguradas() throws Exception {
 
         criarPessoas(12);
 
@@ -74,12 +79,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 YearMonth.of(2026, 9);
 
         List<LocalDate> datas =
-                List.of(
-                        LocalDate.of(2026, 9, 2),
-                        LocalDate.of(2026, 9, 9),
-                        LocalDate.of(2026, 9, 16),
-                        LocalDate.of(2026, 9, 23)
-                );
+                datasDasSemanasDeSetembro();
 
         for (LocalDate data : datas) {
 
@@ -102,14 +102,21 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 programacaoService.listarSemanasDoMes(mes);
 
         assertEquals(
-                4,
+                5,
                 semanas.size()
+        );
+
+        assertEquals(
+                datas,
+                semanas.stream()
+                        .map(ProgramacaoSemana::data)
+                        .toList()
         );
     }
 
 
     @Test
-    void deveGerarEExibirQuatroEscalasPeloController()
+    void deveGerarEExibirTodasAsEscalasPeloController()
             throws Exception {
 
         criarPessoas(12);
@@ -120,26 +127,9 @@ class IntegracaoEscalaTest extends BaseDAOTest {
         YearMonth mes =
                 YearMonth.of(2026, 9);
 
-        List<LocalDate> datas =
-                List.of(
-                        LocalDate.of(2026, 9, 2),
-                        LocalDate.of(2026, 9, 9),
-                        LocalDate.of(2026, 9, 16),
-                        LocalDate.of(2026, 9, 23)
-                );
-
-        for (LocalDate data : datas) {
-
-            programacaoService.obterOuCriar(data);
-
-            for (Parte parte : partesVariaveis) {
-
-                programacaoService.adicionarParteVariavel(
-                        data,
-                        parte.getId()
-                );
-            }
-        }
+        configurarTodasAsSemanas(
+                partesVariaveis
+        );
 
         EscalaView view =
                 criarEscalaView();
@@ -156,13 +146,16 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 controller.possuiEscalasGeradas()
         );
 
-        assertTrue(controller.possuiEscalasGeradas());
-        assertFalse(view.getTabela().getItems().isEmpty());
+        assertFalse(
+                view.getTabela()
+                        .getItems()
+                        .isEmpty()
+        );
     }
 
 
     @Test
-    void deveSalvarAsQuatroEscalasNoBanco()
+    void deveSalvarTodasAsEscalasNoBanco()
             throws Exception {
 
         criarPessoas(12);
@@ -173,7 +166,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
         YearMonth mes =
                 YearMonth.of(2026, 9);
 
-        configurarQuatroSemanas(
+        configurarTodasAsSemanas(
                 partesVariaveis
         );
 
@@ -195,17 +188,12 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 escalaDAO.listarTodas();
 
         assertEquals(
-                4,
+                5,
                 escalas.size()
         );
 
         assertEquals(
-                List.of(
-                        LocalDate.of(2026, 9, 2),
-                        LocalDate.of(2026, 9, 9),
-                        LocalDate.of(2026, 9, 16),
-                        LocalDate.of(2026, 9, 23)
-                ),
+                datasDasSemanasDeSetembro(),
                 escalas.stream()
                         .map(Escala::getData)
                         .sorted()
@@ -215,7 +203,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
 
 
     @Test
-    void deveRecuperarEscalasSalvas()
+    void deveRecuperarTodasAsEscalasSalvas()
             throws Exception {
 
         criarPessoas(12);
@@ -223,7 +211,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
         List<Parte> partes =
                 criarPartesVariaveis(3);
 
-        configurarQuatroSemanas(partes);
+        configurarTodasAsSemanas(partes);
 
         EscalaView view =
                 criarEscalaView();
@@ -246,7 +234,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 escalaDAO.listarTodas();
 
         assertEquals(
-                4,
+                5,
                 recuperadas.size()
         );
 
@@ -295,7 +283,10 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 gerador.gerarEscala(
                         LocalDate.of(2026, 9, 2),
                         List.of(parte),
-                        List.of(pessoa1, pessoa2)
+                        List.of(
+                                pessoa1,
+                                pessoa2
+                        )
                 );
 
         assertTrue(
@@ -351,25 +342,11 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                         new RegrasService()
                 );
 
-        LocalDate semana1 =
-                LocalDate.of(2026, 9, 2);
-
-        LocalDate semana2 =
-                LocalDate.of(2026, 9, 9);
-
-        LocalDate semana3 =
-                LocalDate.of(2026, 9, 16);
-
-        LocalDate semana4 =
-                LocalDate.of(2026, 9, 23);
-
         List<LocalDate> datas =
-                List.of(
-                        semana1,
-                        semana2,
-                        semana3,
-                        semana4
-                );
+                datasDasSemanasDeSetembro();
+
+        LocalDate semanaRegenerada =
+                LocalDate.of(2026, 9, 9);
 
         for (LocalDate data : datas) {
 
@@ -393,7 +370,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 escalaDAO.listarTodas();
 
         assertEquals(
-                4,
+                5,
                 antes.size()
         );
 
@@ -402,18 +379,20 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                         .filter(
                                 escala ->
                                         !escala.getData()
-                                                .equals(semana2)
+                                                .equals(
+                                                        semanaRegenerada
+                                                )
                         )
                         .map(Escala::getId)
                         .sorted()
                         .toList();
 
         /*
-         * Regenera somente a semana 2.
+         * Regenera somente uma semana.
          */
         ResultadoGeracaoEscala novaSemana =
                 gerador.gerarEscala(
-                        semana2,
+                        semanaRegenerada,
                         partes,
                         pessoas
                 );
@@ -430,7 +409,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 escalaDAO.listarTodas();
 
         assertEquals(
-                4,
+                5,
                 depois.size()
         );
 
@@ -439,7 +418,9 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                         .filter(
                                 escala ->
                                         !escala.getData()
-                                                .equals(semana2)
+                                                .equals(
+                                                        semanaRegenerada
+                                                )
                         )
                         .map(Escala::getId)
                         .sorted()
@@ -448,7 +429,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
         assertEquals(
                 idsAntes,
                 idsDepois,
-                "As outras três semanas não deveriam ser alteradas."
+                "As outras quatro semanas não deveriam ser alteradas."
         );
 
         assertTrue(
@@ -456,14 +437,16 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                         .anyMatch(
                                 escala ->
                                         escala.getData()
-                                                .equals(semana2)
+                                                .equals(
+                                                        semanaRegenerada
+                                                )
                         )
         );
     }
 
 
     @Test
-    void deveManterHistoricoDasQuatroGeracoes()
+    void deveManterHistoricoDasCincoGeracoes()
             throws Exception {
 
         List<Pessoa> pessoas =
@@ -478,12 +461,7 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 );
 
         List<LocalDate> datas =
-                List.of(
-                        LocalDate.of(2026, 9, 2),
-                        LocalDate.of(2026, 9, 9),
-                        LocalDate.of(2026, 9, 16),
-                        LocalDate.of(2026, 9, 23)
-                );
+                datasDasSemanasDeSetembro();
 
         for (LocalDate data : datas) {
 
@@ -531,23 +509,17 @@ class IntegracaoEscalaTest extends BaseDAOTest {
     }
 
 
-    private void configurarQuatroSemanas(
+    private void configurarTodasAsSemanas(
             List<Parte> partesVariaveis
     ) {
 
-        List<LocalDate> datas =
-                List.of(
-                        LocalDate.of(2026, 9, 2),
-                        LocalDate.of(2026, 9, 9),
-                        LocalDate.of(2026, 9, 16),
-                        LocalDate.of(2026, 9, 23)
-                );
-
-        for (LocalDate data : datas) {
+        for (LocalDate data :
+                datasDasSemanasDeSetembro()) {
 
             programacaoService.obterOuCriar(data);
 
-            for (Parte parte : partesVariaveis) {
+            for (Parte parte :
+                    partesVariaveis) {
 
                 programacaoService.adicionarParteVariavel(
                         data,
@@ -555,6 +527,18 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 );
             }
         }
+    }
+
+
+    private List<LocalDate> datasDasSemanasDeSetembro() {
+
+        return List.of(
+                LocalDate.of(2026, 9, 2),
+                LocalDate.of(2026, 9, 9),
+                LocalDate.of(2026, 9, 16),
+                LocalDate.of(2026, 9, 23),
+                LocalDate.of(2026, 9, 30)
+        );
     }
 
 

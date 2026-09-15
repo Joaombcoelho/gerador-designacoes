@@ -629,7 +629,9 @@ public class ProgramacaoSemanaService {
     }
 
     /**
-     * Lista as quatro reuniões do mês.
+     * Lista todas as reuniões do mês.
+     *
+     * Um mês pode possuir 4 ou 5 quartas-feiras.
      */
     public List<ProgramacaoSemana> listarSemanasDoMes(
             YearMonth mes
@@ -646,14 +648,11 @@ public class ProgramacaoSemanaService {
         LocalDate data =
                 mes.atDay(1);
 
-        while (
-                data.getMonth() == mes.getMonth()
-                        && semanas.size() < 4
-        ) {
-            if (
-                    data.getDayOfWeek()
-                            == DayOfWeek.WEDNESDAY
-            ) {
+        while (data.getMonth() == mes.getMonth()) {
+
+            if (data.getDayOfWeek()
+                    == DayOfWeek.WEDNESDAY) {
+
                 ProgramacaoSemana programacao =
                         obterOuCriar(data);
 

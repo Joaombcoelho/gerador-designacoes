@@ -68,7 +68,6 @@ A organização do projeto segue a separação por camadas, com classes Java org
 
 ```text
 gerador-designacoes/
-├── .idea/
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -86,11 +85,9 @@ gerador-designacoes/
 │   └── test/
 │       └── java/
 │           └── br/com/geradordesignacoes/
-├── data/
 ├── pom.xml
 ├── README.md
 ├── .gitignore
-├── target/
 └── ...
 ```
 
@@ -187,7 +184,7 @@ Pré-requisitos confirmados pelo projeto:
 Fluxo de execução recomendado a partir da raiz do projeto:
 
 ```bash
-git clone https://github.com/<seu-usuario>/gerador-designacoes.git
+git clone https://github.com/Joaombcoelho/gerador-designacoes.git
 cd gerador-designacoes
 mvn javafx:run
 ```
@@ -254,10 +251,11 @@ O fluxo principal da aplicação, inferido a partir dos pacotes e controladores,
 - programação semanal com partes fixas/variáveis;
 - backup automático e restauração do banco.
 
-### Em desenvolvimento / pendências conhecidas
+### Observações atuais
 
-- a suíte de testes foi validada com sucesso no ambiente verificado por meio de `mvn test -q`;
-- o projeto usa armazenamento local em `%LOCALAPPDATA%` e, por isso, depende do ambiente Windows para o comportamento atual do banco.
+- A suíte de testes foi validada com sucesso por meio de `mvn test -q`.
+- O projeto utiliza armazenamento local em `%LOCALAPPDATA%` e, atualmente,
+  depende do ambiente Windows para o comportamento de armazenamento do banco.
 
 ## Próximas melhorias
 
@@ -276,7 +274,7 @@ identificadas durante seu uso.
 - [ ] Melhorias na validação de conflitos durante a geração;
 - [ ] Melhorias no algoritmo de distribuição;
 - [ ] Personalização do modelo de PDF;
-- [ ] Geração de escalas para períodos maiores.
+- [ ] Geração de escalas para períodos maiores;
 - [ ] Integração com IA para leitura de apostilas em PDF, identificação
     automática das partes da reunião e extração dos respectivos temas;
 - [ ] Revisão e confirmação das informações identificadas pela IA antes

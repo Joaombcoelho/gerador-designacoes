@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -29,11 +30,27 @@ public class SeletorPessoaService {
             ControleDesignacoes controle
     ) {
 
+        return selecionarMelhorPessoa(
+                parte,
+                pessoas,
+                controle,
+                null
+        );
+    }
+
+    public Optional<Pessoa> selecionarMelhorPessoa(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controle,
+            LocalDate data
+    ) {
+
         List<ResultadoAvaliacaoPessoa> candidatos =
                 avaliarPessoasElegiveis(
                         parte,
                         pessoas,
-                        controle
+                        controle,
+                        data
                 );
 
         return candidatos.stream()
@@ -42,7 +59,9 @@ public class SeletorPessoaService {
                                 ResultadoAvaliacaoPessoa::getTotal
                         )
                 )
-                .map(ResultadoAvaliacaoPessoa::getPessoa);
+                .map(
+                        ResultadoAvaliacaoPessoa::getPessoa
+                );
     }
 
     public List<ResultadoAvaliacaoPessoa> avaliarCandidatos(
@@ -51,10 +70,26 @@ public class SeletorPessoaService {
             ControleDesignacoes controle
     ) {
 
+        return avaliarCandidatos(
+                parte,
+                pessoas,
+                controle,
+                null
+        );
+    }
+
+    public List<ResultadoAvaliacaoPessoa> avaliarCandidatos(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controle,
+            LocalDate data
+    ) {
+
         return avaliarPessoasElegiveis(
                 parte,
                 pessoas,
-                controle
+                controle,
+                data
         );
     }
 
@@ -64,11 +99,27 @@ public class SeletorPessoaService {
             ControleDesignacoes controle
     ) {
 
+        return selecionarComDiagnostico(
+                parte,
+                pessoas,
+                controle,
+                null
+        );
+    }
+
+    public DiagnosticoSelecaoPessoa selecionarComDiagnostico(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controle,
+            LocalDate data
+    ) {
+
         List<ResultadoAvaliacaoPessoa> candidatos =
                 avaliarCandidatos(
                         parte,
                         pessoas,
-                        controle
+                        controle,
+                        data
                 );
 
         ResultadoAvaliacaoPessoa escolhido =
@@ -90,7 +141,8 @@ public class SeletorPessoaService {
     private List<ResultadoAvaliacaoPessoa> avaliarPessoasElegiveis(
             Parte parte,
             List<Pessoa> pessoas,
-            ControleDesignacoes controle
+            ControleDesignacoes controle,
+            LocalDate data
     ) {
 
         List<ResultadoAvaliacaoPessoa> resultados =
@@ -106,6 +158,15 @@ public class SeletorPessoaService {
                 continue;
             }
 
+            if (possuiConflitoTesourosJoias(
+                    pessoa,
+                    parte,
+                    controle,
+                    data
+            )) {
+                continue;
+            }
+
             resultados.add(
                     avaliadorPessoaService.avaliar(
                             pessoa,
@@ -116,5 +177,31 @@ public class SeletorPessoaService {
         }
 
         return resultados;
+    }
+
+    /**
+     * Verifica se a pessoa já recebeu, na mesma semana,
+     * a parte que entra em conflito com a parte atual.
+     * A regra é:
+     * DISCURSO_TESOUROS
+     *      ↕
+     * JOIAS_ESPIRITUAIS
+     * O bloqueio ocorre somente quando a data é a mesma.
+     */
+    private boolean possuiConflitoTesourosJoias(
+            Pessoa pessoa,
+            Parte parte,
+            ControleDesignacoes controle,
+            LocalDate data
+    ) {
+        if (data == null) {
+            return false;
+        }
+
+        return controle.possuiConflitoTesourosJoias(
+                pessoa,
+                parte,
+                data
+        );
     }
 }

@@ -152,7 +152,7 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
                         true,
                         false,
                         false,
-                        Privilegio.PUBLICADOR,
+                        Privilegio.BATIZADO,
                         NivelLeitura.EXPERIENTE
                 );
 
@@ -163,7 +163,7 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
                         false,
                         List.of(
                                 TipoParticipacao.DIRIGENTE,
-                                TipoParticipacao.LEITOR
+                                TipoParticipacao.AJUDANTE
                         )
                 );
 
@@ -334,7 +334,7 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
                         true,
                         false,
                         false,
-                        Privilegio.PUBLICADOR,
+                        Privilegio.BATIZADO,
                         NivelLeitura.BASICO
                 );
 
@@ -342,10 +342,10 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
                 criarParteComNivelLeitura(
                         "Estudo Bíblico",
                         TipoParte.DIRIGENTE_ESTUDO,
-                        NivelLeitura.EXPERIENTE,
+                        NivelLeitura.BASICO,
                         List.of(
                                 TipoParticipacao.DIRIGENTE,
-                                TipoParticipacao.LEITOR
+                                TipoParticipacao.AJUDANTE
                         )
                 );
 
@@ -369,7 +369,7 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
                         true,
                         false,
                         false,
-                        Privilegio.PUBLICADOR,
+                        Privilegio.BATIZADO,
                         NivelLeitura.EXPERIENTE
                 );
 

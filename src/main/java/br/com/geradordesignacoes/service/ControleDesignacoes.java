@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.model.HistoricoDesignacoes;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoParticipacao;
 
 import java.time.LocalDate;
@@ -142,6 +143,63 @@ public class ControleDesignacoes {
                 pessoa,
                 parte
         );
+    }
+
+    /**
+     * Verifica se a pessoa já realizou, na mesma
+     * semana, a parte que entra em conflito com
+     * Tesouros da Palavra de Deus ou Joias Espirituais.
+     *
+     * Regra:
+     *
+     * DISCURSO_TESOUROS
+     *      ↕
+     * JOIAS_ESPIRITUAIS
+     *
+     * O bloqueio considera somente a mesma data.
+     * Portanto, realizar Tesouros em uma semana
+     * não impede Joias em outra semana.
+     */
+    public boolean possuiConflitoTesourosJoias(
+            Pessoa pessoa,
+            Parte parte,
+            LocalDate data
+    ) {
+        if (pessoa == null
+                || parte == null
+                || data == null) {
+
+            return false;
+        }
+
+        TipoParte tipoConflitante;
+
+        if (parte.getTipo()
+                == TipoParte.DISCURSO_TESOUROS) {
+
+            tipoConflitante =
+                    TipoParte.JOIAS_ESPIRITUAIS;
+
+        } else if (parte.getTipo()
+                == TipoParte.JOIAS_ESPIRITUAIS) {
+
+            tipoConflitante =
+                    TipoParte.DISCURSO_TESOUROS;
+
+        } else {
+
+            return false;
+        }
+
+        return historico.participacoes()
+                .stream()
+                .anyMatch(
+                        participacao ->
+                                participacao.pessoa().equals(pessoa)
+                                        && participacao.data().equals(data)
+                                        && participacao.parte().getTipo()
+                                        == tipoConflitante
+                );
     }
 
     public long quantidadeVezesNaParte(

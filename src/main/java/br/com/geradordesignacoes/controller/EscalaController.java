@@ -356,7 +356,7 @@ public class EscalaController {
     /**
      * Salva no banco todas as escalas atualmente geradas.
      *
-     * Este método é utilizado tanto pela tela Escala
+     * Este métodoo é utilizado tanto pela tela Escala
      * quanto pela tela Programação.
      *
      * @return true se o salvamento foi realizado com sucesso.
@@ -493,10 +493,10 @@ public class EscalaController {
                     programacaoSemanaService
                             .listarSemanasDoMes(mes);
 
-            if (semanas.size() != 4) {
+            if (semanas.size() < 4 || semanas.size() > 5) {
 
                 view.atualizarStatus(
-                        "É necessário possuir 4 programações configuradas."
+                        "O mês deve possuir 4 ou 5 programações."
                 );
 
                 return false;
@@ -515,7 +515,8 @@ public class EscalaController {
             );
 
             view.atualizarStatus(
-                    "4 escalas geradas com sucesso."
+                    resultadosGeracao.size()
+                            + " escalas geradas com sucesso."
             );
 
             return true;
@@ -586,10 +587,16 @@ public class EscalaController {
 
     private void validarQuantidadeEscalasGeradas() {
 
-        if (resultadosGeracao.size() != 4) {
+        int quantidade =
+                resultadosGeracao.size();
+
+        if (quantidade < 4 || quantidade > 5) {
 
             throw new IllegalStateException(
-                    "A geração mensal não produziu 4 escalas."
+                    "A geração mensal deveria produzir "
+                            + "4 ou 5 escalas, mas produziu "
+                            + quantidade
+                            + "."
             );
         }
     }
@@ -629,6 +636,10 @@ public class EscalaController {
 
     public boolean possuiEscalasGeradas() {
 
-        return resultadosGeracao.size() == 4;
+        int quantidade =
+                resultadosGeracao.size();
+
+        return quantidade >= 4
+                && quantidade <= 5;
     }
 }

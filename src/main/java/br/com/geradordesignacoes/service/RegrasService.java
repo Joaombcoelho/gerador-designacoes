@@ -1,10 +1,6 @@
 package br.com.geradordesignacoes.service;
 
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.Pessoa;
-import br.com.geradordesignacoes.model.Privilegio;
-import br.com.geradordesignacoes.model.Sexo;
-import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.model.*;
 
 import java.util.List;
 
@@ -57,6 +53,21 @@ public class RegrasService {
             return false;
         }
 
+        /*
+         * Regra específica:
+         *
+         * A mesma pessoa não pode fazer simultaneamente
+         * Discurso - Tesouros e Joias espirituais na
+         * mesma reunião.
+         */
+        if (possuiConflitoTesourosJoias(
+                pessoa,
+                parte,
+                controle
+        )) {
+            return false;
+        }
+
         List<Pessoa> pessoasJaDesignadas =
                 controle.getPessoasDesignadas();
 
@@ -86,6 +97,85 @@ public class RegrasService {
         }
 
         return podeExercerAlgumaParticipacao(pessoa, parte);
+    }
+
+
+    /**
+     * Impede que a mesma pessoa seja designada
+     * para Discurso - Tesouros e Joias espirituais
+     * na mesma reunião.
+     */
+    private boolean possuiConflitoTesourosJoias(
+            Pessoa pessoa,
+            Parte parte,
+            ControleDesignacoes controle
+    ) {
+        if (!ehParteTesouros(parte)
+                && !ehParteJoias(parte)) {
+
+            return false;
+        }
+
+        TipoParte tipoConflitante =
+                ehParteTesouros(parte)
+                        ? TipoParte.JOIAS_ESPIRITUAIS
+                        : TipoParte.DISCURSO_TESOUROS;
+
+        return controle.getParticipacoes()
+                .stream()
+                .anyMatch(
+                        participacao ->
+                                participacao.pessoa().equals(pessoa)
+                                        && participacao.data().equals(
+                                        participacao.data()
+                                )
+                                        && participacao.parte().getTipo()
+                                        == tipoConflitante
+                );
+    }
+
+
+    private boolean ehParteTesouros(
+            Parte parte
+    ) {
+        if (parte == null) {
+            return false;
+        }
+
+        String nome =
+                parte.getNome();
+
+        return nome != null
+                && (
+                nome.equalsIgnoreCase(
+                        "Discurso - Tesouros"
+                )
+                        || nome.equalsIgnoreCase(
+                        "Discurso – Tesouros"
+                )
+                        || nome.equalsIgnoreCase(
+                        "Discurso - Tesouros da Palavra de Deus"
+                )
+                        || nome.equalsIgnoreCase(
+                        "Discurso – Tesouros da Palavra de Deus"
+                )
+        );
+    }
+
+
+    private boolean ehParteJoias(
+            Parte parte
+    ) {
+        if (parte == null) {
+            return false;
+        }
+
+        String nome =
+                parte.getNome();
+
+        return nome != null
+                && nome.toLowerCase()
+                .contains("joias espirituais");
     }
 
 
@@ -136,7 +226,7 @@ public class RegrasService {
     /**
      * Verifica se uma pessoa pode exercer
      * uma participação específica numa parte.
-     * Este métodoo é utilizado quando precisamos
+     * Este método é utilizado quando precisamos
      * validar uma participação individual, como
      * durante a edição manual de uma designação.
      */
