@@ -25,9 +25,10 @@ public class ParteDAO {
                     nivel_leitura_minimo,
                     secao,
                     tipo_variacao,
-                    possui_tema
+                    possui_tema,
+                    ordem
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
 
@@ -91,6 +92,7 @@ public class ParteDAO {
                                     parte.getSecao(),
                                     parte.getTipoVariacao(),
                                     parte.possuiTema(),
+                                    parte.getOrdem(),
                                     parte.getParticipacoesNecessarias()
                             );
 
@@ -249,7 +251,8 @@ public class ParteDAO {
                     nivel_leitura_minimo = ?,
                     secao = ?,
                     tipo_variacao = ?,
-                    possui_tema = ?
+                    possui_tema = ?,
+                    ordem = ?
                 WHERE id = ?
                 """;
 
@@ -277,7 +280,7 @@ public class ParteDAO {
 
 
                 statement.setInt(
-                        12,
+                        13,
                         parte.getId()
                 );
 
@@ -388,6 +391,11 @@ public class ParteDAO {
                 11,
                 parte.possuiTema()
         );
+
+        statement.setInt(
+                12,
+                parte.getOrdem()
+        );
     }
 
 
@@ -466,6 +474,10 @@ public class ParteDAO {
                 resultSet.getInt(
                         "possui_tema"
                 ) == 1,
+
+                resultSet.getInt(
+                        "ordem"
+                ),
 
                 buscarParticipacoesNecessarias(
                         connection,

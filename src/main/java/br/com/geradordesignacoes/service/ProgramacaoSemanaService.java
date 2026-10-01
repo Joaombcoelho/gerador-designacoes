@@ -321,50 +321,14 @@ public class ProgramacaoSemanaService {
                 .orElse(0) + 1;
     }
 
-    /**
-     * Ordem padrão das partes da reunião.
+    /* Ordem padrão das partes da reunião.
      */
-    private int obterOrdemParte(
-            Parte parte
-    ) {
-        return switch (parte.getNome()) {
-
-            case "Presidente" -> 1;
-
-            case "Oração inicial" -> 2;
-
-            case "Discurso — Tesouros" -> 3;
-
-            case "Joias Espirituais" -> 4;
-
-            case "Leitura" -> 5;
-
-            case "Iniciando Conversas" -> 6;
-
-            case "Cultivando Interesse" -> 7;
-
-            case "O Que Você Diria?" -> 8;
-
-            case "Fazendo Discípulos" -> 9;
-
-            case "Explicando suas crenças" -> 10;
-
-            case "Discurso — Ministério" -> 11;
-
-            case "Parte 1" -> 12;
-
-            case "Parte 2" -> 13;
-
-            case "Parte 3" -> 14;
-
-            case "Necessidades Locais" -> 15;
-
-            case "Estudo Bíblico" -> 16;
-
-            case "Oração final" -> 17;
-
-            default -> 999;
-        };
+    /**
+     * Ordem padrão da parte da reunião.
+     * A ordem é definida no cadastro da própria parte.
+     */
+    private int obterOrdemParte(Parte parte) {
+        return parte.getOrdem();
     }
 
     /**

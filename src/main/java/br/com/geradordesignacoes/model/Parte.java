@@ -19,6 +19,7 @@ public class Parte {
     private final SecaoParte secao;
     private final TipoVariacaoParte tipoVariacao;
     private final boolean possuiTema;
+    private final int ordem;
 
     /**
      * Construtor principal.
@@ -36,6 +37,7 @@ public class Parte {
             SecaoParte secao,
             TipoVariacaoParte tipoVariacao,
             boolean possuiTema,
+            int ordem,
             List<TipoParticipacao> participacoesNecessarias
     ) {
         this.id = id;
@@ -54,12 +56,52 @@ public class Parte {
         this.secao = secao;
         this.tipoVariacao = tipoVariacao;
         this.possuiTema = possuiTema;
+        this.ordem = ordem;
         this.participacoesNecessarias =
                 List.copyOf(
                         Objects.requireNonNull(
                                 participacoesNecessarias
                         )
                 );
+    }
+
+    /**
+     * Construtor principal anterior.
+     *
+     * Mantido para compatibilidade.
+     * A ordem padrão utilizada é 999.
+     */
+    public Parte(
+            Integer id,
+            String nome,
+            TipoParte tipo,
+            Privilegio privilegioMinimo,
+            boolean exigeAjudante,
+            SexoPermitido sexoPermitido,
+            int quantidadeMinimaParticipantes,
+            boolean geraFormulario,
+            NivelLeitura nivelLeituraMinimo,
+            SecaoParte secao,
+            TipoVariacaoParte tipoVariacao,
+            boolean possuiTema,
+            List<TipoParticipacao> participacoesNecessarias
+    ) {
+        this(
+                id,
+                nome,
+                tipo,
+                privilegioMinimo,
+                exigeAjudante,
+                sexoPermitido,
+                quantidadeMinimaParticipantes,
+                geraFormulario,
+                nivelLeituraMinimo,
+                secao,
+                tipoVariacao,
+                possuiTema,
+                999,
+                participacoesNecessarias
+        );
     }
 
     /**
@@ -92,6 +134,44 @@ public class Parte {
                 secao,
                 tipoVariacao,
                 possuiTema,
+                999,
+                participacoesNecessarias
+        );
+    }
+
+    /**
+     * Construtor utilizado pelo cadastro normal
+     * com ordem definida.
+     */
+    public Parte(
+            String nome,
+            TipoParte tipo,
+            Privilegio privilegioMinimo,
+            boolean exigeAjudante,
+            SexoPermitido sexoPermitido,
+            int quantidadeMinimaParticipantes,
+            boolean geraFormulario,
+            NivelLeitura nivelLeituraMinimo,
+            SecaoParte secao,
+            TipoVariacaoParte tipoVariacao,
+            boolean possuiTema,
+            int ordem,
+            List<TipoParticipacao> participacoesNecessarias
+    ) {
+        this(
+                null,
+                nome,
+                tipo,
+                privilegioMinimo,
+                exigeAjudante,
+                sexoPermitido,
+                quantidadeMinimaParticipantes,
+                geraFormulario,
+                nivelLeituraMinimo,
+                secao,
+                tipoVariacao,
+                possuiTema,
+                ordem,
                 participacoesNecessarias
         );
     }
@@ -124,6 +204,7 @@ public class Parte {
                 null,
                 null,
                 false,
+                999,
                 participacoesNecessarias
         );
     }
@@ -157,6 +238,7 @@ public class Parte {
                 null,
                 null,
                 false,
+                999,
                 participacoesNecessarias
         );
     }
@@ -188,6 +270,7 @@ public class Parte {
                 null,
                 null,
                 false,
+                999,
                 participacoesNecessarias
         );
     }
@@ -238,6 +321,10 @@ public class Parte {
 
     public boolean possuiTema() {
         return possuiTema;
+    }
+
+    public int getOrdem() {
+        return ordem;
     }
 
     public List<TipoParticipacao> getParticipacoesNecessarias() {

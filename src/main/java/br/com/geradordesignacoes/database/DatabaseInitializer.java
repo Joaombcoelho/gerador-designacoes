@@ -45,7 +45,8 @@ public class DatabaseInitializer {
             nivel_leitura_minimo TEXT NOT NULL DEFAULT 'BASICO',
             secao TEXT,
             tipo_variacao TEXT,
-            possui_tema INTEGER NOT NULL DEFAULT 0
+            possui_tema INTEGER NOT NULL DEFAULT 0,
+            ordem INTEGER NOT NULL DEFAULT 999
         );
 
         """;
@@ -222,7 +223,7 @@ public class DatabaseInitializer {
             statement.execute(
                     CREATE_TABLE_PARTE
             );
-
+            adicionarColunaOrdemParte(connection);
 
             /*
              * ----------------------------------------------------
@@ -294,6 +295,9 @@ public class DatabaseInitializer {
                     connection
             );
 
+            atualizarOrdensPadraoPartes(
+                    connection
+            );
 
             cadastrarPessoasIniciais(
                     connection
@@ -320,6 +324,169 @@ public class DatabaseInitializer {
      * PARTES INICIAIS
      * ============================================================
      */
+    private static void adicionarColunaOrdemParte(
+            Connection connection
+    ) throws SQLException {
+
+        String sqlVerificar = """
+        PRAGMA table_info(parte)
+        """;
+
+        boolean colunaExiste = false;
+
+        try (
+                PreparedStatement statement =
+                        connection.prepareStatement(sqlVerificar);
+
+                ResultSet resultSet =
+                        statement.executeQuery()
+        ) {
+
+            while (resultSet.next()) {
+
+                String nomeColuna =
+                        resultSet.getString("name");
+
+                if ("ordem".equalsIgnoreCase(nomeColuna)) {
+                    colunaExiste = true;
+                    break;
+                }
+            }
+        }
+
+        if (!colunaExiste) {
+
+            try (Statement statement =
+                         connection.createStatement()) {
+
+                statement.execute("""
+                ALTER TABLE parte
+                ADD COLUMN ordem INTEGER NOT NULL DEFAULT 999
+                """);
+            }
+        }
+    }
+
+    private static void atualizarOrdensPadraoPartes(
+            Connection connection
+    ) throws SQLException {
+
+        String sql = """
+        UPDATE parte
+        SET ordem = ?
+        WHERE tipo = ?
+        """;
+
+        try (PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            atualizarOrdem(
+                    statement,
+                    1,
+                    TipoParte.PRESIDENTE_REUNIAO
+            );
+
+            atualizarOrdem(
+                    statement,
+                    2,
+                    TipoParte.ORACAO_INICIAL
+            );
+
+            atualizarOrdem(
+                    statement,
+                    3,
+                    TipoParte.DISCURSO_TESOUROS
+            );
+
+            atualizarOrdem(
+                    statement,
+                    4,
+                    TipoParte.JOIAS_ESPIRITUAIS
+            );
+
+            atualizarOrdem(
+                    statement,
+                    5,
+                    TipoParte.LEITURA
+            );
+
+            /*
+             * As partes variáveis do Ministério mantêm
+             * uma ordem padrão entre si.
+             */
+            atualizarOrdemPorNome(
+                    statement,
+                    6,
+                    "Iniciando Conversas"
+            );
+
+            atualizarOrdemPorNome(
+                    statement,
+                    7,
+                    "Cultivando Interesse"
+            );
+
+            atualizarOrdemPorNome(
+                    statement,
+                    9,
+                    "Fazendo Discípulos"
+            );
+
+            atualizarOrdemPorNome(
+                    statement,
+                    10,
+                    "Explicando suas crenças"
+            );
+
+            atualizarOrdem(
+                    statement,
+                    8,
+                    TipoParte.O_QUE_VOCE_DIRIA
+            );
+
+            atualizarOrdem(
+                    statement,
+                    11,
+                    TipoParte.DISCURSO
+            );
+
+            atualizarOrdem(
+                    statement,
+                    12,
+                    TipoParte.PARTE_1
+            );
+
+            atualizarOrdem(
+                    statement,
+                    13,
+                    TipoParte.PARTE_2
+            );
+
+            atualizarOrdem(
+                    statement,
+                    14,
+                    TipoParte.PARTE_3
+            );
+
+            atualizarOrdem(
+                    statement,
+                    15,
+                    TipoParte.NECESSIDADES_LOCAIS
+            );
+
+            atualizarOrdem(
+                    statement,
+                    16,
+                    TipoParte.DIRIGENTE_ESTUDO
+            );
+
+            atualizarOrdem(
+                    statement,
+                    17,
+                    TipoParte.ORACAO_FINAL
+            );
+        }
+    }
 
     private static void cadastrarPartesIniciais(
             Connection connection
@@ -1574,5 +1741,37 @@ public class DatabaseInitializer {
 
 
         inserir.executeUpdate();
+    }
+    private static void atualizarOrdem(
+            PreparedStatement statement,
+            int ordem,
+            TipoParte tipo
+    ) throws SQLException {
+
+        statement.setInt(1, ordem);
+        statement.setString(2, tipo.name());
+        statement.executeUpdate();
+    }
+
+    private static void atualizarOrdemPorNome(
+            PreparedStatement statement,
+            int ordem,
+            String nome
+    ) throws SQLException {
+
+        String sql = """
+        UPDATE parte
+        SET ordem = ?
+        WHERE nome = ?
+        """;
+
+        try (PreparedStatement update =
+                     statement.getConnection()
+                             .prepareStatement(sql)) {
+
+            update.setInt(1, ordem);
+            update.setString(2, nome);
+            update.executeUpdate();
+        }
     }
 }

@@ -664,15 +664,26 @@ public class EscalaDAO {
     ) throws SQLException {
 
         String sql = """
-                SELECT
-                    id,
-                    parte_id,
-                    responsavel_id,
-                    ajudante_id
-                FROM designacao
-                WHERE escala_id = ?
-                ORDER BY id
-                """;
+            SELECT
+                d.id,
+                d.parte_id,
+                d.responsavel_id,
+                d.ajudante_id
+            FROM designacao d
+            LEFT JOIN programacao_semana ps
+                ON ps.data = ?
+            LEFT JOIN programacao_parte pp
+                ON pp.programacao_semana_id = ps.id
+               AND pp.parte_id = d.parte_id
+            WHERE d.escala_id = ?
+            ORDER BY
+                CASE
+                    WHEN pp.ordem IS NULL THEN 1
+                    ELSE 0
+                END,
+                pp.ordem,
+                d.id
+            """;
 
         List<Designacao> designacoes = new ArrayList<>();
 
@@ -684,12 +695,20 @@ public class EscalaDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setInt(
+            statement.setString(
                     1,
+                    data.toString()
+            );
+
+            statement.setInt(
+                    2,
                     escalaId
             );
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 while (resultSet.next()) {
 
