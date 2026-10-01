@@ -48,13 +48,17 @@ public record Designacao(
                 "A parte não pode ser nula."
         );
 
-        this.responsavel = Objects.requireNonNull(
-                responsavel,
-                "O responsável não pode ser nulo."
-        );
+        if (responsavel == null && ajudante == null) {
+            throw new IllegalArgumentException(
+                    "A designação deve possuir um responsável ou um ajudante."
+            );
+        }
+
+        this.responsavel = responsavel;
 
         if (parte.getExigeAjudante()
-                && ajudante == null) {
+                && ajudante == null
+                && parte.getTipo() != TipoParte.DIRIGENTE_ESTUDO) {
 
             throw new IllegalArgumentException(
                     "Esta parte exige um ajudante."
@@ -100,15 +104,16 @@ public record Designacao(
                 .append(parte.getNome())
                 .append("\n");
 
-        texto.append("Responsável: ")
-                .append(responsavel.getNome())
-                .append("\n");
-
-
         if (ajudante != null) {
 
             texto.append("Ajudante: ")
                     .append(ajudante.getNome())
+                    .append("\n");
+        }
+
+        if (responsavel != null) {
+            texto.append("Responsável: ")
+                    .append(responsavel.getNome())
                     .append("\n");
         }
 

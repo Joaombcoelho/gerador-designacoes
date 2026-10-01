@@ -398,7 +398,9 @@ public class HistoricoView {
                                                     .parte()
                                                     .getNome(),
 
-                                            designacao
+                                            designacao.responsavel() == null
+                                                    ? ""
+                                                    : designacao
                                                     .responsavel()
                                                     .getNome(),
 

@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.model.DiagnosticoSelecaoPessoa;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ResultadoAvaliacaoPessoa;
+import br.com.geradordesignacoes.model.TipoParticipacao;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -136,6 +137,32 @@ public class SeletorPessoaService {
                 candidatos,
                 escolhido
         );
+    }
+
+    public DiagnosticoSelecaoPessoa selecionarComDiagnostico(
+            Parte parte,
+            List<Pessoa> pessoas,
+            ControleDesignacoes controle,
+            LocalDate data,
+            TipoParticipacao tipo
+    ) {
+        List<ResultadoAvaliacaoPessoa> candidatos = pessoas.stream()
+                .filter(pessoa -> parte.pessoaPodeExercerParticipacao(pessoa, tipo))
+                .filter(pessoa -> regrasService.podeExercerParticipacao(pessoa, parte, tipo))
+                .filter(pessoa -> !possuiConflitoTesourosJoias(pessoa, parte, controle, data))
+                .map(pessoa -> avaliadorPessoaService.avaliar(
+                        pessoa,
+                        parte,
+                        controle,
+                        tipo
+                ))
+                .toList();
+
+        ResultadoAvaliacaoPessoa escolhido = candidatos.stream()
+                .max(Comparator.comparingInt(ResultadoAvaliacaoPessoa::getTotal))
+                .orElse(null);
+
+        return new DiagnosticoSelecaoPessoa(parte, candidatos, escolhido);
     }
 
     private List<ResultadoAvaliacaoPessoa> avaliarPessoasElegiveis(

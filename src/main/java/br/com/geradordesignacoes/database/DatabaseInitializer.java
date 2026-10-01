@@ -114,7 +114,7 @@ public class DatabaseInitializer {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             escala_id INTEGER NOT NULL,
             parte_id INTEGER NOT NULL,
-            responsavel_id INTEGER NOT NULL,
+            responsavel_id INTEGER,
             ajudante_id INTEGER,
 
             FOREIGN KEY (escala_id)
@@ -225,6 +225,7 @@ public class DatabaseInitializer {
             );
             adicionarColunaOrdemParte(connection);
 
+            migrarTipoVariacaoPartes(connection);
             /*
              * ----------------------------------------------------
              * PARTICIPAÇÕES NECESSÁRIAS
@@ -234,6 +235,7 @@ public class DatabaseInitializer {
             statement.execute(
                     CREATE_TABLE_PARTE_PARTICIPACAO_NECESSARIA
             );
+            removerAjudanteConfiguradoNoEstudoBiblico(connection);
 
 
             /*
@@ -267,6 +269,7 @@ public class DatabaseInitializer {
             statement.execute(
                     CREATE_TABLE_DESIGNACAO
             );
+            migrarResponsavelDesignacaoNullable(connection);
 
 
             /*
@@ -318,6 +321,92 @@ public class DatabaseInitializer {
         }
     }
 
+    private static void migrarResponsavelDesignacaoNullable(
+                Connection connection
+        ) throws SQLException {
+            boolean responsavelObrigatorio = false;
+
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "PRAGMA table_info(designacao)"
+            );
+                 ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    if ("responsavel_id".equals(resultSet.getString("name"))) {
+                        responsavelObrigatorio = resultSet.getInt("notnull") == 1;
+                        break;
+                    }
+                }
+            }
+
+            if (!responsavelObrigatorio) {
+                return;
+            }
+
+            boolean foreignKeysAtivos;
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery("PRAGMA foreign_keys")) {
+                foreignKeysAtivos = resultSet.next() && resultSet.getInt(1) == 1;
+            }
+
+            if (foreignKeysAtivos) {
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute("PRAGMA foreign_keys = OFF");
+                }
+            }
+
+            boolean autoCommitAnterior = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                        CREATE TABLE designacao_migracao (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            escala_id INTEGER NOT NULL,
+                            parte_id INTEGER NOT NULL,
+                            responsavel_id INTEGER,
+                            ajudante_id INTEGER,
+                            FOREIGN KEY (escala_id) REFERENCES escala(id) ON DELETE CASCADE,
+                            FOREIGN KEY (parte_id) REFERENCES parte(id),
+                            FOREIGN KEY (responsavel_id) REFERENCES pessoa(id),
+                            FOREIGN KEY (ajudante_id) REFERENCES pessoa(id)
+                        )
+                        """);
+                statement.execute("""
+                        INSERT INTO designacao_migracao
+                            (id, escala_id, parte_id, responsavel_id, ajudante_id)
+                        SELECT id, escala_id, parte_id, responsavel_id, ajudante_id
+                        FROM designacao
+                        """);
+                statement.execute("DROP TABLE designacao");
+                statement.execute("ALTER TABLE designacao_migracao RENAME TO designacao");
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(autoCommitAnterior);
+                if (foreignKeysAtivos) {
+                    try (Statement statement = connection.createStatement()) {
+                        statement.execute("PRAGMA foreign_keys = ON");
+                    }
+                }
+            }
+        }
+
+    private static void removerAjudanteConfiguradoNoEstudoBiblico(
+                Connection connection
+        ) throws SQLException {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                    DELETE FROM parte_participacao_necessaria
+                    WHERE tipo_participacao = 'AJUDANTE'
+                      AND parte_id IN (
+                          SELECT id FROM parte
+                          WHERE tipo = 'DIRIGENTE_ESTUDO'
+                      )
+                    """)) {
+                statement.executeUpdate();
+            }
+    }
+
 
     /*
      * ============================================================
@@ -364,6 +453,83 @@ public class DatabaseInitializer {
                 ADD COLUMN ordem INTEGER NOT NULL DEFAULT 999
                 """);
             }
+        }
+    }
+
+    private static void migrarTipoVariacaoPartes(
+            Connection connection
+    ) throws SQLException {
+
+        /*
+         * ------------------------------------------------------------
+         * PARTES FIXAS
+         * ------------------------------------------------------------
+         *
+         * Corrige bancos antigos nos quais tipo_variacao
+         * ficou NULL.
+         */
+
+        String sqlFixas = """
+        UPDATE parte
+        SET tipo_variacao = 'FIXA'
+        WHERE tipo IN (
+            'PRESIDENTE_REUNIAO',
+            'ORACAO_INICIAL',
+            'DISCURSO_TESOUROS',
+            'JOIAS_ESPIRITUAIS',
+            'LEITURA',
+            'DIRIGENTE_ESTUDO',
+            'ORACAO_FINAL'
+        )
+        AND (
+            tipo_variacao IS NULL
+            OR TRIM(tipo_variacao) = ''
+        )
+        """;
+
+
+        /*
+         * ------------------------------------------------------------
+         * PARTES VARIÁVEIS
+         * ------------------------------------------------------------
+         */
+
+        String sqlVariaveis = """
+        UPDATE parte
+        SET tipo_variacao = 'VARIAVEL'
+        WHERE (
+            tipo = 'DEMONSTRACAO'
+            OR tipo = 'O_QUE_VOCE_DIRIA'
+        )
+        AND (
+            tipo_variacao IS NULL
+            OR TRIM(tipo_variacao) = ''
+        )
+        """;
+
+
+        try (
+                PreparedStatement fixas =
+                        connection.prepareStatement(sqlFixas);
+
+                PreparedStatement variaveis =
+                        connection.prepareStatement(sqlVariaveis)
+        ) {
+
+            int corrigidasFixas =
+                    fixas.executeUpdate();
+
+            int corrigidasVariaveis =
+                    variaveis.executeUpdate();
+
+
+            System.out.println(
+                    "Migração de tipo_variacao concluída: "
+                            + corrigidasFixas
+                            + " partes fixas e "
+                            + corrigidasVariaveis
+                            + " partes variáveis corrigidas."
+            );
         }
     }
 
@@ -494,11 +660,12 @@ public class DatabaseInitializer {
 
         String sqlVerificar = """
 
-            SELECT id
-            FROM parte
-            WHERE tipo = ?
+    SELECT id
+    FROM parte
+    WHERE tipo = ?
+      AND nome = ?
 
-            """;
+    """;
 
 
         String sqlInserir = """
@@ -949,8 +1116,7 @@ public class DatabaseInitializer {
                     TipoVariacaoParte.FIXA,
                     false,
 
-                    TipoParticipacao.DIRIGENTE,
-                    TipoParticipacao.AJUDANTE
+                    TipoParticipacao.DIRIGENTE
             );
 
 
@@ -1004,6 +1170,11 @@ public class DatabaseInitializer {
         verificar.setString(
                 1,
                 tipo.name()
+        );
+
+        verificar.setString(
+                2,
+                nome
         );
 
 

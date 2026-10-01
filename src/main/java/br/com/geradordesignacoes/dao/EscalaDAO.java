@@ -350,12 +350,6 @@ public class EscalaDAO {
             );
         }
 
-        if (responsavelId == null) {
-            throw new IllegalArgumentException(
-                    "ID do responsável não pode ser nulo."
-            );
-        }
-
         String sql = """
                 UPDATE designacao
                 SET responsavel_id = ?,
@@ -371,10 +365,11 @@ public class EscalaDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setInt(
-                    1,
-                    responsavelId
-            );
+            if (responsavelId == null) {
+                statement.setNull(1, java.sql.Types.INTEGER);
+            } else {
+                statement.setInt(1, responsavelId);
+            }
 
             if (ajudanteId == null) {
 
@@ -434,12 +429,6 @@ public class EscalaDAO {
             );
         }
 
-        if (responsavelId == null) {
-            throw new IllegalArgumentException(
-                    "ID do responsável não pode ser nulo."
-            );
-        }
-
         String sql = """
                 INSERT INTO designacao (
                     escala_id,
@@ -468,10 +457,11 @@ public class EscalaDAO {
                     parteId
             );
 
-            statement.setInt(
-                    3,
-                    responsavelId
-            );
+            if (responsavelId == null) {
+                statement.setNull(3, java.sql.Types.INTEGER);
+            } else {
+                statement.setInt(3, responsavelId);
+            }
 
             if (ajudanteId == null) {
 
@@ -631,10 +621,11 @@ public class EscalaDAO {
                         designacao.parte().getId()
                 );
 
-                statement.setInt(
-                        3,
-                        designacao.responsavel().getId()
-                );
+                if (designacao.responsavel() == null) {
+                    statement.setNull(3, java.sql.Types.INTEGER);
+                } else {
+                    statement.setInt(3, designacao.responsavel().getId());
+                }
 
                 if (designacao.ajudante() == null) {
 
@@ -721,14 +712,14 @@ public class EscalaDAO {
                                     )
                             );
 
-                    Pessoa responsavel =
-                            pessoaDAO.buscarPorId(
-                                    resultSet.getInt("responsavel_id")
-                            ).orElseThrow(() ->
-                                    new RuntimeException(
-                                            "Responsável não encontrado."
-                                    )
-                            );
+                    Pessoa responsavel = null;
+                    int responsavelId = resultSet.getInt("responsavel_id");
+                    if (!resultSet.wasNull()) {
+                        responsavel = pessoaDAO.buscarPorId(responsavelId)
+                                .orElseThrow(() -> new RuntimeException(
+                                        "Responsável não encontrado."
+                                ));
+                    }
 
                     Pessoa ajudante = null;
 
@@ -814,14 +805,14 @@ public class EscalaDAO {
                                 )
                         );
 
-                Pessoa responsavel =
-                        pessoaDAO.buscarPorId(
-                                resultSet.getInt("responsavel_id")
-                        ).orElseThrow(() ->
-                                new RuntimeException(
-                                        "Responsável não encontrado."
-                                )
-                        );
+                Pessoa responsavel = null;
+                int responsavelId = resultSet.getInt("responsavel_id");
+                if (!resultSet.wasNull()) {
+                    responsavel = pessoaDAO.buscarPorId(responsavelId)
+                            .orElseThrow(() -> new RuntimeException(
+                                    "Responsável não encontrado."
+                            ));
+                }
 
                 Pessoa ajudante = null;
 

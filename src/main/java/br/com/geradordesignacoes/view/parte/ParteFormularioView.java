@@ -668,10 +668,6 @@ public class ParteFormularioView {
                 selecionarParticipacao(
                         TipoParticipacao.DIRIGENTE
                 );
-
-                selecionarParticipacao(
-                        TipoParticipacao.LEITOR
-                );
             }
         }
     }

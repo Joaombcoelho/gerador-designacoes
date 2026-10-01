@@ -176,17 +176,16 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
 
         assertTrue(resultado.erros().isEmpty());
 
-        assertEquals(
-                1,
-                resultado.escala()
-                        .getDesignacoes()
-                        .size()
-        );
+        assertEquals(2, resultado.escala().getDesignacoes().size());
 
-        Designacao designacao =
-                resultado.escala()
-                        .getDesignacoes()
-                        .get(0);
+        Designacao designacao = resultado.escala().getDesignacoes().stream()
+                .filter(item -> item.responsavel() != null)
+                .findFirst()
+                .orElseThrow();
+        Designacao designacaoLeitor = resultado.escala().getDesignacoes().stream()
+                .filter(item -> item.ajudante() != null)
+                .findFirst()
+                .orElseThrow();
 
         assertEquals(
                 dirigente.getId(),
@@ -195,7 +194,7 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
 
         assertEquals(
                 leitor.getId(),
-                designacao.ajudante().getId()
+                designacaoLeitor.ajudante().getId()
         );
     }
 
@@ -238,17 +237,10 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
                 resultado.erros().size()
         );
 
-        assertTrue(
-                resultado.erros()
-                        .get(0)
-                        .contains("Estudo Bíblico")
-        );
-
-        assertTrue(
-                resultado.escala()
-                        .getDesignacoes()
-                        .isEmpty()
-        );
+        assertTrue(resultado.erros().get(0).contains("Leitor"));
+        assertEquals(1, resultado.escala().getDesignacoes().size());
+        assertEquals(pessoa.getId(),
+                resultado.escala().getDesignacoes().get(0).responsavel().getId());
     }
 
 
@@ -384,20 +376,13 @@ class GeradorEscalaRegrasTest extends BaseDAOTest {
                 resultadoComExperiente.erros().isEmpty()
         );
 
-        assertEquals(
-                1,
-                resultadoComExperiente.escala()
-                        .getDesignacoes()
-                        .size()
-        );
+        assertEquals(2, resultadoComExperiente.escala().getDesignacoes().size());
 
         assertEquals(
                 leitorExperiente.getId(),
-                resultadoComExperiente.escala()
-                        .getDesignacoes()
-                        .get(0)
-                        .ajudante()
-                        .getId()
+                resultadoComExperiente.escala().getDesignacoes().stream()
+                        .filter(item -> item.ajudante() != null)
+                        .findFirst().orElseThrow().ajudante().getId()
         );
     }
 

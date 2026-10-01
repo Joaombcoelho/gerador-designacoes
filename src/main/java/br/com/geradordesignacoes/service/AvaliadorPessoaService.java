@@ -9,6 +9,20 @@ public class AvaliadorPessoaService {
             Parte parte,
             ControleDesignacoes controle
     ) {
+        return avaliar(
+                pessoa,
+                parte,
+                controle,
+                parte.getParticipacoesNecessarias().stream().findFirst().orElse(null)
+        );
+    }
+
+    public ResultadoAvaliacaoPessoa avaliar(
+            Pessoa pessoa,
+            Parte parte,
+            ControleDesignacoes controle,
+            TipoParticipacao tipoParticipacao
+    ) {
 
         int pontosParticipacoes =
                 pontuarQuantidadeParticipacoes(
@@ -25,7 +39,8 @@ public class AvaliadorPessoaService {
                 pontuarRepeticaoParticipacao(
                         pessoa,
                         parte,
-                        controle
+                        controle,
+                        tipoParticipacao
                 );
 
         return new ResultadoAvaliacaoPessoa(
@@ -80,15 +95,9 @@ public class AvaliadorPessoaService {
     private int pontuarRepeticaoParticipacao(
             Pessoa pessoa,
             Parte parte,
-            ControleDesignacoes controle
+            ControleDesignacoes controle,
+            TipoParticipacao tipoParticipacao
     ) {
-
-        TipoParticipacao tipoParticipacao =
-                parte.getParticipacoesNecessarias()
-                        .stream()
-                        .findFirst()
-                        .orElse(null);
-
         if (tipoParticipacao == null) {
             return 0;
         }

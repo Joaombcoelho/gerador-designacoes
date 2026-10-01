@@ -310,6 +310,38 @@ public class EscalaView {
                                 Designacao designacao =
                                         designacoes.get(indice);
 
+                                if (designacao.parte().getTipo()
+                                        == br.com.geradordesignacoes.model.TipoParte.DIRIGENTE_ESTUDO) {
+                                    if (indice > 0
+                                            && designacoes.get(indice - 1).parte()
+                                            .equals(designacao.parte())) {
+                                        continue;
+                                    }
+
+                                    String dirigente = designacoes.stream()
+                                            .filter(item -> item.parte().equals(designacao.parte()))
+                                            .map(Designacao::responsavel)
+                                            .filter(java.util.Objects::nonNull)
+                                            .map(br.com.geradordesignacoes.model.Pessoa::getNome)
+                                            .findFirst()
+                                            .orElse("");
+                                    String leitor = designacoes.stream()
+                                            .filter(item -> item.parte().equals(designacao.parte()))
+                                            .map(Designacao::ajudante)
+                                            .filter(java.util.Objects::nonNull)
+                                            .map(br.com.geradordesignacoes.model.Pessoa::getNome)
+                                            .findFirst()
+                                            .orElse("");
+
+                                    itens.add(new ItemEscala(
+                                            indice,
+                                            data.format(formatter) + " - " + designacao.parte().getNome(),
+                                            dirigente,
+                                            leitor
+                                    ));
+                                    continue;
+                                }
+
                                 String parte =
                                         data.format(
                                                 formatter
@@ -320,7 +352,9 @@ public class EscalaView {
 
 
                                 String responsavel =
-                                        designacao.responsavel()
+                                        designacao.responsavel() == null
+                                                ? ""
+                                                : designacao.responsavel()
                                                 .getNome();
 
 

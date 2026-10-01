@@ -537,7 +537,9 @@ public class EdicaoEscalaView {
 
 
                                     String responsavel =
-                                            designacao
+                                            designacao.responsavel() == null
+                                                    ? ""
+                                                    : designacao
                                                     .responsavel()
                                                     .getNome();
 

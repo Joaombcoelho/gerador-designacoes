@@ -173,14 +173,39 @@ public class EscalaController {
                 .getItems()
                 .clear();
 
-        for (
-                int indice = 0;
-                indice < designacoes.size();
-                indice++
-        ) {
+        for (int indice = 0; indice < designacoes.size(); indice++) {
 
             Designacao designacao =
                     designacoes.get(indice);
+
+            if (designacao.parte().getTipo()
+                    == br.com.geradordesignacoes.model.TipoParte.DIRIGENTE_ESTUDO) {
+                if (indice > 0
+                        && designacoes.get(indice - 1).parte().equals(designacao.parte())) {
+                    continue;
+                }
+
+                Pessoa dirigente = designacoes.stream()
+                        .filter(item -> item.parte().equals(designacao.parte()))
+                        .map(Designacao::responsavel)
+                        .filter(java.util.Objects::nonNull)
+                        .findFirst()
+                        .orElse(null);
+                Pessoa leitor = designacoes.stream()
+                        .filter(item -> item.parte().equals(designacao.parte()))
+                        .map(Designacao::ajudante)
+                        .filter(java.util.Objects::nonNull)
+                        .findFirst()
+                        .orElse(null);
+
+                view.getTabela().getItems().add(new ItemEscala(
+                        indice,
+                        designacao.parte().getNome(),
+                        dirigente == null ? "" : dirigente.getNome(),
+                        leitor == null ? "" : leitor.getNome()
+                ));
+                continue;
+            }
 
             String ajudante =
                     obterNomeAjudante(
@@ -191,7 +216,9 @@ public class EscalaController {
                     new ItemEscala(
                             indice,
                             designacao.parte().getNome(),
-                            designacao.responsavel().getNome(),
+                            designacao.responsavel() == null
+                                    ? ""
+                                    : designacao.responsavel().getNome(),
                             ajudante
                     );
 

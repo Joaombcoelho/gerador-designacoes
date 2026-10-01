@@ -353,7 +353,11 @@ public class Parte {
             return false;
         }
 
-        if (!participacoesNecessarias.contains(tipo)) {
+        boolean leitorInternoDoEstudo =
+                ehLeitorDoEstudoBiblico(pessoa, tipo);
+
+        if (!participacoesNecessarias.contains(tipo)
+                && !leitorInternoDoEstudo) {
             return false;
         }
 
@@ -368,7 +372,7 @@ public class Parte {
          * básicas porque o privilégio mínimo geral da
          * parte é utilizado principalmente para o dirigente.
          */
-        if (ehLeitorDoEstudoBiblico(pessoa, tipo)) {
+        if (leitorInternoDoEstudo) {
             return podeSerLeitorDoEstudoBiblico(pessoa);
         }
 
