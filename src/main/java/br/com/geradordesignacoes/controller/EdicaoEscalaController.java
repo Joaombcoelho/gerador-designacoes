@@ -52,6 +52,15 @@ public class EdicaoEscalaController {
                 .toList();
     }
 
+    public List<YearMonth> listarMesesDisponiveis() {
+        return escalaDAO.listarTodas()
+                .stream()
+                .map(escala -> YearMonth.from(escala.getData()))
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .toList();
+    }
+
     public Escala selecionarEscala(
             Integer escalaId
     ) {

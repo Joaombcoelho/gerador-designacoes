@@ -10,6 +10,10 @@ import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoParticipacao;
+import javafx.scene.control.ComboBox;
+import javafx.util.StringConverter;
+import java.util.Locale;
+import java.time.format.TextStyle;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -30,7 +34,7 @@ import java.util.List;
 public class EdicaoEscalaView {
 
     private final BorderPane root;
-    private final DatePicker campoMes;
+    private final ComboBox<YearMonth> campoMes;
     private final ListView<Escala> listaSemanas;
     private final ListView<Designacao> listaDesignacoes;
     private final Label labelStatus;
@@ -67,10 +71,32 @@ public class EdicaoEscalaView {
         todasAsPessoas = carregarListaPessoas();
         todasAsPartes = carregarListaPartes();
 
-        campoMes = new DatePicker();
+        campoMes = new ComboBox<>();
         campoMes.setPromptText("Selecione o mês");
-        campoMes.getStyleClass().add("date-picker");
+        campoMes.getStyleClass().add("combo-box");
         campoMes.setPrefWidth(180);
+
+        campoMes.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(YearMonth mes) {
+                if (mes == null) {
+                    return "";
+                }
+
+                String nomeMes = mes.getMonth()
+                        .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
+
+                return nomeMes.substring(0, 1).toUpperCase(Locale.ROOT)
+                        + nomeMes.substring(1)
+                        + " / "
+                        + mes.getYear();
+            }
+
+            @Override
+            public YearMonth fromString(String texto) {
+                return null;
+            }
+        });
 
         listaSemanas = new ListView<>();
         listaSemanas.getStyleClass().add("list-view");
@@ -131,10 +157,10 @@ public class EdicaoEscalaView {
         criarRodape();
 
         controller = new EdicaoEscalaController();
-
         configurarListaSemanas();
         configurarListaDesignacoes();
         registrarEventos();
+        carregarMesesDisponiveis();
     }
 
     private List<Pessoa> carregarListaPessoas() {
@@ -635,17 +661,15 @@ public class EdicaoEscalaView {
     }
 
     private void carregarSemanas() {
-        LocalDate data = campoMes.getValue();
+        YearMonth mes = campoMes.getValue();
 
-        if (data == null) {
+        if (mes == null) {
             labelStatus.setText("Selecione um mês.");
             listaSemanas.getItems().clear();
             listaDesignacoes.getItems().clear();
             botaoAdicionarParte.setDisable(true);
             return;
         }
-
-        YearMonth mes = YearMonth.from(data);
 
         try {
             limparConfirmacaoConflito();
@@ -846,7 +870,7 @@ public class EdicaoEscalaView {
         return root;
     }
 
-    public DatePicker getCampoMes() {
+    public ComboBox<YearMonth> getCampoMes() {
         return campoMes;
     }
 
@@ -880,5 +904,51 @@ public class EdicaoEscalaView {
         espaco.setPrefHeight(altura);
         espaco.setMaxHeight(altura);
         return espaco;
+    }
+
+
+    private void configurarComboMes() {
+        List<Escala> escalas = controller == null
+                ? List.of()
+                : List.of();
+
+        campoMes.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(YearMonth mes) {
+                if (mes == null) {
+                    return "";
+                }
+
+                String nome = mes.getMonth().getDisplayName(
+                        java.time.format.TextStyle.FULL,
+                        java.util.Locale.of("pt", "BR")
+                );
+
+                nome = nome.substring(0, 1).toUpperCase()
+                        + nome.substring(1);
+
+                return nome + " " + mes.getYear();
+            }
+
+            @Override
+            public YearMonth fromString(String texto) {
+                return null;
+            }
+        });
+    }
+    private void carregarMesesDisponiveis() {
+        List<YearMonth> meses = controller.listarMesesDisponiveis();
+
+        campoMes.getItems().setAll(meses);
+
+        YearMonth mesAtual = YearMonth.now();
+
+        if (meses.contains(mesAtual)) {
+            campoMes.setValue(mesAtual);
+        } else if (!meses.isEmpty()) {
+            campoMes.setValue(meses.get(0));
+        }
+
+        carregarSemanas();
     }
 }
