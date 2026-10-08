@@ -12,7 +12,7 @@ import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
-
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -405,10 +405,10 @@ public class MainView {
                         false
                 );
 
-        sobre.setOnAction(
-                event ->
-                        mostrarSobre()
-        );
+        sobre.setOnAction(event -> {
+            ativarBotao(sobre);
+            mostrarSobre();
+        });
 
         sidebar.getChildren().add(
                 sobre
@@ -1240,25 +1240,88 @@ public class MainView {
 
     private void mostrarSobre() {
 
-        Alert alerta =
-                new Alert(
-                        Alert.AlertType.INFORMATION
-                );
+        VBox conteudo = new VBox(20);
+        conteudo.getStyleClass().add("content-area");
+        conteudo.setPadding(new Insets(28));
 
-        alerta.setTitle(
-                "Sobre"
+        Label titulo = new Label("Sobre o sistema");
+        titulo.getStyleClass().add("page-title");
+
+        Label subtitulo = new Label(
+                "Informações sobre o Gerador de Designações"
+        );
+        subtitulo.getStyleClass().add("page-subtitle");
+
+        VBox cardPrincipal = new VBox(14);
+        cardPrincipal.getStyleClass().add("card");
+        cardPrincipal.setPadding(new Insets(28));
+        cardPrincipal.setAlignment(Pos.CENTER);
+
+        FontIcon icone = new FontIcon(FontAwesomeSolid.CALENDAR_CHECK);
+        icone.setIconSize(48);
+        icone.setIconColor(Color.web("#2B82C5"));
+
+        Label nome = new Label("Gerador de Designações");
+        nome.getStyleClass().add("page-title");
+
+        Label versao = new Label("Versão 1.0.3");
+        versao.getStyleClass().add("page-subtitle");
+
+        Label descricao = new Label(
+                "Aplicativo para auxiliar na organização, geração " +
+                        "e gerenciamento das designações das reuniões congregacionais."
+        );
+        descricao.setWrapText(true);
+        descricao.setMaxWidth(560);
+        descricao.setAlignment(Pos.CENTER);
+        descricao.setStyle(
+                "-fx-text-fill: #D1D5DB; -fx-font-size: 14px;"
         );
 
-        alerta.setHeaderText(
-                "Gerador de Designações"
+        cardPrincipal.getChildren().addAll(
+                icone,
+                nome,
+                versao,
+                descricao
         );
 
-        alerta.setContentText(
-                "Sistema para geração e gerenciamento " +
-                        "das designações das reuniões congregacionais."
+        VBox cardRecursos = new VBox(12);
+        cardRecursos.getStyleClass().add("card");
+
+        Label tituloRecursos = new Label("Principais recursos");
+        tituloRecursos.getStyleClass().add("card-title");
+
+        Label recursos = new Label(
+                "• Cadastro de pessoas e partes\n" +
+                        "• Configuração da programação semanal\n" +
+                        "• Geração e edição de escalas\n" +
+                        "• Consulta ao histórico de designações\n" +
+                        "• Backup e restauração dos dados"
+        );
+        recursos.setWrapText(true);
+        recursos.setStyle("-fx-text-fill: #D1D5DB; -fx-font-size: 13px;");
+
+        cardRecursos.getChildren().addAll(
+                tituloRecursos,
+                recursos
         );
 
-        alerta.showAndWait();
+        Label rodape = new Label(
+                "Desenvolvido para facilitar a organização das designações."
+        );
+        rodape.getStyleClass().add("page-subtitle");
+        rodape.setWrapText(true);
+
+        conteudo.getChildren().addAll(
+                titulo,
+                subtitulo,
+                cardPrincipal,
+                cardRecursos,
+                rodape
+        );
+
+        mostrarTela(conteudo);
+
     }
 
 
