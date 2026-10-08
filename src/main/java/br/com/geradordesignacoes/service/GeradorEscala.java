@@ -183,6 +183,22 @@ public class GeradorEscala {
                 if (responsavel.equals(ajudante)) {
                     continue;
                 }
+
+                /*
+                 * Regra do Presidente:
+                 *
+                 * O Presidente pode acumular somente
+                 * com a Oração Final.
+                 *
+                 * A demonstração possui duas participações
+                 * (responsável e ajudante), portanto o
+                 * Presidente não pode participar dela.
+                 */
+                if (controleDesignacoes.ehPresidente(responsavel)
+                        || controleDesignacoes.ehPresidente(ajudante)) {
+                    continue;
+                }
+
                 if (!regrasService.podeFormarDemonstracao(parte, responsavel, ajudante, pessoasJaDesignadas)) {
                     continue;
                 }
