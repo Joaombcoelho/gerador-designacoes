@@ -180,7 +180,8 @@ public class SeletorPessoaService {
             if (!regrasService.podeDesignar(
                     pessoa,
                     parte,
-                    controle
+                    controle,
+                    data
             )) {
                 continue;
             }

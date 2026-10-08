@@ -105,8 +105,17 @@ public class EscalaController {
                     "Gerando escala..."
             );
 
+            ProgramacaoSemana semana =
+                    programacaoSemanaService.obterOuCriar(data);
+
             List<Parte> partes =
-                    parteService.listarTodas();
+                    obterPartesDaSemana(semana);
+
+            if (partes.isEmpty()) {
+                throw new IllegalStateException(
+                        "Nenhuma parte está configurada para esta semana."
+                );
+            }
 
             ultimoResultado =
                     geradorEscala.gerarEscala(
@@ -358,21 +367,58 @@ public class EscalaController {
 
     private void gerarNovamente() {
 
-        view.getTabela()
-                .getItems()
-                .clear();
+        LocalDate data =
+                obterDataSelecionada();
 
-        ultimoResultado = null;
+        if (data == null) {
+            informarDataObrigatoria();
+            return;
+        }
 
-        resultadosGeracao.clear();
+        try {
 
-        escalaSalva = false;
+            view.atualizarStatus(
+                    "Gerando escala novamente..."
+            );
 
-        view.atualizarStatus(
-                "Aguardando geração da escala..."
-        );
+            ProgramacaoSemana semana =
+                    programacaoSemanaService.obterOuCriar(data);
 
-        view.atualizarResumo("");
+            List<Parte> partes =
+                    obterPartesDaSemana(semana);
+
+            if (partes.isEmpty()) {
+                throw new IllegalStateException(
+                        "Nenhuma parte está configurada para esta semana."
+                );
+            }
+
+            ultimoResultado =
+                    geradorEscala.gerarEscala(
+                            data,
+                            partes
+                    );
+
+            registrarResultado(
+                    data,
+                    ultimoResultado
+            );
+
+            preencherTabela(
+                    ultimoResultado
+                            .escala()
+                            .getDesignacoes()
+            );
+
+            atualizarResumo();
+
+        } catch (Exception e) {
+
+            tratarErroGeracao(
+                    "Erro ao gerar novamente a escala.",
+                    e
+            );
+        }
     }
 
     private boolean salvarEscala() {

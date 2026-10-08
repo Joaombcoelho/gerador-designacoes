@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.service;
 import br.com.geradordesignacoes.model.*;
 
 import java.util.List;
+import java.time.LocalDate;
 
 import static br.com.geradordesignacoes.model.TipoParticipacao.*;
 
@@ -44,6 +45,21 @@ public class RegrasService {
             Parte parte,
             ControleDesignacoes controle
     ) {
+        return podeDesignar(
+                pessoa,
+                parte,
+                controle,
+                null
+        );
+    }
+
+
+    public boolean podeDesignar(
+            Pessoa pessoa,
+            Parte parte,
+            ControleDesignacoes controle,
+            LocalDate data
+    ) {
 
         if (pessoa == null
                 || parte == null
@@ -60,10 +76,12 @@ public class RegrasService {
          * Discurso - Tesouros e Joias espirituais na
          * mesma reunião.
          */
-        if (possuiConflitoTesourosJoias(
+        if (data != null
+                && possuiConflitoTesourosJoias(
                 pessoa,
                 parte,
-                controle
+                controle,
+                data
         )) {
             return false;
         }
@@ -76,11 +94,6 @@ public class RegrasService {
             /*
              * O presidente nunca pode receber
              * uma segunda designação.
-             *
-             * A exceção da oração final é tratada
-             * diretamente pelo GeradorEscala, que
-             * utiliza o presidente como responsável
-             * pela oração final.
              */
             if (controle.ehPresidente(pessoa)) {
                 return false;
@@ -88,15 +101,17 @@ public class RegrasService {
 
             /*
              * Anciãos e servos ministeriais podem
-             * receber mais de uma designação na
-             * mesma reunião.
+             * receber mais de uma designação.
              */
             if (!podeReceberMaisDeUmaDesignacao(pessoa)) {
                 return false;
             }
         }
 
-        return podeExercerAlgumaParticipacao(pessoa, parte);
+        return podeExercerAlgumaParticipacao(
+                pessoa,
+                parte
+        );
     }
 
 
@@ -108,8 +123,17 @@ public class RegrasService {
     private boolean possuiConflitoTesourosJoias(
             Pessoa pessoa,
             Parte parte,
-            ControleDesignacoes controle
+            ControleDesignacoes controle,
+            LocalDate data
     ) {
+        if (pessoa == null
+                || parte == null
+                || controle == null
+                || data == null) {
+
+            return false;
+        }
+
         if (!ehParteTesouros(parte)
                 && !ehParteJoias(parte)) {
 
@@ -126,9 +150,7 @@ public class RegrasService {
                 .anyMatch(
                         participacao ->
                                 participacao.pessoa().equals(pessoa)
-                                        && participacao.data().equals(
-                                        participacao.data()
-                                )
+                                        && participacao.data().equals(data)
                                         && participacao.parte().getTipo()
                                         == tipoConflitante
                 );
