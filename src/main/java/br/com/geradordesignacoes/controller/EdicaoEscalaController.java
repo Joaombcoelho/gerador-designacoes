@@ -1,10 +1,13 @@
 package br.com.geradordesignacoes.controller;
 
 import br.com.geradordesignacoes.dao.EscalaDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Escala;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.service.RegrasService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -19,6 +22,12 @@ public class EdicaoEscalaController {
 
     private final EscalaDAO escalaDAO =
             new EscalaDAO();
+
+    private final PessoaDAO pessoaDAO =
+            new PessoaDAO();
+
+    private final RegrasService regrasService =
+            new RegrasService();
 
     private Escala escalaSelecionada;
 
@@ -64,6 +73,55 @@ public class EdicaoEscalaController {
         }
 
         return escalaSelecionada.getDesignacoes();
+    }
+
+    public List<Pessoa> listarPessoasParaSelecao(
+            Parte parte,
+            TipoParticipacao tipoParticipacao
+    ) {
+        return listarPessoasParaSelecao(
+                parte,
+                tipoParticipacao,
+                null
+        );
+    }
+
+    public List<Pessoa> listarPessoasParaSelecao(
+            Parte parte,
+            TipoParticipacao tipoParticipacao,
+            Pessoa participanteAtual
+    ) {
+        if (parte == null || tipoParticipacao == null) {
+            return List.of();
+        }
+
+        LinkedHashSet<Pessoa> pessoas =
+                new LinkedHashSet<>(
+                        pessoaDAO.listarTodos()
+                                .stream()
+                                .filter(
+                                        pessoa ->
+                                                regrasService
+                                                        .podeExercerParticipacao(
+                                                                pessoa,
+                                                                parte,
+                                                                tipoParticipacao
+                                                        )
+                                )
+                                .sorted(
+                                        Comparator.comparing(
+                                                Pessoa::getNome,
+                                                String.CASE_INSENSITIVE_ORDER
+                                        )
+                                )
+                                .toList()
+                );
+
+        if (participanteAtual != null) {
+            pessoas.add(participanteAtual);
+        }
+
+        return pessoas.stream().toList();
     }
 
     public List<LocalDate> verificarConflitos(

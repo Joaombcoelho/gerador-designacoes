@@ -8,6 +8,8 @@ import br.com.geradordesignacoes.model.Escala;
 
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.TipoParte;
+import br.com.geradordesignacoes.model.TipoParticipacao;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -753,13 +755,10 @@ public class EdicaoEscalaView {
                             designacaoSelecionada =
                                     selecionada;
 
-
-                            restaurarListaPessoas(
-                                    comboResponsavel
-                            );
-
-                            restaurarListaPessoas(
-                                    comboAjudante
+                            atualizarListasDePessoas(
+                                    selecionada.parte(),
+                                    selecionada.responsavel(),
+                                    selecionada.ajudante()
                             );
 
 
@@ -781,18 +780,6 @@ public class EdicaoEscalaView {
     }
 
 
-    private void restaurarListaPessoas(
-            ComboBox<Pessoa> combo
-    ) {
-
-        combo.setItems(
-                FXCollections.observableArrayList(
-                        todasAsPessoas
-                )
-        );
-    }
-
-
     private void registrarEventos() {
 
         botaoCarregar.setOnAction(
@@ -803,6 +790,23 @@ public class EdicaoEscalaView {
         campoMes.setOnAction(
                 event -> carregarSemanas()
         );
+
+        comboParte.getSelectionModel()
+                .selectedItemProperty()
+                .addListener(
+                        (observable, antiga, selecionada) -> {
+                            if (selecionada == null) {
+                                limparSelecaoPessoas();
+                                return;
+                            }
+
+                            atualizarListasDePessoas(
+                                    selecionada,
+                                    null,
+                                    null
+                            );
+                        }
+                );
 
 
         listaSemanas
@@ -896,6 +900,52 @@ public class EdicaoEscalaView {
         botaoAdicionarParte.setOnAction(
                 event -> adicionarParte()
         );
+    }
+
+    private void atualizarListasDePessoas(
+            Parte parte,
+            Pessoa responsavelAtual,
+            Pessoa ajudanteAtual
+    ) {
+        TipoParticipacao tipoResponsavel =
+                tipoParticipacaoDoResponsavel(parte);
+
+        comboResponsavel.setItems(
+                FXCollections.observableArrayList(
+                        controller.listarPessoasParaSelecao(
+                                parte,
+                                tipoResponsavel,
+                                responsavelAtual
+                        )
+                )
+        );
+
+        comboAjudante.setItems(
+                FXCollections.observableArrayList(
+                        controller.listarPessoasParaSelecao(
+                                parte,
+                                TipoParticipacao.AJUDANTE,
+                                ajudanteAtual
+                        )
+                )
+        );
+    }
+
+    private TipoParticipacao tipoParticipacaoDoResponsavel(
+            Parte parte
+    ) {
+        if (parte.getTipo() == TipoParte.DIRIGENTE_ESTUDO) {
+            return TipoParticipacao.DIRIGENTE;
+        }
+
+        return parte.getParticipacoesNecessarias()
+                .stream()
+                .filter(
+                        tipo ->
+                                tipo != TipoParticipacao.AJUDANTE
+                )
+                .findFirst()
+                .orElse(TipoParticipacao.RESPONSAVEL);
     }
 
 

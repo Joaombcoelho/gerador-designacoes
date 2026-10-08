@@ -176,6 +176,89 @@ class EdicaoEscalaControllerTest extends BaseDAOTest {
         );
     }
 
+    @Test
+    void deveListarSomentePessoasElegiveisParaParticipacao() {
+        Pessoa elegivel = pessoa(
+                "Elegível",
+                Sexo.FEMININO,
+                true,
+                Privilegio.ANCIAO,
+                NivelLeitura.BASICO,
+                true
+        );
+        Pessoa inativa = pessoa(
+                "Inativa",
+                Sexo.MASCULINO,
+                false,
+                Privilegio.ANCIAO,
+                NivelLeitura.BASICO,
+                true
+        );
+        Pessoa sexoInvalido = pessoa(
+                "Sexo inválido",
+                Sexo.MASCULINO,
+                true,
+                Privilegio.ANCIAO,
+                NivelLeitura.BASICO,
+                true
+        );
+        Pessoa privilegioInsuficiente = pessoa(
+                "Privilégio insuficiente",
+                Sexo.FEMININO,
+                true,
+                Privilegio.PUBLICADOR,
+                NivelLeitura.BASICO,
+                true
+        );
+
+        Parte parte = parteDAO.salvar(
+                new Parte(
+                        "Parte feminina",
+                        TipoParte.PARTE_1,
+                        Privilegio.BATIZADO,
+                        false,
+                        SexoPermitido.FEMININO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.RESPONSAVEL)
+                )
+        );
+
+        List<Pessoa> pessoas =
+                controller.listarPessoasParaSelecao(
+                        parte,
+                        TipoParticipacao.RESPONSAVEL
+                );
+
+        assertTrue(pessoas.contains(elegivel));
+        assertFalse(pessoas.contains(privilegioInsuficiente));
+        assertFalse(pessoas.contains(inativa));
+        assertFalse(pessoas.contains(sexoInvalido));
+    }
+
+    @Test
+    void deveManterParticipanteAtualMesmoQueNaoEstejaMaisElegivel() {
+        Pessoa atual = pessoa(
+                "Participante atual",
+                Sexo.MASCULINO,
+                false,
+                Privilegio.ANCIAO,
+                NivelLeitura.BASICO,
+                true
+        );
+
+        Parte parte = criarParteSemAjudante("Parte atual");
+
+        assertTrue(
+                controller.listarPessoasParaSelecao(
+                        parte,
+                        TipoParticipacao.RESPONSAVEL,
+                        atual
+                ).contains(atual)
+        );
+    }
+
 
     @Test
     void deveAdicionarNovaParteNaEscala() {
@@ -510,6 +593,32 @@ class EdicaoEscalaControllerTest extends BaseDAOTest {
                 );
 
         return pessoaDAO.salvar(pessoa);
+    }
+
+    private Pessoa pessoa(
+            String nome,
+            Sexo sexo,
+            boolean ativo,
+            Privilegio privilegio,
+            NivelLeitura nivelLeitura,
+            boolean podeSerResponsavel
+    ) {
+        return pessoaDAO.salvar(
+                new Pessoa(
+                        nome,
+                        sexo,
+                        ativo,
+                        podeSerResponsavel,
+                        true,
+                        true,
+                        false,
+                        false,
+                        false,
+                        false,
+                        privilegio,
+                        nivelLeitura
+                )
+        );
     }
 
 
