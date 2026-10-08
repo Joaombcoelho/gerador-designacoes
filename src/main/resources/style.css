@@ -1,0 +1,347 @@
+/* =========================================================
+       GERADOR DE DESIGNAÇÕES
+       Identidade visual principal
+       ========================================================= */
+
+
+    /* =========================================================
+       CORES E CONFIGURAÇÕES GERAIS
+       ========================================================= */
+
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #f5f7fa;
+    -fx-text-fill: #263238;
+}
+
+
+/* =========================================================
+   BARRA SUPERIOR
+   ========================================================= */
+
+.top-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e1e5e9;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 14 20 14 20;
+}
+
+
+/* =========================================================
+   MENU LATERAL
+   ========================================================= */
+
+.sidebar {
+    -fx-background-color: #1f2937;
+    -fx-padding: 20 12 20 12;
+    -fx-spacing: 6;
+}
+
+
+/* Nome da aplicação no menu */
+
+.sidebar-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 10 20 10;
+}
+
+
+/* Categorias do menu */
+
+.sidebar-section {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 18 10 5 10;
+}
+
+
+/* Botões do menu */
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d1d5db;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+
+.sidebar-button:hover {
+    -fx-background-color: #374151;
+    -fx-text-fill: #ffffff;
+}
+
+
+.sidebar-button-active {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+
+.sidebar-spacer {
+    -fx-pref-height: 10;
+}
+
+
+/* =========================================================
+   ÁREA PRINCIPAL
+   ========================================================= */
+
+.content-area {
+    -fx-background-color: #f5f7fa;
+    -fx-padding: 30;
+}
+
+
+/* =========================================================
+   TÍTULOS
+   ========================================================= */
+
+.page-title {
+    -fx-text-fill: #111827;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+
+.page-subtitle {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 14px;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-padding: 20;
+}
+
+
+.card-title {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+
+.card-value {
+    -fx-text-fill: #111827;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+
+/* =========================================================
+   BOTÕES PRINCIPAIS
+   ========================================================= */
+
+.primary-button {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 18 10 18;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+
+.primary-button:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+
+.secondary-button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #374151;
+    -fx-font-size: 14px;
+    -fx-padding: 10 18 10 18;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+
+.secondary-button:hover {
+    -fx-background-color: #f3f4f6;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status-success {
+    -fx-text-fill: #15803d;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+
+.status-warning {
+    -fx-text-fill: #b45309;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+
+.status-error {
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+
+/* =========================================================
+   CAMPOS
+   ========================================================= */
+
+.text-field,
+.password-field,
+.combo-box,
+.date-picker {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 10 8 10;
+}
+
+
+.text-field:focused,
+.password-field:focused,
+.combo-box:focused,
+.date-picker:focused {
+    -fx-border-color: #2563eb;
+    -fx-border-width: 1.5;
+}
+
+
+/* =========================================================
+   TABELAS
+   ========================================================= */
+
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+
+.table-view .column-header-background {
+    -fx-background-color: #f3f4f6;
+}
+
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+
+.table-view .column-header .label {
+    -fx-text-fill: #374151;
+    -fx-font-weight: bold;
+}
+
+
+.table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+}
+
+
+.table-row-cell:hover {
+    -fx-background-color: #f9fafb;
+}
+
+
+.table-row-cell:selected {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #111827;
+}
+
+
+/* =========================================================
+   SEPARADORES
+   ========================================================= */
+
+.separator .line {
+    -fx-border-color: #e5e7eb;
+}
+
+
+/* =========================================================
+   SCROLL
+   ========================================================= */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+
+/* =========================================================
+   ALERTAS
+   ========================================================= */
+
+.dialog-pane {
+    -fx-background-color: #ffffff;
+}
+
+
+.dialog-pane .header-panel {
+    -fx-background-color: #f5f7fa;
+}
+
+
+.dialog-pane .content {
+    -fx-padding: 15;
+}
+
+
+/* =========================================================
+   BOTÕES PADRÃO DO JAVAFX
+   ========================================================= */
+
+.button {
+    -fx-cursor: hand;
+}
+
+
+/* =========================================================
+   BARRA DE ROLAGEM
+   ========================================================= */
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+
+.scroll-bar .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 5;
+}
+
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #94a3b8;
+}

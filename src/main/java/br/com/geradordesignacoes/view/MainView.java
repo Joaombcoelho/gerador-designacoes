@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.view;
 
 import br.com.geradordesignacoes.controller.EscalaController;
+import br.com.geradordesignacoes.controller.ProgramacaoController;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.BackupDatabase;
 import br.com.geradordesignacoes.database.RestaurarDatabase;
@@ -10,21 +11,20 @@ import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
-import br.com.geradordesignacoes.controller.ProgramacaoController;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -58,31 +58,27 @@ public class MainView {
 
     public MainView() {
 
-        root =
-                new BorderPane();
+        root = new BorderPane();
 
+        root.getStyleClass().add("main-root");
 
         PessoaDAO pessoaDAO =
                 new PessoaDAO();
-
 
         PessoaService pessoaService =
                 new PessoaService(
                         pessoaDAO
                 );
 
-
         pessoaView =
                 new PessoaView(
                         pessoaService
                 );
 
-
         escalaController =
                 new EscalaController(
                         escalaView
                 );
-
 
         programacaoController =
                 new ProgramacaoController(
@@ -90,89 +86,285 @@ public class MainView {
                         escalaController
                 );
 
-
-        /*
-         * O Histórico recebe uma ação que permite
-         * solicitar ao MainView a abertura da tela
-         * de edição.
-         */
         historicoView =
-                new HistoricoView(
-                );
+                new HistoricoView();
 
-
-        criarMenu();
+        criarLayout();
 
         criarTelaInicial();
     }
 
 
-    private void criarMenu() {
+    private void criarLayout() {
 
-        MenuBar menuBar =
-                new MenuBar();
+        VBox menuLateral =
+                criarMenuLateral();
+
+        HBox barraSuperior =
+                criarBarraSuperior();
+
+        root.setLeft(menuLateral);
+
+        root.setTop(barraSuperior);
+    }
 
 
-        // =====================================================
-        // BOTÃO INÍCIO
-        // =====================================================
+    // =========================================================
+    // MENU LATERAL
+    // =========================================================
 
-        Button botaoInicio =
-                new Button(
-                        "Início"
+    private VBox criarMenuLateral() {
+
+        VBox menu =
+                new VBox();
+
+        menu.getStyleClass().add("sidebar");
+
+        menu.setPrefWidth(220);
+
+        // -----------------------------------------------------
+        // TÍTULO
+        // -----------------------------------------------------
+
+        Label titulo =
+                new Label(
+                        "Gerador de\nDesignações"
                 );
 
-        botaoInicio.setPrefHeight(
-                25
+        titulo.getStyleClass().add(
+                "sidebar-title"
         );
 
-        botaoInicio.setOnAction(
+        menu.getChildren().add(
+                titulo
+        );
+
+
+        // -----------------------------------------------------
+        // PRINCIPAL
+        // -----------------------------------------------------
+
+        adicionarTituloSecao(
+                menu,
+                "PRINCIPAL"
+        );
+
+        Button inicio =
+                criarBotaoMenu(
+                        "Início",
+                        true
+                );
+
+        inicio.setOnAction(
                 event ->
                         criarTelaInicial()
         );
 
+        menu.getChildren().add(
+                inicio
+        );
 
-        // =====================================================
-        // ARQUIVO
-        // =====================================================
 
-        Menu menuArquivo =
-                new Menu(
-                        "Arquivo"
+        // -----------------------------------------------------
+        // CADASTROS
+        // -----------------------------------------------------
+
+        adicionarTituloSecao(
+                menu,
+                "CADASTROS"
+        );
+
+        Button pessoas =
+                criarBotaoMenu(
+                        "Pessoas"
                 );
 
+        pessoas.setOnAction(
+                event ->
+                        mostrarTela(
+                                pessoaView.getView()
+                        )
+        );
 
-        MenuItem itemBackup =
-                new MenuItem(
+        Button partes =
+                criarBotaoMenu(
+                        "Partes"
+                );
+
+        partes.setOnAction(
+                event ->
+                        mostrarTela(
+                                parteView.getView()
+                        )
+        );
+
+        menu.getChildren().addAll(
+                pessoas,
+                partes
+        );
+
+
+        // -----------------------------------------------------
+        // PROGRAMAÇÃO
+        // -----------------------------------------------------
+
+        adicionarTituloSecao(
+                menu,
+                "PROGRAMAÇÃO"
+        );
+
+        Button programacao =
+                criarBotaoMenu(
+                        "Programação Semanal"
+                );
+
+        programacao.setOnAction(
+                event ->
+                        mostrarTela(
+                                programacaoView.getView()
+                        )
+        );
+
+        menu.getChildren().add(
+                programacao
+        );
+
+
+        // -----------------------------------------------------
+        // ESCALAS
+        // -----------------------------------------------------
+
+        adicionarTituloSecao(
+                menu,
+                "ESCALAS"
+        );
+
+        Button gerarEscala =
+                criarBotaoMenu(
+                        "Gerar Escala"
+                );
+
+        gerarEscala.setOnAction(
+                event ->
+                        mostrarTela(
+                                escalaView.getView()
+                        )
+        );
+
+
+        Button editarEscala =
+                criarBotaoMenu(
+                        "Editar Escalas"
+                );
+
+        editarEscala.setOnAction(
+                event ->
+                        mostrarTela(
+                                edicaoEscalaView.getView()
+                        )
+        );
+
+        menu.getChildren().addAll(
+                gerarEscala,
+                editarEscala
+        );
+
+
+        // -----------------------------------------------------
+        // HISTÓRICO
+        // -----------------------------------------------------
+
+        adicionarTituloSecao(
+                menu,
+                "HISTÓRICO"
+        );
+
+        Button historico =
+                criarBotaoMenu(
+                        "Consultar Histórico"
+                );
+
+        historico.setOnAction(
+                event -> {
+
+                    historicoView.atualizar();
+
+                    mostrarTela(
+                            historicoView.getView()
+                    );
+                }
+        );
+
+        menu.getChildren().add(
+                historico
+        );
+
+
+        // -----------------------------------------------------
+        // ESPAÇO FLEXÍVEL
+        // -----------------------------------------------------
+
+        Region espaco =
+                new Region();
+
+        VBox.setVgrow(
+                espaco,
+                Priority.ALWAYS
+        );
+
+        menu.getChildren().add(
+                espaco
+        );
+
+
+        // -----------------------------------------------------
+        // ARQUIVO
+        // -----------------------------------------------------
+
+        adicionarTituloSecao(
+                menu,
+                "SISTEMA"
+        );
+
+        Button backup =
+                criarBotaoMenu(
                         "Fazer Backup"
                 );
 
-
-        MenuItem itemRestaurarBackup =
-                new MenuItem(
-                        "Restaurar Backup"
-                );
-
-
-        MenuItem itemSair =
-                new MenuItem(
-                        "Sair"
-                );
-
-
-        itemBackup.setOnAction(
+        backup.setOnAction(
                 event ->
                         fazerBackup()
         );
 
 
-        itemRestaurarBackup.setOnAction(
+        Button restaurar =
+                criarBotaoMenu(
+                        "Restaurar Backup"
+                );
+
+        restaurar.setOnAction(
                 event ->
                         restaurarBackup()
         );
 
 
-        itemSair.setOnAction(
+        Button sobre =
+                criarBotaoMenu(
+                        "Sobre"
+                );
+
+        sobre.setOnAction(
+                event ->
+                        mostrarSobre()
+        );
+
+
+        Button sair =
+                criarBotaoMenu(
+                        "Sair"
+                );
+
+        sair.setOnAction(
                 event -> {
 
                     if (
@@ -187,262 +379,97 @@ public class MainView {
         );
 
 
-        menuArquivo.getItems().addAll(
-                itemBackup,
-                itemRestaurarBackup,
-                new SeparatorMenuItem(),
-                itemSair
+        menu.getChildren().addAll(
+                backup,
+                restaurar,
+                sobre,
+                sair
         );
 
 
-        // =====================================================
-        // CADASTROS
-        // =====================================================
+        return menu;
+    }
 
-        Menu menuCadastros =
-                new Menu(
-                        "Cadastros"
+
+    private void adicionarTituloSecao(
+            VBox menu,
+            String texto
+    ) {
+
+        Label titulo =
+                new Label(
+                        texto
                 );
 
-
-        MenuItem itemPessoas =
-                new MenuItem(
-                        "Pessoas"
-                );
-
-
-        MenuItem itemPartes =
-                new MenuItem(
-                        "Partes"
-                );
-
-
-        itemPessoas.setOnAction(
-                event ->
-                        mostrarTela(
-                                pessoaView.getView()
-                        )
+        titulo.getStyleClass().add(
+                "sidebar-section"
         );
 
-
-        itemPartes.setOnAction(
-                event ->
-                        mostrarTela(
-                                parteView.getView()
-                        )
-        );
-
-
-        menuCadastros.getItems().addAll(
-                itemPessoas,
-                itemPartes
-        );
-
-
-        // =====================================================
-        // PROGRAMAÇÃO
-        // =====================================================
-
-        Menu menuProgramacao =
-                new Menu(
-                        "Programação"
-                );
-
-
-        MenuItem itemProgramacao =
-                new MenuItem(
-                        "Programação Semanal"
-                );
-
-
-        itemProgramacao.setOnAction(
-                event ->
-                        mostrarTela(
-                                programacaoView.getView()
-                        )
-        );
-
-
-        menuProgramacao.getItems().add(
-                itemProgramacao
-        );
-
-
-        // =====================================================
-        // ESCALA
-        // =====================================================
-
-        Menu menuEscala =
-                new Menu(
-                        "Escala"
-                );
-
-
-        MenuItem itemGerarEscala =
-                new MenuItem(
-                        "Gerar Escala"
-                );
-
-
-        MenuItem itemEditarEscalas =
-                new MenuItem(
-                        "Editar Escalas"
-                );
-
-
-        itemGerarEscala.setOnAction(
-                event ->
-                        mostrarTela(
-                                escalaView.getView()
-                        )
-        );
-
-
-        itemEditarEscalas.setOnAction(
-                event ->
-                        mostrarTela(
-                                edicaoEscalaView.getView()
-                        )
-        );
-
-
-        menuEscala.getItems().addAll(
-                itemGerarEscala,
-                itemEditarEscalas
-        );
-
-
-        // =====================================================
-        // HISTÓRICO
-        // =====================================================
-
-        Menu menuHistorico =
-                new Menu(
-                        "Histórico"
-                );
-
-
-        MenuItem itemConsultarHistorico =
-                new MenuItem(
-                        "Consultar Histórico"
-                );
-
-
-        itemConsultarHistorico.setOnAction(
-                event -> {
-
-                    historicoView.atualizar();
-
-                    mostrarTela(
-                            historicoView.getView()
-                    );
-                }
-        );
-
-
-        menuHistorico.getItems().add(
-                itemConsultarHistorico
-        );
-
-
-        // =====================================================
-        // AJUDA
-        // =====================================================
-
-        Menu menuAjuda =
-                new Menu(
-                        "Ajuda"
-                );
-
-
-        MenuItem itemSobre =
-                new MenuItem(
-                        "Sobre"
-                );
-
-
-        itemSobre.setOnAction(
-                event ->
-                        mostrarSobre()
-        );
-
-
-        menuAjuda.getItems().add(
-                itemSobre
-        );
-
-
-        // =====================================================
-        // MENU PRINCIPAL
-        // =====================================================
-
-        menuBar.getMenus().addAll(
-                menuArquivo,
-                menuCadastros,
-                menuProgramacao,
-                menuEscala,
-                menuHistorico,
-                menuAjuda
-        );
-
-
-        // =====================================================
-        // BARRA SUPERIOR
-        // =====================================================
-
-        HBox barraSuperior =
-                new HBox();
-
-
-        barraSuperior.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-
-        barraSuperior.setSpacing(
-                5
-        );
-
-
-        barraSuperior.setPadding(
-                new Insets(
-                        2,
-                        5,
-                        2,
-                        5
-                )
-        );
-
-
-        barraSuperior.getChildren().addAll(
-                botaoInicio,
-                menuBar
-        );
-
-
-        root.setTop(
-                barraSuperior
+        menu.getChildren().add(
+                titulo
         );
     }
 
 
-    private void criarTelaInicial() {
+    private Button criarBotaoMenu(
+            String texto
+    ) {
 
-        VBox painelPrincipal =
-                new VBox(
-                        20
+        return criarBotaoMenu(
+                texto,
+                false
+        );
+    }
+
+
+    private Button criarBotaoMenu(
+            String texto,
+            boolean ativo
+    ) {
+
+        Button botao =
+                new Button(
+                        texto
                 );
 
-
-        painelPrincipal.setAlignment(
-                Pos.CENTER
+        botao.setMaxWidth(
+                Double.MAX_VALUE
         );
 
+        botao.getStyleClass().add(
+                "sidebar-button"
+        );
 
-        painelPrincipal.setPadding(
-                new Insets(
-                        40
-                )
+        if (ativo) {
+
+            botao.getStyleClass().add(
+                    "sidebar-button-active"
+            );
+        }
+
+        return botao;
+    }
+
+
+    // =========================================================
+    // BARRA SUPERIOR
+    // =========================================================
+
+    private HBox criarBarraSuperior() {
+
+        HBox barra =
+                new HBox();
+
+        barra.getStyleClass().add(
+                "top-bar"
+        );
+
+        barra.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        barra.setSpacing(
+                10
         );
 
 
@@ -451,22 +478,19 @@ public class MainView {
                         "Gerador de Designações"
                 );
 
-
         titulo.setStyle(
-                "-fx-font-size: 28px;" +
-                        "-fx-font-weight: bold;"
+                "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #111827;"
         );
 
 
-        Label subtitulo =
-                new Label(
-                        "Automatize a geração e o gerenciamento " +
-                                "das designações das reuniões."
-                );
+        Region espaco =
+                new Region();
 
-
-        subtitulo.setStyle(
-                "-fx-font-size: 15px;"
+        HBox.setHgrow(
+                espaco,
+                Priority.ALWAYS
         );
 
 
@@ -475,66 +499,180 @@ public class MainView {
                         "● Sistema pronto"
                 );
 
-
-        status.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-font-weight: bold;"
+        status.getStyleClass().add(
+                "status-success"
         );
 
 
+        barra.getChildren().addAll(
+                titulo,
+                espaco,
+                status
+        );
+
+
+        return barra;
+    }
+
+
+    // =========================================================
+    // TELA INICIAL
+    // =========================================================
+
+    private void criarTelaInicial() {
+
+        VBox painelPrincipal =
+                new VBox(
+                        25
+                );
+
+        painelPrincipal.getStyleClass().add(
+                "content-area"
+        );
+
+        painelPrincipal.setAlignment(
+                Pos.TOP_LEFT
+        );
+
+
+        // -----------------------------------------------------
+        // CABEÇALHO
+        // -----------------------------------------------------
+
+        Label titulo =
+                new Label(
+                        "Bem-vindo ao Gerador de Designações"
+                );
+
+        titulo.getStyleClass().add(
+                "page-title"
+        );
+
+
+        Label subtitulo =
+                new Label(
+                        "Gerencie pessoas, programação e escalas " +
+                                "das reuniões em um único lugar."
+                );
+
+        subtitulo.getStyleClass().add(
+                "page-subtitle"
+        );
+
+
+        VBox cabecalho =
+                new VBox(
+                        6
+                );
+
+        cabecalho.getChildren().addAll(
+                titulo,
+                subtitulo
+        );
+
+
+        // -----------------------------------------------------
+        // CARDS
+        // -----------------------------------------------------
+
+        HBox cards =
+                new HBox(
+                        15
+                );
+
+        cards.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+
+        VBox cardPessoas =
+                criarCard(
+                        "Pessoas",
+                        "Cadastro de participantes"
+                );
+
+
+        VBox cardPartes =
+                criarCard(
+                        "Partes",
+                        "Partes das reuniões"
+                );
+
+
+        VBox cardProgramacao =
+                criarCard(
+                        "Programação",
+                        "Programação semanal"
+                );
+
+
+        VBox cardEscalas =
+                criarCard(
+                        "Escalas",
+                        "Geração das designações"
+                );
+
+
+        cards.getChildren().addAll(
+                cardPessoas,
+                cardPartes,
+                cardProgramacao,
+                cardEscalas
+        );
+
+
+        // -----------------------------------------------------
+        // ACESSO RÁPIDO
+        // -----------------------------------------------------
+
+        Label acessoTitulo =
+                new Label(
+                        "Acesso rápido"
+                );
+
+        acessoTitulo.getStyleClass().add(
+                "page-title"
+        );
+
+        acessoTitulo.setStyle(
+                "-fx-font-size: 18px;"
+        );
+
+
+        HBox botoes =
+                new HBox(
+                        12
+                );
+
+
         Button botaoGerarEscala =
-                new Button(
+                criarBotaoPrincipal(
                         "Gerar Escala"
                 );
 
 
+        Button botaoProgramacao =
+                criarBotaoSecundario(
+                        "Programação"
+                );
+
+
         Button botaoPessoas =
-                new Button(
+                criarBotaoSecundario(
                         "Pessoas"
                 );
 
 
         Button botaoPartes =
-                new Button(
+                criarBotaoSecundario(
                         "Partes"
                 );
 
 
         Button botaoHistorico =
-                new Button(
+                criarBotaoSecundario(
                         "Histórico"
                 );
-
-
-        Button botaoProgramacao =
-                new Button(
-                        "Programação"
-                );
-
-
-        configurarBotaoPrincipal(
-                botaoGerarEscala
-        );
-
-
-        configurarBotaoPrincipal(
-                botaoProgramacao
-        );
-
-
-        configurarBotaoPrincipal(
-                botaoPessoas
-        );
-
-
-        configurarBotaoPrincipal(
-                botaoPartes
-        );
-
-
-        configurarBotaoPrincipal(
-                botaoHistorico
-        );
 
 
         botaoGerarEscala.setOnAction(
@@ -581,17 +719,6 @@ public class MainView {
         );
 
 
-        HBox botoes =
-                new HBox(
-                        15
-                );
-
-
-        botoes.setAlignment(
-                Pos.CENTER
-        );
-
-
         botoes.getChildren().addAll(
                 botaoGerarEscala,
                 botaoProgramacao,
@@ -601,22 +728,51 @@ public class MainView {
         );
 
 
-        Label informacao =
-                new Label(
-                        "Use o menu superior ou os atalhos " +
-                                "abaixo para começar."
+        // -----------------------------------------------------
+        // INFORMAÇÃO
+        // -----------------------------------------------------
+
+        VBox informacao =
+                new VBox(
+                        5
                 );
 
+        informacao.getStyleClass().add(
+                "card"
+        );
 
-        informacao.setStyle(
-                "-fx-font-size: 13px;"
+
+        Label informacaoTitulo =
+                new Label(
+                        "Sistema pronto"
+                );
+
+        informacaoTitulo.getStyleClass().add(
+                "card-title"
+        );
+
+
+        Label informacaoTexto =
+                new Label(
+                        "Utilize o menu lateral para acessar " +
+                                "as funções do sistema."
+                );
+
+        informacaoTexto.getStyleClass().add(
+                "page-subtitle"
+        );
+
+
+        informacao.getChildren().addAll(
+                informacaoTitulo,
+                informacaoTexto
         );
 
 
         painelPrincipal.getChildren().addAll(
-                titulo,
-                subtitulo,
-                status,
+                cabecalho,
+                cards,
+                acessoTitulo,
                 botoes,
                 informacao
         );
@@ -628,34 +784,99 @@ public class MainView {
     }
 
 
-    private void configurarBotaoPrincipal(
-            Button botao
+    private VBox criarCard(
+            String titulo,
+            String descricao
     ) {
 
-        botao.setPrefWidth(
-                130
+        VBox card =
+                new VBox(
+                        8
+                );
+
+        card.getStyleClass().add(
+                "card"
+        );
+
+        card.setPrefWidth(
+                210
+        );
+
+        Label labelTitulo =
+                new Label(
+                        titulo
+                );
+
+        labelTitulo.getStyleClass().add(
+                "card-title"
         );
 
 
-        botao.setPrefHeight(
-                40
+        Label labelDescricao =
+                new Label(
+                        descricao
+                );
+
+        labelDescricao.getStyleClass().add(
+                "page-subtitle"
+        );
+
+        labelDescricao.setWrapText(
+                true
         );
 
 
-        botao.setStyle(
-                "-fx-font-size: 14px;"
+        card.getChildren().addAll(
+                labelTitulo,
+                labelDescricao
         );
+
+
+        return card;
     }
 
+
+    private Button criarBotaoPrincipal(
+            String texto
+    ) {
+
+        Button botao =
+                new Button(
+                        texto
+                );
+
+        botao.getStyleClass().add(
+                "primary-button"
+        );
+
+        return botao;
+    }
+
+
+    private Button criarBotaoSecundario(
+            String texto
+    ) {
+
+        Button botao =
+                new Button(
+                        texto
+                );
+
+        botao.getStyleClass().add(
+                "secondary-button"
+        );
+
+        return botao;
+    }
+
+
+    // =========================================================
+    // NAVEGAÇÃO
+    // =========================================================
 
     private void mostrarTela(
             Parent view
     ) {
-
-        root.setCenter(
-                null
-        );
-
 
         root.setCenter(
                 view
@@ -670,6 +891,35 @@ public class MainView {
 
 
     // =========================================================
+    // CSS
+    // =========================================================
+
+    public void aplicarEstilo(
+            Scene scene
+    ) {
+
+        var css =
+                getClass()
+                        .getResource(
+                                "/style.css"
+                        );
+
+        if (
+                css != null &&
+                        !scene.getStylesheets()
+                                .contains(
+                                        css.toExternalForm()
+                                )
+        ) {
+
+            scene.getStylesheets().add(
+                    css.toExternalForm()
+            );
+        }
+    }
+
+
+    // =========================================================
     // BACKUP
     // =========================================================
 
@@ -678,11 +928,9 @@ public class MainView {
         FileChooser fileChooser =
                 new FileChooser();
 
-
         fileChooser.setTitle(
                 "Salvar backup do banco"
         );
-
 
         fileChooser.getExtensionFilters()
                 .add(
@@ -692,17 +940,14 @@ public class MainView {
                         )
                 );
 
-
         File arquivo =
                 fileChooser.showSaveDialog(
                         root.getScene().getWindow()
                 );
 
-
         if (arquivo == null) {
             return;
         }
-
 
         try {
 
@@ -710,30 +955,24 @@ public class MainView {
                     arquivo.toPath()
             );
 
-
             Alert alerta =
                     new Alert(
                             Alert.AlertType.INFORMATION
                     );
 
-
             alerta.setTitle(
                     "Backup"
             );
-
 
             alerta.setHeaderText(
                     null
             );
 
-
             alerta.setContentText(
                     "Backup realizado com sucesso."
             );
 
-
             alerta.showAndWait();
-
 
         } catch (IOException e) {
 
@@ -742,22 +981,18 @@ public class MainView {
                             Alert.AlertType.ERROR
                     );
 
-
             alerta.setTitle(
                     "Erro"
             );
-
 
             alerta.setHeaderText(
                     null
             );
 
-
             alerta.setContentText(
                     "Não foi possível criar o backup.\n"
                             + e.getMessage()
             );
-
 
             alerta.showAndWait();
         }
@@ -773,11 +1008,9 @@ public class MainView {
         FileChooser fileChooser =
                 new FileChooser();
 
-
         fileChooser.setTitle(
                 "Selecionar backup do banco"
         );
-
 
         fileChooser.getExtensionFilters()
                 .add(
@@ -787,38 +1020,31 @@ public class MainView {
                         )
                 );
 
-
         File arquivo =
                 fileChooser.showOpenDialog(
                         root.getScene().getWindow()
                 );
 
-
         if (arquivo == null) {
             return;
         }
-
 
         Alert confirmacao =
                 new Alert(
                         Alert.AlertType.CONFIRMATION
                 );
 
-
         confirmacao.setTitle(
                 "Restaurar backup"
         );
-
 
         confirmacao.setHeaderText(
                 "Atenção: os dados atuais serão substituídos."
         );
 
-
         confirmacao.setContentText(
                 "Deseja realmente restaurar este backup?"
         );
-
 
         confirmacao.showAndWait()
                 .ifPresent(
@@ -833,7 +1059,6 @@ public class MainView {
                                         arquivo
                                 );
                             }
-
                         }
                 );
     }
@@ -849,31 +1074,25 @@ public class MainView {
                     arquivo.toPath()
             );
 
-
             Alert alerta =
                     new Alert(
                             Alert.AlertType.INFORMATION
                     );
 
-
             alerta.setTitle(
                     "Restauração concluída"
             );
 
-
             alerta.setHeaderText(
                     null
             );
-
 
             alerta.setContentText(
                     "Backup restaurado com sucesso.\n"
                             + "Reinicie a aplicação para carregar os dados."
             );
 
-
             alerta.showAndWait();
-
 
         } catch (IOException e) {
 
@@ -882,21 +1101,17 @@ public class MainView {
                             Alert.AlertType.ERROR
                     );
 
-
             alerta.setTitle(
                     "Erro na restauração"
             );
-
 
             alerta.setHeaderText(
                     null
             );
 
-
             alerta.setContentText(
                     e.getMessage()
             );
-
 
             alerta.showAndWait();
         }
@@ -914,23 +1129,19 @@ public class MainView {
                         Alert.AlertType.INFORMATION
                 );
 
-
         alerta.setTitle(
                 "Sobre"
         );
 
-
         alerta.setHeaderText(
                 "Gerador de Designações"
         );
-
 
         alerta.setContentText(
                 "Sistema para gerenciamento e geração "
                         + "automática de designações.\n\n"
                         + "Versão 1.0"
         );
-
 
         alerta.showAndWait();
     }

@@ -31,6 +31,9 @@ public class MainApp extends Application {
                         700
                 );
 
+        // Aplica o estilo visual global da aplicação
+        mainView.aplicarEstilo(scene);
+
         stage.setTitle(
                 "Gerador de Designações"
         );
@@ -39,7 +42,10 @@ public class MainApp extends Application {
 
         stage.show();
 
-        stage.setOnCloseRequest(event -> backupAutomaticoService.encerrar());
+        stage.setOnCloseRequest(
+                event ->
+                        backupAutomaticoService.encerrar()
+        );
     }
 
     public static void main(String[] args) {
