@@ -1,3 +1,4 @@
+
 package br.com.geradordesignacoes.view.edicao;
 
 import br.com.geradordesignacoes.controller.EdicaoEscalaController;
@@ -29,1196 +30,541 @@ import java.util.List;
 public class EdicaoEscalaView {
 
     private final BorderPane root;
-
     private final DatePicker campoMes;
-
     private final ListView<Escala> listaSemanas;
-
     private final ListView<Designacao> listaDesignacoes;
-
     private final Label labelStatus;
-
     private final Label labelSemanaSelecionada;
-
     private final ComboBox<Parte> comboParte;
-
     private final ComboBox<Pessoa> comboResponsavel;
-
     private final ComboBox<Pessoa> comboAjudante;
-
     private final Button botaoCarregar;
-
     private final Button botaoAdicionarParte;
-
     private final Button botaoSalvar;
+    private final Button botaoConfirmarConflito;
+    private final Button botaoCancelarConflito;
 
     private final EdicaoEscalaController controller;
-
     private final PessoaDAO pessoaDAO;
-
     private final ParteDAO parteDAO;
-
     private final List<Pessoa> todasAsPessoas;
-
     private final List<Parte> todasAsPartes;
 
     private Designacao designacaoSelecionada;
 
+    private Integer designacaoPendenteId;
+    private Pessoa responsavelPendente;
+    private Pessoa ajudantePendente;
 
     public EdicaoEscalaView() {
-
         root = new BorderPane();
-
         root.getStyleClass().add("content-area");
-
-        root.setPadding(
-                new Insets(24)
-        );
-
+        root.setPadding(new Insets(24));
 
         pessoaDAO = new PessoaDAO();
-
         parteDAO = new ParteDAO();
 
-        todasAsPessoas =
-                carregarListaPessoas();
-
-        todasAsPartes =
-                carregarListaPartes();
-
+        todasAsPessoas = carregarListaPessoas();
+        todasAsPartes = carregarListaPartes();
 
         campoMes = new DatePicker();
-
-        campoMes.setPromptText(
-                "Selecione o mês"
-        );
-
-        campoMes.getStyleClass().add(
-                "date-picker"
-        );
-
+        campoMes.setPromptText("Selecione o mês");
+        campoMes.getStyleClass().add("date-picker");
         campoMes.setPrefWidth(180);
 
-
         listaSemanas = new ListView<>();
-
-        listaSemanas.getStyleClass().add(
-                "list-view"
-        );
-
-        listaSemanas
-                .getSelectionModel()
-                .setSelectionMode(
-                        SelectionMode.SINGLE
-                );
-
+        listaSemanas.getStyleClass().add("list-view");
+        listaSemanas.getSelectionModel()
+                .setSelectionMode(SelectionMode.SINGLE);
 
         listaDesignacoes = new ListView<>();
-
-        listaDesignacoes.getStyleClass().add(
-                "list-view"
-        );
-
-        listaDesignacoes
-                .getSelectionModel()
-                .setSelectionMode(
-                        SelectionMode.SINGLE
-                );
-
+        listaDesignacoes.getStyleClass().add("list-view");
+        listaDesignacoes.getSelectionModel()
+                .setSelectionMode(SelectionMode.SINGLE);
 
         labelStatus = new Label(
                 "Selecione um mês para visualizar as semanas."
         );
-
-        labelStatus.getStyleClass().add(
-                "status-warning"
-        );
-
+        labelStatus.getStyleClass().add("status-warning");
+        labelStatus.setWrapText(true);
 
         labelSemanaSelecionada = new Label(
                 "Nenhuma semana selecionada."
         );
+        labelSemanaSelecionada.getStyleClass().add("card-title");
 
-        labelSemanaSelecionada.getStyleClass().add(
-                "card-title"
-        );
+        comboParte = criarComboParte();
+        comboParte.getStyleClass().add("combo-box");
+        comboParte.setMaxWidth(Double.MAX_VALUE);
 
+        comboResponsavel = criarComboPessoa();
+        comboResponsavel.getStyleClass().add("combo-box");
+        comboResponsavel.setMaxWidth(Double.MAX_VALUE);
 
-        comboParte =
-                criarComboParte();
+        comboAjudante = criarComboPessoa();
+        comboAjudante.getStyleClass().add("combo-box");
+        comboAjudante.setMaxWidth(Double.MAX_VALUE);
 
-        comboParte.getStyleClass().add(
-                "combo-box"
-        );
+        botaoCarregar = new Button("Carregar Semanas");
+        botaoCarregar.getStyleClass().add("primary-button");
 
-        comboParte.setPrefWidth(
-                Double.MAX_VALUE
-        );
+        botaoAdicionarParte = new Button("+ Adicionar Parte");
+        botaoAdicionarParte.getStyleClass().add("secondary-button");
+        botaoAdicionarParte.setDisable(true);
 
+        botaoSalvar = new Button("Salvar Alterações");
+        botaoSalvar.getStyleClass().add("success-button");
+        botaoSalvar.setDisable(true);
 
-        comboResponsavel =
-                criarComboPessoa();
+        botaoConfirmarConflito = new Button("Salvar mesmo assim");
+        botaoConfirmarConflito.getStyleClass().add("danger-button");
+        botaoConfirmarConflito.setVisible(false);
+        botaoConfirmarConflito.setManaged(false);
 
-        comboResponsavel.getStyleClass().add(
-                "combo-box"
-        );
-
-        comboResponsavel.setPrefWidth(
-                Double.MAX_VALUE
-        );
-
-
-        comboAjudante =
-                criarComboPessoa();
-
-        comboAjudante.getStyleClass().add(
-                "combo-box"
-        );
-
-        comboAjudante.setPrefWidth(
-                Double.MAX_VALUE
-        );
-
-
-        botaoCarregar = new Button(
-                "Carregar Semanas"
-        );
-
-        botaoCarregar.getStyleClass().add(
-                "primary-button"
-        );
-
-
-        botaoAdicionarParte =
-                new Button(
-                        "+ Adicionar Parte"
-                );
-
-        botaoAdicionarParte.getStyleClass().add(
-                "secondary-button"
-        );
-
-        botaoAdicionarParte.setDisable(
-                true
-        );
-
-
-        botaoSalvar = new Button(
-                "Salvar Alterações"
-        );
-
-        botaoSalvar.getStyleClass().add(
-                "success-button"
-        );
-
-        botaoSalvar.setDisable(
-                true
-        );
-
+        botaoCancelarConflito = new Button("Cancelar");
+        botaoCancelarConflito.getStyleClass().add("secondary-button");
+        botaoCancelarConflito.setVisible(false);
+        botaoCancelarConflito.setManaged(false);
 
         criarCabecalho();
-
         criarConteudo();
-
         criarRodape();
 
-
-        controller =
-                new EdicaoEscalaController();
-
+        controller = new EdicaoEscalaController();
 
         configurarListaSemanas();
-
         configurarListaDesignacoes();
-
         registrarEventos();
     }
 
-
     private List<Pessoa> carregarListaPessoas() {
-
         try {
-
             return pessoaDAO.listarTodos()
                     .stream()
-                    .sorted(
-                            Comparator.comparing(
-                                    Pessoa::getNome,
-                                    String.CASE_INSENSITIVE_ORDER
-                            )
-                    )
+                    .sorted(Comparator.comparing(
+                            Pessoa::getNome,
+                            String.CASE_INSENSITIVE_ORDER
+                    ))
                     .toList();
-
         } catch (Exception e) {
-
-            mostrarErro(
-                    "Erro ao carregar pessoas.",
-                    e.getMessage()
-            );
-
+            mostrarErro("Erro ao carregar pessoas.", e.getMessage());
             return List.of();
         }
     }
-
 
     private List<Parte> carregarListaPartes() {
-
         try {
-
             return parteDAO.listarTodos()
                     .stream()
-                    .sorted(
-                            Comparator.comparing(
-                                    Parte::getNome,
-                                    String.CASE_INSENSITIVE_ORDER
-                            )
-                    )
+                    .sorted(Comparator.comparing(
+                            Parte::getNome,
+                            String.CASE_INSENSITIVE_ORDER
+                    ))
                     .toList();
-
         } catch (Exception e) {
-
-            mostrarErro(
-                    "Erro ao carregar partes.",
-                    e.getMessage()
-            );
-
+            mostrarErro("Erro ao carregar partes.", e.getMessage());
             return List.of();
         }
     }
 
-
     private ComboBox<Parte> criarComboParte() {
-
-        ComboBox<Parte> combo =
-                new ComboBox<>();
+        ComboBox<Parte> combo = new ComboBox<>();
 
         combo.setItems(
-                FXCollections.observableArrayList(
-                        todasAsPartes
-                )
+                FXCollections.observableArrayList(todasAsPartes)
         );
 
-        combo.setCellFactory(
-                listView ->
-                        new ListCell<>() {
+        combo.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Parte parte, boolean empty) {
+                super.updateItem(parte, empty);
+                setText(empty || parte == null
+                        ? null
+                        : parte.getNome());
+            }
+        });
 
-                            @Override
-                            protected void updateItem(
-                                    Parte parte,
-                                    boolean empty
-                            ) {
+        combo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Parte parte, boolean empty) {
+                super.updateItem(parte, empty);
+                setText(empty || parte == null
+                        ? null
+                        : parte.getNome());
+            }
+        });
 
-                                super.updateItem(
-                                        parte,
-                                        empty
-                                );
-
-                                if (
-                                        empty
-                                                || parte == null
-                                ) {
-
-                                    setText(null);
-
-                                } else {
-
-                                    setText(
-                                            parte.getNome()
-                                    );
-                                }
-                            }
-                        }
-        );
-
-        combo.setButtonCell(
-                new ListCell<>() {
-
-                    @Override
-                    protected void updateItem(
-                            Parte parte,
-                            boolean empty
-                    ) {
-
-                        super.updateItem(
-                                parte,
-                                empty
-                        );
-
-                        if (
-                                empty
-                                        || parte == null
-                        ) {
-
-                            setText(null);
-
-                        } else {
-
-                            setText(
-                                    parte.getNome()
-                            );
-                        }
-                    }
-                }
-        );
-
-        combo.setPromptText(
-                "Selecione a parte"
-        );
-
+        combo.setPromptText("Selecione a parte");
         return combo;
     }
-
 
     private ComboBox<Pessoa> criarComboPessoa() {
-
-        ComboBox<Pessoa> combo =
-                new ComboBox<>();
+        ComboBox<Pessoa> combo = new ComboBox<>();
 
         combo.setItems(
-                FXCollections.observableArrayList(
-                        todasAsPessoas
-                )
+                FXCollections.observableArrayList(todasAsPessoas)
         );
 
-        combo.setCellFactory(
-                listView ->
-                        criarCelulaPessoa()
-        );
-
-        combo.setButtonCell(
-                criarCelulaPessoa()
-        );
-
-        combo.setPromptText(
-                "Selecione uma pessoa"
-        );
+        combo.setCellFactory(listView -> criarCelulaPessoa());
+        combo.setButtonCell(criarCelulaPessoa());
+        combo.setPromptText("Selecione uma pessoa");
 
         return combo;
     }
 
-
     private ListCell<Pessoa> criarCelulaPessoa() {
-
         return new ListCell<>() {
-
             @Override
-            protected void updateItem(
-                    Pessoa pessoa,
-                    boolean empty
-            ) {
-
-                super.updateItem(
-                        pessoa,
-                        empty
-                );
-
-                if (
-                        empty
-                                || pessoa == null
-                ) {
-
-                    setText(null);
-
-                } else {
-
-                    setText(
-                            pessoa.getNome()
-                    );
-                }
+            protected void updateItem(Pessoa pessoa, boolean empty) {
+                super.updateItem(pessoa, empty);
+                setText(empty || pessoa == null
+                        ? null
+                        : pessoa.getNome());
             }
         };
     }
 
-
     private void atualizarListaPartes() {
-
-        List<Parte> partesAtualizadas =
-                carregarListaPartes();
-
         comboParte.setItems(
-                FXCollections.observableArrayList(
-                        partesAtualizadas
-                )
+                FXCollections.observableArrayList(carregarListaPartes())
         );
     }
-
 
     private void criarCabecalho() {
+        Label titulo = new Label("Edição de Escalas");
+        titulo.getStyleClass().add("page-title");
 
-        Label titulo =
-                new Label(
-                        "Edição de Escalas"
-                );
+        Label instrucao = new Label(
+                "Selecione o mês e a semana para editar as designações."
+        );
+        instrucao.getStyleClass().add("page-subtitle");
 
-        titulo.getStyleClass().add(
-                "page-title"
+        Label labelMes = new Label("Mês da escala");
+        labelMes.getStyleClass().add("label");
+
+        HBox linhaMes = new HBox(
+                10, labelMes, campoMes, botaoCarregar
+        );
+        linhaMes.setAlignment(Pos.CENTER_LEFT);
+
+        VBox topo = new VBox(
+                6, titulo, instrucao, criarEspaco(8), linhaMes
         );
 
-
-        Label instrucao =
-                new Label(
-                        "Selecione o mês e a semana para editar as designações."
-                );
-
-        instrucao.getStyleClass().add(
-                "page-subtitle"
-        );
-
-
-        Label labelMes =
-                new Label(
-                        "Mês da escala"
-                );
-
-        labelMes.getStyleClass().add(
-                "label"
-        );
-
-
-        HBox linhaMes =
-                new HBox(
-                        10,
-                        labelMes,
-                        campoMes,
-                        botaoCarregar
-                );
-
-        linhaMes.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-
-        VBox topo =
-                new VBox(
-                        6,
-                        titulo,
-                        instrucao,
-                        criarEspaco(8),
-                        linhaMes
-                );
-
-
-        root.setTop(
-                topo
-        );
+        root.setTop(topo);
     }
-
 
     private void criarConteudo() {
+        VBox painelSemanas = criarPainelSemanas();
+        VBox painelDesignacoes = criarPainelDesignacoes();
+        VBox painelEdicao = criarPainelEdicao();
 
-        VBox painelSemanas =
-                criarPainelSemanas();
-
-
-        VBox painelDesignacoes =
-                criarPainelDesignacoes();
-
-
-        VBox painelEdicao =
-                criarPainelEdicao();
-
-
-        HBox centro =
-                new HBox(
-                        16,
-                        painelSemanas,
-                        painelDesignacoes,
-                        painelEdicao
-                );
-
-
-        HBox.setHgrow(
-                painelSemanas,
-                Priority.SOMETIMES
+        HBox centro = new HBox(
+                16, painelSemanas, painelDesignacoes, painelEdicao
         );
 
-        HBox.setHgrow(
-                painelDesignacoes,
-                Priority.ALWAYS
-        );
+        HBox.setHgrow(painelSemanas, Priority.SOMETIMES);
+        HBox.setHgrow(painelDesignacoes, Priority.ALWAYS);
+        HBox.setHgrow(painelEdicao, Priority.SOMETIMES);
 
-        HBox.setHgrow(
-                painelEdicao,
-                Priority.SOMETIMES
-        );
-
-
-        root.setCenter(
-                centro
-        );
-
-        BorderPane.setMargin(
-                centro,
-                new Insets(
-                        24,
-                        0,
-                        0,
-                        0
-                )
-        );
+        root.setCenter(centro);
+        BorderPane.setMargin(centro, new Insets(24, 0, 0, 0));
     }
-
 
     private VBox criarPainelSemanas() {
+        Label titulo = new Label("Semanas disponíveis");
+        titulo.getStyleClass().add("card-title");
 
-        Label titulo =
-                new Label(
-                        "Semanas disponíveis"
-                );
-
-        titulo.getStyleClass().add(
-                "card-title"
+        Label descricao = new Label(
+                "Escolha uma semana para visualizar suas designações."
         );
+        descricao.getStyleClass().add("page-subtitle");
 
+        VBox.setVgrow(listaSemanas, Priority.ALWAYS);
 
-        Label descricao =
-                new Label(
-                        "Escolha uma semana para visualizar suas designações."
-                );
-
-        descricao.getStyleClass().add(
-                "page-subtitle"
+        VBox painel = new VBox(
+                10, titulo, descricao, listaSemanas
         );
-
-
-        VBox.setVgrow(
-                listaSemanas,
-                Priority.ALWAYS
-        );
-
-
-        VBox painel =
-                new VBox(
-                        10,
-                        titulo,
-                        descricao,
-                        listaSemanas
-                );
-
-        painel.getStyleClass().add(
-                "card"
-        );
-
-
-        painel.setPrefWidth(
-                260
-        );
-
-        painel.setMinWidth(
-                230
-        );
-
+        painel.getStyleClass().add("card");
+        painel.setPrefWidth(260);
+        painel.setMinWidth(230);
 
         return painel;
     }
-
 
     private VBox criarPainelDesignacoes() {
+        Label titulo = new Label("Designações da semana");
+        titulo.getStyleClass().add("card-title");
 
-        Label titulo =
-                new Label(
-                        "Designações da semana"
-                );
+        VBox.setVgrow(listaDesignacoes, Priority.ALWAYS);
 
-        titulo.getStyleClass().add(
-                "card-title"
+        VBox painel = new VBox(
+                10, labelSemanaSelecionada, titulo, listaDesignacoes
         );
-
-
-        VBox.setVgrow(
-                listaDesignacoes,
-                Priority.ALWAYS
-        );
-
-
-        VBox painel =
-                new VBox(
-                        10,
-                        labelSemanaSelecionada,
-                        titulo,
-                        listaDesignacoes
-                );
-
-        painel.getStyleClass().add(
-                "card"
-        );
-
+        painel.getStyleClass().add("card");
 
         configurarCelulasDesignacoes();
-
-
         return painel;
     }
-
 
     private void configurarCelulasDesignacoes() {
+        listaDesignacoes.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Designacao designacao, boolean empty) {
+                super.updateItem(designacao, empty);
 
-        listaDesignacoes.setCellFactory(
-                listView ->
-                        new ListCell<>() {
+                if (empty || designacao == null) {
+                    setGraphic(null);
+                    setText(null);
+                    return;
+                }
 
-                            @Override
-                            protected void updateItem(
-                                    Designacao designacao,
-                                    boolean empty
-                            ) {
+                String parte = designacao.parte().getNome();
 
-                                super.updateItem(
-                                        designacao,
-                                        empty
-                                );
+                String responsavel = designacao.responsavel() == null
+                        ? "-"
+                        : designacao.responsavel().getNome();
 
+                String ajudante = designacao.ajudante() == null
+                        ? "-"
+                        : designacao.ajudante().getNome();
 
-                                if (
-                                        empty
-                                                || designacao == null
-                                ) {
+                Label labelParte = new Label(parte);
+                labelParte.getStyleClass().add("card-title");
 
-                                    setGraphic(null);
-                                    setText(null);
+                Label labelResponsavel = new Label(
+                        "Responsável: " + responsavel
+                );
 
-                                    return;
-                                }
+                Label labelAjudante = new Label(
+                        "Ajudante: " + ajudante
+                );
 
+                VBox conteudo = new VBox(
+                        5, labelParte, labelResponsavel, labelAjudante
+                );
+                conteudo.setPadding(new Insets(10));
 
-                                String parte =
-                                        designacao
-                                                .parte()
-                                                .getNome();
-
-
-                                String responsavel =
-                                        designacao.responsavel() == null
-                                                ? "-"
-                                                : designacao
-                                                .responsavel()
-                                                .getNome();
-
-
-                                String ajudante =
-                                        designacao.ajudante() == null
-                                                ? "-"
-                                                : designacao
-                                                .ajudante()
-                                                .getNome();
-
-
-                                Label labelParte =
-                                        new Label(
-                                                parte
-                                        );
-
-                                labelParte.getStyleClass().add(
-                                        "card-title"
-                                );
-
-
-                                Label labelResponsavel =
-                                        new Label(
-                                                "Responsável: "
-                                                        + responsavel
-                                        );
-
-
-                                Label labelAjudante =
-                                        new Label(
-                                                "Ajudante: "
-                                                        + ajudante
-                                        );
-
-
-                                VBox conteudo =
-                                        new VBox(
-                                                5,
-                                                labelParte,
-                                                labelResponsavel,
-                                                labelAjudante
-                                        );
-
-
-                                conteudo.setPadding(
-                                        new Insets(
-                                                10
-                                        )
-                                );
-
-
-                                setGraphic(
-                                        conteudo
-                                );
-
-                                setText(null);
-
-                                setPadding(
-                                        new Insets(
-                                                3
-                                        )
-                                );
-                            }
-                        }
-        );
+                setGraphic(conteudo);
+                setText(null);
+                setPadding(new Insets(3));
+            }
+        });
     }
 
-
     private VBox criarPainelEdicao() {
+        Label titulo = new Label("Editar designação");
+        titulo.getStyleClass().add("card-title");
 
-        Label titulo =
-                new Label(
-                        "Editar designação"
-                );
+        Label descricao = new Label(
+                "Selecione uma designação ou adicione uma nova parte."
+        );
+        descricao.getStyleClass().add("page-subtitle");
 
-        titulo.getStyleClass().add(
-                "card-title"
+        Label labelParte = new Label("Adicionar parte");
+        labelParte.getStyleClass().add("label");
+
+        Label labelResponsavel = new Label("Responsável");
+        labelResponsavel.getStyleClass().add("label");
+
+        Label labelAjudante = new Label("Ajudante");
+        labelAjudante.getStyleClass().add("label");
+
+        VBox campoParte = new VBox(
+                6, labelParte, comboParte, botaoAdicionarParte
         );
 
-
-        Label descricao =
-                new Label(
-                        "Selecione uma designação ou adicione uma nova parte."
-                );
-
-        descricao.getStyleClass().add(
-                "page-subtitle"
+        VBox campoResponsavel = new VBox(
+                6, labelResponsavel, comboResponsavel
         );
 
-
-        Label labelParte =
-                new Label(
-                        "Adicionar parte"
-                );
-
-        labelParte.getStyleClass().add(
-                "label"
+        VBox campoAjudante = new VBox(
+                6, labelAjudante, comboAjudante
         );
 
-
-        Label labelResponsavel =
-                new Label(
-                        "Responsável"
-                );
-
-        labelResponsavel.getStyleClass().add(
-                "label"
+        VBox campos = new VBox(
+                16, campoParte, campoResponsavel, campoAjudante
         );
 
-
-        Label labelAjudante =
-                new Label(
-                        "Ajudante"
-                );
-
-        labelAjudante.getStyleClass().add(
-                "label"
+        VBox painel = new VBox(
+                10,
+                titulo,
+                descricao,
+                criarEspaco(6),
+                campos,
+                criarEspaco(10),
+                botaoSalvar
         );
 
+        painel.getStyleClass().add("card");
+        painel.setPrefWidth(310);
+        painel.setMinWidth(280);
 
-        VBox campoParte =
-                new VBox(
-                        6,
-                        labelParte,
-                        comboParte,
-                        botaoAdicionarParte
-                );
-
-
-        VBox campoResponsavel =
-                new VBox(
-                        6,
-                        labelResponsavel,
-                        comboResponsavel
-                );
-
-
-        VBox campoAjudante =
-                new VBox(
-                        6,
-                        labelAjudante,
-                        comboAjudante
-                );
-
-
-        VBox campos =
-                new VBox(
-                        16,
-                        campoParte,
-                        campoResponsavel,
-                        campoAjudante
-                );
-
-
-        VBox painel =
-                new VBox(
-                        10,
-                        titulo,
-                        descricao,
-                        criarEspaco(6),
-                        campos,
-                        criarEspaco(10),
-                        botaoSalvar
-                );
-
-
-        painel.getStyleClass().add(
-                "card"
-        );
-
-
-        painel.setPrefWidth(
-                310
-        );
-
-        painel.setMinWidth(
-                280
-        );
-
-
-        botaoSalvar.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
-        botaoAdicionarParte.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
+        botaoSalvar.setMaxWidth(Double.MAX_VALUE);
+        botaoAdicionarParte.setMaxWidth(Double.MAX_VALUE);
 
         return painel;
     }
 
-
     private void criarRodape() {
+        Separator separador = new Separator();
 
-        Separator separador =
-                new Separator();
-
-
-        HBox conteudo =
-                new HBox(
-                        labelStatus
-                );
-
-
-        conteudo.setAlignment(
-                Pos.CENTER_LEFT
+        HBox botoesConflito = new HBox(
+                10, botaoConfirmarConflito, botaoCancelarConflito
         );
+        botoesConflito.setAlignment(Pos.CENTER_LEFT);
 
+        HBox conteudo = new HBox(12, labelStatus, botoesConflito);
+        conteudo.setAlignment(Pos.CENTER_LEFT);
 
-        VBox rodape =
-                new VBox(
-                        10,
-                        separador,
-                        conteudo
-                );
+        VBox rodape = new VBox(10, separador, conteudo);
 
-
-        BorderPane.setMargin(
-                rodape,
-                new Insets(
-                        20,
-                        0,
-                        0,
-                        0
-                )
-        );
-
-
-        root.setBottom(
-                rodape
-        );
+        BorderPane.setMargin(rodape, new Insets(20, 0, 0, 0));
+        root.setBottom(rodape);
     }
-
 
     private void configurarListaSemanas() {
+        listaSemanas.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Escala escala, boolean empty) {
+                super.updateItem(escala, empty);
 
-        listaSemanas.setCellFactory(
-                listView ->
-                        new ListCell<>() {
+                if (empty || escala == null) {
+                    setGraphic(null);
+                    setText(null);
+                    return;
+                }
 
-                            @Override
-                            protected void updateItem(
-                                    Escala escala,
-                                    boolean empty
-                            ) {
+                String data = escala.getData().format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                );
 
-                                super.updateItem(
-                                        escala,
-                                        empty
-                                );
+                Label titulo = new Label("Semana");
+                titulo.getStyleClass().add("page-subtitle");
 
+                Label dataLabel = new Label(data);
+                dataLabel.getStyleClass().add("card-title");
 
-                                if (
-                                        empty
-                                                || escala == null
-                                ) {
+                VBox conteudo = new VBox(3, titulo, dataLabel);
+                conteudo.setPadding(new Insets(8));
 
-                                    setGraphic(null);
-                                    setText(null);
-
-                                    return;
-                                }
-
-
-                                String data =
-                                        escala
-                                                .getData()
-                                                .format(
-                                                        DateTimeFormatter.ofPattern(
-                                                                "dd/MM/yyyy"
-                                                        )
-                                                );
-
-
-                                Label titulo =
-                                        new Label(
-                                                "Semana"
-                                        );
-
-                                titulo.getStyleClass().add(
-                                        "page-subtitle"
-                                );
-
-
-                                Label dataLabel =
-                                        new Label(
-                                                data
-                                        );
-
-                                dataLabel.getStyleClass().add(
-                                        "card-title"
-                                );
-
-
-                                VBox conteudo =
-                                        new VBox(
-                                                3,
-                                                titulo,
-                                                dataLabel
-                                        );
-
-
-                                conteudo.setPadding(
-                                        new Insets(
-                                                8
-                                        )
-                                );
-
-
-                                setGraphic(
-                                        conteudo
-                                );
-
-                                setText(null);
-                            }
-                        }
-        );
+                setGraphic(conteudo);
+                setText(null);
+            }
+        });
     }
-
 
     private void configurarListaDesignacoes() {
-
-        listaDesignacoes
-                .getSelectionModel()
+        listaDesignacoes.getSelectionModel()
                 .selectedItemProperty()
-                .addListener(
-                        (observable,
-                         antiga,
-                         selecionada) -> {
+                .addListener((observable, antiga, selecionada) -> {
+                    if (selecionada == null) {
+                        return;
+                    }
 
-                            if (
-                                    selecionada == null
-                            ) {
+                    limparConfirmacaoConflito();
+                    designacaoSelecionada = selecionada;
 
-                                return;
-                            }
+                    atualizarListasDePessoas(
+                            selecionada.parte(),
+                            selecionada.responsavel(),
+                            selecionada.ajudante()
+                    );
 
+                    comboResponsavel.setValue(selecionada.responsavel());
+                    comboAjudante.setValue(selecionada.ajudante());
 
-                            designacaoSelecionada =
-                                    selecionada;
-
-
-                            atualizarListasDePessoas(
-                                    selecionada.parte(),
-                                    selecionada.responsavel(),
-                                    selecionada.ajudante()
-                            );
-
-
-                            comboResponsavel.setValue(
-                                    selecionada.responsavel()
-                            );
-
-
-                            comboAjudante.setValue(
-                                    selecionada.ajudante()
-                            );
-
-
-                            botaoSalvar.setDisable(
-                                    false
-                            );
-                        }
-                );
+                    botaoSalvar.setDisable(false);
+                });
     }
 
-
     private void registrarEventos() {
-
-        botaoCarregar.setOnAction(
-                event -> carregarSemanas()
-        );
-
-
-        campoMes.setOnAction(
-                event -> carregarSemanas()
-        );
-
+        botaoCarregar.setOnAction(event -> carregarSemanas());
+        campoMes.setOnAction(event -> carregarSemanas());
 
         comboParte.getSelectionModel()
                 .selectedItemProperty()
-                .addListener(
-                        (observable,
-                         antiga,
-                         selecionada) -> {
+                .addListener((observable, antiga, selecionada) -> {
+                    if (selecionada == null) {
+                        limparSelecaoPessoas();
+                        return;
+                    }
 
-                            if (
-                                    selecionada == null
-                            ) {
+                    atualizarListasDePessoas(selecionada, null, null);
+                });
 
-                                limparSelecaoPessoas();
-
-                                return;
-                            }
-
-
-                            atualizarListasDePessoas(
-                                    selecionada,
-                                    null,
-                                    null
-                            );
-                        }
-                );
-
-
-        listaSemanas
-                .getSelectionModel()
+        listaSemanas.getSelectionModel()
                 .selectedItemProperty()
-                .addListener(
-                        (observable,
-                         antigo,
-                         selecionado) -> {
+                .addListener((observable, antigo, selecionado) -> {
+                    if (selecionado == null) {
+                        return;
+                    }
 
-                            if (
-                                    selecionado == null
-                            ) {
+                    try {
+                        limparConfirmacaoConflito();
 
-                                return;
-                            }
+                        Escala escala = controller.selecionarEscala(
+                                selecionado.getId()
+                        );
 
+                        labelSemanaSelecionada.setText(
+                                "Semana: " + escala.getData().format(
+                                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                                )
+                        );
 
-                            try {
+                        listaDesignacoes.getItems().setAll(
+                                controller.listarDesignacoesSelecionadas()
+                        );
 
-                                Escala escala =
-                                        controller
-                                                .selecionarEscala(
-                                                        selecionado.getId()
-                                                );
+                        designacaoSelecionada = null;
+                        limparSelecaoPessoas();
+                        comboParte.setValue(null);
+                        atualizarListaPartes();
 
+                        botaoSalvar.setDisable(true);
+                        botaoAdicionarParte.setDisable(false);
 
-                                labelSemanaSelecionada.setText(
-                                        "Semana: "
-                                                + escala
-                                                .getData()
-                                                .format(
-                                                        DateTimeFormatter.ofPattern(
-                                                                "dd/MM/yyyy"
-                                                        )
-                                                )
-                                );
+                        labelStatus.setText(
+                                escala.getDesignacoes().size()
+                                        + " designação(ões) encontrada(s)."
+                        );
+                    } catch (Exception e) {
+                        mostrarErro(
+                                "Erro ao selecionar a semana.",
+                                e.getMessage()
+                        );
+                    }
+                });
 
+        botaoSalvar.setOnAction(event -> salvarAlteracoes());
+        botaoAdicionarParte.setOnAction(event -> adicionarParte());
 
-                                listaDesignacoes
-                                        .getItems()
-                                        .setAll(
-                                                controller
-                                                        .listarDesignacoesSelecionadas()
-                                        );
-
-
-                                designacaoSelecionada =
-                                        null;
-
-
-                                limparSelecaoPessoas();
-
-
-                                comboParte.setValue(
-                                        null
-                                );
-
-
-                                atualizarListaPartes();
-
-
-                                botaoSalvar.setDisable(
-                                        true
-                                );
-
-
-                                botaoAdicionarParte.setDisable(
-                                        false
-                                );
-
-
-                                labelStatus.setText(
-                                        escala
-                                                .getDesignacoes()
-                                                .size()
-                                                + " designação(ões) encontrada(s)."
-                                );
-
-                            } catch (Exception e) {
-
-                                mostrarErro(
-                                        "Erro ao selecionar a semana.",
-                                        e.getMessage()
-                                );
-                            }
-                        }
-                );
-
-
-        botaoSalvar.setOnAction(
-                event -> salvarAlteracoes()
+        botaoConfirmarConflito.setOnAction(
+                event -> confirmarSalvamentoComConflito()
         );
 
-
-        botaoAdicionarParte.setOnAction(
-                event -> adicionarParte()
-        );
+        botaoCancelarConflito.setOnAction(event -> {
+            limparConfirmacaoConflito();
+            labelStatus.setText("Alteração cancelada.");
+        });
     }
-
 
     private void atualizarListasDePessoas(
             Parte parte,
             Pessoa responsavelAtual,
             Pessoa ajudanteAtual
     ) {
-
         TipoParticipacao tipoResponsavel =
-                tipoParticipacaoDoResponsavel(
-                        parte
-                );
-
+                tipoParticipacaoDoResponsavel(parte);
 
         comboResponsavel.setItems(
                 FXCollections.observableArrayList(
                         controller.listarPessoasParaSelecao(
-                                parte,
-                                tipoResponsavel,
-                                responsavelAtual
+                                parte, tipoResponsavel, responsavelAtual
                         )
                 )
         );
-
 
         comboAjudante.setItems(
                 FXCollections.observableArrayList(
@@ -1231,269 +577,109 @@ public class EdicaoEscalaView {
         );
     }
 
-
-    private TipoParticipacao tipoParticipacaoDoResponsavel(
-            Parte parte
-    ) {
-
-        if (
-                parte.getTipo()
-                        == TipoParte.DIRIGENTE_ESTUDO
-        ) {
-
+    private TipoParticipacao tipoParticipacaoDoResponsavel(Parte parte) {
+        if (parte.getTipo() == TipoParte.DIRIGENTE_ESTUDO) {
             return TipoParticipacao.DIRIGENTE;
         }
 
-
         return parte.getParticipacoesNecessarias()
                 .stream()
-                .filter(
-                        tipo ->
-                                tipo != TipoParticipacao.AJUDANTE
-                )
+                .filter(tipo -> tipo != TipoParticipacao.AJUDANTE)
                 .findFirst()
-                .orElse(
-                        TipoParticipacao.RESPONSAVEL
-                );
+                .orElse(TipoParticipacao.RESPONSAVEL);
     }
 
-
     private void adicionarParte() {
-
-        if (controller == null) {
-
-            return;
-        }
-
-
         atualizarListaPartes();
 
-
-        Parte parte =
-                comboParte.getValue();
-
-
-        Pessoa responsavel =
-                comboResponsavel.getValue();
-
-
-        Pessoa ajudante =
-                comboAjudante.getValue();
-
+        Parte parte = comboParte.getValue();
+        Pessoa responsavel = comboResponsavel.getValue();
+        Pessoa ajudante = comboAjudante.getValue();
 
         if (parte == null) {
-
-            mostrarErro(
-                    "Adicionar parte",
-                    "Selecione uma parte."
-            );
-
+            mostrarErro("Adicionar parte", "Selecione a parte.");
             return;
         }
 
-
         if (responsavel == null) {
-
             mostrarErro(
                     "Adicionar parte",
                     "Selecione um responsável."
             );
-
             return;
         }
 
-
         try {
+            controller.adicionarParte(parte, responsavel, ajudante);
 
-            controller.adicionarParte(
-                    parte,
-                    responsavel,
-                    ajudante
+            listaDesignacoes.getItems().setAll(
+                    controller.listarDesignacoesSelecionadas()
             );
 
-
-            listaDesignacoes
-                    .getItems()
-                    .setAll(
-                            controller
-                                    .listarDesignacoesSelecionadas()
-                    );
-
-
-            comboParte.setValue(
-                    null
-            );
-
-
+            comboParte.setValue(null);
             limparSelecaoPessoas();
+            designacaoSelecionada = null;
+            botaoSalvar.setDisable(true);
 
-
-            designacaoSelecionada =
-                    null;
-
-
-            botaoSalvar.setDisable(
-                    true
-            );
-
-
-            labelStatus.setText(
-                    "Parte adicionada com sucesso."
-            );
-
+            labelStatus.setText("Parte adicionada com sucesso.");
         } catch (Exception e) {
-
-            mostrarErro(
-                    "Erro ao adicionar parte.",
-                    e.getMessage()
-            );
+            mostrarErro("Erro ao adicionar parte.", e.getMessage());
         }
     }
 
-
     private void limparSelecaoPessoas() {
-
-        comboResponsavel.setValue(
-                null
-        );
-
-        comboAjudante.setValue(
-                null
-        );
-
+        comboResponsavel.setValue(null);
+        comboAjudante.setValue(null);
         comboResponsavel.getEditor().clear();
-
         comboAjudante.getEditor().clear();
     }
 
-
     private void carregarSemanas() {
-
-        LocalDate data =
-                campoMes.getValue();
-
+        LocalDate data = campoMes.getValue();
 
         if (data == null) {
-
-            labelStatus.setText(
-                    "Selecione um mês."
-            );
-
-
-            listaSemanas
-                    .getItems()
-                    .clear();
-
-
-            listaDesignacoes
-                    .getItems()
-                    .clear();
-
-
-            botaoAdicionarParte.setDisable(
-                    true
-            );
-
-
+            labelStatus.setText("Selecione um mês.");
+            listaSemanas.getItems().clear();
+            listaDesignacoes.getItems().clear();
+            botaoAdicionarParte.setDisable(true);
             return;
         }
 
-
-        YearMonth mes =
-                YearMonth.from(
-                        data
-                );
-
+        YearMonth mes = YearMonth.from(data);
 
         try {
+            limparConfirmacaoConflito();
 
-            List<Escala> escalas =
-                    controller
-                            .listarEscalasDoMes(
-                                    mes
-                            );
+            List<Escala> escalas = controller.listarEscalasDoMes(mes);
+            listaSemanas.getItems().setAll(escalas);
+            listaDesignacoes.getItems().clear();
 
-
-            listaSemanas
-                    .getItems()
-                    .setAll(
-                            escalas
-                    );
-
-
-            listaDesignacoes
-                    .getItems()
-                    .clear();
-
-
-            designacaoSelecionada =
-                    null;
-
-
+            designacaoSelecionada = null;
             limparSelecaoPessoas();
-
-
-            comboParte.setValue(
-                    null
-            );
-
-
+            comboParte.setValue(null);
             atualizarListaPartes();
 
+            botaoSalvar.setDisable(true);
+            botaoAdicionarParte.setDisable(true);
 
-            botaoSalvar.setDisable(
-                    true
-            );
-
-
-            botaoAdicionarParte.setDisable(
-                    true
-            );
-
-
-            if (
-                    escalas.isEmpty()
-            ) {
-
+            if (escalas.isEmpty()) {
                 labelStatus.setText(
                         "Nenhuma escala encontrada para "
                                 + mes.format(
-                                DateTimeFormatter.ofPattern(
-                                        "MM/yyyy"
-                                )
+                                DateTimeFormatter.ofPattern("MM/yyyy")
                         )
                                 + "."
                 );
-
             } else {
-
                 labelStatus.setText(
-                        escalas.size()
-                                + " semana(s) encontrada(s)."
+                        escalas.size() + " semana(s) encontrada(s)."
                 );
             }
-
         } catch (Exception e) {
-
-            listaSemanas
-                    .getItems()
-                    .clear();
-
-
-            listaDesignacoes
-                    .getItems()
-                    .clear();
-
-
-            botaoAdicionarParte.setDisable(
-                    true
-            );
-
-
-            labelStatus.setText(
-                    "Erro ao carregar as semanas."
-            );
-
+            listaSemanas.getItems().clear();
+            listaDesignacoes.getItems().clear();
+            botaoAdicionarParte.setDisable(true);
+            labelStatus.setText("Erro ao carregar as semanas.");
 
             mostrarErro(
                     "Erro ao carregar as semanas.",
@@ -1502,70 +688,37 @@ public class EdicaoEscalaView {
         }
     }
 
-
     private void salvarAlteracoes() {
-
-        if (
-                designacaoSelecionada == null
-        ) {
-
+        if (designacaoSelecionada == null) {
             return;
         }
 
+        Pessoa novoResponsavel = comboResponsavel.getValue();
+        Pessoa novoAjudante = comboAjudante.getValue();
 
-        Pessoa novoResponsavel =
-                comboResponsavel.getValue();
-
-
-        Pessoa novoAjudante =
-                comboAjudante.getValue();
-
-
-        if (
-                novoResponsavel == null
-        ) {
-
+        if (novoResponsavel == null) {
             mostrarErro(
                     "Responsável",
                     "Selecione um responsável da lista."
             );
-
             return;
         }
 
-
         try {
+            List<LocalDate> conflitos = controller.verificarConflitos(
+                    designacaoSelecionada.id(),
+                    novoResponsavel,
+                    novoAjudante
+            );
 
-            List<LocalDate> conflitos =
-                    controller.verificarConflitos(
-                            designacaoSelecionada.id(),
-                            novoResponsavel,
-                            novoAjudante
-                    );
-
-
-            if (
-                    !conflitos.isEmpty()
-            ) {
-
-                boolean confirmou =
-                        confirmarConflitos(
-                                novoResponsavel,
-                                novoAjudante,
-                                conflitos
-                        );
-
-
-                if (!confirmou) {
-
-                    labelStatus.setText(
-                            "Alteração cancelada."
-                    );
-
-                    return;
-                }
+            if (!conflitos.isEmpty()) {
+                mostrarConfirmacaoConflitos(
+                        novoResponsavel,
+                        novoAjudante,
+                        conflitos
+                );
+                return;
             }
-
 
             controller.salvarAlteracoes(
                     designacaoSelecionada.id(),
@@ -1573,253 +726,159 @@ public class EdicaoEscalaView {
                     novoAjudante
             );
 
-
+            limparConfirmacaoConflito();
             atualizarListaDesignacoes();
-
-
-            labelStatus.setText(
-                    "Alterações salvas com sucesso."
-            );
+            labelStatus.setText("Alterações salvas com sucesso.");
 
         } catch (Exception e) {
-
-            mostrarErro(
-                    "Erro ao salvar alterações.",
-                    e.getMessage()
-            );
+            mostrarErro("Erro ao salvar alterações.", e.getMessage());
         }
     }
 
-
-    private boolean confirmarConflitos(
+    private void mostrarConfirmacaoConflitos(
             Pessoa responsavel,
             Pessoa ajudante,
             List<LocalDate> conflitos
     ) {
+        designacaoPendenteId = designacaoSelecionada.id();
+        responsavelPendente = responsavel;
+        ajudantePendente = ajudante;
 
-        StringBuilder mensagem =
-                new StringBuilder();
-
-
-        mensagem.append(
-                "Foi encontrado conflito de escala no mês.\n\n"
+        StringBuilder mensagem = new StringBuilder(
+                "Conflito encontrado. Responsável: "
         );
+        mensagem.append(responsavel.getNome());
 
-
-        mensagem.append(
-                "Participantes envolvidos:\n"
-        );
-
-
-        mensagem.append(
-                "• Responsável: "
-        );
-
-
-        mensagem.append(
-                responsavel.getNome()
-        );
-
-
-        mensagem.append(
-                "\n"
-        );
-
-
-        if (
-                ajudante != null
-        ) {
-
-            mensagem.append(
-                    "• Ajudante: "
-            );
-
-
-            mensagem.append(
-                    ajudante.getNome()
-            );
-
-
-            mensagem.append(
-                    "\n"
-            );
+        if (ajudante != null) {
+            mensagem.append(" | Ajudante: ")
+                    .append(ajudante.getNome());
         }
 
+        mensagem.append(" | Datas: ");
 
-        mensagem.append(
-                "\nDatas com conflito:\n"
-        );
-
-
-        for (
-                LocalDate data :
-                conflitos
-        ) {
+        for (int i = 0; i < conflitos.size(); i++) {
+            if (i > 0) {
+                mensagem.append(", ");
+            }
 
             mensagem.append(
-                    "• "
-            );
-
-
-            mensagem.append(
-                    data.format(
-                            DateTimeFormatter.ofPattern(
-                                    "dd/MM/yyyy"
-                            )
+                    conflitos.get(i).format(
+                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
                     )
             );
-
-
-            mensagem.append(
-                    "\n"
-            );
         }
 
+        mensagem.append(". Escolha uma opção abaixo.");
 
-        mensagem.append(
-                "\nDeseja salvar mesmo assim?"
-        );
+        labelStatus.setText(mensagem.toString());
+        labelStatus.setWrapText(true);
 
+        labelStatus.getStyleClass().remove("status-success");
+        labelStatus.getStyleClass().remove("status-error");
 
-        Alert alerta =
-                new Alert(
-                        Alert.AlertType.CONFIRMATION
-                );
+        if (!labelStatus.getStyleClass().contains("status-warning")) {
+            labelStatus.getStyleClass().add("status-warning");
+        }
 
+        botaoConfirmarConflito.setVisible(true);
+        botaoConfirmarConflito.setManaged(true);
 
-        alerta.setTitle(
-                "Conflito de escala"
-        );
-
-
-        alerta.setHeaderText(
-                "Conflito encontrado"
-        );
-
-
-        alerta.setContentText(
-                mensagem.toString()
-        );
-
-
-        return alerta
-                .showAndWait()
-                .filter(
-                        resposta ->
-                                resposta == ButtonType.OK
-                )
-                .isPresent();
+        botaoCancelarConflito.setVisible(true);
+        botaoCancelarConflito.setManaged(true);
     }
 
+    private void confirmarSalvamentoComConflito() {
+        if (designacaoPendenteId == null
+                || responsavelPendente == null) {
+            limparConfirmacaoConflito();
+            return;
+        }
+
+        try {
+            controller.salvarAlteracoes(
+                    designacaoPendenteId,
+                    responsavelPendente,
+                    ajudantePendente
+            );
+
+            limparConfirmacaoConflito();
+            atualizarListaDesignacoes();
+
+            labelStatus.setText(
+                    "Alterações salvas com sucesso, apesar dos conflitos."
+            );
+        } catch (Exception e) {
+            limparConfirmacaoConflito();
+
+            labelStatus.setText(
+                    "Erro ao salvar: "
+                            + (e.getMessage() == null
+                            ? "Erro desconhecido."
+                            : e.getMessage())
+            );
+        }
+    }
+
+    private void limparConfirmacaoConflito() {
+        designacaoPendenteId = null;
+        responsavelPendente = null;
+        ajudantePendente = null;
+
+        botaoConfirmarConflito.setVisible(false);
+        botaoConfirmarConflito.setManaged(false);
+
+        botaoCancelarConflito.setVisible(false);
+        botaoCancelarConflito.setManaged(false);
+    }
 
     private void atualizarListaDesignacoes() {
-
         List<Designacao> designacoes =
-                controller
-                        .listarDesignacoesSelecionadas();
+                controller.listarDesignacoesSelecionadas();
 
+        listaDesignacoes.getItems().setAll(designacoes);
 
-        listaDesignacoes
-                .getItems()
-                .setAll(
-                        designacoes
-                );
-
-
-        designacaoSelecionada =
-                null;
-
-
+        designacaoSelecionada = null;
         limparSelecaoPessoas();
-
-
-        botaoSalvar.setDisable(
-                true
-        );
+        botaoSalvar.setDisable(true);
     }
 
-
     public Parent getView() {
-
         return root;
     }
 
-
     public DatePicker getCampoMes() {
-
         return campoMes;
     }
 
-
     public ListView<Escala> getListaSemanas() {
-
         return listaSemanas;
     }
 
-
     public ListView<Designacao> getListaDesignacoes() {
-
         return listaDesignacoes;
     }
 
-
     public Label getLabelStatus() {
-
         return labelStatus;
     }
 
-
-    private void mostrarErro(
-            String titulo,
-            String mensagem
-    ) {
-
-        Alert alerta =
-                new Alert(
-                        Alert.AlertType.ERROR
-                );
-
-
-        alerta.setTitle(
-                titulo
-        );
-
-
-        alerta.setHeaderText(
-                null
-        );
-
-
+    private void mostrarErro(String titulo, String mensagem) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
         alerta.setContentText(
                 mensagem == null
                         ? "Erro desconhecido."
                         : mensagem
         );
-
-
         alerta.showAndWait();
     }
 
-
-    private VBox criarEspaco(
-            double altura
-    ) {
-
-        VBox espaco =
-                new VBox();
-
-        espaco.setMinHeight(
-                altura
-        );
-
-        espaco.setPrefHeight(
-                altura
-        );
-
-        espaco.setMaxHeight(
-                altura
-        );
-
+    private VBox criarEspaco(double altura) {
+        VBox espaco = new VBox();
+        espaco.setMinHeight(altura);
+        espaco.setPrefHeight(altura);
+        espaco.setMaxHeight(altura);
         return espaco;
     }
 }
