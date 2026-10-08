@@ -30,14 +30,15 @@ public class HistoricoController {
     }
 
 
+
+
     private void carregarHistorico() {
 
-        escalas =
-                escalaDAO.listarTodas();
+        escalas = escalaDAO.listarTodas();
 
-        view.carregarEscalas(
-                escalas
-        );
+        view.atualizarMeses(escalas);
+
+        filtrarPorMes(YearMonth.now());
     }
 
 

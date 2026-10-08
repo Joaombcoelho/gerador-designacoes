@@ -432,9 +432,16 @@ public class HistoricoView {
         );
 
 
+
         colunaStatus.setCellFactory(
                 coluna ->
                         new TableCell<>() {
+
+                            private final Label badge = new Label();
+
+                            {
+                                badge.getStyleClass().add("badge-blue");
+                            }
 
                             @Override
                             protected void updateItem(
@@ -442,38 +449,18 @@ public class HistoricoView {
                                     boolean empty
                             ) {
 
-                                super.updateItem(
-                                        status,
-                                        empty
-                                );
+                                super.updateItem(status, empty);
 
-
-                                if (
-                                        empty
-                                                || status == null
-                                ) {
-
+                                if (empty || status == null || status.isBlank()) {
                                     setText(null);
-
+                                    setGraphic(null);
                                     return;
                                 }
 
-
-                                Label badge =
-                                        new Label(
-                                                status
-                                        );
-
-                                badge.getStyleClass().add(
-                                        "badge-blue"
-                                );
-
-
-                                setGraphic(
-                                        badge
-                                );
+                                badge.setText(status);
 
                                 setText(null);
+                                setGraphic(badge);
                             }
                         }
         );
