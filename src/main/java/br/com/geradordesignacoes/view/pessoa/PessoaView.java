@@ -24,6 +24,10 @@ public class PessoaView {
 
     private final TableView<Pessoa> tabela;
 
+    private VBox painelConfirmacao;
+
+    private Pessoa pessoaPendenteExclusao;
+
 
     public PessoaView(PessoaService pessoaService) {
 
@@ -437,50 +441,46 @@ public class PessoaView {
     }
 
 
-    private void confirmarExclusao(
-            Pessoa pessoa
-    ) {
 
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.CONFIRMATION
-                );
+    private void confirmarExclusao(Pessoa pessoa) {
 
+        pessoaPendenteExclusao = pessoa;
 
-        alert.setTitle(
-                "Confirmação"
+        Label mensagem = new Label(
+                "Deseja realmente excluir \"" + pessoa.getNome() + "\"?"
         );
+        mensagem.getStyleClass().add("page-subtitle");
 
+        Button confirmar = new Button("Confirmar exclusão");
+        confirmar.getStyleClass().add("danger-button");
 
-        alert.setHeaderText(
-                "Excluir Pessoa"
-        );
+        Button cancelar = new Button("Cancelar");
+        cancelar.getStyleClass().add("secondary-button");
 
+        HBox botoes = new HBox(10, confirmar, cancelar);
+        botoes.setAlignment(Pos.CENTER_RIGHT);
 
-        alert.setContentText(
-                "Deseja realmente excluir \"" +
-                        pessoa.getNome() +
-                        "\"?"
-        );
+        painelConfirmacao = new VBox(12, mensagem, botoes);
+        painelConfirmacao.getStyleClass().add("card");
+        painelConfirmacao.setPadding(new Insets(16));
 
+        confirmar.setOnAction(event -> {
+            if (pessoaPendenteExclusao != null) {
+                pessoaService.excluir(pessoaPendenteExclusao.getId());
+                pessoaPendenteExclusao = null;
+                voltarParaTabela();
+            }
+        });
 
-        ButtonType resposta =
-                alert.showAndWait()
-                        .orElse(
-                                ButtonType.CANCEL
-                        );
-
-
-        if (
-                resposta ==
-                        ButtonType.OK
-        ) {
-
-            pessoaService.excluir(
-                    pessoa.getId()
-            );
-
+        cancelar.setOnAction(event -> {
+            pessoaPendenteExclusao = null;
             voltarParaTabela();
-        }
+        });
+
+        VBox conteudo = new VBox(16, tabela, painelConfirmacao);
+        VBox.setVgrow(tabela, Priority.ALWAYS);
+
+        root.setCenter(conteudo);
     }
+
 }

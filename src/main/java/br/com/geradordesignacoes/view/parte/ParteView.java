@@ -169,6 +169,7 @@ public class ParteView {
         abrirFormulario(selecionada);
     }
 
+
     private void excluirSelecionado() {
         Parte selecionada = tabela.getSelectionModel().getSelectedItem();
 
@@ -177,23 +178,44 @@ public class ParteView {
             return;
         }
 
-        Alert alerta = new Alert(
-                Alert.AlertType.CONFIRMATION,
-                "Deseja realmente excluir a parte \""
-                        + selecionada.getNome() + "\"?",
-                ButtonType.YES,
-                ButtonType.NO
+        VBox painelAtual = (VBox) root.getCenter();
+
+        // Evita exibir mais de uma confirmação.
+        painelAtual.getChildren().removeIf(
+                node -> node.getProperties().containsKey("confirmacao-exclusao")
         );
 
-        alerta.setTitle("Confirmar exclusão");
-        alerta.setHeaderText("Excluir parte");
+        Label mensagem = new Label(
+                "Deseja realmente excluir a parte \""
+                        + selecionada.getNome() + "\"?"
+        );
+        mensagem.getStyleClass().add("page-subtitle");
 
-        alerta.showAndWait().ifPresent(resposta -> {
-            if (resposta == ButtonType.YES) {
-                parteDAO.excluir(selecionada.getId());
-                carregarDados();
-            }
+        Button confirmar = new Button("Confirmar exclusão");
+        confirmar.getStyleClass().add("danger-button");
+
+        Button cancelar = new Button("Cancelar");
+        cancelar.getStyleClass().add("secondary-button");
+
+        HBox botoesConfirmacao = new HBox(10, confirmar, cancelar);
+        botoesConfirmacao.setAlignment(Pos.CENTER_RIGHT);
+
+        VBox confirmacao = new VBox(12, mensagem, botoesConfirmacao);
+        confirmacao.getStyleClass().add("card");
+        confirmacao.setPadding(new Insets(16));
+        confirmacao.getProperties().put("confirmacao-exclusao", true);
+
+        confirmar.setOnAction(event -> {
+            painelAtual.getChildren().remove(confirmacao);
+            parteDAO.excluir(selecionada.getId());
+            carregarDados();
         });
+
+        cancelar.setOnAction(event ->
+                painelAtual.getChildren().remove(confirmacao)
+        );
+
+        painelAtual.getChildren().add(confirmacao);
     }
 
     private void mostrarAviso(String mensagem) {
