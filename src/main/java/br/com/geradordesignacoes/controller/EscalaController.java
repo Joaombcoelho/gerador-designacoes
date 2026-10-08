@@ -87,6 +87,13 @@ public class EscalaController {
                 .setOnAction(
                         event -> salvarEscala()
                 );
+
+        view.getCampoData()
+                .valueProperty()
+                .addListener(
+                        (observable, dataAnterior, novaData) ->
+                                atualizarEscalaSelecionada(novaData)
+                );
     }
 
     private void gerarEscala() {
@@ -149,6 +156,45 @@ public class EscalaController {
 
         return view.getCampoData()
                 .getValue();
+    }
+
+    private void atualizarEscalaSelecionada(
+            LocalDate data
+    ) {
+
+        if (data == null) {
+            return;
+        }
+
+        ResultadoGeracaoEscala resultado =
+                resultadosGeracao.get(data);
+
+        if (resultado == null) {
+
+            view.getTabela()
+                    .getItems()
+                    .clear();
+
+            view.atualizarStatus(
+                    "Nenhuma escala gerada para esta semana."
+            );
+
+            view.atualizarResumo(
+                    ""
+            );
+
+            return;
+        }
+
+        preencherTabela(
+                resultado.escala()
+                        .getDesignacoes()
+        );
+
+        ultimoResultado =
+                resultado;
+
+        atualizarResumo();
     }
 
     private void informarDataObrigatoria() {
