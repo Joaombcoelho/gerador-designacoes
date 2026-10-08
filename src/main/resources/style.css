@@ -1,223 +1,415 @@
-/* =========================================================
-       GERADOR DE DESIGNAÇÕES
-       Identidade visual principal
-       ========================================================= */
+/* ============================================================
+   GERADOR DE DESIGNAÇÕES
+   Tema Dark — Moderno / Minimalista / Profissional
+   ============================================================ */
 
 
-    /* =========================================================
-       CORES E CONFIGURAÇÕES GERAIS
-       ========================================================= */
+/* ============================================================
+   PALETA / BASE
+   ============================================================ */
 
 .root {
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
-    -fx-background-color: #f5f7fa;
-    -fx-text-fill: #263238;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+
+    -fx-background-color: #181B20;
+
+    -fx-text-fill: #F3F4F6;
 }
 
 
-/* =========================================================
-   BARRA SUPERIOR
-   ========================================================= */
+/* ============================================================
+   LAYOUT PRINCIPAL
+   ============================================================ */
 
-.top-bar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e1e5e9;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 14 20 14 20;
+.main-root {
+    -fx-background-color: #181B20;
 }
 
 
-/* =========================================================
-   MENU LATERAL
-   ========================================================= */
+/* ============================================================
+   BARRA LATERAL
+   ============================================================ */
 
 .sidebar {
-    -fx-background-color: #1f2937;
-    -fx-padding: 20 12 20 12;
-    -fx-spacing: 6;
+    -fx-background-color: #111317;
+
+    -fx-padding: 20px 12px 16px 12px;
+
+    -fx-border-color: #20242C;
+    -fx-border-width: 0 1px 0 0;
 }
 
 
-/* Nome da aplicação no menu */
+/* Logo / título */
 
 .sidebar-title {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 18px;
+    -fx-text-fill: #FFFFFF;
+
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 17px;
     -fx-font-weight: bold;
-    -fx-padding: 5 10 20 10;
+
+    -fx-padding: 4px 10px 18px 10px;
 }
 
 
-/* Categorias do menu */
+/* Seções */
 
 .sidebar-section {
-    -fx-text-fill: #9ca3af;
-    -fx-font-size: 11px;
+    -fx-text-fill: #6B7280;
+
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
-    -fx-padding: 18 10 5 10;
+
+    -fx-padding: 14px 10px 7px 10px;
 }
 
 
-/* Botões do menu */
+/* Botões */
 
 .sidebar-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #d1d5db;
-    -fx-font-size: 14px;
+
+    -fx-text-fill: #9CA3AF;
+
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+
     -fx-alignment: CENTER_LEFT;
-    -fx-padding: 10 12 10 12;
-    -fx-background-radius: 6;
+
+    -fx-padding: 10px 12px;
+
+    -fx-background-radius: 7px;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 3px;
+
     -fx-cursor: hand;
 }
 
 
 .sidebar-button:hover {
-    -fx-background-color: #374151;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #FFFFFF;
+
+    -fx-border-color: #2B82C5;
 }
 
+
+.sidebar-button:pressed {
+    -fx-background-color: #20252E;
+}
+
+
+/* Botão ativo */
 
 .sidebar-button-active {
-    -fx-background-color: #2563eb;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #FFFFFF;
+
     -fx-font-weight: bold;
+
+    -fx-border-color: #2B82C5;
+    -fx-border-width: 0 0 0 3px;
 }
 
+
+/* Espaço flexível */
 
 .sidebar-spacer {
-    -fx-pref-height: 10;
+    -fx-background-color: transparent;
 }
 
 
-/* =========================================================
-   ÁREA PRINCIPAL
-   ========================================================= */
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
+
+.top-bar {
+    -fx-background-color: #181B20;
+
+    -fx-padding: 14px 24px;
+
+    -fx-border-color: #252A34;
+    -fx-border-width: 0 0 1px 0;
+}
+
+
+.top-bar .label {
+    -fx-text-fill: #F3F4F6;
+}
+
+
+/* ============================================================
+   ÁREA DE CONTEÚDO
+   ============================================================ */
 
 .content-area {
-    -fx-background-color: #f5f7fa;
-    -fx-padding: 30;
+    -fx-background-color: #181B20;
+
+    -fx-padding: 26px;
 }
 
 
-/* =========================================================
+/* ============================================================
    TÍTULOS
-   ========================================================= */
+   ============================================================ */
 
 .page-title {
-    -fx-text-fill: #111827;
-    -fx-font-size: 26px;
+    -fx-text-fill: #FFFFFF;
+
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
 }
 
 
 .page-subtitle {
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 14px;
+    -fx-text-fill: #9CA3AF;
+
+    -fx-font-size: 13px;
 }
 
 
-/* =========================================================
+/* ============================================================
    CARDS
-   ========================================================= */
+   ============================================================ */
 
 .card {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 10;
-    -fx-border-color: #e5e7eb;
-    -fx-border-radius: 10;
-    -fx-padding: 20;
+    -fx-background-color: #252A34;
+
+    -fx-background-radius: 12px;
+
+    -fx-border-color: #303642;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+
+    -fx-padding: 18px;
+}
+
+
+.card:hover {
+    -fx-background-color: #292F3A;
+
+    -fx-border-color: #3A4657;
 }
 
 
 .card-title {
-    -fx-text-fill: #6b7280;
-    -fx-font-size: 13px;
+    -fx-text-fill: #9CA3AF;
+
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
 
 
 .card-value {
-    -fx-text-fill: #111827;
-    -fx-font-size: 26px;
+    -fx-text-fill: #FFFFFF;
+
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
 }
 
 
-/* =========================================================
+/* ============================================================
    BOTÕES PRINCIPAIS
-   ========================================================= */
+   ============================================================ */
 
 .primary-button {
-    -fx-background-color: #2563eb;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 14px;
+    -fx-background-color: #2B82C5;
+
+    -fx-text-fill: #FFFFFF;
+
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-padding: 10 18 10 18;
-    -fx-background-radius: 6;
+
+    -fx-padding: 10px 18px;
+
+    -fx-background-radius: 7px;
+
+    -fx-border-color: transparent;
+
     -fx-cursor: hand;
 }
 
 
 .primary-button:hover {
-    -fx-background-color: #1d4ed8;
+    -fx-background-color: #3594DC;
 }
 
 
+.primary-button:pressed {
+    -fx-background-color: #246FA8;
+}
+
+
+/* ============================================================
+   BOTÃO VERDE / AÇÃO POSITIVA
+   ============================================================ */
+
+.success-button {
+    -fx-background-color: #10B981;
+
+    -fx-text-fill: #FFFFFF;
+
+    -fx-font-weight: bold;
+
+    -fx-padding: 10px 18px;
+
+    -fx-background-radius: 7px;
+
+    -fx-border-color: transparent;
+
+    -fx-cursor: hand;
+}
+
+
+.success-button:hover {
+    -fx-background-color: #13CA8D;
+}
+
+
+.success-button:pressed {
+    -fx-background-color: #0E9F70;
+}
+
+
+/* ============================================================
+   BOTÕES SECUNDÁRIOS
+   ============================================================ */
+
 .secondary-button {
-    -fx-background-color: #ffffff;
-    -fx-text-fill: #374151;
-    -fx-font-size: 14px;
-    -fx-padding: 10 18 10 18;
-    -fx-border-color: #d1d5db;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #D1D5DB;
+
+    -fx-font-size: 13px;
+
+    -fx-padding: 9px 16px;
+
+    -fx-background-radius: 7px;
+
+    -fx-border-color: #3A414D;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
     -fx-cursor: hand;
 }
 
 
 .secondary-button:hover {
-    -fx-background-color: #f3f4f6;
+    -fx-background-color: #2D333E;
+
+    -fx-text-fill: #FFFFFF;
+
+    -fx-border-color: #4A5565;
 }
 
 
-/* =========================================================
+.secondary-button:pressed {
+    -fx-background-color: #20252D;
+}
+
+
+/* ============================================================
+   BOTÃO PERIGOSO
+   ============================================================ */
+
+.danger-button {
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #F87171;
+
+    -fx-font-weight: bold;
+
+    -fx-padding: 9px 16px;
+
+    -fx-background-radius: 7px;
+
+    -fx-border-color: #3A414D;
+    -fx-border-radius: 7px;
+
+    -fx-cursor: hand;
+}
+
+
+.danger-button:hover {
+    -fx-background-color: #3A2327;
+
+    -fx-text-fill: #EF4444;
+
+    -fx-border-color: #EF4444;
+}
+
+
+/* ============================================================
    STATUS
-   ========================================================= */
+   ============================================================ */
 
 .status-success {
-    -fx-text-fill: #15803d;
-    -fx-font-size: 13px;
+    -fx-background-color: #123A2E;
+
+    -fx-text-fill: #34D399;
+
+    -fx-padding: 6px 10px;
+
+    -fx-background-radius: 20px;
+
     -fx-font-weight: bold;
 }
 
 
 .status-warning {
-    -fx-text-fill: #b45309;
-    -fx-font-size: 13px;
+    -fx-background-color: #3D2E12;
+
+    -fx-text-fill: #FBBF24;
+
+    -fx-padding: 6px 10px;
+
+    -fx-background-radius: 20px;
+
     -fx-font-weight: bold;
 }
 
 
 .status-error {
-    -fx-text-fill: #b91c1c;
-    -fx-font-size: 13px;
+    -fx-background-color: #3B2024;
+
+    -fx-text-fill: #F87171;
+
+    -fx-padding: 6px 10px;
+
+    -fx-background-radius: 20px;
+
     -fx-font-weight: bold;
 }
 
 
-/* =========================================================
-   CAMPOS
-   ========================================================= */
+/* ============================================================
+   CAMPOS DE TEXTO
+   ============================================================ */
 
 .text-field,
 .password-field,
 .combo-box,
 .date-picker {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #d1d5db;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 8 10 8 10;
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #F3F4F6;
+
+    -fx-prompt-text-fill: #6B7280;
+
+    -fx-background-radius: 7px;
+
+    -fx-border-color: #363D49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-padding: 9px 11px;
 }
 
 
@@ -225,71 +417,255 @@
 .password-field:focused,
 .combo-box:focused,
 .date-picker:focused {
-    -fx-border-color: #2563eb;
-    -fx-border-width: 1.5;
+    -fx-border-color: #2B82C5;
+
+    -fx-background-color: #272D38;
 }
 
 
-/* =========================================================
+/* Texto digitado */
+
+.text-field .text,
+.password-field .text {
+    -fx-fill: #FFFFFF;
+}
+
+
+/* ============================================================
+   COMBO BOX
+   ============================================================ */
+
+.combo-box {
+    -fx-padding: 0;
+}
+
+
+.combo-box .list-cell {
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #F3F4F6;
+}
+
+
+.combo-box-popup .list-view {
+    -fx-background-color: #252A34;
+
+    -fx-border-color: #3A414D;
+}
+
+
+.combo-box-popup .list-cell {
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #F3F4F6;
+
+    -fx-padding: 9px 12px;
+}
+
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #2B82C5;
+
+    -fx-text-fill: #FFFFFF;
+}
+
+
+/* ============================================================
+   DATE PICKER
+   ============================================================ */
+
+.date-picker .text-field {
+    -fx-background-color: transparent;
+
+    -fx-border-color: transparent;
+}
+
+
+.date-picker .arrow-button {
+    -fx-background-color: #2B82C5;
+
+    -fx-background-radius: 0 6px 6px 0;
+}
+
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: #3594DC;
+}
+
+
+/* ============================================================
    TABELAS
-   ========================================================= */
+   ============================================================ */
 
 .table-view {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
+    -fx-background-color: #252A34;
+
+    -fx-control-inner-background: #252A34;
+
+    -fx-table-cell-border-color: #303642;
+
+    -fx-border-color: #303642;
+
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
 }
 
 
+/* Cabeçalho */
+
 .table-view .column-header-background {
-    -fx-background-color: #f3f4f6;
+    -fx-background-color: #1E222B;
+
+    -fx-background-radius: 10px 10px 0 0;
 }
 
 
 .table-view .column-header {
     -fx-background-color: transparent;
+
+    -fx-border-color: #303642;
+
+    -fx-padding: 11px 8px;
 }
 
 
 .table-view .column-header .label {
-    -fx-text-fill: #374151;
+    -fx-text-fill: #9CA3AF;
+
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
 }
 
 
+/* Células */
+
+.table-view .table-cell {
+    -fx-text-fill: #E5E7EB;
+
+    -fx-padding: 10px 8px;
+
+    -fx-border-color: transparent;
+}
+
+
+/* Linhas */
+
 .table-row-cell {
-    -fx-background-color: #ffffff;
-    -fx-border-color: transparent transparent #f0f0f0 transparent;
+    -fx-background-color: #252A34;
+
+    -fx-border-color: #303642;
+    -fx-border-width: 0 0 1px 0;
+}
+
+
+.table-row-cell:odd {
+    -fx-background-color: #222730;
 }
 
 
 .table-row-cell:hover {
-    -fx-background-color: #f9fafb;
+    -fx-background-color: #2D3440;
 }
 
 
 .table-row-cell:selected {
-    -fx-background-color: #dbeafe;
-    -fx-text-fill: #111827;
+    -fx-background-color: #1F527A;
 }
 
 
-/* =========================================================
-   SEPARADORES
-   ========================================================= */
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: #FFFFFF;
+}
+
+
+/* ============================================================
+   CHECKBOX
+   ============================================================ */
+
+.check-box {
+    -fx-text-fill: #D1D5DB;
+
+    -fx-font-size: 13px;
+}
+
+
+.check-box:hover {
+    -fx-text-fill: #FFFFFF;
+}
+
+
+.check-box .box {
+    -fx-background-color: #252A34;
+
+    -fx-border-color: #4B5563;
+
+    -fx-border-width: 1.5px;
+
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+
+    -fx-padding: 4px;
+}
+
+
+.check-box:selected .box {
+    -fx-background-color: #10B981;
+
+    -fx-border-color: #10B981;
+}
+
+
+.check-box:selected .mark {
+    -fx-background-color: #FFFFFF;
+}
+
+
+/* ============================================================
+   RADIO BUTTON
+   ============================================================ */
+
+.radio-button {
+    -fx-text-fill: #D1D5DB;
+}
+
+
+.radio-button .radio {
+    -fx-background-color: #252A34;
+
+    -fx-border-color: #4B5563;
+
+    -fx-border-radius: 100px;
+
+    -fx-padding: 4px;
+}
+
+
+.radio-button:selected .radio {
+    -fx-background-color: #2B82C5;
+
+    -fx-border-color: #2B82C5;
+}
+
+
+/* ============================================================
+   SEPARADOR
+   ============================================================ */
 
 .separator .line {
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: #303642;
+
+    -fx-border-width: 1px 0 0 0;
 }
 
 
-/* =========================================================
-   SCROLL
-   ========================================================= */
+/* ============================================================
+   SCROLL PANE
+   ============================================================ */
 
 .scroll-pane {
     -fx-background-color: transparent;
+
+    -fx-border-color: transparent;
 }
 
 
@@ -298,50 +674,237 @@
 }
 
 
-/* =========================================================
-   ALERTAS
-   ========================================================= */
+/* ============================================================
+   LIST VIEW
+   ============================================================ */
+
+.list-view {
+    -fx-background-color: #252A34;
+
+    -fx-border-color: #303642;
+
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+
+.list-cell {
+    -fx-background-color: #252A34;
+
+    -fx-text-fill: #D1D5DB;
+
+    -fx-padding: 10px;
+}
+
+
+.list-cell:odd {
+    -fx-background-color: #222730;
+}
+
+
+.list-cell:hover {
+    -fx-background-color: #2D3440;
+}
+
+
+.list-cell:selected {
+    -fx-background-color: #1F527A;
+
+    -fx-text-fill: #FFFFFF;
+}
+
+
+/* ============================================================
+   DIALOGOS
+   ============================================================ */
 
 .dialog-pane {
-    -fx-background-color: #ffffff;
+    -fx-background-color: #252A34;
 }
 
 
 .dialog-pane .header-panel {
-    -fx-background-color: #f5f7fa;
+    -fx-background-color: #1E222B;
+}
+
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #FFFFFF;
+
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
 }
 
 
 .dialog-pane .content {
-    -fx-padding: 15;
+    -fx-text-fill: #D1D5DB;
 }
 
 
-/* =========================================================
-   BOTÕES PADRÃO DO JAVAFX
-   ========================================================= */
+.dialog-pane .button-bar .button {
+    -fx-background-color: #2B82C5;
+
+    -fx-text-fill: #FFFFFF;
+
+    -fx-background-radius: 6px;
+}
+
+
+/* ============================================================
+   BOTÃO PADRÃO JAVA FX
+   ============================================================ */
 
 .button {
+    -fx-background-radius: 7px;
+
     -fx-cursor: hand;
+
+    -fx-font-family: "Segoe UI";
 }
 
 
-/* =========================================================
-   BARRA DE ROLAGEM
-   ========================================================= */
+.button:hover {
+    -fx-opacity: 0.92;
+}
 
-.scroll-bar:vertical,
-.scroll-bar:horizontal {
+
+.button:pressed {
+    -fx-opacity: 0.78;
+}
+
+
+/* ============================================================
+   LABELS
+   ============================================================ */
+
+.label {
+    -fx-text-fill: #D1D5DB;
+}
+
+
+/* ============================================================
+   TOOLTIP
+   ============================================================ */
+
+.tooltip {
+    -fx-background-color: #111317;
+
+    -fx-text-fill: #F3F4F6;
+
+    -fx-border-color: #3A414D;
+
+    -fx-border-radius: 5px;
+
+    -fx-background-radius: 5px;
+
+    -fx-padding: 7px 10px;
+}
+
+
+/* ============================================================
+   BARRA DE ROLAGEM
+   ============================================================ */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+
+.scroll-bar .track {
     -fx-background-color: transparent;
 }
 
 
 .scroll-bar .thumb {
-    -fx-background-color: #cbd5e1;
-    -fx-background-radius: 5;
+    -fx-background-color: #3A414D;
+
+    -fx-background-radius: 10px;
 }
 
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: #94a3b8;
+    -fx-background-color: #4B5563;
+}
+
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+
+    -fx-padding: 0;
+}
+
+
+/* ============================================================
+   BADGES / PILLS
+   ============================================================ */
+
+.badge-active {
+    -fx-background-color: #123A2E;
+
+    -fx-text-fill: #34D399;
+
+    -fx-background-radius: 20px;
+
+    -fx-padding: 5px 10px;
+
+    -fx-font-size: 11px;
+
+    -fx-font-weight: bold;
+}
+
+
+.badge-inactive {
+    -fx-background-color: #3B2024;
+
+    -fx-text-fill: #F87171;
+
+    -fx-background-radius: 20px;
+
+    -fx-padding: 5px 10px;
+
+    -fx-font-size: 11px;
+
+    -fx-font-weight: bold;
+}
+
+
+.badge-blue {
+    -fx-background-color: #17344B;
+
+    -fx-text-fill: #60A5FA;
+
+    -fx-background-radius: 20px;
+
+    -fx-padding: 5px 10px;
+
+    -fx-font-size: 11px;
+
+    -fx-font-weight: bold;
+}
+
+
+.badge-warning {
+    -fx-background-color: #3D2E12;
+
+    -fx-text-fill: #FBBF24;
+
+    -fx-background-radius: 20px;
+
+    -fx-padding: 5px 10px;
+
+    -fx-font-size: 11px;
+
+    -fx-font-weight: bold;
+}
+
+
+/* ============================================================
+   FOCO
+   ============================================================ */
+
+*:focused {
+    -fx-focus-color: transparent;
+
+    -fx-faint-focus-color: transparent;
 }

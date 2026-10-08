@@ -1,12 +1,18 @@
 package br.com.geradordesignacoes.view.pessoa;
 
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.service.PessoaService;
+
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 
@@ -25,9 +31,10 @@ public class PessoaView {
 
         root = new BorderPane();
 
-        root.setPadding(
-                new Insets(10)
+        root.getStyleClass().add(
+                "content-area"
         );
+
 
         tabela = new TableView<>();
 
@@ -42,68 +49,133 @@ public class PessoaView {
 
         Label titulo =
                 new Label(
-                        "Cadastro de Pessoas"
+                        "Pessoas"
                 );
 
+        titulo.getStyleClass().add(
+                "page-title"
+        );
 
-        titulo.setStyle(
-                "-fx-font-size: 20px;"
+
+        Label subtitulo =
+                new Label(
+                        "Gerencie os participantes e suas funções na congregação."
+                );
+
+        subtitulo.getStyleClass().add(
+                "page-subtitle"
         );
 
 
         VBox topo =
                 new VBox(
-                        10,
-                        titulo
+                        6,
+                        titulo,
+                        subtitulo
                 );
 
+        topo.setPadding(
+                new Insets(
+                        0,
+                        0,
+                        18,
+                        0
+                )
+        );
 
-        root.setTop(topo);
+
+        root.setTop(
+                topo
+        );
     }
-
 
 
     private void criarTabela() {
 
-
         TableColumn<Pessoa, String> colunaNome =
                 new TableColumn<>("Nome");
-
 
         colunaNome.setCellValueFactory(
                 new PropertyValueFactory<>("nome")
         );
 
 
-
         TableColumn<Pessoa, String> colunaSexo =
                 new TableColumn<>("Sexo");
-
 
         colunaSexo.setCellValueFactory(
                 new PropertyValueFactory<>("sexo")
         );
 
 
-
-        TableColumn<Pessoa, String> colunaPrivilegio =
+        TableColumn<Pessoa, Privilegio> colunaPrivilegio =
                 new TableColumn<>("Privilégio");
-
 
         colunaPrivilegio.setCellValueFactory(
                 new PropertyValueFactory<>("privilegio")
         );
 
+        colunaPrivilegio.setCellFactory(coluna -> new TableCell<>() {
+
+            @Override
+            protected void updateItem(Privilegio privilegio, boolean vazio) {
+
+                super.updateItem(privilegio, vazio);
+
+                if (vazio || privilegio == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                Label badge = new Label(privilegio.toString());
+                badge.getStyleClass().add("badge-blue");
+
+                setGraphic(badge);
+                setText(null);
+            }
+        });
 
 
         TableColumn<Pessoa, Boolean> colunaAtivo =
-                new TableColumn<>("Ativo");
-
+                new TableColumn<>("Status");
 
         colunaAtivo.setCellValueFactory(
                 new PropertyValueFactory<>("ativo")
         );
 
+        colunaAtivo.setCellFactory(coluna -> new TableCell<>() {
+
+            @Override
+            protected void updateItem(Boolean ativo, boolean vazio) {
+
+                super.updateItem(ativo, vazio);
+
+                if (vazio || ativo == null) {
+
+                    setText(null);
+                    setGraphic(null);
+
+                } else {
+
+                    Label badge;
+
+                    if (ativo) {
+
+                        badge = new Label("Ativo");
+                        badge.getStyleClass().add("badge-active");
+
+                    } else {
+
+                        badge = new Label("Inativo");
+                        badge.getStyleClass().add("badge-inactive");
+                    }
+
+                    setGraphic(badge);
+                    setText(null);
+                }
+            }
+        });
 
 
         tabela.getColumns().addAll(
@@ -118,91 +190,104 @@ public class PessoaView {
                 TableView.CONSTRAINED_RESIZE_POLICY
         );
 
-
-        root.setCenter(
-                tabela
+        tabela.setPlaceholder(
+                new Label("Nenhuma pessoa cadastrada.")
         );
+
+        tabela.getStyleClass().add("table-view");
+
+        root.setCenter(tabela);
     }
-
-
 
 
     private void criarBotoes() {
 
-
         Button novo =
-                new Button("Novo");
+                new Button(
+                        "+ Nova Pessoa"
+                );
+
+        novo.getStyleClass().add(
+                "primary-button"
+        );
 
 
         Button editar =
-                new Button("Editar");
+                new Button(
+                        "Editar"
+                );
+
+        editar.getStyleClass().add(
+                "secondary-button"
+        );
 
 
         Button excluir =
-                new Button("Excluir");
+                new Button(
+                        "Excluir"
+                );
 
+        excluir.getStyleClass().add(
+                "danger-button"
+        );
 
 
         novo.setOnAction(
-                event -> abrirFormulario()
+                event ->
+                        abrirFormulario()
         );
 
 
         editar.setOnAction(
-                event -> abrirFormularioEdicao()
+                event ->
+                        abrirFormularioEdicao()
         );
 
 
         excluir.setOnAction(
-                event -> excluirPessoa()
+                event ->
+                        excluirPessoa()
         );
 
 
+        Region espaco =
+                new Region();
 
-        ToolBar barra =
-                new ToolBar(
+        HBox.setHgrow(
+                espaco,
+                Priority.ALWAYS
+        );
+
+
+        HBox barra =
+                new HBox(
+                        10,
+                        espaco,
                         novo,
                         editar,
                         excluir
                 );
 
 
-        VBox topo =
-                new VBox(
-                        10
-                );
-
-
-        Label titulo =
-                new Label(
-                        "Cadastro de Pessoas"
-                );
-
-
-        titulo.setStyle(
-                "-fx-font-size: 20px;"
+        barra.setAlignment(
+                Pos.CENTER_RIGHT
         );
 
 
-        topo.getChildren().addAll(
-                titulo,
+        VBox topo =
+                (VBox) root.getTop();
+
+
+        topo.getChildren().add(
                 barra
         );
-
-
-        root.setTop(
-                topo
-        );
     }
-
 
 
     public Parent getView() {
 
         return root;
-
     }
-
 
 
     private void carregarPessoas() {
@@ -210,9 +295,7 @@ public class PessoaView {
         tabela.getItems().setAll(
                 pessoaService.listarTodas()
         );
-
     }
-
 
 
     private void abrirFormulario() {
@@ -229,9 +312,7 @@ public class PessoaView {
         root.setCenter(
                 formulario.getView()
         );
-
     }
-
 
 
     private void voltarParaTabela() {
@@ -241,19 +322,19 @@ public class PessoaView {
         root.setCenter(
                 tabela
         );
-
     }
 
 
+    private void salvarPessoa(
+            Pessoa pessoa
+    ) {
 
-    private void salvarPessoa(Pessoa pessoa) {
-
-        pessoaService.salvar(pessoa);
+        pessoaService.salvar(
+                pessoa
+        );
 
         voltarParaTabela();
-
     }
-
 
 
     private Pessoa obterPessoaSelecionada() {
@@ -261,12 +342,12 @@ public class PessoaView {
         return tabela
                 .getSelectionModel()
                 .getSelectedItem();
-
     }
 
 
-
-    private void mostrarAviso(String mensagem) {
+    private void mostrarAviso(
+            String mensagem
+    ) {
 
         Alert alert =
                 new Alert(
@@ -288,9 +369,7 @@ public class PessoaView {
 
 
         alert.showAndWait();
-
     }
-
 
 
     private void abrirFormularioEdicao() {
@@ -321,21 +400,19 @@ public class PessoaView {
         root.setCenter(
                 formulario.getView()
         );
-
     }
 
 
-
-    private void atualizarPessoa(Pessoa pessoa) {
+    private void atualizarPessoa(
+            Pessoa pessoa
+    ) {
 
         pessoaService.atualizar(
                 pessoa
         );
 
         voltarParaTabela();
-
     }
-
 
 
     private void excluirPessoa() {
@@ -357,12 +434,12 @@ public class PessoaView {
         confirmarExclusao(
                 pessoa
         );
-
     }
 
 
-
-    private void confirmarExclusao(Pessoa pessoa) {
+    private void confirmarExclusao(
+            Pessoa pessoa
+    ) {
 
         Alert alert =
                 new Alert(
@@ -389,18 +466,21 @@ public class PessoaView {
 
         ButtonType resposta =
                 alert.showAndWait()
-                        .orElse(ButtonType.CANCEL);
+                        .orElse(
+                                ButtonType.CANCEL
+                        );
 
 
-
-        if (resposta == ButtonType.OK) {
+        if (
+                resposta ==
+                        ButtonType.OK
+        ) {
 
             pessoaService.excluir(
                     pessoa.getId()
             );
 
             voltarParaTabela();
-
         }
     }
 }

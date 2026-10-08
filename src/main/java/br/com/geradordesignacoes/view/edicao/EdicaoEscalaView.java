@@ -5,7 +5,6 @@ import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Escala;
-
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.TipoParte;
@@ -70,8 +69,10 @@ public class EdicaoEscalaView {
 
         root = new BorderPane();
 
+        root.getStyleClass().add("content-area");
+
         root.setPadding(
-                new Insets(10)
+                new Insets(24)
         );
 
 
@@ -92,8 +93,18 @@ public class EdicaoEscalaView {
                 "Selecione o mês"
         );
 
+        campoMes.getStyleClass().add(
+                "date-picker"
+        );
+
+        campoMes.setPrefWidth(180);
+
 
         listaSemanas = new ListView<>();
+
+        listaSemanas.getStyleClass().add(
+                "list-view"
+        );
 
         listaSemanas
                 .getSelectionModel()
@@ -103,6 +114,10 @@ public class EdicaoEscalaView {
 
 
         listaDesignacoes = new ListView<>();
+
+        listaDesignacoes.getStyleClass().add(
+                "list-view"
+        );
 
         listaDesignacoes
                 .getSelectionModel()
@@ -115,61 +130,95 @@ public class EdicaoEscalaView {
                 "Selecione um mês para visualizar as semanas."
         );
 
+        labelStatus.getStyleClass().add(
+                "status-warning"
+        );
+
 
         labelSemanaSelecionada = new Label(
                 "Nenhuma semana selecionada."
         );
 
-        labelSemanaSelecionada.setStyle(
-                "-fx-font-weight: bold;"
+        labelSemanaSelecionada.getStyleClass().add(
+                "card-title"
         );
 
 
         comboParte =
                 criarComboParte();
 
-        comboParte.setPrefWidth(250);
+        comboParte.getStyleClass().add(
+                "combo-box"
+        );
+
+        comboParte.setPrefWidth(
+                Double.MAX_VALUE
+        );
 
 
         comboResponsavel =
                 criarComboPessoa();
 
-        comboResponsavel.setPrefWidth(250);
+        comboResponsavel.getStyleClass().add(
+                "combo-box"
+        );
+
+        comboResponsavel.setPrefWidth(
+                Double.MAX_VALUE
+        );
 
 
         comboAjudante =
                 criarComboPessoa();
 
-        comboAjudante.setPrefWidth(250);
+        comboAjudante.getStyleClass().add(
+                "combo-box"
+        );
+
+        comboAjudante.setPrefWidth(
+                Double.MAX_VALUE
+        );
 
 
         botaoCarregar = new Button(
                 "Carregar Semanas"
         );
 
+        botaoCarregar.getStyleClass().add(
+                "primary-button"
+        );
+
 
         botaoAdicionarParte =
                 new Button(
-                        "Adicionar Parte"
+                        "+ Adicionar Parte"
                 );
 
-        botaoAdicionarParte.setDisable(true);
+        botaoAdicionarParte.getStyleClass().add(
+                "secondary-button"
+        );
+
+        botaoAdicionarParte.setDisable(
+                true
+        );
 
 
         botaoSalvar = new Button(
                 "Salvar Alterações"
         );
 
-        botaoSalvar.setDisable(true);
+        botaoSalvar.getStyleClass().add(
+                "success-button"
+        );
+
+        botaoSalvar.setDisable(
+                true
+        );
 
 
         criarCabecalho();
 
-        criarListaSemanas();
-
-        criarListaDesignacoes();
-
-        criarPainelEdicao();
+        criarConteudo();
 
         criarRodape();
 
@@ -181,7 +230,6 @@ public class EdicaoEscalaView {
         configurarListaSemanas();
 
         configurarListaDesignacoes();
-
 
         registrarEventos();
     }
@@ -265,8 +313,10 @@ public class EdicaoEscalaView {
                                         empty
                                 );
 
-                                if (empty
-                                        || parte == null) {
+                                if (
+                                        empty
+                                                || parte == null
+                                ) {
 
                                     setText(null);
 
@@ -294,8 +344,10 @@ public class EdicaoEscalaView {
                                 empty
                         );
 
-                        if (empty
-                                || parte == null) {
+                        if (
+                                empty
+                                        || parte == null
+                        ) {
 
                             setText(null);
 
@@ -328,17 +380,18 @@ public class EdicaoEscalaView {
                 )
         );
 
-
         combo.setCellFactory(
                 listView ->
                         criarCelulaPessoa()
         );
 
-
         combo.setButtonCell(
                 criarCelulaPessoa()
         );
 
+        combo.setPromptText(
+                "Selecione uma pessoa"
+        );
 
         return combo;
     }
@@ -359,9 +412,10 @@ public class EdicaoEscalaView {
                         empty
                 );
 
-
-                if (empty
-                        || pessoa == null) {
+                if (
+                        empty
+                                || pessoa == null
+                ) {
 
                     setText(null);
 
@@ -391,70 +445,139 @@ public class EdicaoEscalaView {
 
     private void criarCabecalho() {
 
-        Label titulo = new Label(
-                "Edição de Escalas"
-        );
+        Label titulo =
+                new Label(
+                        "Edição de Escalas"
+                );
 
-        titulo.setStyle(
-                "-fx-font-size: 20px;"
-                        + "-fx-font-weight: bold;"
-        );
-
-
-        Label instrucao = new Label(
-                "Selecione o mês e depois a semana que deseja editar."
+        titulo.getStyleClass().add(
+                "page-title"
         );
 
 
-        HBox linhaMes = new HBox(
-                10,
-                new Label("Mês:"),
-                campoMes,
-                botaoCarregar
+        Label instrucao =
+                new Label(
+                        "Selecione o mês e a semana para editar as designações."
+                );
+
+        instrucao.getStyleClass().add(
+                "page-subtitle"
         );
+
+
+        Label labelMes =
+                new Label(
+                        "Mês da escala"
+                );
+
+        labelMes.getStyleClass().add(
+                "label"
+        );
+
+
+        HBox linhaMes =
+                new HBox(
+                        10,
+                        labelMes,
+                        campoMes,
+                        botaoCarregar
+                );
 
         linhaMes.setAlignment(
                 Pos.CENTER_LEFT
         );
 
 
-        VBox topo = new VBox(
-                10,
-                titulo,
-                instrucao,
-                linhaMes
+        VBox topo =
+                new VBox(
+                        6,
+                        titulo,
+                        instrucao,
+                        criarEspaco(8),
+                        linhaMes
+                );
+
+
+        root.setTop(
+                topo
         );
-
-
-        topo.setPadding(
-                new Insets(
-                        0,
-                        0,
-                        10,
-                        0
-                )
-        );
-
-
-        root.setTop(topo);
     }
 
 
-    private void criarListaSemanas() {
+    private void criarConteudo() {
 
-        Label titulo = new Label(
-                "Semanas disponíveis"
+        VBox painelSemanas =
+                criarPainelSemanas();
+
+
+        VBox painelDesignacoes =
+                criarPainelDesignacoes();
+
+
+        VBox painelEdicao =
+                criarPainelEdicao();
+
+
+        HBox centro =
+                new HBox(
+                        16,
+                        painelSemanas,
+                        painelDesignacoes,
+                        painelEdicao
+                );
+
+
+        HBox.setHgrow(
+                painelSemanas,
+                Priority.SOMETIMES
         );
 
-        titulo.setStyle(
-                "-fx-font-weight: bold;"
+        HBox.setHgrow(
+                painelDesignacoes,
+                Priority.ALWAYS
+        );
+
+        HBox.setHgrow(
+                painelEdicao,
+                Priority.SOMETIMES
         );
 
 
-        VBox painel = new VBox(
-                8,
-                titulo,
-                listaSemanas
+        root.setCenter(
+                centro
+        );
+
+        BorderPane.setMargin(
+                centro,
+                new Insets(
+                        24,
+                        0,
+                        0,
+                        0
+                )
+        );
+    }
+
+
+    private VBox criarPainelSemanas() {
+
+        Label titulo =
+                new Label(
+                        "Semanas disponíveis"
+                );
+
+        titulo.getStyleClass().add(
+                "card-title"
+        );
+
+
+        Label descricao =
+                new Label(
+                        "Escolha uma semana para visualizar suas designações."
+                );
+
+        descricao.getStyleClass().add(
+                "page-subtitle"
         );
 
 
@@ -464,39 +587,41 @@ public class EdicaoEscalaView {
         );
 
 
-        painel.setPrefWidth(260);
+        VBox painel =
+                new VBox(
+                        10,
+                        titulo,
+                        descricao,
+                        listaSemanas
+                );
+
+        painel.getStyleClass().add(
+                "card"
+        );
 
 
-        root.setLeft(painel);
+        painel.setPrefWidth(
+                260
+        );
+
+        painel.setMinWidth(
+                230
+        );
+
+
+        return painel;
     }
 
 
-    private void criarListaDesignacoes() {
+    private VBox criarPainelDesignacoes() {
 
-        Label titulo = new Label(
-                "Designações"
-        );
+        Label titulo =
+                new Label(
+                        "Designações da semana"
+                );
 
-        titulo.setStyle(
-                "-fx-font-weight: bold;"
-        );
-
-
-        VBox painel = new VBox(
-                8,
-                labelSemanaSelecionada,
-                titulo,
-                listaDesignacoes
-        );
-
-
-        painel.setPadding(
-                new Insets(
-                        0,
-                        10,
-                        0,
-                        15
-                )
+        titulo.getStyleClass().add(
+                "card-title"
         );
 
 
@@ -506,8 +631,27 @@ public class EdicaoEscalaView {
         );
 
 
-        root.setCenter(painel);
+        VBox painel =
+                new VBox(
+                        10,
+                        labelSemanaSelecionada,
+                        titulo,
+                        listaDesignacoes
+                );
 
+        painel.getStyleClass().add(
+                "card"
+        );
+
+
+        configurarCelulasDesignacoes();
+
+
+        return painel;
+    }
+
+
+    private void configurarCelulasDesignacoes() {
 
         listaDesignacoes.setCellFactory(
                 listView ->
@@ -525,107 +669,169 @@ public class EdicaoEscalaView {
                                 );
 
 
-                                if (empty
-                                        || designacao == null) {
+                                if (
+                                        empty
+                                                || designacao == null
+                                ) {
 
+                                    setGraphic(null);
                                     setText(null);
 
-                                } else {
-
-                                    String parte =
-                                            designacao
-                                                    .parte()
-                                                    .getNome();
-
-
-                                    String responsavel =
-                                            designacao.responsavel() == null
-                                                    ? ""
-                                                    : designacao
-                                                    .responsavel()
-                                                    .getNome();
-
-
-                                    String ajudante =
-                                            designacao
-                                                    .ajudante()
-                                                    == null
-                                                    ? "-"
-                                                    : designacao
-                                                    .ajudante()
-                                                    .getNome();
-
-
-                                    setText(
-                                            parte
-                                                    + "\nResponsável: "
-                                                    + responsavel
-                                                    + "\nAjudante: "
-                                                    + ajudante
-                                    );
-
-
-                                    setPadding(
-                                            new Insets(8)
-                                    );
+                                    return;
                                 }
+
+
+                                String parte =
+                                        designacao
+                                                .parte()
+                                                .getNome();
+
+
+                                String responsavel =
+                                        designacao.responsavel() == null
+                                                ? "-"
+                                                : designacao
+                                                .responsavel()
+                                                .getNome();
+
+
+                                String ajudante =
+                                        designacao.ajudante() == null
+                                                ? "-"
+                                                : designacao
+                                                .ajudante()
+                                                .getNome();
+
+
+                                Label labelParte =
+                                        new Label(
+                                                parte
+                                        );
+
+                                labelParte.getStyleClass().add(
+                                        "card-title"
+                                );
+
+
+                                Label labelResponsavel =
+                                        new Label(
+                                                "Responsável: "
+                                                        + responsavel
+                                        );
+
+
+                                Label labelAjudante =
+                                        new Label(
+                                                "Ajudante: "
+                                                        + ajudante
+                                        );
+
+
+                                VBox conteudo =
+                                        new VBox(
+                                                5,
+                                                labelParte,
+                                                labelResponsavel,
+                                                labelAjudante
+                                        );
+
+
+                                conteudo.setPadding(
+                                        new Insets(
+                                                10
+                                        )
+                                );
+
+
+                                setGraphic(
+                                        conteudo
+                                );
+
+                                setText(null);
+
+                                setPadding(
+                                        new Insets(
+                                                3
+                                        )
+                                );
                             }
                         }
         );
     }
 
 
-    private void criarPainelEdicao() {
+    private VBox criarPainelEdicao() {
 
         Label titulo =
                 new Label(
                         "Editar designação"
                 );
 
-        titulo.setStyle(
-                "-fx-font-size: 15px;"
-                        + "-fx-font-weight: bold;"
+        titulo.getStyleClass().add(
+                "card-title"
+        );
+
+
+        Label descricao =
+                new Label(
+                        "Selecione uma designação ou adicione uma nova parte."
+                );
+
+        descricao.getStyleClass().add(
+                "page-subtitle"
         );
 
 
         Label labelParte =
                 new Label(
-                        "Adicionar parte:"
+                        "Adicionar parte"
                 );
+
+        labelParte.getStyleClass().add(
+                "label"
+        );
 
 
         Label labelResponsavel =
                 new Label(
-                        "Responsável:"
+                        "Responsável"
                 );
+
+        labelResponsavel.getStyleClass().add(
+                "label"
+        );
 
 
         Label labelAjudante =
                 new Label(
-                        "Ajudante:"
+                        "Ajudante"
                 );
 
+        labelAjudante.getStyleClass().add(
+                "label"
+        );
 
-        VBox parte =
+
+        VBox campoParte =
                 new VBox(
-                        5,
+                        6,
                         labelParte,
                         comboParte,
                         botaoAdicionarParte
                 );
 
 
-        VBox responsavel =
+        VBox campoResponsavel =
                 new VBox(
-                        5,
+                        6,
                         labelResponsavel,
                         comboResponsavel
                 );
 
 
-        VBox ajudante =
+        VBox campoAjudante =
                 new VBox(
-                        5,
+                        6,
                         labelAjudante,
                         comboAjudante
                 );
@@ -633,10 +839,10 @@ public class EdicaoEscalaView {
 
         VBox campos =
                 new VBox(
-                        15,
-                        parte,
-                        responsavel,
-                        ajudante
+                        16,
+                        campoParte,
+                        campoResponsavel,
+                        campoAjudante
                 );
 
 
@@ -644,41 +850,70 @@ public class EdicaoEscalaView {
                 new VBox(
                         10,
                         titulo,
+                        descricao,
+                        criarEspaco(6),
                         campos,
+                        criarEspaco(10),
                         botaoSalvar
                 );
 
 
-        painel.setPadding(
-                new Insets(
-                        10,
-                        0,
-                        10,
-                        15
-                )
+        painel.getStyleClass().add(
+                "card"
         );
 
 
-        root.setRight(painel);
+        painel.setPrefWidth(
+                310
+        );
+
+        painel.setMinWidth(
+                280
+        );
+
+
+        botaoSalvar.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        botaoAdicionarParte.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+
+        return painel;
     }
 
 
     private void criarRodape() {
 
-        HBox rodape =
+        Separator separador =
+                new Separator();
+
+
+        HBox conteudo =
                 new HBox(
                         labelStatus
                 );
 
 
-        rodape.setAlignment(
+        conteudo.setAlignment(
                 Pos.CENTER_LEFT
         );
 
 
-        rodape.setPadding(
-                new Insets(
+        VBox rodape =
+                new VBox(
                         10,
+                        separador,
+                        conteudo
+                );
+
+
+        BorderPane.setMargin(
+                rodape,
+                new Insets(
+                        20,
                         0,
                         0,
                         0
@@ -686,7 +921,9 @@ public class EdicaoEscalaView {
         );
 
 
-        root.setBottom(rodape);
+        root.setBottom(
+                rodape
+        );
     }
 
 
@@ -708,28 +945,68 @@ public class EdicaoEscalaView {
                                 );
 
 
-                                if (empty
-                                        || escala == null) {
+                                if (
+                                        empty
+                                                || escala == null
+                                ) {
 
+                                    setGraphic(null);
                                     setText(null);
 
-                                } else {
-
-                                    String data =
-                                            escala
-                                                    .getData()
-                                                    .format(
-                                                            DateTimeFormatter.ofPattern(
-                                                                    "dd/MM/yyyy"
-                                                            )
-                                                    );
-
-
-                                    setText(
-                                            "Semana - "
-                                                    + data
-                                    );
+                                    return;
                                 }
+
+
+                                String data =
+                                        escala
+                                                .getData()
+                                                .format(
+                                                        DateTimeFormatter.ofPattern(
+                                                                "dd/MM/yyyy"
+                                                        )
+                                                );
+
+
+                                Label titulo =
+                                        new Label(
+                                                "Semana"
+                                        );
+
+                                titulo.getStyleClass().add(
+                                        "page-subtitle"
+                                );
+
+
+                                Label dataLabel =
+                                        new Label(
+                                                data
+                                        );
+
+                                dataLabel.getStyleClass().add(
+                                        "card-title"
+                                );
+
+
+                                VBox conteudo =
+                                        new VBox(
+                                                3,
+                                                titulo,
+                                                dataLabel
+                                        );
+
+
+                                conteudo.setPadding(
+                                        new Insets(
+                                                8
+                                        )
+                                );
+
+
+                                setGraphic(
+                                        conteudo
+                                );
+
+                                setText(null);
                             }
                         }
         );
@@ -746,7 +1023,9 @@ public class EdicaoEscalaView {
                          antiga,
                          selecionada) -> {
 
-                            if (selecionada == null) {
+                            if (
+                                    selecionada == null
+                            ) {
 
                                 return;
                             }
@@ -754,6 +1033,7 @@ public class EdicaoEscalaView {
 
                             designacaoSelecionada =
                                     selecionada;
+
 
                             atualizarListasDePessoas(
                                     selecionada.parte(),
@@ -791,14 +1071,23 @@ public class EdicaoEscalaView {
                 event -> carregarSemanas()
         );
 
+
         comboParte.getSelectionModel()
                 .selectedItemProperty()
                 .addListener(
-                        (observable, antiga, selecionada) -> {
-                            if (selecionada == null) {
+                        (observable,
+                         antiga,
+                         selecionada) -> {
+
+                            if (
+                                    selecionada == null
+                            ) {
+
                                 limparSelecaoPessoas();
+
                                 return;
                             }
+
 
                             atualizarListasDePessoas(
                                     selecionada,
@@ -817,7 +1106,9 @@ public class EdicaoEscalaView {
                          antigo,
                          selecionado) -> {
 
-                            if (selecionado == null) {
+                            if (
+                                    selecionado == null
+                            ) {
 
                                 return;
                             }
@@ -852,15 +1143,18 @@ public class EdicaoEscalaView {
                                         );
 
 
-                                designacaoSelecionada = null;
+                                designacaoSelecionada =
+                                        null;
 
 
                                 limparSelecaoPessoas();
 
 
-                                comboParte.setValue(null);
+                                comboParte.setValue(
+                                        null
+                                );
 
-                                // Recarrega as partes diretamente do banco.
+
                                 atualizarListaPartes();
 
 
@@ -902,13 +1196,18 @@ public class EdicaoEscalaView {
         );
     }
 
+
     private void atualizarListasDePessoas(
             Parte parte,
             Pessoa responsavelAtual,
             Pessoa ajudanteAtual
     ) {
+
         TipoParticipacao tipoResponsavel =
-                tipoParticipacaoDoResponsavel(parte);
+                tipoParticipacaoDoResponsavel(
+                        parte
+                );
+
 
         comboResponsavel.setItems(
                 FXCollections.observableArrayList(
@@ -919,6 +1218,7 @@ public class EdicaoEscalaView {
                         )
                 )
         );
+
 
         comboAjudante.setItems(
                 FXCollections.observableArrayList(
@@ -931,12 +1231,19 @@ public class EdicaoEscalaView {
         );
     }
 
+
     private TipoParticipacao tipoParticipacaoDoResponsavel(
             Parte parte
     ) {
-        if (parte.getTipo() == TipoParte.DIRIGENTE_ESTUDO) {
+
+        if (
+                parte.getTipo()
+                        == TipoParte.DIRIGENTE_ESTUDO
+        ) {
+
             return TipoParticipacao.DIRIGENTE;
         }
+
 
         return parte.getParticipacoesNecessarias()
                 .stream()
@@ -945,7 +1252,9 @@ public class EdicaoEscalaView {
                                 tipo != TipoParticipacao.AJUDANTE
                 )
                 .findFirst()
-                .orElse(TipoParticipacao.RESPONSAVEL);
+                .orElse(
+                        TipoParticipacao.RESPONSAVEL
+                );
     }
 
 
@@ -957,8 +1266,6 @@ public class EdicaoEscalaView {
         }
 
 
-        // Garante que o ComboBox esteja sempre atualizado
-        // antes de selecionar uma nova parte.
         atualizarListaPartes();
 
 
@@ -1013,12 +1320,16 @@ public class EdicaoEscalaView {
                     );
 
 
-            comboParte.setValue(null);
+            comboParte.setValue(
+                    null
+            );
+
 
             limparSelecaoPessoas();
 
 
-            designacaoSelecionada = null;
+            designacaoSelecionada =
+                    null;
 
 
             botaoSalvar.setDisable(
@@ -1042,9 +1353,13 @@ public class EdicaoEscalaView {
 
     private void limparSelecaoPessoas() {
 
-        comboResponsavel.setValue(null);
+        comboResponsavel.setValue(
+                null
+        );
 
-        comboAjudante.setValue(null);
+        comboAjudante.setValue(
+                null
+        );
 
         comboResponsavel.getEditor().clear();
 
@@ -1085,19 +1400,25 @@ public class EdicaoEscalaView {
 
 
         YearMonth mes =
-                YearMonth.from(data);
+                YearMonth.from(
+                        data
+                );
 
 
         try {
 
             List<Escala> escalas =
                     controller
-                            .listarEscalasDoMes(mes);
+                            .listarEscalasDoMes(
+                                    mes
+                            );
 
 
             listaSemanas
                     .getItems()
-                    .setAll(escalas);
+                    .setAll(
+                            escalas
+                    );
 
 
             listaDesignacoes
@@ -1105,15 +1426,18 @@ public class EdicaoEscalaView {
                     .clear();
 
 
-            designacaoSelecionada = null;
+            designacaoSelecionada =
+                    null;
 
 
             limparSelecaoPessoas();
 
 
-            comboParte.setValue(null);
+            comboParte.setValue(
+                    null
+            );
 
-            // Também atualiza ao carregar um novo mês.
+
             atualizarListaPartes();
 
 
@@ -1127,7 +1451,9 @@ public class EdicaoEscalaView {
             );
 
 
-            if (escalas.isEmpty()) {
+            if (
+                    escalas.isEmpty()
+            ) {
 
                 labelStatus.setText(
                         "Nenhuma escala encontrada para "
@@ -1179,7 +1505,9 @@ public class EdicaoEscalaView {
 
     private void salvarAlteracoes() {
 
-        if (designacaoSelecionada == null) {
+        if (
+                designacaoSelecionada == null
+        ) {
 
             return;
         }
@@ -1193,7 +1521,9 @@ public class EdicaoEscalaView {
                 comboAjudante.getValue();
 
 
-        if (novoResponsavel == null) {
+        if (
+                novoResponsavel == null
+        ) {
 
             mostrarErro(
                     "Responsável",
@@ -1214,7 +1544,9 @@ public class EdicaoEscalaView {
                     );
 
 
-            if (!conflitos.isEmpty()) {
+            if (
+                    !conflitos.isEmpty()
+            ) {
 
                 boolean confirmou =
                         confirmarConflitos(
@@ -1289,10 +1621,14 @@ public class EdicaoEscalaView {
         );
 
 
-        mensagem.append("\n");
+        mensagem.append(
+                "\n"
+        );
 
 
-        if (ajudante != null) {
+        if (
+                ajudante != null
+        ) {
 
             mensagem.append(
                     "• Ajudante: "
@@ -1304,7 +1640,9 @@ public class EdicaoEscalaView {
             );
 
 
-            mensagem.append("\n");
+            mensagem.append(
+                    "\n"
+            );
         }
 
 
@@ -1313,9 +1651,14 @@ public class EdicaoEscalaView {
         );
 
 
-        for (LocalDate data : conflitos) {
+        for (
+                LocalDate data :
+                conflitos
+        ) {
 
-            mensagem.append("• ");
+            mensagem.append(
+                    "• "
+            );
 
 
             mensagem.append(
@@ -1327,7 +1670,9 @@ public class EdicaoEscalaView {
             );
 
 
-            mensagem.append("\n");
+            mensagem.append(
+                    "\n"
+            );
         }
 
 
@@ -1376,10 +1721,13 @@ public class EdicaoEscalaView {
 
         listaDesignacoes
                 .getItems()
-                .setAll(designacoes);
+                .setAll(
+                        designacoes
+                );
 
 
-        designacaoSelecionada = null;
+        designacaoSelecionada =
+                null;
 
 
         limparSelecaoPessoas();
@@ -1432,9 +1780,15 @@ public class EdicaoEscalaView {
                 );
 
 
-        alerta.setTitle(titulo);
+        alerta.setTitle(
+                titulo
+        );
 
-        alerta.setHeaderText(null);
+
+        alerta.setHeaderText(
+                null
+        );
+
 
         alerta.setContentText(
                 mensagem == null
@@ -1444,5 +1798,28 @@ public class EdicaoEscalaView {
 
 
         alerta.showAndWait();
+    }
+
+
+    private VBox criarEspaco(
+            double altura
+    ) {
+
+        VBox espaco =
+                new VBox();
+
+        espaco.setMinHeight(
+                altura
+        );
+
+        espaco.setPrefHeight(
+                altura
+        );
+
+        espaco.setMaxHeight(
+                altura
+        );
+
+        return espaco;
     }
 }

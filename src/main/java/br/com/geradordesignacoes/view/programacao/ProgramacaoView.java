@@ -9,10 +9,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,17 +40,6 @@ public class ProgramacaoView {
 
     private final Button botaoSalvar;
 
-    /*
-     * Lista de todas as partes da reunião.
-     *
-     * Partes FIXAS:
-     * - aparecem marcadas;
-     * - ficam desabilitadas.
-     *
-     * Partes VARIÁVEIS:
-     * - podem ser marcadas;
-     * - podem ser desmarcadas.
-     */
     private final ListView<Parte> listaPartes;
 
     private final TextField campoTema;
@@ -62,179 +50,149 @@ public class ProgramacaoView {
 
     private Consumer<Parte> onParteSelecionadaChanged;
 
-    /*
-     * Guarda o estado visual dos CheckBoxes.
-     */
     private final Map<Integer, Boolean> partesSelecionadas;
 
 
     public ProgramacaoView() {
 
         root = new BorderPane();
+        root.getStyleClass().add("content-area");
 
-        root.setPadding(
-                new Insets(10)
-        );
+        root.setPadding(new Insets(24));
 
+        campoData = new DatePicker();
 
-        campoData =
-                new DatePicker();
+        listaSemanas = new ListView<>();
 
+        semanas = FXCollections.observableArrayList();
 
-        listaSemanas =
-                new ListView<>();
+        statusSemanas = new HashMap<>();
 
+        partesSelecionadas = new HashMap<>();
 
-        semanas =
-                FXCollections.observableArrayList();
+        botaoAdicionarSemana = new Button("+ Adicionar semana");
+        botaoAdicionarSemana.getStyleClass().add("primary-button");
 
+        botaoEditarSemana = new Button("Editar semana");
+        botaoEditarSemana.getStyleClass().add("secondary-button");
 
-        statusSemanas =
-                new HashMap<>();
-
-
-        partesSelecionadas =
-                new HashMap<>();
-
-
-        botaoAdicionarSemana =
-                new Button(
-                        "Adicionar semana"
-                );
-
-
-        botaoEditarSemana =
-                new Button(
-                        "Editar semana"
-                );
-
-
-        botaoGerar =
-                new Button(
-                        "Gerar"
-                );
-
-
+        botaoGerar = new Button("Gerar Escala");
+        botaoGerar.getStyleClass().add("success-button");
         botaoGerar.setDisable(true);
 
-
-        botaoSalvar =
-                new Button(
-                        "Salvar Escalas"
-                );
-
-
+        botaoSalvar = new Button("Salvar");
+        botaoSalvar.getStyleClass().add("primary-button");
         botaoSalvar.setDisable(true);
 
+        listaPartes = new ListView<>();
+        listaPartes.getStyleClass().add("list-view");
 
-        listaPartes =
-                new ListView<>();
+        campoTema = new TextField();
+        campoTema.setPromptText("Informe o tema da parte");
+        campoTema.getStyleClass().add("text-field");
 
+        botaoSalvarTema = new Button("Salvar Tema");
+        botaoSalvarTema.getStyleClass().add("secondary-button");
 
-        campoTema =
-                new TextField();
-
-
-        campoTema.setPromptText(
-                "Informe o tema da parte"
+        labelStatus = new Label(
+                "Selecione um mês para configurar a programação."
         );
 
-
-        botaoSalvarTema =
-                new Button(
-                        "Salvar Tema"
-                );
-
-
-        labelStatus =
-                new Label(
-                        "Selecione um mês para configurar a programação."
-                );
-
+        labelStatus.getStyleClass().add("label");
 
         configurarListaSemanas();
-
         configurarListaPartes();
 
         criarCabecalho();
-
         criarConteudo();
-
         criarRodape();
     }
 
 
     private void configurarListaSemanas() {
 
-        listaSemanas.setItems(
-                semanas
-        );
-
+        listaSemanas.setItems(semanas);
 
         listaSemanas.setCellFactory(
-                lista ->
-                        new ListCell<>() {
+                lista -> new ListCell<>() {
 
-                            @Override
-                            protected void updateItem(
-                                    LocalDate data,
-                                    boolean empty
-                            ) {
+                    @Override
+                    protected void updateItem(
+                            LocalDate data,
+                            boolean empty
+                    ) {
 
-                                super.updateItem(
+                        super.updateItem(data, empty);
+
+                        if (empty || data == null) {
+
+                            setText(null);
+                            setGraphic(null);
+                            getStyleClass().removeAll(
+                                    "programacao-configurada",
+                                    "programacao-pendente"
+                            );
+
+                            return;
+                        }
+
+                        boolean configurada =
+                                statusSemanas.getOrDefault(
                                         data,
-                                        empty
+                                        false
                                 );
 
+                        VBox conteudo = new VBox(4);
 
-                                if (
-                                        empty
-                                                || data == null
-                                ) {
+                        Label dataLabel =
+                                new Label(
+                                        "Reunião de "
+                                                + formatarData(data)
+                                );
 
-                                    setText(null);
+                        dataLabel.setStyle(
+                                "-fx-font-size: 14px; "
+                                        + "-fx-font-weight: bold;"
+                        );
 
-                                    setStyle("");
-
-                                    return;
-                                }
-
-
-                                boolean configurada =
-                                        statusSemanas.getOrDefault(
-                                                data,
-                                                false
-                                        );
-
-
-                                String status =
+                        Label statusLabel =
+                                new Label(
                                         configurada
                                                 ? "✓ Configurada"
-                                                : "✗ Não configurada";
-
-
-                                setText(
-                                        "Reunião: "
-                                                + formatarData(data)
-                                                + "    "
-                                                + status
+                                                : "○ Não configurada"
                                 );
 
+                        if (configurada) {
 
-                                if (configurada) {
+                            statusLabel.getStyleClass()
+                                    .add("status-success");
 
-                                    setStyle(
-                                            "-fx-background-color: #d5f5d5;"
-                                    );
+                        } else {
 
-                                } else {
-
-                                    setStyle(
-                                            "-fx-background-color: #ffd6d6;"
-                                    );
-                                }
-                            }
+                            statusLabel.getStyleClass()
+                                    .add("status-warning");
                         }
+
+                        conteudo.getChildren().addAll(
+                                dataLabel,
+                                statusLabel
+                        );
+
+                        setGraphic(conteudo);
+                        setText(null);
+
+                        getStyleClass().removeAll(
+                                "programacao-configurada",
+                                "programacao-pendente"
+                        );
+
+                        getStyleClass().add(
+                                configurada
+                                        ? "programacao-configurada"
+                                        : "programacao-pendente"
+                        );
+                    }
+                }
         );
     }
 
@@ -242,128 +200,103 @@ public class ProgramacaoView {
     private void configurarListaPartes() {
 
         listaPartes.setCellFactory(
-                lista ->
-                        new ListCell<>() {
+                lista -> new ListCell<>() {
 
-                            private final CheckBox checkBox =
-                                    new CheckBox();
+                    private final CheckBox checkBox =
+                            new CheckBox();
 
+                    {
+                        checkBox.setOnAction(event -> {
 
-                            {
-                                checkBox.setOnAction(
-                                        event -> {
+                            Parte parte = getItem();
 
-                                            Parte parte =
-                                                    getItem();
-
-                                            if (parte == null) {
-                                                return;
-                                            }
-
-
-                                            /*
-                                             * Partes fixas não podem
-                                             * alterar seu estado.
-                                             */
-                                            if (
-                                                    parte.getTipoVariacao()
-                                                            == TipoVariacaoParte.FIXA
-                                            ) {
-                                                checkBox.setSelected(true);
-
-                                                return;
-                                            }
-
-
-                                            partesSelecionadas.put(
-                                                    parte.getId(),
-                                                    checkBox.isSelected()
-                                            );
-
-
-                                            if (
-                                                    onParteSelecionadaChanged
-                                                            != null
-                                            ) {
-
-                                                onParteSelecionadaChanged.accept(
-                                                        parte
-                                                );
-                                            }
-                                        }
-                                );
+                            if (parte == null) {
+                                return;
                             }
 
-
-                            @Override
-                            protected void updateItem(
-                                    Parte parte,
-                                    boolean empty
+                            if (
+                                    parte.getTipoVariacao()
+                                            == TipoVariacaoParte.FIXA
                             ) {
 
-                                super.updateItem(
-                                        parte,
-                                        empty
-                                );
+                                checkBox.setSelected(true);
 
+                                return;
+                            }
 
-                                if (
-                                        empty
-                                                || parte == null
-                                ) {
+                            partesSelecionadas.put(
+                                    parte.getId(),
+                                    checkBox.isSelected()
+                            );
 
-                                    setGraphic(null);
+                            if (
+                                    onParteSelecionadaChanged
+                                            != null
+                            ) {
 
-                                    setText(null);
-
-                                    return;
-                                }
-
-
-                                boolean fixa =
-                                        parte.getTipoVariacao()
-                                                == TipoVariacaoParte.FIXA;
-
-
-                                checkBox.setText(
-                                        parte.getNome()
-                                );
-
-
-                                /*
-                                 * Parte fixa:
-                                 * sempre marcada e desabilitada.
-                                 */
-                                if (fixa) {
-
-                                    checkBox.setSelected(true);
-
-                                    checkBox.setDisable(true);
-
-
-                                    partesSelecionadas.put(
-                                            parte.getId(),
-                                            true
-                                    );
-
-                                } else {
-
-                                    checkBox.setDisable(false);
-
-                                    checkBox.setSelected(
-                                            partesSelecionadas.getOrDefault(
-                                                    parte.getId(),
-                                                    false
-                                            )
-                                    );
-                                }
-
-
-                                setGraphic(
-                                        checkBox
+                                onParteSelecionadaChanged.accept(
+                                        parte
                                 );
                             }
+                        });
+                    }
+
+
+                    @Override
+                    protected void updateItem(
+                            Parte parte,
+                            boolean empty
+                    ) {
+
+                        super.updateItem(
+                                parte,
+                                empty
+                        );
+
+                        if (empty || parte == null) {
+
+                            setGraphic(null);
+                            setText(null);
+
+                            return;
                         }
+
+                        boolean fixa =
+                                parte.getTipoVariacao()
+                                        == TipoVariacaoParte.FIXA;
+
+                        checkBox.setText(
+                                parte.getNome()
+                        );
+
+                        checkBox.getStyleClass()
+                                .add("check-box");
+
+                        if (fixa) {
+
+                            checkBox.setSelected(true);
+                            checkBox.setDisable(true);
+
+                            partesSelecionadas.put(
+                                    parte.getId(),
+                                    true
+                            );
+
+                        } else {
+
+                            checkBox.setDisable(false);
+
+                            checkBox.setSelected(
+                                    partesSelecionadas.getOrDefault(
+                                            parte.getId(),
+                                            false
+                                    )
+                            );
+                        }
+
+                        setGraphic(checkBox);
+                    }
+                }
         );
     }
 
@@ -371,235 +304,283 @@ public class ProgramacaoView {
     private void criarCabecalho() {
 
         Label titulo =
+                new Label("Programação Mensal");
+
+        titulo.getStyleClass().add("page-title");
+
+        Label subtitulo =
                 new Label(
-                        "Programação Mensal"
+                        "Configure as reuniões, partes e temas do mês."
                 );
 
+        subtitulo.getStyleClass().add("page-subtitle");
 
-        titulo.setStyle(
-                "-fx-font-size: 20px; -fx-font-weight: bold;"
-        );
+        Label labelMes =
+                new Label("Mês da programação");
 
+        labelMes.getStyleClass().add("label");
 
-        campoData.setPromptText(
-                "Selecione o mês"
-        );
+        campoData.setPromptText("Selecione o mês");
+        campoData.getStyleClass().add("date-picker");
 
+        campoData.setPrefWidth(180);
 
-        HBox linhaMes =
+        HBox seletorMes =
                 new HBox(
                         10,
-                        new Label("Mês:"),
+                        labelMes,
                         campoData
                 );
 
-
-        linhaMes.setAlignment(
+        seletorMes.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-
         VBox topo =
                 new VBox(
-                        15,
+                        6,
                         titulo,
-                        linhaMes
+                        subtitulo,
+                        criarEspacamento(8),
+                        seletorMes
                 );
 
-
-        root.setTop(
-                topo
-        );
+        root.setTop(topo);
     }
 
 
     private void criarConteudo() {
 
-        Label tituloSemanas =
-                new Label(
-                        "Reuniões do mês"
+        VBox painelSemanas =
+                criarPainelSemanas();
+
+        VBox painelPartes =
+                criarPainelPartes();
+
+        HBox centro =
+                new HBox(
+                        16,
+                        painelSemanas,
+                        painelPartes
                 );
 
-
-        tituloSemanas.setStyle(
-                "-fx-font-weight: bold;"
+        HBox.setHgrow(
+                painelSemanas,
+                Priority.SOMETIMES
         );
 
+        HBox.setHgrow(
+                painelPartes,
+                Priority.ALWAYS
+        );
 
-        VBox painelSemanas =
-                new VBox(
-                        8,
-                        tituloSemanas,
-                        listaSemanas
+        VBox.setVgrow(
+                painelSemanas,
+                Priority.ALWAYS
+        );
+
+        VBox.setVgrow(
+                painelPartes,
+                Priority.ALWAYS
+        );
+
+        BorderPane.setMargin(
+                centro,
+                new Insets(24, 0, 0, 0)
+        );
+
+        root.setCenter(centro);
+    }
+
+
+    private VBox criarPainelSemanas() {
+
+        Label titulo =
+                new Label("Reuniões do mês");
+
+        titulo.getStyleClass().add("card-title");
+
+        Label descricao =
+                new Label(
+                        "Selecione uma reunião para editar sua programação."
                 );
 
+        descricao.getStyleClass().add("page-subtitle");
+
+        listaSemanas.getStyleClass().add("table-view");
 
         VBox.setVgrow(
                 listaSemanas,
                 Priority.ALWAYS
         );
 
-
-        HBox.setHgrow(
-                painelSemanas,
-                Priority.ALWAYS
-        );
-
-
-        HBox botoesSemana =
+        HBox botoes =
                 new HBox(
                         10,
                         botaoAdicionarSemana,
                         botaoEditarSemana
                 );
 
-
-        botoesSemana.setAlignment(
-                Pos.CENTER
+        botoes.setAlignment(
+                Pos.CENTER_LEFT
         );
 
-
-        VBox painelMes =
+        VBox card =
                 new VBox(
-                        8,
-                        painelSemanas,
-                        botoesSemana
+                        10,
+                        titulo,
+                        descricao,
+                        listaSemanas,
+                        botoes
                 );
 
+        card.getStyleClass().add("card");
 
-        painelMes.setPrefWidth(350);
+        card.setPrefWidth(360);
 
+        card.setMinWidth(320);
 
-        Label tituloPartes =
-                new Label(
-                        "Partes da reunião"
-                );
-
-
-        tituloPartes.setStyle(
-                "-fx-font-weight: bold;"
+        VBox.setVgrow(
+                listaSemanas,
+                Priority.ALWAYS
         );
 
+        return card;
+    }
+
+
+    private VBox criarPainelPartes() {
+
+        Label titulo =
+                new Label("Partes da reunião");
+
+        titulo.getStyleClass().add("card-title");
 
         Label instrucao =
                 new Label(
                         "Partes fixas são incluídas automaticamente. "
-                                + "Marque as partes variáveis desejadas:"
+                                + "Marque as partes variáveis desejadas."
                 );
 
-
-        instrucao.setStyle(
-                "-fx-text-fill: gray;"
-        );
-
-
-        VBox painelPartes =
-                new VBox(
-                        8,
-                        tituloPartes,
-                        instrucao,
-                        listaPartes
-                );
-
+        instrucao.getStyleClass().add("page-subtitle");
 
         VBox.setVgrow(
                 listaPartes,
                 Priority.ALWAYS
         );
 
+        VBox painelTema =
+                criarPainelTema();
 
-        HBox.setHgrow(
-                painelPartes,
+        VBox card =
+                new VBox(
+                        10,
+                        titulo,
+                        instrucao,
+                        listaPartes,
+                        painelTema
+                );
+
+        card.getStyleClass().add("card");
+
+        VBox.setVgrow(
+                listaPartes,
                 Priority.ALWAYS
         );
 
+        return card;
+    }
 
-        VBox painelTema =
-                new VBox(
-                        8,
-                        new Label(
-                                "Tema da parte selecionada:"
-                        ),
+
+    private VBox criarPainelTema() {
+
+        Label titulo =
+                new Label("Tema da parte selecionada");
+
+        titulo.getStyleClass().add("card-title");
+
+        HBox linha =
+                new HBox(
+                        10,
                         campoTema,
                         botaoSalvarTema
                 );
 
-
-        painelTema.setPadding(
-                new Insets(10, 0, 0, 0)
-        );
-
-
-        VBox painelEditor =
-                new VBox(
-                        15,
-                        painelPartes,
-                        painelTema
-                );
-
-
-        VBox.setVgrow(
-                painelPartes,
-                Priority.ALWAYS
-        );
-
-
-        VBox.setVgrow(
-                painelEditor,
-                Priority.ALWAYS
-        );
-
-
-        HBox centro =
-                new HBox(
-                        20,
-                        painelMes,
-                        painelEditor
-                );
-
-
         HBox.setHgrow(
-                painelEditor,
+                campoTema,
                 Priority.ALWAYS
         );
 
-
-        root.setCenter(
-                centro
+        linha.setAlignment(
+                Pos.CENTER_LEFT
         );
+
+        VBox painel =
+                new VBox(
+                        8,
+                        titulo,
+                        linha
+                );
+
+        painel.setPadding(
+                new Insets(12, 0, 0, 0)
+        );
+
+        return painel;
     }
 
 
     private void criarRodape() {
 
-        HBox botoes =
-                new HBox(
-                        10,
-                        labelStatus,
-                        botaoGerar,
-                        botaoSalvar
-                );
-
+        Separator separador =
+                new Separator();
 
         HBox.setHgrow(
                 labelStatus,
                 Priority.ALWAYS
         );
 
+        labelStatus.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        HBox botoes =
+                new HBox(
+                        10,
+                        labelStatus,
+                        botaoSalvar,
+                        botaoGerar
+                );
 
         botoes.setAlignment(
-                Pos.CENTER_LEFT
+                Pos.CENTER_RIGHT
         );
 
+        VBox rodape =
+                new VBox(
+                        12,
+                        separador,
+                        botoes
+                );
 
-        botoes.setPadding(
-                new Insets(15, 0, 0, 0)
+        BorderPane.setMargin(
+                rodape,
+                new Insets(20, 0, 0, 0)
         );
 
+        root.setBottom(rodape);
+    }
 
-        root.setBottom(
-                botoes
-        );
+
+    private Region criarEspacamento(double altura) {
+
+        Region region = new Region();
+
+        region.setMinHeight(altura);
+        region.setPrefHeight(altura);
+        region.setMaxHeight(altura);
+
+        return region;
     }
 
 
@@ -706,13 +687,11 @@ public class ProgramacaoView {
                 novasSemanas
         );
 
-
         statusSemanas.clear();
 
         statusSemanas.putAll(
                 status
         );
-
 
         listaSemanas.refresh();
     }
@@ -727,7 +706,6 @@ public class ProgramacaoView {
                 data,
                 configurada
         );
-
 
         listaSemanas.refresh();
     }
@@ -759,10 +737,6 @@ public class ProgramacaoView {
 
         partesSelecionadas.clear();
 
-
-        /*
-         * As partes fixas sempre começam marcadas.
-         */
         for (Parte parte : partes) {
 
             if (
@@ -777,13 +751,11 @@ public class ProgramacaoView {
             }
         }
 
-
         listaPartes.setItems(
                 FXCollections.observableArrayList(
                         partes
                 )
         );
-
 
         listaPartes.refresh();
     }
@@ -798,12 +770,10 @@ public class ProgramacaoView {
             return;
         }
 
-
         partesSelecionadas.put(
                 parteId,
                 marcada
         );
-
 
         listaPartes.refresh();
     }
@@ -816,7 +786,6 @@ public class ProgramacaoView {
         if (parteId == null) {
             return false;
         }
-
 
         return partesSelecionadas.getOrDefault(
                 parteId,

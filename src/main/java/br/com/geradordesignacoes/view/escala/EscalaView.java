@@ -1,8 +1,9 @@
 package br.com.geradordesignacoes.view.escala;
 
-import br.com.geradordesignacoes.controller.EscalaController;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
+import br.com.geradordesignacoes.model.TipoParte;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -10,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
@@ -43,13 +45,21 @@ public class EscalaView {
 
         root = new BorderPane();
 
+        root.getStyleClass().add("content-area");
+
         root.setPadding(
-                new Insets(10)
+                new Insets(24)
         );
 
 
         campoData =
                 new DatePicker();
+
+        campoData.getStyleClass().add(
+                "date-picker"
+        );
+
+        campoData.setPrefWidth(180);
 
 
         botaoGerar =
@@ -57,11 +67,19 @@ public class EscalaView {
                         "Gerar Escala"
                 );
 
+        botaoGerar.getStyleClass().add(
+                "primary-button"
+        );
+
 
         botaoGerarNovamente =
                 new Button(
                         "Gerar Novamente"
                 );
+
+        botaoGerarNovamente.getStyleClass().add(
+                "secondary-button"
+        );
 
 
         botaoSalvar =
@@ -69,19 +87,35 @@ public class EscalaView {
                         "Salvar Escala"
                 );
 
+        botaoSalvar.getStyleClass().add(
+                "success-button"
+        );
+
 
         labelStatus =
                 new Label(
                         "Aguardando geração das escalas..."
                 );
 
+        labelStatus.getStyleClass().add(
+                "status-warning"
+        );
+
 
         labelResumo =
                 new Label();
 
+        labelResumo.getStyleClass().add(
+                "page-subtitle"
+        );
+
 
         tabela =
                 new TableView<>();
+
+        tabela.getStyleClass().add(
+                "table-view"
+        );
 
 
         criarCabecalho();
@@ -105,64 +139,60 @@ public class EscalaView {
                         "Geração de Escalas"
                 );
 
-
-        titulo.setStyle(
-                "-fx-font-size: 20px;"
+        titulo.getStyleClass().add(
+                "page-title"
         );
 
 
-        HBox linhaData =
+        Label subtitulo =
+                new Label(
+                        "Gere e acompanhe as designações das reuniões do mês."
+                );
+
+        subtitulo.getStyleClass().add(
+                "page-subtitle"
+        );
+
+
+        Label labelMes =
+                new Label(
+                        "Mês da programação"
+                );
+
+        labelMes.getStyleClass().add(
+                "label"
+        );
+
+
+        campoData.setPromptText(
+                "Selecione o mês"
+        );
+
+
+        HBox seletorMes =
                 new HBox(
                         10,
-                        new Label("Mês:"),
+                        labelMes,
                         campoData
                 );
 
-
-        linhaData.setAlignment(
+        seletorMes.setAlignment(
                 Pos.CENTER_LEFT
         );
 
 
-        HBox linhaBotao =
-                new HBox(
-                        botaoGerar
-                );
-
-
-        linhaBotao.setAlignment(
-                Pos.CENTER
-        );
-
-
         VBox painelStatus =
-                new VBox(
-                        5,
-                        new Label("Status"),
-                        labelStatus,
-                        labelResumo
-                );
-
-
-        painelStatus.setPadding(
-                new Insets(10)
-        );
-
-
-        painelStatus.setStyle(
-                "-fx-background-color: #F5F5F5;" +
-                        "-fx-border-color: lightgray;" +
-                        "-fx-border-radius: 5;" +
-                        "-fx-background-radius: 5;"
-        );
+                criarPainelStatus();
 
 
         VBox topo =
                 new VBox(
-                        15,
+                        6,
                         titulo,
-                        linhaData,
-                        linhaBotao,
+                        subtitulo,
+                        criarEspaco(10),
+                        seletorMes,
+                        criarEspaco(8),
                         painelStatus
                 );
 
@@ -170,6 +200,35 @@ public class EscalaView {
         root.setTop(
                 topo
         );
+    }
+
+
+    private VBox criarPainelStatus() {
+
+        Label titulo =
+                new Label(
+                        "Status da geração"
+                );
+
+        titulo.getStyleClass().add(
+                "card-title"
+        );
+
+
+        VBox painel =
+                new VBox(
+                        5,
+                        titulo,
+                        labelStatus,
+                        labelResumo
+                );
+
+        painel.getStyleClass().add(
+                "card"
+        );
+
+
+        return painel;
     }
 
 
@@ -190,7 +249,7 @@ public class EscalaView {
 
         TableColumn<ItemEscala, String> colunaResponsavel =
                 new TableColumn<>(
-                        "Responsável"
+                        "Responsável / Dirigente"
                 );
 
 
@@ -203,7 +262,7 @@ public class EscalaView {
 
         TableColumn<ItemEscala, String> colunaAjudante =
                 new TableColumn<>(
-                        "Ajudante"
+                        "Ajudante / Leitor"
                 );
 
 
@@ -221,8 +280,28 @@ public class EscalaView {
         );
 
 
+        colunaParte.setPrefWidth(420);
+
+        colunaResponsavel.setPrefWidth(260);
+
+        colunaAjudante.setPrefWidth(260);
+
+
         tabela.setColumnResizePolicy(
                 TableView.CONSTRAINED_RESIZE_POLICY
+        );
+
+
+        tabela.setPlaceholder(
+                new Label(
+                        "Nenhuma escala gerada."
+                )
+        );
+
+
+        BorderPane.setMargin(
+                tabela,
+                new Insets(20, 0, 0, 0)
         );
 
 
@@ -233,6 +312,10 @@ public class EscalaView {
 
 
     private void criarRodape() {
+
+        Separator separador =
+                new Separator();
+
 
         HBox botoes =
                 new HBox(
@@ -247,18 +330,22 @@ public class EscalaView {
         );
 
 
-        botoes.setPadding(
-                new Insets(
-                        15,
-                        0,
-                        0,
-                        0
-                )
+        VBox rodape =
+                new VBox(
+                        12,
+                        separador,
+                        botoes
+                );
+
+
+        BorderPane.setMargin(
+                rodape,
+                new Insets(20, 0, 0, 0)
         );
 
 
         root.setBottom(
-                botoes
+                rodape
         );
     }
 
@@ -272,7 +359,6 @@ public class EscalaView {
 
         List<ItemEscala> itens =
                 new ArrayList<>();
-
 
 
         DateTimeFormatter formatter =
@@ -301,6 +387,7 @@ public class EscalaView {
                                     resultado.escala()
                                             .getDesignacoes();
 
+
                             for (
                                     int indice = 0;
                                     indice < designacoes.size();
@@ -308,39 +395,98 @@ public class EscalaView {
                             ) {
 
                                 Designacao designacao =
-                                        designacoes.get(indice);
+                                        designacoes.get(
+                                                indice
+                                        );
 
-                                if (designacao.parte().getTipo()
-                                        == br.com.geradordesignacoes.model.TipoParte.DIRIGENTE_ESTUDO) {
-                                    if (indice > 0
-                                            && designacoes.get(indice - 1).parte()
-                                            .equals(designacao.parte())) {
+
+                                if (
+                                        designacao.parte()
+                                                .getTipo()
+                                                == TipoParte.DIRIGENTE_ESTUDO
+                                ) {
+
+                                    if (
+                                            indice > 0
+                                                    && designacoes
+                                                    .get(indice - 1)
+                                                    .parte()
+                                                    .equals(
+                                                            designacao.parte()
+                                                    )
+                                    ) {
+
                                         continue;
                                     }
 
-                                    String dirigente = designacoes.stream()
-                                            .filter(item -> item.parte().equals(designacao.parte()))
-                                            .map(Designacao::responsavel)
-                                            .filter(java.util.Objects::nonNull)
-                                            .map(br.com.geradordesignacoes.model.Pessoa::getNome)
-                                            .findFirst()
-                                            .orElse("");
-                                    String leitor = designacoes.stream()
-                                            .filter(item -> item.parte().equals(designacao.parte()))
-                                            .map(Designacao::ajudante)
-                                            .filter(java.util.Objects::nonNull)
-                                            .map(br.com.geradordesignacoes.model.Pessoa::getNome)
-                                            .findFirst()
-                                            .orElse("");
 
-                                    itens.add(new ItemEscala(
-                                            indice,
-                                            data.format(formatter) + " - " + designacao.parte().getNome(),
-                                            dirigente,
-                                            leitor
-                                    ));
+                                    String dirigente =
+                                            designacoes.stream()
+                                                    .filter(
+                                                            item ->
+                                                                    item.parte()
+                                                                            .equals(
+                                                                                    designacao.parte()
+                                                                            )
+                                                    )
+                                                    .map(
+                                                            Designacao::responsavel
+                                                    )
+                                                    .filter(
+                                                            java.util.Objects::nonNull
+                                                    )
+                                                    .map(
+                                                            br.com.geradordesignacoes.model.Pessoa::getNome
+                                                    )
+                                                    .findFirst()
+                                                    .orElse(
+                                                            ""
+                                                    );
+
+
+                                    String leitor =
+                                            designacoes.stream()
+                                                    .filter(
+                                                            item ->
+                                                                    item.parte()
+                                                                            .equals(
+                                                                                    designacao.parte()
+                                                                            )
+                                                    )
+                                                    .map(
+                                                            Designacao::ajudante
+                                                    )
+                                                    .filter(
+                                                            java.util.Objects::nonNull
+                                                    )
+                                                    .map(
+                                                            br.com.geradordesignacoes.model.Pessoa::getNome
+                                                    )
+                                                    .findFirst()
+                                                    .orElse(
+                                                            ""
+                                                    );
+
+
+                                    itens.add(
+                                            new ItemEscala(
+                                                    indice,
+                                                    data.format(
+                                                            formatter
+                                                    )
+                                                            + " - "
+                                                            + designacao
+                                                            .parte()
+                                                            .getNome(),
+                                                    dirigente,
+                                                    leitor
+                                            )
+                                    );
+
+
                                     continue;
                                 }
+
 
                                 String parte =
                                         data.format(
@@ -352,14 +498,16 @@ public class EscalaView {
 
 
                                 String responsavel =
-                                        designacao.responsavel() == null
+                                        designacao.responsavel()
+                                                == null
                                                 ? ""
                                                 : designacao.responsavel()
                                                 .getNome();
 
 
                                 String ajudante =
-                                        designacao.ajudante() == null
+                                        designacao.ajudante()
+                                                == null
                                                 ? ""
                                                 : designacao.ajudante()
                                                 .getNome();
@@ -385,6 +533,15 @@ public class EscalaView {
 
         labelStatus.setText(
                 "Escalas geradas com sucesso."
+        );
+
+        labelStatus.getStyleClass().removeAll(
+                "status-warning",
+                "status-error"
+        );
+
+        labelStatus.getStyleClass().add(
+                "status-success"
         );
 
 
@@ -450,7 +607,32 @@ public class EscalaView {
         );
     }
 
+
     public br.com.geradordesignacoes.controller.EscalaController getController() {
+
         return controller;
+    }
+
+
+    private VBox criarEspaco(
+            double altura
+    ) {
+
+        VBox espaco =
+                new VBox();
+
+        espaco.setMinHeight(
+                altura
+        );
+
+        espaco.setPrefHeight(
+                altura
+        );
+
+        espaco.setMaxHeight(
+                altura
+        );
+
+        return espaco;
     }
 }
