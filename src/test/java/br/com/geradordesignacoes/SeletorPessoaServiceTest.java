@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -240,6 +241,91 @@ public class SeletorPessoaServiceTest {
         );
     }
 
+    @Test
+    void naoDeveSelecionarPresidenteComoDirigente() {
+        Pessoa presidente = criarPessoaComParticipacao(
+                "Presidente",
+                true,
+                true
+        );
+        Pessoa candidato = criarPessoaComParticipacao(
+                "Candidato",
+                true,
+                true
+        );
+        Parte parte = criarParteComParticipacao(
+                TipoParticipacao.DIRIGENTE
+        );
+        ControleDesignacoes controle = new ControleDesignacoes();
+        controle.definirPresidente(presidente);
+
+        DiagnosticoSelecaoPessoa diagnostico =
+                seletor.selecionarComDiagnostico(
+                        parte,
+                        List.of(presidente, candidato),
+                        controle,
+                        LocalDate.of(2026, 8, 4),
+                        TipoParticipacao.DIRIGENTE
+                );
+
+        assertFalse(
+                diagnostico.candidatos().stream()
+                        .anyMatch(resultado ->
+                                resultado.getPessoa().equals(presidente))
+        );
+        assertEquals(candidato, diagnostico.escolhido().getPessoa());
+    }
+
+    @Test
+    void naoDeveSelecionarPresidenteComoAjudante() {
+        Pessoa presidente = criarPessoaComParticipacao(
+                "Presidente",
+                true,
+                true
+        );
+        Parte parte = criarParteComParticipacao(
+                TipoParticipacao.AJUDANTE
+        );
+        ControleDesignacoes controle = new ControleDesignacoes();
+        controle.definirPresidente(presidente);
+
+        DiagnosticoSelecaoPessoa diagnostico =
+                seletor.selecionarComDiagnostico(
+                        parte,
+                        List.of(presidente),
+                        controle,
+                        LocalDate.of(2026, 8, 4),
+                        TipoParticipacao.AJUDANTE
+                );
+
+        assertTrue(diagnostico.candidatos().isEmpty());
+        assertNull(diagnostico.escolhido());
+    }
+
+    @Test
+    void pessoaQueNaoEPresidenteContinuaElegivel() {
+        Pessoa candidato = criarPessoaComParticipacao(
+                "Candidato",
+                true,
+                true
+        );
+        Parte parte = criarParteComParticipacao(
+                TipoParticipacao.DIRIGENTE
+        );
+        ControleDesignacoes controle = new ControleDesignacoes();
+
+        DiagnosticoSelecaoPessoa diagnostico =
+                seletor.selecionarComDiagnostico(
+                        parte,
+                        List.of(candidato),
+                        controle,
+                        LocalDate.of(2026, 8, 4),
+                        TipoParticipacao.DIRIGENTE
+                );
+
+        assertEquals(candidato, diagnostico.escolhido().getPessoa());
+    }
+
     private Pessoa criarPessoa(
             String nome,
             Privilegio privilegio
@@ -272,6 +358,43 @@ public class SeletorPessoaServiceTest {
                 List.of(
                         TipoParticipacao.LEITOR
                 )
+        );
+    }
+
+    private Pessoa criarPessoaComParticipacao(
+            String nome,
+            boolean podeSerAjudante,
+            boolean podeSerDirigente
+    ) {
+        return new Pessoa(
+                nome,
+                Sexo.MASCULINO,
+                true,
+                true,
+                podeSerAjudante,
+                true,
+                true,
+                true,
+                true,
+                podeSerDirigente,
+                Privilegio.ANCIAO,
+                NivelLeitura.EXPERIENTE
+        );
+    }
+
+    private Parte criarParteComParticipacao(
+            TipoParticipacao participacao
+    ) {
+        return new Parte(
+                "Parte " + participacao,
+                TipoParte.PARTE_1,
+                Privilegio.PUBLICADOR,
+                false,
+                SexoPermitido.AMBOS,
+                1,
+                false,
+                NivelLeitura.BASICO,
+                List.of(participacao)
         );
     }
 }

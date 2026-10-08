@@ -147,6 +147,7 @@ public class SeletorPessoaService {
             TipoParticipacao tipo
     ) {
         List<ResultadoAvaliacaoPessoa> candidatos = pessoas.stream()
+                .filter(pessoa -> !controle.ehPresidente(pessoa))
                 .filter(pessoa -> parte.pessoaPodeExercerParticipacao(pessoa, tipo))
                 .filter(pessoa -> regrasService.podeExercerParticipacao(pessoa, parte, tipo))
                 .filter(pessoa -> !possuiConflitoTesourosJoias(pessoa, parte, controle, data))

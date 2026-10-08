@@ -33,11 +33,16 @@ public class GeradorEscalaPresidenteTest extends BaseDAOTest {
 
         Parte partePresidente = salvarPartePresidente();
         Parte parteLeitura = salvarParteLeitura();
+        Parte parteOracaoFinal = salvarParteOracaoFinal();
 
         ResultadoGeracaoEscala resultado = new GeradorEscala(new RegrasService())
                 .gerar(
                         LocalDate.of(2026, 8, 4),
-                        List.of(parteLeitura, partePresidente),
+                        List.of(
+                                parteLeitura,
+                                partePresidente,
+                                parteOracaoFinal
+                        ),
                         List.of(presidente, leitor)
                 );
 
@@ -49,6 +54,10 @@ public class GeradorEscalaPresidenteTest extends BaseDAOTest {
                 .anyMatch(participacao ->
                         participacao.pessoa().equals(presidente)
                                 && participacao.tipoParticipacao() == TipoParticipacao.PRESIDENTE));
+        assertTrue(resultado.getDesignacoes().stream()
+                .anyMatch(designacao ->
+                        designacao.parte().getTipo() == TipoParte.ORACAO_FINAL
+                                && designacao.responsavel().equals(presidente)));
     }
 
     @Test
@@ -175,6 +184,23 @@ public class GeradorEscalaPresidenteTest extends BaseDAOTest {
                         false,
                         NivelLeitura.BASICO,
                         List.of(TipoParticipacao.LEITOR)
+                )
+        );
+    }
+
+    private Parte salvarParteOracaoFinal() {
+
+        return new ParteDAO().salvar(
+                new Parte(
+                        "Oração final",
+                        TipoParte.ORACAO_FINAL,
+                        Privilegio.BATIZADO,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.ORACAO_FINAL)
                 )
         );
     }
