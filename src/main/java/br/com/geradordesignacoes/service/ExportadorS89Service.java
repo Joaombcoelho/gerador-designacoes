@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.net.URISyntaxException;
 
 public class ExportadorS89Service {
 
@@ -444,7 +445,40 @@ public class ExportadorS89Service {
             return Path.of(configurado);
         }
 
-        return Path.of(MODELO_PADRAO);
+        Path caminhoRelativo = Path.of(MODELO_PADRAO);
+        if (Files.isRegularFile(caminhoRelativo)) {
+            return caminhoRelativo;
+        }
+
+        try {
+            Path localizacaoAplicacao =
+                    Path.of(
+                            ExportadorS89Service.class
+                                    .getProtectionDomain()
+                                    .getCodeSource()
+                                    .getLocation()
+                                    .toURI()
+                    );
+
+            Path diretorioAplicacao =
+                    Files.isRegularFile(localizacaoAplicacao)
+                            ? localizacaoAplicacao.getParent()
+                            : localizacaoAplicacao;
+
+            Path modeloInstalado =
+                    diretorioAplicacao.resolve(MODELO_PADRAO);
+
+            if (Files.isRegularFile(modeloInstalado)) {
+                return modeloInstalado;
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(
+                    "Não foi possível localizar o modelo S-89 instalado.",
+                    e
+            );
+        }
+
+        return caminhoRelativo;
     }
 
     private record DesignacaoExportacao(
