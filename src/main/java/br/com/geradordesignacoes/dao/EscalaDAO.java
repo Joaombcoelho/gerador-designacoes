@@ -272,6 +272,42 @@ public class EscalaDAO {
         }
     }
 
+    public Optional<Escala> buscarPorData(LocalDate data) {
+
+        if (data == null) {
+            throw new IllegalArgumentException(
+                    "A data da escala não pode ser nula."
+            );
+        }
+
+        String sql = """
+                SELECT id
+                FROM escala
+                WHERE data = ?
+                """;
+
+        try (
+                Connection connection = ConnectionFactory.getConnection();
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+            statement.setString(1, data.toString());
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return Optional.empty();
+                }
+
+                return buscarPorId(resultSet.getInt("id"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao buscar escala pela data.",
+                    e
+            );
+        }
+    }
+
 
     public List<Escala> listarTodas() {
 

@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
+import br.com.geradordesignacoes.service.ExportadorS89Service;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
 import java.time.DayOfWeek;
@@ -23,6 +24,8 @@ public class ProgramacaoController {
 
     private final EscalaController escalaController;
 
+    private final ExportadorS89Service exportadorS89Service;
+
     private final List<LocalDate> semanas;
 
 
@@ -38,6 +41,9 @@ public class ProgramacaoController {
 
         this.service =
                 new ProgramacaoSemanaService();
+
+        this.exportadorS89Service =
+                new ExportadorS89Service();
 
         this.semanas =
                 new ArrayList<>();
@@ -115,6 +121,11 @@ public class ProgramacaoController {
         view.getBotaoGerar()
                 .setOnAction(
                         event -> gerarEscalas()
+                );
+
+        view.getBotaoExportarS89()
+                .setOnAction(
+                        event -> exportarS89()
                 );
 
 
@@ -898,7 +909,6 @@ public class ProgramacaoController {
             return;
         }
 
-
         escalaController.gerarEscalasDoMes(
                 YearMonth.from(data)
         );
@@ -910,6 +920,34 @@ public class ProgramacaoController {
          * as escalas geradas.
          */
         view.atualizarBotaoSalvar(true);
+    }
+
+    private void exportarS89() {
+        LocalDate data = obterDataSelecionada();
+
+        if (data == null) {
+            view.atualizarStatus(
+                    "Selecione uma semana para exportar."
+            );
+            return;
+        }
+
+        try {
+            List<java.nio.file.Path> arquivos =
+                    exportadorS89Service.exportarSemana(data);
+
+            view.atualizarStatus(
+                    "S-89 exportado com sucesso: "
+                            + arquivos.size()
+                            + " arquivo(s) em "
+                            + arquivos.get(0).getParent()
+            );
+        } catch (Exception e) {
+            view.atualizarStatus(
+                    "Não foi possível exportar o S-89: "
+                            + e.getMessage()
+            );
+        }
     }
 
 
