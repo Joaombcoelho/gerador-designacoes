@@ -1,187 +1,164 @@
 # Gerador de Designações
 
-Aplicação desktop em Java com JavaFX para gerenciar pessoas, partes de reunião, programação semanal e geração de escala de designações. O sistema usa SQLite como banco local, persiste histórico de participações e tenta distribuir as atribuições considerando regras de privilégio, sexo, participação, nível de leitura e frequência histórica.
+Aplicação desktop para configuração de programações semanais, geração e edição de escalas de designações. O sistema foi desenvolvido em JavaFX, utiliza SQLite para persistência local e aplica regras de elegibilidade, distribuição e histórico para apoiar a organização das reuniões.
 
-## Sobre o projeto
+## Visão geral
 
-O projeto nasceu como uma ferramenta para auxiliar na organização de designações de reuniões, com foco em rotatividade, consistência e redução de atribuições manuais. A aplicação permite cadastrar pessoas e partes de reunião, gerar uma escala para uma data específica e manter um histórico de participações para apoiar a distribuição das funções.
+O projeto reúne em uma única aplicação:
 
-No estado atual do código, o sistema é uma aplicação desktop com interface JavaFX que combina CRUD de dados, lógica de negócio para geração de designações e persistência local em SQLite. A estrutura foi organizada em camadas bem definidas: modelos, DAOs, serviços, controladores e views.
+- cadastro e edição de pessoas;
+- cadastro e edição de partes da reunião;
+- configuração da programação semanal;
+- seleção de partes variáveis e inclusão automática de partes fixas;
+- geração, revisão, edição e salvamento de escalas;
+- consulta do histórico de designações;
+- backup manual, restauração e backup automático do banco;
+- exportação de designações elegíveis para o formulário PDF S-89.
 
-O público-alvo é quem precisa controlar designações em uma reunião ou contexto semelhante, especialmente quando há regras de elegibilidade e necessidade de evitar repetições indevidas. As principais funcionalidades já implementadas incluem cadastro e edição de pessoas, cadastro de partes, geração automática de escala e configuração da programação semanal.
+As funcionalidades são organizadas em camadas de modelo, acesso a dados, serviços, controladores e views JavaFX. A aplicação é destinada a uso local e não possui backend ou serviço remoto.
 
-Características relevantes da solução:
+## Captura de telas
 
-- persistência local em banco SQLite;
-- geração automática de escala por data;
-- histórico de participação por pessoa e parte;
-- regras de privilégio, sexo, leitura e participação;
-- suporte a partes fixas e variáveis na programação semanal;
-- backup automático e restauração do banco;
-- interface desktop em JavaFX.
-
-## Funcionalidades
-
-As funcionalidades abaixo foram identificadas diretamente no código e na estrutura do projeto:
-
-- gerenciamento de pessoas;
-- gerenciamento de partes de reunião;
-- cadastro de papéis e participações exigidas por parte;
-- geração automática de escala de designações;
-- suporte a designações com responsável e ajudante;
-- programação semanal com ordenação das partes;
-- atribuição de temas para partes da programação semanal;
-- histórico de designações e participações;
-- persistência em SQLite;
-- backup e restauração do banco de dados;
-- regras de distribuição baseadas em histórico, privilégio e elegibilidade.
-
-## Tecnologias utilizadas
-
-As tecnologias e bibliotecas realmente presentes no projeto são:
-
-- Java 22 (definido em `pom.xml` via `maven.compiler.release`);
-- Maven;
-- JavaFX 21.0.7;
-- SQLite;
-- JDBC via `sqlite-jdbc` 3.50.3.0;
-- JUnit 5.10.2;
-- JUnit 4.13.1;
-- Maven Surefire Plugin;
-- JavaFX Maven Plugin.
-
-## Screenshots
-
-A pasta `screenshot` do repositório contém telas relevantes da aplicação desktop e pode ser usada como referência visual do projeto:
 
 ![Tela inicial](screenshot/Home.jpg)
 
+
 ![Tela de cadastro de partes](screenshot/Tela%20Cadastro%20parte.jpg)
 
-![Tela de programação](screenshot/Tela%20Programacao.jpg)
+![Tela de programação semanal](screenshot/Tela%20Programacao.jpg)
 
 ![Tela de histórico](screenshot/Tela%20Historico.jpg)
 
-## Arquitetura e estrutura do projeto
 
-A organização do projeto segue a separação por camadas, com classes Java organizadas por pacote:
+## Funcionalidades implementadas
+
+### Cadastros
+
+- Cadastro, edição e gerenciamento de pessoas.
+- Cadastro e edição de partes da reunião.
+- Configuração das participações necessárias, privilégio mínimo, sexo permitido, nível de leitura e necessidade de ajudante de cada parte.
+
+### Programação semanal
+
+- Criação e consulta de programações por data.
+- Inclusão automática das partes fixas.
+- Seleção e remoção de partes variáveis, respeitando o limite de 3 a 6 partes variáveis.
+- Definição de tema para as partes que possuem tema.
+- Edição do número oficial de cada `ProgramacaoParte`, individualmente por semana.
+- Números oficiais positivos ou vazios; a ordem interna da programação permanece separada desse número.
+
+
+### Geração e edição de escalas
+
+- Geração de escalas por data ou mês.
+- Revisão da escala antes do salvamento.
+- Edição de designações salvas, incluindo responsável e ajudante quando aplicável.
+- Salvamento das escalas e das designações no SQLite.
+- Distribuição baseada em atividade, privilégios, sexo permitido, participações exigidas, nível de leitura, histórico e regras específicas de cada parte.
+
+### Histórico
+
+- Registro e consulta do histórico de participações.
+- Uso do histórico para reduzir repetições e apoiar a distribuição das designações.
+
+### Backup e restauração
+
+- Backup manual do banco pela interface.
+- Restauração de um arquivo `.db` pela interface.
+- Backup automático no início da aplicação e a cada 24 horas enquanto ela estiver aberta.
+- Backups automáticos recebem data e hora no nome para evitar a substituição de arquivos anteriores.
+
+## Exportação para PDF S-89
+
+Na tela de **Programação Semanal**, selecione a semana e clique em **Exportar S-89**. A exportação consulta somente a escala já salva e a programação correspondente no banco; ela não gera nem substitui escalas automaticamente.
+
+Atualmente são exportadas as designações das partes elegíveis:
+
+- parte com tipo `LEITURA`;
+- partes do tipo `DEMONSTRACAO` pertencentes à seção `MINISTERIO`, que representa as partes de ministério cadastradas na aplicação.
+
+Antes de criar o arquivo, o serviço valida a existência da escala salva, da programação semanal, do participante e do número oficial da `ProgramacaoParte`. Se algum dado obrigatório estiver ausente, a operação informa o erro e não cria um PDF incompleto.
+
+O formulário utiliza o modelo versionado em `modelos/S-89_T.pdf` e preenche:
+
+| Campo do formulário | Conteúdo |
+| --- | --- |
+| `900_1_Text_SanSerif` | Nome do responsável ou participante da parte |
+| `900_2_Text_SanSerif` | Nome do ajudante, quando houver |
+| `900_3_Text_SanSerif` | Intervalo semanal de segunda-feira a domingo, em português |
+| `900_4_Text_SanSerif` | Número oficial e nome da parte, por exemplo `3 — Leitura` |
+| `900_5_CheckBox` | Salão principal, marcado |
+| `900_6_CheckBox` | Sala B, desmarcado |
+| `900_7_CheckBox` | Sala C, desmarcado |
+
+Exemplos de intervalo no campo de data:
 
 ```text
-gerador-designacoes/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── br/com/geradordesignacoes/
-│   │   │       ├── controller/
-│   │   │       ├── dao/
-│   │   │       ├── database/
-│   │   │       ├── model/
-│   │   │       ├── service/
-│   │   │       ├── view/
-│   │   │       ├── Main.java
-│   │   │       ├── MainApp.java
-│   │   │       └── ...
-│   │   └── resources/
-│   └── test/
-│       └── java/
-│           └── br/com/geradordesignacoes/
-├── pom.xml
-├── README.md
-├── .gitignore
-└── ...
+05 - 11 de Outubro
+28 de Setembro - 04 de Outubro
+28 de Dezembro de 2026 - 03 de Janeiro de 2027
 ```
 
-Principais responsabilidades por pacote:
+Por padrão, os arquivos são salvos em:
 
-- `model`: entidades do domínio, enums e objetos de regra de negócio, como `Pessoa`, `Parte`, `Escala`, `Designacao`, `ProgramacaoSemana` e demais modelos auxiliares.
-- `dao`: acesso direto ao SQLite, incluindo consultas, inserções, atualizações e carregamento de dados.
-- `service`: lógica de regras de negócio, avaliação de candidatos, geração de escala e programação semanal.
-- `controller`: integração entre a interface gráfica e os serviços.
-- `view`: telas JavaFX para pessoas, partes, escala, programação, histórico e edição da escala.
-- `database`: criação do banco, setup inicial e utilitários de backup/restauração.
-
-## Banco de dados
-
-O banco utilizado é SQLite. A conexão é iniciada em `ConnectionFactory`, que cria o diretório `%LOCALAPPDATA%\GeradorDesignacoes` e usa o arquivo `gerador-designacoes.db` como base local.
-
-```java
-private static final Path DATABASE_DIRECTORY =
-        Path.of(System.getenv("LOCALAPPDATA"), "GeradorDesignacoes");
-
-private static final Path DATABASE_PATH =
-        DATABASE_DIRECTORY.resolve("gerador-designacoes.db");
+```text
+%USERPROFILE%\GeradorDesignacoes\S-89\
+└── Outubro 2026\
+    └── Semana 1 - 07-10-2026\
+        └── S89_Leitura_Biblia.pdf
 ```
 
-Os principais objetos persistidos no banco são:
+O exportador não sobrescreve arquivos existentes. O caminho do modelo e o diretório de saída podem ser configurados por propriedades do sistema:
 
-- `pessoa`
-- `parte`
-- `parte_participacao_necessaria`
-- `historico_designacoes`
-- `escala`
-- `designacao`
-- `programacao_semana`
-- `programacao_parte`
-
-Relacionamentos principais:
-
-- `designacao` referencia `escala`, `parte`, `responsavel_id` e `ajudante_id`;
-- `historico_designacoes` referencia `pessoa` e `parte`;
-- `parte_participacao_necessaria` referencia `parte` e armazena as participações necessárias para cada parte;
-- `programacao_parte` referencia `programacao_semana` e `parte`;
-- `programacao_semana` possui uma data e lista de partes programadas para a semana.
-
-A criação e atualização da estrutura do banco ocorrem em `DatabaseInitializer.initialize()`. Esse inicializador cria as tabelas se não existirem e também realiza um seed inicial de partes e pessoas. O seed define partes como "Presidente", "Oração inicial", "Discurso — Tesouros", "Joias Espirituais", "Leitura", "Estudo Bíblico" e "Oração final", além de uma lista inicial de pessoas com atributos de privilégio e permissões.
-
-## Regras de negócio
-
-As principais regras identificadas no código são as seguintes:
-
-- somente pessoas com `ativo = true` podem ser designadas;
-- a pessoa precisa ter pelo menos uma participação que a parte exige;
-- a parte define `privilegio_minimo`, `sexo_permitido`, `quantidade_minima_participantes`, `nivel_leitura_minimo`, `exige_ajudante`, `gera_formulario` e `possui_tema`;
-- o presidente não pode receber uma segunda designação na mesma reunião;
-- anciãos e servos ministeriais podem receber mais de uma designação na mesma reunião;
-- uma pessoa só pode ser selecionada para uma parte se estiver habilitada para a participação necessária;
-- a geração de escala considera o histórico para reduzir repetição de tarefas e priorizar pessoas menos frequentes;
-- a avaliação de candidatos usa três critérios principais:
-  1. quantidade de participações anteriores;
-  2. compatibilidade de privilégio com a parte;
-  3. penalidade por repetição de participação na mesma parte;
-- a seleção de dupla para demostração exige pessoa responsável e ajudante diferentes, ativos, do mesmo sexo e habilitados para as funções;
-- a programação semanal exige entre 3 e 6 partes variáveis e rejeita partes duplicadas ou não variáveis;
-- partes da programação semanal podem ter tema e ordem em sequência;
-- a ordem padrão das partes da reunião é definida pelo `ProgramacaoSemanaService` com base nos nomes das partes.
-
-Em termos práticos, a lógica simula uma distribuição balanceada, evitando que a mesma pessoa fique repetidamente na mesma função e respeitando os limites do perfil da pessoa e da parte.
-
-## Testes
-
-O projeto possui testes automatizados em JUnit sob `src/test/java`. Há várias classes de teste cobrindo a lógica de geração de escala, regras de negócio, DAO, partes, pessoas, programação semanal e avaliação de candidatos.
-
-O framework principal é:
-
-- JUnit 5 (presente em `org.junit.jupiter`)
-- JUnit 4 (presente em `junit:junit`)
-
-Na validação executada neste ambiente, a suíte foi rodada com o comando:
-
-```bash
-mvn test -q
+```text
+-Ds89.template=C:\caminho\S-89_T.pdf
+-Ds89.output.dir=C:\caminho\de\saida
 ```
 
-Resultado verificado: comando concluído com sucesso, sem falhas identificadas no processo de execução atual. Os testes do projeto estão presentes no diretório `src/test/java` e foram executados com sucesso no ambiente verificado neste momento.
+O local da reunião não é obtido do banco; por isso, apenas o checkbox **Salão principal** é marcado automaticamente.
 
-## Como executar o projeto
+## Tecnologias utilizadas
 
-Pré-requisitos confirmados pelo projeto:
+As versões abaixo são as declaradas no `pom.xml`:
+
+- Java 22;
+- Maven;
+- JavaFX Controls e FXML 21.0.7;
+- SQLite JDBC 3.50.3.0;
+- Apache PDFBox 3.0.5;
+- Ikonli JavaFX 12.3.1;
+- Ikonli FontAwesome 5 Pack 12.3.1;
+- JUnit Jupiter 5.10.2;
+- JUnit 4.13.1;
+- Maven Compiler Plugin 3.13.0;
+- Maven Surefire Plugin 3.2.5;
+- JavaFX Maven Plugin 0.0.8.
+
+## Arquitetura e organização do código
+
+O projeto utiliza uma organização em camadas:
+
+- `model`: entidades, records e enums do domínio, como `Pessoa`, `Parte`, `Designacao`, `Escala`, `ProgramacaoSemana` e `ProgramacaoParte`;
+- `dao`: consultas e operações de persistência no SQLite;
+- `service`: regras de negócio, geração, programação semanal, backup e exportação S-89;
+- `controller`: coordenação entre views e services;
+- `view`: telas e componentes JavaFX;
+- `database`: conexão, inicialização, migrações, backup e restauração;
+- `teste`: utilitário para inspeção do modelo PDF S-89.
+
+O fluxo principal é iniciado por `MainApp`. Na inicialização, o banco é preparado por `DatabaseInitializer`, o backup automático é iniciado e a interface principal é exibida.
+
+## Requisitos
 
 - JDK 22;
-- Maven instalado e configurado no PATH;
-- ambiente Windows, pois a aplicação grava o banco em `%LOCALAPPDATA%\GeradorDesignacoes`;
-- dependências JavaFX e SQLite gerenciadas pelo Maven.
+- Maven disponível no `PATH`;
+- sistema operacional Windows para o caminho atual de armazenamento baseado em `LOCALAPPDATA`;
+- acesso à internet na primeira compilação, para que o Maven possa baixar as dependências;
+- arquivo `modelos/S-89_T.pdf` presente para utilizar a exportação S-89.
 
-Fluxo de execução recomendado a partir da raiz do projeto:
+## Instalação e execução
+
+Na raiz do projeto:
 
 ```bash
 git clone https://github.com/Joaombcoelho/gerador-designacoes.git
@@ -189,94 +166,84 @@ cd gerador-designacoes
 mvn javafx:run
 ```
 
-O plugin JavaFX no `pom.xml` aponta `br.com.geradordesignacoes.MainApp` como classe principal, então a execução da aplicação por esse comando é a forma mais direta de iniciar a interface.
+O plugin JavaFX está configurado para iniciar `br.com.geradordesignacoes.MainApp`.
 
-## Requisitos
+## Testes
 
-- Java 22;
-- Maven;
-- sistema operacional Windows para o armazenamento atual do banco em `LOCALAPPDATA`;
-- acesso a um ambiente com JavaFX disponível via dependências Maven;
-- SQLite driver gerenciado automaticamente pelo `sqlite-jdbc`.
+Para compilar e executar todos os testes:
 
-## Configuração
-
-Não há arquivo de configuração externo como `application.properties`, `.env` ou YAML no projeto. A aplicação cria o banco e o diretório de dados automaticamente na primeira execução.
-
-O banco e os backups são salvos em:
-
-```text
-%LOCALAPPDATA%\GeradorDesignacoes\
-├── gerador-designacoes.db
-└── backups/
+```bash
+mvn test
 ```
 
-## Uso da aplicação
+Os testes ficam em `src/test/java` e cobrem modelos, regras de negócio, services, DAOs, programação semanal, geração de escalas e exportação do S-89.
 
-O fluxo principal da aplicação, inferido a partir dos pacotes e controladores, é:
+## Banco de dados e persistência
 
-1. iniciar a aplicação (`MainApp`);
-2. inicializar o banco e o seed inicial (`DatabaseInitializer`);
-3. abrir a tela principal (`MainView`);
-4. cadastrar pessoas e partes no menu de cadastros;
-5. definir a programação semanal, quando necessário;
-6. gerar uma escala para uma data específica;
-7. revisar, salvar e editar a escala gerada;
-8. consultar o histórico de designações;
-9. fazer backup e restaurar o banco quando necessário.
+O banco é SQLite e é criado automaticamente na primeira inicialização. No Windows, o caminho usado pelo `ConnectionFactory` é:
 
-## Estrutura das principais entidades
+```text
+%LOCALAPPDATA%\GeradorDesignacoes\gerador-designacoes.db
+```
 
-| Entidade | Responsabilidade |
-| --- | --- |
-| `Pessoa` | representa um participante com nome, sexo, privilégio, nível de leitura, status de participação e permissões operacionais. |
-| `Parte` | representa uma tarefa ou parte da reunião, com tipo, privilégio mínimo, sexo permitido, exigência de ajudante e participações necessárias. |
-| `ParticipacaoDesignacao` | registra uma participação específica de uma pessoa em uma parte em uma data. |
-| `Designacao` | representa a atribuição concreta de uma pessoa (e opcionalmente ajudante) a uma parte em uma escala. |
-| `Escala` | representa a geração de designações para uma data, com status, data de geração e lista de designações. |
-| `ProgramacaoSemana` | agrupa uma data e a sequência de partes da programação semanal. |
-| `ProgramacaoParte` | representa uma parte dentro da programação semanal, com ordem e tema. |
-| `HistoricoDesignacoes` | consolida o histórico de participações para cálculo de distribuição e regras. |
+O inicializador cria ou atualiza a estrutura e cadastra dados iniciais quando necessário. Entre as tabelas utilizadas estão:
 
-## Status do projeto
+- `pessoa`;
+- `parte`;
+- `parte_participacao_necessaria`;
+- `historico_designacoes`;
+- `escala`;
+- `designacao`;
+- `programacao_semana`;
+- `programacao_parte`.
 
-### Concluído
+`programacao_parte.numero_oficial` pertence à parte dentro de uma programação semanal. Ele não altera o cadastro mestre em `parte` e não substitui a coluna `ordem`.
 
-- estrutura de aplicação desktop JavaFX;
-- cadastro de pessoas;
-- cadastro de partes de reunião;
-- geração de escala por data;
-- histórico de designações;
-- persistência em SQLite;
-- programação semanal com partes fixas/variáveis;
-- backup automático e restauração do banco.
+Os backups automáticos são gravados em:
 
-### Observações atuais
+```text
+%LOCALAPPDATA%\GeradorDesignacoes\backups\
+```
 
-- A suíte de testes foi validada com sucesso por meio de `mvn test -q`.
-- O projeto utiliza armazenamento local em `%LOCALAPPDATA%` e, atualmente,
-  depende do ambiente Windows para o comportamento de armazenamento do banco.
+O backup manual permite escolher o arquivo de destino. A restauração substitui o banco local pelo arquivo selecionado e a interface orienta reiniciar a aplicação para carregar os dados restaurados.
 
-## Próximas melhorias
+## Estrutura de pastas relevante
 
-O projeto continua em desenvolvimento e novas funcionalidades serão
-definidas conforme a utilização real da aplicação e as necessidades
-identificadas durante seu uso.
+```text
+gerador-designacoes/
+├── modelos/
+│   ├── S-89_T.pdf
+│   └── S-89_visualizacao.png
+├── screenshot/
+│   ├── Home.jpg
+│   ├── Tela Cadastro parte.jpg
+│   ├── Tela Historico.jpg
+│   └── Tela Programacao.jpg
+├── src/
+│   ├── main/java/br/com/geradordesignacoes/
+│   │   ├── controller/
+│   │   ├── dao/
+│   │   ├── database/
+│   │   ├── model/
+│   │   ├── service/
+│   │   └── view/
+│   └── test/java/br/com/geradordesignacoes/
+├── pom.xml
+└── README.md
+```
 
-### Planejadas
+## Estado atual e melhorias futuras
 
-- [ ] Exportação das escalas para PDF;
-- [ ] Exportação das escalas para Excel/CSV;
-- [ ] Impressão direta das escalas;
-- [ ] Relatórios de participação;
-- [ ] Filtros e melhorias no histórico;
-- [ ] Visualização mensal das escalas;
-- [ ] Melhorias na validação de conflitos durante a geração;
-- [ ] Melhorias no algoritmo de distribuição;
-- [ ] Personalização do modelo de PDF;
-- [ ] Geração de escalas para períodos maiores;
-- [ ] Integração com IA para leitura de apostilas em PDF, identificação
-    automática das partes da reunião e extração dos respectivos temas;
-- [ ] Revisão e confirmação das informações identificadas pela IA antes
-  de salvar a programação semanal.
+O projeto possui uma aplicação desktop funcional para cadastro, programação semanal, geração, edição, persistência e consulta de escalas, com backup local e exportação S-89 para as partes atualmente elegíveis.
 
+O estado atual ainda é direcionado a uso local em Windows.
+
+Possíveis evoluções, sem compromisso de implementação neste momento:
+
+- ampliar os formatos e modelos de exportação;
+- aprimorar relatórios e filtros de histórico;
+- melhorar a validação e a visualização de conflitos;
+- evoluir a distribuição das designações conforme novas regras confirmadas.
+- permitir configuração de múltiplos locais de reunião e exportação S-89 com base no local selecionado;
+- Leitura do PDF da apostila, para a configuração automatica das partes e obtenção dos temas.
+- Geração do formulário S-140, com toda a programação da reunião e todos os participantes.
