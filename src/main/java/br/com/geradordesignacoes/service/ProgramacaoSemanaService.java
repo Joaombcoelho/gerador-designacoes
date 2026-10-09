@@ -6,6 +6,7 @@ import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
+import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
 import java.time.DayOfWeek;
@@ -72,6 +73,7 @@ public class ProgramacaoSemanaService {
 
         if (existente != null) {
             sincronizarPartesFixas(existente);
+            atribuirNumeroPadraoLeitura(existente);
 
             return programacaoSemanaDAO.buscarPorData(data);
         }
@@ -114,6 +116,8 @@ public class ProgramacaoSemanaService {
                             parteFixa,
                             novaOrdem
                     );
+
+            atribuirNumeroPadraoLeitura(programacaoParte);
 
             programacaoParteDAO.salvar(
                     programacao.id(),
@@ -203,6 +207,53 @@ public class ProgramacaoSemanaService {
     }
 
     /**
+     * Define ou altera o número oficial de uma parte
+     * de uma programação semanal.
+     */
+    public void definirNumeroOficial(
+            LocalDate data,
+            int ordem,
+            Integer numeroOficial
+    ) {
+        validarData(data);
+
+        if (ordem <= 0) {
+            throw new IllegalArgumentException(
+                    "A ordem deve ser maior que zero."
+            );
+        }
+
+        if (numeroOficial != null && numeroOficial < 1) {
+            throw new IllegalArgumentException(
+                    "O número oficial deve ser maior que zero."
+            );
+        }
+
+        ProgramacaoSemana programacao =
+                obterOuCriar(data);
+
+        ProgramacaoParte programacaoParte =
+                programacao.partes()
+                        .stream()
+                        .filter(
+                                parte ->
+                                        parte.getOrdem() == ordem
+                        )
+                        .findFirst()
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Parte da programação não encontrada."
+                                        )
+                        );
+
+        programacaoParteDAO.atualizarNumeroOficial(
+                programacaoParte.getId(),
+                numeroOficial
+        );
+    }
+
+    /**
      * Cria uma nova programação semanal.
      *
      * Uma nova programação recebe automaticamente
@@ -221,7 +272,7 @@ public class ProgramacaoSemanaService {
 
         for (Parte parte : partesFixas) {
             programacao.adicionarParte(
-                    new ProgramacaoParte(
+                    criarProgramacaoParte(
                             parte,
                             ordem++
                     )
@@ -229,6 +280,56 @@ public class ProgramacaoSemanaService {
         }
 
         return programacao;
+    }
+
+    private ProgramacaoParte criarProgramacaoParte(
+            Parte parte,
+            int ordem
+    ) {
+        ProgramacaoParte programacaoParte =
+                new ProgramacaoParte(
+                        parte,
+                        ordem
+                );
+
+        atribuirNumeroPadraoLeitura(programacaoParte);
+
+        return programacaoParte;
+    }
+
+    private void atribuirNumeroPadraoLeitura(
+            ProgramacaoParte programacaoParte
+    ) {
+        if (programacaoParte.getParte().getTipo()
+                != TipoParte.LEITURA
+                || programacaoParte.getNumeroOficial() != null) {
+            return;
+        }
+
+        programacaoParte.setNumeroOficial(3);
+    }
+
+    private void atribuirNumeroPadraoLeitura(
+            ProgramacaoSemana programacao
+    ) {
+        programacao.partes()
+                .forEach(
+                        programacaoParte -> {
+                            if (
+                                    programacaoParte.getParte().getTipo()
+                                            == TipoParte.LEITURA
+                                            && programacaoParte
+                                            .getNumeroOficial() == null
+                            ) {
+                                programacaoParte.setNumeroOficial(3);
+                                programacaoParteDAO
+                                        .atualizarNumeroOficial(
+                                                programacaoParte.getId(),
+                                                3
+                                        );
+                            }
+                        }
+                );
     }
 
     /**
@@ -484,6 +585,8 @@ public class ProgramacaoSemanaService {
                         parte,
                         novaOrdem
                 );
+
+        atribuirNumeroPadraoLeitura(programacaoParte);
 
         programacaoParteDAO.salvar(
                 programacao.id(),

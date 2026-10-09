@@ -141,6 +141,97 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
 
 
     @Test
+    void deveSalvarListarAtualizarEPermitirNumeroOficialNulo() {
+
+        int semanaId = criarProgramacaoSemana();
+
+        Parte parte =
+                obterParteInicial(
+                        "DISCURSO_TESOUROS"
+                );
+
+        ProgramacaoParte programacaoParte =
+                new ProgramacaoParte(
+                        null,
+                        parte,
+                        1,
+                        "Tema de teste",
+                        7
+                );
+
+        programacaoParteDAO.salvar(
+                semanaId,
+                programacaoParte
+        );
+
+        ProgramacaoParte salva =
+                programacaoParteDAO.listarPorSemana(semanaId)
+                        .get(0);
+
+        assertEquals(
+                7,
+                salva.getNumeroOficial()
+        );
+
+        programacaoParteDAO.atualizarNumeroOficial(
+                salva.getId(),
+                9
+        );
+
+        assertEquals(
+                9,
+                programacaoParteDAO.listarPorSemana(semanaId)
+                        .get(0)
+                        .getNumeroOficial()
+        );
+
+        programacaoParteDAO.atualizarNumeroOficial(
+                salva.getId(),
+                null
+        );
+
+        assertNull(
+                programacaoParteDAO.listarPorSemana(semanaId)
+                        .get(0)
+                        .getNumeroOficial()
+        );
+    }
+
+
+    @Test
+    void deveRejeitarNumeroOficialMenorQueUm() {
+
+        int semanaId = criarProgramacaoSemana();
+
+        Parte parte =
+                obterParteInicial(
+                        "DISCURSO_TESOUROS"
+                );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        new ProgramacaoParte(
+                                null,
+                                parte,
+                                1,
+                                null,
+                                0
+                        )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        programacaoParteDAO.atualizarNumeroOficial(
+                                999,
+                                0
+                        )
+        );
+    }
+
+
+    @Test
     void deveExcluirParteDaProgramacao() {
 
         int semanaId = criarProgramacaoSemana();

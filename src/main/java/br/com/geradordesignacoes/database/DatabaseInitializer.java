@@ -287,6 +287,8 @@ public class DatabaseInitializer {
                     CREATE_TABLE_PROGRAMACAO_PARTE
             );
 
+            adicionarColunaNumeroOficialProgramacaoParte(connection);
+
 
             /*
              * ----------------------------------------------------
@@ -317,6 +319,42 @@ public class DatabaseInitializer {
             throw new RuntimeException(
                     "Erro ao inicializar o banco de dados.",
                     e
+            );
+        }
+    }
+
+    private static void adicionarColunaNumeroOficialProgramacaoParte(
+            Connection connection
+    ) throws SQLException {
+
+        boolean colunaExiste = false;
+
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(
+                        "PRAGMA table_info(programacao_parte)"
+                )
+        ) {
+            while (resultSet.next()) {
+                if ("numero_oficial".equals(
+                        resultSet.getString("name")
+                )) {
+                    colunaExiste = true;
+                    break;
+                }
+            }
+        }
+
+        if (!colunaExiste) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute(
+                        "ALTER TABLE programacao_parte " +
+                                "ADD COLUMN numero_oficial INTEGER"
+                );
+            }
+
+            System.out.println(
+                    "Coluna numero_oficial adicionada à programação."
             );
         }
     }

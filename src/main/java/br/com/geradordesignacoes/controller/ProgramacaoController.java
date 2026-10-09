@@ -106,6 +106,11 @@ public class ProgramacaoController {
                         event -> salvarTema()
                 );
 
+        view.getBotaoSalvarNumeroOficial()
+                .setOnAction(
+                        event -> salvarNumeroOficial()
+                );
+
 
         view.getBotaoGerar()
                 .setOnAction(
@@ -338,8 +343,25 @@ public class ProgramacaoController {
                                 )
                 );
 
+        Map<Integer, Integer> numerosOficiais =
+                new HashMap<>();
+
+        programacao.partes()
+                .forEach(
+                        programacaoParte ->
+                                numerosOficiais.put(
+                                        programacaoParte.getParte().getId(),
+                                        programacaoParte.getNumeroOficial()
+                                )
+                );
+
+        view.carregarNumerosOficiais(numerosOficiais);
+
 
         view.getCampoTema()
+                .clear();
+
+        view.getCampoNumeroOficial()
                 .clear();
 
 
@@ -627,17 +649,27 @@ public class ProgramacaoController {
                     )
                     .findFirst()
                     .ifPresentOrElse(
-
-                            programacaoParte ->
-                                    view.getCampoTema()
-                                            .setText(
-                                                    programacaoParte
-                                                            .getTema()
-                                            ),
-
-                            () ->
-                                    view.getCampoTema()
-                                            .clear()
+                            programacaoParte -> {
+                                view.getCampoTema()
+                                        .setText(
+                                                programacaoParte
+                                                        .getTema()
+                                        );
+                                view.getCampoNumeroOficial()
+                                        .setText(
+                                                programacaoParte
+                                                        .getNumeroOficial()
+                                                        == null
+                                                        ? ""
+                                                        : programacaoParte
+                                                        .getNumeroOficial()
+                                                        .toString()
+                                        );
+                            },
+                            () -> {
+                                view.getCampoTema().clear();
+                                view.getCampoNumeroOficial().clear();
+                            }
                     );
 
 
@@ -750,6 +782,101 @@ public class ProgramacaoController {
                             + e.getMessage()
             );
 
+            e.printStackTrace();
+        }
+    }
+
+    private void salvarNumeroOficial() {
+
+        LocalDate data =
+                obterDataSelecionada();
+
+        if (data == null) {
+            view.atualizarStatus(
+                    "Selecione uma reunião."
+            );
+            return;
+        }
+
+        Parte parte =
+                view.getListaPartes()
+                        .getSelectionModel()
+                        .getSelectedItem();
+
+        if (parte == null) {
+            view.atualizarStatus(
+                    "Selecione uma parte para informar o número oficial."
+            );
+            return;
+        }
+
+        if (!view.isParteSelecionada(parte.getId())) {
+            view.atualizarStatus(
+                    "Selecione a parte antes de informar o número oficial."
+            );
+            return;
+        }
+
+        String texto =
+                view.getCampoNumeroOficial()
+                        .getText()
+                        .trim();
+
+        Integer numeroOficial;
+
+        if (texto.isEmpty()) {
+            numeroOficial = null;
+        } else {
+            try {
+                numeroOficial = Integer.valueOf(texto);
+            } catch (NumberFormatException e) {
+                view.atualizarStatus(
+                        "Informe um número oficial inteiro positivo ou deixe o campo vazio."
+                );
+                return;
+            }
+        }
+
+        try {
+            ProgramacaoSemana programacao =
+                    service.obterOuCriar(data);
+
+            ProgramacaoParte programacaoParte =
+                    programacao.partes()
+                            .stream()
+                            .filter(
+                                    item ->
+                                            item.getParte().getId()
+                                                    .equals(parte.getId())
+                            )
+                            .findFirst()
+                            .orElseThrow(
+                                    () ->
+                                            new IllegalArgumentException(
+                                                    "Parte não encontrada na programação."
+                                            )
+                            );
+
+            service.definirNumeroOficial(
+                    data,
+                    programacaoParte.getOrdem(),
+                    numeroOficial
+            );
+
+            carregarProgramacao(data);
+
+            view.atualizarStatus(
+                    "Número oficial salvo com sucesso."
+            );
+        } catch (IllegalArgumentException e) {
+            view.atualizarStatus(
+                    e.getMessage()
+            );
+        } catch (Exception e) {
+            view.atualizarStatus(
+                    "Erro ao salvar número oficial: "
+                            + e.getMessage()
+            );
             e.printStackTrace();
         }
     }

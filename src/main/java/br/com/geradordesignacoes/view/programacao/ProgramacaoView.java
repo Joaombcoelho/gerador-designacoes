@@ -46,11 +46,17 @@ public class ProgramacaoView {
 
     private final Button botaoSalvarTema;
 
+    private final TextField campoNumeroOficial;
+
+    private final Button botaoSalvarNumeroOficial;
+
     private final Label labelStatus;
 
     private Consumer<Parte> onParteSelecionadaChanged;
 
     private final Map<Integer, Boolean> partesSelecionadas;
+
+    private final Map<Integer, Integer> numerosOficiais;
 
 
     public ProgramacaoView() {
@@ -69,6 +75,8 @@ public class ProgramacaoView {
         statusSemanas = new HashMap<>();
 
         partesSelecionadas = new HashMap<>();
+
+        numerosOficiais = new HashMap<>();
 
         botaoAdicionarSemana = new Button("+ Adicionar semana");
         botaoAdicionarSemana.getStyleClass().add("primary-button");
@@ -93,6 +101,14 @@ public class ProgramacaoView {
 
         botaoSalvarTema = new Button("Salvar Tema");
         botaoSalvarTema.getStyleClass().add("secondary-button");
+
+        campoNumeroOficial = new TextField();
+        campoNumeroOficial.setPromptText("Número positivo ou vazio");
+        campoNumeroOficial.getStyleClass().add("text-field");
+        campoNumeroOficial.setPrefWidth(180);
+
+        botaoSalvarNumeroOficial = new Button("Salvar Número");
+        botaoSalvarNumeroOficial.getStyleClass().add("secondary-button");
 
         labelStatus = new Label(
                 "Selecione um mês para configurar a programação."
@@ -265,8 +281,15 @@ public class ProgramacaoView {
                                 parte.getTipoVariacao()
                                         == TipoVariacaoParte.FIXA;
 
+                        Integer numeroOficial =
+                                numerosOficiais.get(parte.getId());
+
                         checkBox.setText(
                                 parte.getNome()
+                                        + (numeroOficial == null
+                                        ? ""
+                                        : " - Nº oficial: "
+                                        + numeroOficial)
                         );
 
                         checkBox.getStyleClass()
@@ -522,6 +545,28 @@ public class ProgramacaoView {
                         linha
                 );
 
+        Label tituloNumero =
+                new Label("Número oficial da parte");
+
+        tituloNumero.getStyleClass().add("card-title");
+
+        HBox linhaNumero =
+                new HBox(
+                        10,
+                        campoNumeroOficial,
+                        botaoSalvarNumeroOficial
+                );
+
+        linhaNumero.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        painel.getChildren().addAll(
+                criarEspacamento(4),
+                tituloNumero,
+                linhaNumero
+        );
+
         painel.setPadding(
                 new Insets(12, 0, 0, 0)
         );
@@ -667,6 +712,16 @@ public class ProgramacaoView {
         return botaoSalvarTema;
     }
 
+    public TextField getCampoNumeroOficial() {
+
+        return campoNumeroOficial;
+    }
+
+    public Button getBotaoSalvarNumeroOficial() {
+
+        return botaoSalvarNumeroOficial;
+    }
+
 
     public void atualizarStatus(
             String mensagem
@@ -757,6 +812,15 @@ public class ProgramacaoView {
                 )
         );
 
+        listaPartes.refresh();
+    }
+
+    public void carregarNumerosOficiais(
+            Map<Integer, Integer> numeros
+    ) {
+
+        numerosOficiais.clear();
+        numerosOficiais.putAll(numeros);
         listaPartes.refresh();
     }
 

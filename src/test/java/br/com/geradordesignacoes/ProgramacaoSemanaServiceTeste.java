@@ -4,7 +4,9 @@ import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
+import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
+import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,8 @@ class ProgramacaoSemanaServiceTest {
 
     @BeforeEach
     void prepararBanco() {
+
+        DatabaseInitializer.initialize();
 
         service =
                 new ProgramacaoSemanaService();
@@ -211,6 +215,55 @@ class ProgramacaoSemanaServiceTest {
                                 data,
                                 null
                         )
+        );
+    }
+
+    @Test
+    void deveDefinirNumeroTresParaLeituraEPreservarNumeroEditado() {
+
+        LocalDate data =
+                LocalDate.of(2026, 11, 4);
+
+        ProgramacaoSemana criada =
+                service.obterOuCriar(data);
+
+        ProgramacaoParte leitura =
+                criada.partes()
+                        .stream()
+                        .filter(
+                                parte ->
+                                        parte.getParte().getTipo()
+                                                == TipoParte.LEITURA
+                        )
+                        .findFirst()
+                        .orElseThrow();
+
+        assertEquals(
+                3,
+                leitura.getNumeroOficial()
+        );
+
+        service.definirNumeroOficial(
+                data,
+                leitura.getOrdem(),
+                8
+        );
+
+        ProgramacaoSemana recarregada =
+                service.obterOuCriar(data);
+
+        assertEquals(
+                8,
+                recarregada.partes()
+                        .stream()
+                        .filter(
+                                parte ->
+                                        parte.getParte().getTipo()
+                                                == TipoParte.LEITURA
+                        )
+                        .findFirst()
+                        .orElseThrow()
+                        .getNumeroOficial()
         );
     }
 

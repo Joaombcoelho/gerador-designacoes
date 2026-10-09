@@ -57,14 +57,15 @@ public class ProgramacaoParteDAO {
     ) throws SQLException {
 
         String sql = """
-                INSERT INTO programacao_parte (
-                    programacao_semana_id,
-                    parte_id,
-                    ordem,
-                    tema
-                )
-                VALUES (?, ?, ?, ?)
-                """;
+    INSERT INTO programacao_parte (
+        programacao_semana_id,
+        parte_id,
+        ordem,
+        tema,
+        numero_oficial
+    )
+    VALUES (?, ?, ?, ?, ?)
+    """;
 
 
         try (
@@ -94,6 +95,10 @@ public class ProgramacaoParteDAO {
                     programacaoParte.getTema()
             );
 
+            statement.setObject(
+                    5,
+                    programacaoParte.getNumeroOficial()
+            );
 
             statement.executeUpdate();
         }
@@ -153,6 +158,61 @@ public class ProgramacaoParteDAO {
     }
 
 
+    public void atualizarNumeroOficial(
+            Integer id,
+            Integer numeroOficial
+    ) {
+
+        validarNumeroOficial(numeroOficial);
+
+        String sql = """
+                UPDATE programacao_parte
+                SET numero_oficial = ?
+                WHERE id = ?
+                """;
+
+
+        try (
+                Connection connection =
+                        ConnectionFactory.getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setObject(
+                    1,
+                    numeroOficial
+            );
+
+            statement.setInt(
+                    2,
+                    id
+            );
+
+
+            int linhasAfetadas =
+                    statement.executeUpdate();
+
+
+            if (linhasAfetadas != 1) {
+
+                throw new RuntimeException(
+                        "Parte da programação não encontrada."
+                );
+            }
+
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao atualizar número oficial da parte da programação.",
+                    e
+            );
+        }
+    }
+
+
     public List<ProgramacaoParte> listarPorSemana(
             int programacaoSemanaId
     ) {
@@ -183,14 +243,10 @@ public class ProgramacaoParteDAO {
     ) throws SQLException {
 
         String sql = """
-                SELECT
-                    id,
-                    parte_id,
-                    ordem,
-                    tema
-                FROM programacao_parte
-                WHERE programacao_semana_id = ?
-                ORDER BY ordem
+                SELECT id, parte_id, ordem, tema, numero_oficial
+                              FROM programacao_parte
+                              WHERE programacao_semana_id = ?
+                              ORDER BY ordem
                 """;
 
 
@@ -238,7 +294,8 @@ public class ProgramacaoParteDAO {
                                     resultSet.getInt("id"),
                                     parte.get(),
                                     resultSet.getInt("ordem"),
-                                    resultSet.getString("tema")
+                                    resultSet.getString("tema"),
+                                    (Integer) resultSet.getObject("numero_oficial")
                             );
 
 
@@ -251,6 +308,17 @@ public class ProgramacaoParteDAO {
 
 
         return partes;
+    }
+
+
+    private void validarNumeroOficial(
+            Integer numeroOficial
+    ) {
+        if (numeroOficial != null && numeroOficial < 1) {
+            throw new IllegalArgumentException(
+                    "O número oficial deve ser maior que zero."
+            );
+        }
     }
 
 
