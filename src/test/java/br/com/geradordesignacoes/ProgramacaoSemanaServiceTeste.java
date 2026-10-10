@@ -6,7 +6,6 @@ import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
-import br.com.geradordesignacoes.database.DatabaseInitializer;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,16 +15,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProgramacaoSemanaServiceTest {
+class ProgramacaoSemanaServiceTest extends BaseDAOTest {
 
     private ProgramacaoSemanaService service;
 
 
     @BeforeEach
-    void prepararBanco() {
-
-        DatabaseInitializer.initialize();
-
+    void prepararServico() {
         service =
                 new ProgramacaoSemanaService();
     }

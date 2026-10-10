@@ -1,78 +1,55 @@
 package br.com.geradordesignacoes;
 
-import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.database.DatabaseInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 public abstract class BaseDAOTest {
 
     protected Connection connection;
+    private TestDatabase testDatabase;
 
 
     @BeforeEach
-    void prepararBanco() throws SQLException {
+    void prepararBanco() throws Exception {
+
+        testDatabase =
+                TestDatabase.create();
 
         DatabaseInitializer.initialize();
 
-        connection = ConnectionFactory.getConnection();
-
-        limparBanco();
-
-        DatabaseInitializer.initialize();
+        connection =
+                br.com.geradordesignacoes.database.ConnectionFactory
+                        .getConnection();
     }
 
 
     @AfterEach
-    void finalizarBanco() throws SQLException {
+    void finalizarBanco() throws Exception {
 
-        limparBanco();
-
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
+        Exception failure = null;
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (Exception e) {
+            failure = e;
         }
-    }
 
+        try {
+            testDatabase.close();
+        } catch (Exception e) {
+            if (failure != null) {
+                failure.addSuppressed(e);
+            } else {
+                failure = e;
+            }
+        }
 
-    protected void limparBanco() throws SQLException {
-
-        try (Statement statement = connection.createStatement()) {
-
-            statement.execute(
-                    "DELETE FROM designacao"
-            );
-
-            statement.execute(
-                    "DELETE FROM historico_designacoes"
-            );
-
-            statement.execute(
-                    "DELETE FROM parte_participacao_necessaria"
-            );
-
-            statement.execute(
-                    "DELETE FROM programacao_parte"
-            );
-
-            statement.execute(
-                    "DELETE FROM programacao_semana"
-            );
-
-            statement.execute(
-                    "DELETE FROM escala"
-            );
-
-            statement.execute(
-                    "DELETE FROM parte"
-            );
-
-            statement.execute(
-                    "DELETE FROM pessoa"
-            );
+        if (failure != null) {
+            throw failure;
         }
     }
 }

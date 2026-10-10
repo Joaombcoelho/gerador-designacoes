@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GeradorEscalaHistoricoTest {
+public class GeradorEscalaHistoricoTest extends BaseDAOTest {
 
 
     private PessoaDAO pessoaDAO;
@@ -26,12 +26,9 @@ public class GeradorEscalaHistoricoTest {
 
     @BeforeEach
     void configurar() {
-
         pessoaDAO = new PessoaDAO();
         parteDAO = new ParteDAO();
         historicoDAO = new HistoricoDesignacoesDAO();
-
-        historicoDAO.limpar();
     }
 
 

@@ -4,7 +4,6 @@ import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -12,19 +11,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HistoricoDesignacoesDAOTest {
+public class HistoricoDesignacoesDAOTest extends BaseDAOTest {
 
     private final PessoaDAO pessoaDAO = new PessoaDAO();
     private final ParteDAO parteDAO = new ParteDAO();
     private final HistoricoDesignacoesDAO historicoDAO =
             new HistoricoDesignacoesDAO();
 
-
-    @BeforeEach
-    void limparBanco() {
-
-        historicoDAO.limpar();
-    }
 
 
     @Test

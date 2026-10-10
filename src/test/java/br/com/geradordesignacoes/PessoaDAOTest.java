@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PessoaDAOTest {
+public class PessoaDAOTest extends BaseDAOTest {
 
     @Test
     void deveSalvarEBuscarPessoa() {
