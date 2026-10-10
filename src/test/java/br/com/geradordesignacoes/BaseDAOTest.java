@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.database.DatabaseInitializer;
+import br.com.geradordesignacoes.database.ConnectionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -10,6 +11,11 @@ public abstract class BaseDAOTest {
 
     protected Connection connection;
     private TestDatabase testDatabase;
+
+    protected final ConnectionFactory.TestContext
+    abrirContextoNaThreadAtual() {
+        return testDatabase.openContextOnCurrentThread();
+    }
 
 
     @BeforeEach

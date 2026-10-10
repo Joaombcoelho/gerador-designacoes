@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.controller.EscalaController;
 import br.com.geradordesignacoes.dao.EscalaDAO;
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
@@ -550,14 +551,20 @@ class IntegracaoEscalaTest extends BaseDAOTest {
 
         final EscalaView[] resultado =
                 new EscalaView[1];
+        final Throwable[] falha =
+                new Throwable[1];
 
         Platform.runLater(
                 () -> {
-
-                    resultado[0] =
-                            new EscalaView();
-
-                    latch.countDown();
+                    try (ConnectionFactory.TestContext ignored =
+                                 abrirContextoNaThreadAtual()) {
+                        resultado[0] =
+                                new EscalaView();
+                    } catch (Throwable e) {
+                        falha[0] = e;
+                    } finally {
+                        latch.countDown();
+                    }
                 }
         );
 
@@ -568,6 +575,16 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 ),
                 "Não foi possível criar a EscalaView."
         );
+
+        if (falha[0] != null) {
+            if (falha[0] instanceof Exception exception) {
+                throw exception;
+            }
+            if (falha[0] instanceof Error error) {
+                throw error;
+            }
+            throw new RuntimeException(falha[0]);
+        }
 
         return resultado[0];
     }

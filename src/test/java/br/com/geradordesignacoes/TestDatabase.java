@@ -9,9 +9,6 @@ import java.util.Comparator;
 
 final class TestDatabase {
 
-    private TestDatabase() {
-    }
-
     static TestDatabase create() throws IOException {
         Path directory = Files.createTempDirectory(
                 "gerador-designacoes-test-"
@@ -30,7 +27,12 @@ final class TestDatabase {
         try {
             ConnectionFactory.TestContext context =
                     ConnectionFactory.openTestContext(databasePath);
-            return new TestDatabase(directory, realDirectory, context);
+            return new TestDatabase(
+                    directory,
+                    databasePath,
+                    realDirectory,
+                    context
+            );
         } catch (RuntimeException e) {
             delete(directory);
             throw e;
@@ -38,17 +40,24 @@ final class TestDatabase {
     }
 
     private final Path directory;
+    private final Path databasePath;
     private final Path realDirectory;
     private final ConnectionFactory.TestContext context;
 
     private TestDatabase(
             Path directory,
+            Path databasePath,
             Path realDirectory,
             ConnectionFactory.TestContext context
     ) {
         this.directory = directory;
+        this.databasePath = databasePath;
         this.realDirectory = realDirectory;
         this.context = context;
+    }
+
+    ConnectionFactory.TestContext openContextOnCurrentThread() {
+        return ConnectionFactory.openTestContext(databasePath);
     }
 
     void close() throws Exception {

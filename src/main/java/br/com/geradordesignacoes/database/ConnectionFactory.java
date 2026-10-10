@@ -45,7 +45,7 @@ public class ConnectionFactory {
 
         Path databasePath =
                 context == null
-                        ? getProductionDatabasePath()
+                        ? productionDatabasePath()
                         : context.databasePath;
         Path databaseDirectory = databasePath.getParent();
 
@@ -113,11 +113,26 @@ public class ConnectionFactory {
         if (context != null) {
             return context.databasePath;
         }
-        return getProductionDatabasePath();
+        if (PRODUCTION_CONTEXT.get() == null) {
+            throw new IllegalStateException(
+                    "Acesso ao caminho de produção exige um contexto explícito."
+            );
+        }
+        return productionDatabasePath();
     }
 
     public static Path getProductionDatabasePath() {
-        return DATABASE_PATH.toAbsolutePath().normalize();
+        if (isTestMode()) {
+            throw new IllegalStateException(
+                    "O caminho de produção não está disponível em testes."
+            );
+        }
+        if (PRODUCTION_CONTEXT.get() == null) {
+            throw new IllegalStateException(
+                    "Acesso ao caminho de produção exige um contexto explícito."
+            );
+        }
+        return productionDatabasePath();
     }
 
     public static ProductionContext openProductionContext() {
@@ -144,7 +159,7 @@ public class ConnectionFactory {
         }
 
         Path normalizedPath = normalize(databasePath);
-        Path productionPath = normalize(getProductionDatabasePath());
+        Path productionPath = normalize(productionDatabasePath());
 
         if (samePath(normalizedPath, productionPath)
                 || isInside(normalizedPath, productionPath.getParent())) {
@@ -168,6 +183,10 @@ public class ConnectionFactory {
         return Boolean.parseBoolean(
                 System.getProperty(TEST_MODE_PROPERTY, "false")
         );
+    }
+
+    private static Path productionDatabasePath() {
+        return DATABASE_PATH.toAbsolutePath().normalize();
     }
 
     private static Path normalize(Path path) {

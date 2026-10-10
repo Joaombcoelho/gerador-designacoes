@@ -379,13 +379,19 @@ class CasosExtremosTest extends BaseDAOTest {
 
         final EscalaView[] resultado =
                 new EscalaView[1];
+        final Throwable[] falha =
+                new Throwable[1];
 
         Platform.runLater(() -> {
-
-            resultado[0] =
-                    new EscalaView();
-
-            latch.countDown();
+            try (ConnectionFactory.TestContext ignored =
+                         abrirContextoNaThreadAtual()) {
+                resultado[0] =
+                        new EscalaView();
+            } catch (Throwable e) {
+                falha[0] = e;
+            } finally {
+                latch.countDown();
+            }
         });
 
         assertTrue(
@@ -395,6 +401,16 @@ class CasosExtremosTest extends BaseDAOTest {
                 ),
                 "Não foi possível criar a EscalaView."
         );
+
+        if (falha[0] != null) {
+            if (falha[0] instanceof Exception exception) {
+                throw exception;
+            }
+            if (falha[0] instanceof Error error) {
+                throw error;
+            }
+            throw new RuntimeException(falha[0]);
+        }
 
         return resultado[0];
     }

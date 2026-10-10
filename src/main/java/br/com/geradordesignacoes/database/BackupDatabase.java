@@ -7,9 +7,6 @@ import java.nio.file.StandardCopyOption;
 
 public class BackupDatabase {
 
-    private static final Path BANCO_ORIGEM =
-            ConnectionFactory.getDatabasePath();
-
     public static void criarBackup(Path destino)
             throws IOException {
 
@@ -19,10 +16,13 @@ public class BackupDatabase {
             );
         }
 
-        if (!Files.exists(BANCO_ORIGEM)) {
+        Path bancoOrigem =
+                ConnectionFactory.getDatabasePath();
+
+        if (!Files.exists(bancoOrigem)) {
             throw new IOException(
                     "Banco de dados não encontrado: "
-                            + BANCO_ORIGEM.toAbsolutePath()
+                            + bancoOrigem.toAbsolutePath()
             );
         }
 
@@ -33,7 +33,7 @@ public class BackupDatabase {
         }
 
         Files.copy(
-                BANCO_ORIGEM,
+                bancoOrigem,
                 destino,
                 StandardCopyOption.REPLACE_EXISTING
         );

@@ -1,5 +1,7 @@
 package br.com.geradordesignacoes.service;
 
+import br.com.geradordesignacoes.database.ConnectionFactory;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +13,9 @@ public class BackupAutomaticoService {
     private final BackupService backupService;
 
     private final ScheduledExecutorService scheduler;
+    private final Object lifecycleLock = new Object();
+    private boolean iniciado;
+    private boolean encerrado;
 
     public BackupAutomaticoService() {
 
@@ -35,14 +40,46 @@ public class BackupAutomaticoService {
 
     public void iniciar() {
 
+        synchronized (lifecycleLock) {
+            if (encerrado) {
+                throw new IllegalStateException(
+                        "O serviço de backup já foi encerrado."
+                );
+            }
+            if (iniciado) {
+                throw new IllegalStateException(
+                        "O serviço de backup já foi iniciado."
+                );
+            }
+            iniciado = true;
+        }
+
         criarBackup();
 
-        scheduler.scheduleAtFixedRate(
-                this::criarBackup,
-                INTERVALO_HORAS,
-                INTERVALO_HORAS,
-                TimeUnit.HOURS
-        );
+        synchronized (lifecycleLock) {
+            if (!encerrado) {
+                scheduler.scheduleAtFixedRate(
+                        this::criarBackupAgendado,
+                        INTERVALO_HORAS,
+                        INTERVALO_HORAS,
+                        TimeUnit.HOURS
+                );
+            }
+        }
+    }
+
+    private void criarBackupAgendado() {
+        ConnectionFactory.ProductionContext context;
+        synchronized (lifecycleLock) {
+            if (encerrado) {
+                return;
+            }
+            context = ConnectionFactory.openProductionContext();
+        }
+
+        try (context) {
+            criarBackup();
+        }
     }
 
     private void criarBackup() {
@@ -66,6 +103,9 @@ public class BackupAutomaticoService {
 
     public void encerrar() {
 
-        scheduler.shutdownNow();
+        synchronized (lifecycleLock) {
+            encerrado = true;
+            scheduler.shutdownNow();
+        }
     }
 }

@@ -7,9 +7,6 @@ import java.nio.file.StandardCopyOption;
 
 public class RestaurarDatabase {
 
-    private static final Path BANCO_DESTINO =
-            ConnectionFactory.getDatabasePath();
-
     public static void restaurar(Path origem)
             throws IOException {
 
@@ -25,7 +22,9 @@ public class RestaurarDatabase {
             );
         }
 
-        Path pastaDestino = BANCO_DESTINO.getParent();
+        Path bancoDestino =
+                ConnectionFactory.getDatabasePath();
+        Path pastaDestino = bancoDestino.getParent();
 
         if (pastaDestino != null) {
             Files.createDirectories(pastaDestino);
@@ -33,7 +32,7 @@ public class RestaurarDatabase {
 
         Files.copy(
                 origem,
-                BANCO_DESTINO,
+                bancoDestino,
                 StandardCopyOption.REPLACE_EXISTING
         );
     }

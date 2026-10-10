@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.RegrasService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -15,12 +16,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GeradorEscalaCompletaTest extends BaseDAOTest {
 
-    private final PessoaDAO pessoaDAO = new PessoaDAO();
-    private final ParteDAO parteDAO = new ParteDAO();
+    private PessoaDAO pessoaDAO;
+    private ParteDAO parteDAO;
 
-    private final GeradorEscala gerador =
-            new GeradorEscala(new RegrasService());
+    private GeradorEscala gerador;
 
+    @BeforeEach
+    void prepararObjetos() {
+        pessoaDAO = new PessoaDAO();
+        parteDAO = new ParteDAO();
+        gerador = new GeradorEscala(new RegrasService());
+    }
 
     @Test
     void deveGerarTresPartesVariaveis() {
