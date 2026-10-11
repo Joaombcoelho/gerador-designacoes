@@ -160,7 +160,7 @@ public class EdicaoEscalaView {
         configurarListaSemanas();
         configurarListaDesignacoes();
         registrarEventos();
-        carregarMesesDisponiveis();
+        atualizarMesesDisponiveis();
     }
 
     private List<Pessoa> carregarListaPessoas() {
@@ -945,17 +945,20 @@ public class EdicaoEscalaView {
             }
         });
     }
-    private void carregarMesesDisponiveis() {
+    public void atualizarMesesDisponiveis() {
+        YearMonth mesSelecionado = campoMes.getValue();
         List<YearMonth> meses = controller.listarMesesDisponiveis();
 
         campoMes.getItems().setAll(meses);
 
-        YearMonth mesAtual = YearMonth.now();
-
-        if (meses.contains(mesAtual)) {
-            campoMes.setValue(mesAtual);
+        if (mesSelecionado != null && meses.contains(mesSelecionado)) {
+            campoMes.setValue(mesSelecionado);
+        } else if (meses.contains(YearMonth.now())) {
+            campoMes.setValue(YearMonth.now());
         } else if (!meses.isEmpty()) {
             campoMes.setValue(meses.get(0));
+        } else {
+            campoMes.setValue(null);
         }
 
         carregarSemanas();

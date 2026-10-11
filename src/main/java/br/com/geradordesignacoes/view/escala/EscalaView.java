@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class EscalaView {
@@ -54,6 +55,30 @@ public class EscalaView {
 
         campoData =
                 new DatePicker();
+
+        campoData.setConverter(
+                new javafx.util.StringConverter<>() {
+                    private final DateTimeFormatter formatter =
+                            DateTimeFormatter.ofPattern(
+                                    "dd/MM/yyyy",
+                                    Locale.forLanguageTag("pt-BR")
+                            );
+
+                    @Override
+                    public String toString(LocalDate data) {
+                        return data == null
+                                ? ""
+                                : formatter.format(data);
+                    }
+
+                    @Override
+                    public LocalDate fromString(String texto) {
+                        return texto == null || texto.isBlank()
+                                ? null
+                                : LocalDate.parse(texto, formatter);
+                    }
+                }
+        );
 
         campoData.getStyleClass().add(
                 "date-picker"

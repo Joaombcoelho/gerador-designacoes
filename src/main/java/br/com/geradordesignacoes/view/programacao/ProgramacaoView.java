@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -69,6 +70,29 @@ public class ProgramacaoView {
         root.setPadding(new Insets(24));
 
         campoData = new DatePicker();
+        campoData.setConverter(
+                new javafx.util.StringConverter<>() {
+                    private final DateTimeFormatter formatter =
+                            DateTimeFormatter.ofPattern(
+                                    "dd/MM/yyyy",
+                                    Locale.forLanguageTag("pt-BR")
+                            );
+
+                    @Override
+                    public String toString(LocalDate data) {
+                        return data == null
+                                ? ""
+                                : formatter.format(data);
+                    }
+
+                    @Override
+                    public LocalDate fromString(String texto) {
+                        return texto == null || texto.isBlank()
+                                ? null
+                                : LocalDate.parse(texto, formatter);
+                    }
+                }
+        );
 
         listaSemanas = new ListView<>();
 

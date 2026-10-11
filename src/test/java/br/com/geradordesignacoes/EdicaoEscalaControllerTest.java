@@ -8,6 +8,7 @@ import br.com.geradordesignacoes.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +21,48 @@ class EdicaoEscalaControllerTest extends BaseDAOTest {
 
     private final EdicaoEscalaController controller =
             new EdicaoEscalaController();
+
+    @Test
+    void deveListarMesesDisponiveisSemDuplicarEEmOrdemDecrescente() {
+        Parte parte = criarParteSemAjudante("Parte dos meses");
+        Pessoa pessoa = criarPessoa("Pessoa dos meses");
+
+        criarEscala(
+                LocalDate.of(2026, 9, 3),
+                new Designacao(
+                        LocalDate.of(2026, 9, 3),
+                        parte,
+                        pessoa,
+                        null
+                )
+        );
+        criarEscala(
+                LocalDate.of(2026, 9, 10),
+                new Designacao(
+                        LocalDate.of(2026, 9, 10),
+                        parte,
+                        pessoa,
+                        null
+                )
+        );
+        criarEscala(
+                LocalDate.of(2026, 7, 2),
+                new Designacao(
+                        LocalDate.of(2026, 7, 2),
+                        parte,
+                        pessoa,
+                        null
+                )
+        );
+
+        assertEquals(
+                List.of(
+                        YearMonth.of(2026, 9),
+                        YearMonth.of(2026, 7)
+                ),
+                controller.listarMesesDisponiveis()
+        );
+    }
 
 
     @Test

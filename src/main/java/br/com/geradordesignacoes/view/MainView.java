@@ -307,6 +307,8 @@ public class MainView {
                             editarEscalas
                     );
 
+                    edicaoEscalaView.atualizarMesesDisponiveis();
+
                     mostrarTela(
                             edicaoEscalaView.getView()
                     );

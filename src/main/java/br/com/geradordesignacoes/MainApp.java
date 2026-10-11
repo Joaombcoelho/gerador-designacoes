@@ -8,6 +8,8 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.Locale;
+
 public class MainApp extends Application {
 
     private BackupAutomaticoService backupAutomaticoService;
@@ -15,6 +17,10 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
+        Locale.setDefault(
+                Locale.Category.FORMAT,
+                Locale.forLanguageTag("pt-BR")
+        );
 
         productionContext =
                 ConnectionFactory.openProductionContext();
