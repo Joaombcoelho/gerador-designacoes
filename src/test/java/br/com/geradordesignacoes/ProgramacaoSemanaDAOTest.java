@@ -7,6 +7,7 @@ import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
+import br.com.geradordesignacoes.model.ConfiguracaoSalas;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -22,6 +23,26 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
 
     private final ParteDAO parteDAO =
             new ParteDAO();
+
+    @Test
+    void devePersistirCopiaDasSalasNaProgramacao() {
+        LocalDate data = LocalDate.of(2026, 10, 4);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(
+                null,
+                data,
+                List.of(),
+                true,
+                false
+        );
+
+        programacaoSemanaDAO.salvar(programacao);
+
+        ProgramacaoSemana encontrada =
+                programacaoSemanaDAO.buscarPorData(data);
+
+        assertTrue(encontrada.salaBHabilitada());
+        assertFalse(encontrada.salaCHabilitada());
+    }
 
 
     @Test

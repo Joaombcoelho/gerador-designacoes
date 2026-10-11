@@ -6,6 +6,7 @@ import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
+import br.com.geradordesignacoes.model.ConfiguracaoSalas;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
@@ -21,11 +22,13 @@ public class ProgramacaoSemanaService {
     private final ParteDAO parteDAO;
     private final ProgramacaoSemanaDAO programacaoSemanaDAO;
     private final ProgramacaoParteDAO programacaoParteDAO;
+    private final ConfiguracaoSalasService configuracaoSalasService;
 
     public ProgramacaoSemanaService() {
         this.parteDAO = new ParteDAO();
         this.programacaoSemanaDAO = new ProgramacaoSemanaDAO();
         this.programacaoParteDAO = new ProgramacaoParteDAO();
+        this.configuracaoSalasService = new ConfiguracaoSalasService();
     }
 
     /**
@@ -282,7 +285,7 @@ public class ProgramacaoSemanaService {
                 listarPartesFixasOrdenadas();
 
         ProgramacaoSemana programacao =
-                new ProgramacaoSemana(data);
+                novaProgramacao(data);
 
         int ordem = 1;
 
@@ -526,7 +529,7 @@ public class ProgramacaoSemanaService {
                 );
 
         ProgramacaoSemana programacao =
-                new ProgramacaoSemana(data);
+                novaProgramacao(data);
 
         int ordem = 1;
 
@@ -540,6 +543,13 @@ public class ProgramacaoSemanaService {
         }
 
         return programacao;
+    }
+
+    private ProgramacaoSemana novaProgramacao(LocalDate data) {
+        ConfiguracaoSalas configuracao =
+                configuracaoSalasService.buscar();
+
+        return new ProgramacaoSemana(data, configuracao);
     }
 
     /**

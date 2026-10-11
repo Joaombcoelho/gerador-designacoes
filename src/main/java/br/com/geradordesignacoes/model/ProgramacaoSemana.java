@@ -6,12 +6,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public record ProgramacaoSemana(Integer id, LocalDate data, List<ProgramacaoParte> partes) {
+public record ProgramacaoSemana(
+        Integer id,
+        LocalDate data,
+        List<ProgramacaoParte> partes,
+        boolean salaBHabilitada,
+        boolean salaCHabilitada
+) {
 
     public ProgramacaoSemana(
             Integer id,
             LocalDate data,
-            List<ProgramacaoParte> partes
+            List<ProgramacaoParte> partes,
+            boolean salaBHabilitada,
+            boolean salaCHabilitada
     ) {
 
         this.id = id;
@@ -23,6 +31,17 @@ public record ProgramacaoSemana(Integer id, LocalDate data, List<ProgramacaoPart
                 new ArrayList<>(
                         Objects.requireNonNull(partes)
                 );
+
+        this.salaBHabilitada = salaBHabilitada;
+        this.salaCHabilitada = salaCHabilitada;
+    }
+
+    public ProgramacaoSemana(
+            Integer id,
+            LocalDate data,
+            List<ProgramacaoParte> partes
+    ) {
+        this(id, data, partes, false, false);
     }
 
 
@@ -33,7 +52,22 @@ public record ProgramacaoSemana(Integer id, LocalDate data, List<ProgramacaoPart
         this(
                 null,
                 data,
-                new ArrayList<>()
+                new ArrayList<>(),
+                false,
+                false
+        );
+    }
+
+    public ProgramacaoSemana(
+            LocalDate data,
+            ConfiguracaoSalas configuracaoSalas
+    ) {
+        this(
+                null,
+                data,
+                new ArrayList<>(),
+                configuracaoSalas.salaBHabilitada(),
+                configuracaoSalas.salaCHabilitada()
         );
     }
 

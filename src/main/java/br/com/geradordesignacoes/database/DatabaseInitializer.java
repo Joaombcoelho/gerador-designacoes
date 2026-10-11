@@ -144,7 +144,19 @@ public class DatabaseInitializer {
 
         CREATE TABLE IF NOT EXISTS programacao_semana (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            data DATE NOT NULL UNIQUE
+            data DATE NOT NULL UNIQUE,
+            sala_b_habilitada INTEGER NOT NULL DEFAULT 0,
+            sala_c_habilitada INTEGER NOT NULL DEFAULT 0
+        );
+
+        """;
+
+    private static final String CREATE_TABLE_CONFIGURACAO_SALAS = """
+
+        CREATE TABLE IF NOT EXISTS configuracao_salas (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            sala_b_habilitada INTEGER NOT NULL DEFAULT 0,
+            sala_c_habilitada INTEGER NOT NULL DEFAULT 0
         );
 
         """;
@@ -281,6 +293,13 @@ public class DatabaseInitializer {
             statement.execute(
                     CREATE_TABLE_PROGRAMACAO_SEMANA
             );
+            adicionarColunasSalasProgramacaoSemana(connection);
+            statement.execute(CREATE_TABLE_CONFIGURACAO_SALAS);
+            statement.execute("""
+                    INSERT OR IGNORE INTO configuracao_salas
+                        (id, sala_b_habilitada, sala_c_habilitada)
+                    VALUES (1, 0, 0)
+                    """);
 
 
             statement.execute(
@@ -319,6 +338,40 @@ public class DatabaseInitializer {
             throw new RuntimeException(
                     "Erro ao inicializar o banco de dados.",
                     e
+            );
+        }
+
+    }
+
+    private static void adicionarColunasSalasProgramacaoSemana(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaSeNecessario(connection, "sala_b_habilitada");
+        adicionarColunaSeNecessario(connection, "sala_c_habilitada");
+    }
+
+    private static void adicionarColunaSeNecessario(
+            Connection connection,
+            String coluna
+    ) throws SQLException {
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(
+                        "PRAGMA table_info(programacao_semana)"
+                )
+        ) {
+            while (resultSet.next()) {
+                if (coluna.equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(
+                    "ALTER TABLE programacao_semana ADD COLUMN "
+                            + coluna
+                            + " INTEGER NOT NULL DEFAULT 0"
             );
         }
     }

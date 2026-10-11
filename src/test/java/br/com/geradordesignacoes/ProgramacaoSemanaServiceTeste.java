@@ -1,6 +1,8 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ParteDAO;
+import br.com.geradordesignacoes.dao.ConfiguracaoSalasDAO;
+import br.com.geradordesignacoes.model.ConfiguracaoSalas;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
@@ -18,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProgramacaoSemanaServiceTest extends BaseDAOTest {
 
     private ProgramacaoSemanaService service;
+
+    private final ConfiguracaoSalasDAO configuracaoSalasDAO =
+            new ConfiguracaoSalasDAO();
 
 
     @BeforeEach
@@ -62,6 +67,23 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
                 primeira.partes().size(),
                 segunda.partes().size()
         );
+    }
+
+    @Test
+    void deveCopiarConfiguracaoGlobalAoCriarSemana() {
+        configuracaoSalasDAO.salvar(new ConfiguracaoSalas(true, true));
+
+        LocalDate data = LocalDate.of(2026, 11, 1);
+        ProgramacaoSemana criada = service.obterOuCriar(data);
+
+        configuracaoSalasDAO.salvar(new ConfiguracaoSalas(false, false));
+
+        ProgramacaoSemana recarregada = service.obterOuCriar(data);
+
+        assertTrue(criada.salaBHabilitada());
+        assertTrue(criada.salaCHabilitada());
+        assertTrue(recarregada.salaBHabilitada());
+        assertTrue(recarregada.salaCHabilitada());
     }
 
 

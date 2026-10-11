@@ -26,9 +26,9 @@ public class ProgramacaoSemanaDAO {
 
         String sql = """
                 INSERT INTO programacao_semana (
-                    data
+                    data, sala_b_habilitada, sala_c_habilitada
                 )
-                VALUES (?)
+                VALUES (?, ?, ?)
                 """;
 
 
@@ -54,6 +54,8 @@ public class ProgramacaoSemanaDAO {
                                 programacaoSemana.data()
                         )
                 );
+                statement.setBoolean(2, programacaoSemana.salaBHabilitada());
+                statement.setBoolean(3, programacaoSemana.salaCHabilitada());
 
 
                 statement.executeUpdate();
@@ -100,7 +102,9 @@ public class ProgramacaoSemanaDAO {
                 return new ProgramacaoSemana(
                         id,
                         programacaoSemana.data(),
-                        programacaoSemana.partes()
+                        programacaoSemana.partes(),
+                        programacaoSemana.salaBHabilitada(),
+                        programacaoSemana.salaCHabilitada()
                 );
 
 
@@ -129,7 +133,9 @@ public class ProgramacaoSemanaDAO {
         String sql = """
                 SELECT
                     id,
-                    data
+                    data,
+                    sala_b_habilitada,
+                    sala_c_habilitada
                 FROM programacao_semana
                 WHERE data = ?
                 """;
@@ -175,7 +181,9 @@ public class ProgramacaoSemanaDAO {
                         id,
                         resultSet.getDate("data")
                                 .toLocalDate(),
-                        partes
+                        partes,
+                        resultSet.getBoolean("sala_b_habilitada"),
+                        resultSet.getBoolean("sala_c_habilitada")
                 );
             }
 
