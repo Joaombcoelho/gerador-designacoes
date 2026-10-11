@@ -38,6 +38,16 @@ public class HistoricoView {
 
     private final ComboBox<YearMonth> comboMes;
 
+    private final VBox painelConfirmacaoExclusao;
+
+    private final Label mensagemConfirmacaoExclusao;
+
+    private final Button botaoConfirmarExclusao;
+
+    private final Button botaoCancelarExclusao;
+
+    private Escala escalaPendenteExclusao;
+
 
     public HistoricoView() {
 
@@ -74,6 +84,40 @@ public class HistoricoView {
         botaoExcluir.getStyleClass().add(
                 "danger-button"
         );
+        botaoExcluir.setDisable(true);
+
+        mensagemConfirmacaoExclusao = new Label();
+        mensagemConfirmacaoExclusao.setWrapText(true);
+        mensagemConfirmacaoExclusao.getStyleClass().add(
+                "status-warning"
+        );
+
+        botaoConfirmarExclusao = new Button(
+                "Confirmar exclusão"
+        );
+        botaoConfirmarExclusao.getStyleClass().add(
+                "danger-button"
+        );
+
+        botaoCancelarExclusao = new Button(
+                "Cancelar"
+        );
+        botaoCancelarExclusao.getStyleClass().add(
+                "secondary-button"
+        );
+
+        painelConfirmacaoExclusao = new VBox(
+                8,
+                mensagemConfirmacaoExclusao,
+                new HBox(
+                        8,
+                        botaoConfirmarExclusao,
+                        botaoCancelarExclusao
+                )
+        );
+        painelConfirmacaoExclusao.getStyleClass().add("card");
+        painelConfirmacaoExclusao.setVisible(false);
+        painelConfirmacaoExclusao.setManaged(false);
 
 
         comboMes =
@@ -330,7 +374,8 @@ public class HistoricoView {
                 new VBox(
                         12,
                         separador,
-                        rodape
+                        rodape,
+                        painelConfirmacaoExclusao
                 );
 
 
@@ -379,10 +424,13 @@ public class HistoricoView {
                             if (
                                     nova != null
                             ) {
+                                botaoExcluir.setDisable(false);
 
                                 controller.carregarDetalhes(
                                         nova
                                 );
+                            } else {
+                                botaoExcluir.setDisable(true);
                             }
                         }
                 );
@@ -780,83 +828,45 @@ public class HistoricoView {
                                     .getSelectedItem();
 
 
-                    if (
-                            escalaSelecionada == null
-                    ) {
-
-                        Alert alerta =
-                                new Alert(
-                                        Alert.AlertType.WARNING
-                                );
-
-
-                        alerta.setTitle(
-                                "Nenhuma escala selecionada"
-                        );
-
-
-                        alerta.setHeaderText(
-                                null
-                        );
-
-
-                        alerta.setContentText(
-                                "Selecione uma escala para excluir."
-                        );
-
-
-                        alerta.showAndWait();
-
+                    if (escalaSelecionada == null) {
                         return;
                     }
 
-
-                    Alert confirmacao =
-                            new Alert(
-                                    Alert.AlertType.CONFIRMATION
-                            );
-
-
-                    confirmacao.setTitle(
-                            "Excluir escala"
-                    );
-
-
-                    confirmacao.setHeaderText(
-                            "Excluir escala"
-                    );
-
-
-                    confirmacao.setContentText(
+                    escalaPendenteExclusao = escalaSelecionada;
+                    mensagemConfirmacaoExclusao.setText(
                             "Deseja realmente excluir a escala do dia "
-                                    + escalaSelecionada
-                                    .getData()
+                                    + escalaSelecionada.getData()
                                     + "?"
                     );
-
-
-                    confirmacao
-                            .showAndWait()
-                            .ifPresent(
-                                    resposta -> {
-
-                                        if (
-                                                resposta
-                                                        == ButtonType.OK
-                                        ) {
-
-                                            controller.excluirEscala(
-                                                    escalaSelecionada
-                                            );
-
-
-                                            tabelaDetalhes
-                                                    .getItems()
-                                                    .clear();
-                                        }
-                                    }
-                            );
+                    painelConfirmacaoExclusao.setVisible(true);
+                    painelConfirmacaoExclusao.setManaged(true);
                 }
         );
+
+        botaoCancelarExclusao.setOnAction(
+                event -> cancelarExclusao()
+        );
+
+        botaoConfirmarExclusao.setOnAction(
+                event -> confirmarExclusao()
+        );
+    }
+
+    private void cancelarExclusao() {
+        escalaPendenteExclusao = null;
+        painelConfirmacaoExclusao.setVisible(false);
+        painelConfirmacaoExclusao.setManaged(false);
+    }
+
+    private void confirmarExclusao() {
+        if (escalaPendenteExclusao == null) {
+            cancelarExclusao();
+            return;
+        }
+
+        controller.excluirEscala(escalaPendenteExclusao);
+        tabela.getSelectionModel().clearSelection();
+        tabelaDetalhes.getItems().clear();
+        cancelarExclusao();
     }
 }
