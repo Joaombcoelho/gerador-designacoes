@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.service.BackupAutomaticoService;
 import br.com.geradordesignacoes.view.MainView;
 import javafx.application.Application;
+import javafx.scene.image.Image;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -47,6 +48,15 @@ public class MainApp extends Application {
 
             stage.setTitle(
                     "Gerador de Designações"
+            );
+
+            stage.getIcons().add(
+                    new Image(
+                            getClass()
+                                    .getResourceAsStream(
+                                    "/logo.png"
+                                    )
+                    )
             );
 
             stage.setScene(scene);

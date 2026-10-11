@@ -198,12 +198,28 @@ public class ProgramacaoSemanaService {
                                         )
                         );
 
-        programacaoParte.setTema(tema);
+        String temaNormalizado =
+                        normalizarTema(tema);
+
+        programacaoParte.setTema(temaNormalizado);
 
         programacaoParteDAO.atualizarTema(
-                programacaoParte.getId(),
-                tema
+                        programacaoParte.getId(),
+                        temaNormalizado
         );
+    }
+
+    private String normalizarTema(String tema) {
+        if (tema == null) {
+            return null;
+        }
+
+        String temaNormalizado =
+                        tema.trim();
+
+        return temaNormalizado.isEmpty()
+                        ? null
+                        : temaNormalizado;
     }
 
     /**

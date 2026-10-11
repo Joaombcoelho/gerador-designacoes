@@ -87,6 +87,201 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
         }
     }
 
+    @Test
+    void deveManterTemasDaMesmaParteIsoladosEntreSemanas() {
+
+        LocalDate semanaA =
+                LocalDate.of(2026, 12, 2);
+
+        LocalDate semanaB =
+                LocalDate.of(2026, 12, 9);
+
+        ProgramacaoSemana programacaoA =
+                service.obterOuCriar(semanaA);
+
+        ProgramacaoSemana programacaoB =
+                service.obterOuCriar(semanaB);
+
+        ProgramacaoParte parteA =
+                programacaoA.partes()
+                        .stream()
+                        .findFirst()
+                        .orElseThrow();
+
+        ProgramacaoParte parteB =
+                programacaoB.partes()
+                        .stream()
+                        .filter(
+                                parte ->
+                                        parte.getParte()
+                                                .getId()
+                                                .equals(
+                                                        parteA.getParte()
+                                                                .getId()
+                                                )
+                        )
+                        .findFirst()
+                        .orElseThrow();
+
+        assertEquals(
+                parteA.getParte().getId(),
+                parteB.getParte().getId()
+        );
+
+        service.definirTema(
+                semanaA,
+                parteA.getOrdem(),
+                "Tema da primeira semana"
+        );
+
+        service.definirTema(
+                semanaB,
+                parteB.getOrdem(),
+                "Tema da segunda semana"
+        );
+
+        ProgramacaoSemana recarregadaA =
+                service.obterOuCriar(semanaA);
+
+        ProgramacaoSemana recarregadaB =
+                service.obterOuCriar(semanaB);
+
+        assertEquals(
+                "Tema da primeira semana",
+                recarregadaA.partes()
+                        .stream()
+                        .filter(
+                                parte ->
+                                        parte.getParte()
+                                                .getId()
+                                                .equals(
+                                                        parteA.getParte()
+                                                                .getId()
+                                                )
+                        )
+                        .findFirst()
+                        .orElseThrow()
+                        .getTema()
+        );
+
+        assertEquals(
+                "Tema da segunda semana",
+                recarregadaB.partes()
+                        .stream()
+                        .filter(
+                                parte ->
+                                        parte.getParte()
+                                                .getId()
+                                                .equals(
+                                                        parteA.getParte()
+                                                                .getId()
+                                                )
+                        )
+                        .findFirst()
+                        .orElseThrow()
+                        .getTema()
+        );
+    }
+
+    @Test
+    void devePreservarTemaNormalAoSalvar() {
+
+        LocalDate data =
+                LocalDate.of(2027, 1, 6);
+
+        ProgramacaoSemana programacao =
+                service.obterOuCriar(data);
+
+        int ordem =
+                programacao.partes()
+                        .get(0)
+                        .getOrdem();
+
+        service.definirTema(
+                data,
+                ordem,
+                "Tema normal"
+        );
+
+        assertEquals(
+                "Tema normal",
+                service.obterOuCriar(data)
+                        .partes()
+                        .get(0)
+                        .getTema()
+        );
+    }
+
+    @Test
+    void deveRemoverEspacosNasExtremidadesDoTema() {
+
+        LocalDate data =
+                LocalDate.of(2027, 1, 13);
+
+        ProgramacaoSemana programacao =
+                service.obterOuCriar(data);
+
+        service.definirTema(
+                data,
+                programacao.partes().get(0).getOrdem(),
+                "  Tema  com  espacamento  "
+        );
+
+        assertEquals(
+                "Tema  com  espacamento",
+                service.obterOuCriar(data)
+                        .partes()
+                        .get(0)
+                        .getTema()
+        );
+    }
+
+    @Test
+    void deveNormalizarTemaVazioParaAusencia() {
+
+        LocalDate data =
+                LocalDate.of(2027, 1, 20);
+
+        ProgramacaoSemana programacao =
+                service.obterOuCriar(data);
+
+        service.definirTema(
+                data,
+                programacao.partes().get(0).getOrdem(),
+                ""
+        );
+
+        assertNull(
+                service.obterOuCriar(data)
+                        .partes()
+                        .get(0)
+                        .getTema()
+        );
+    }
+
+    @Test
+    void deveNormalizarTemaComApenasEspacosParaAusencia() {
+
+        LocalDate data =
+                LocalDate.of(2027, 1, 27);
+
+        ProgramacaoSemana programacao =
+                service.obterOuCriar(data);
+
+        service.definirTema(
+                data,
+                programacao.partes().get(0).getOrdem(),
+                "   "
+        );
+
+        assertNull(
+                service.obterOuCriar(data)
+                        .partes()
+                        .get(0)
+                        .getTema()
+        );
+    }
+
 
     @Test
     void deveRejeitarDataNula() {

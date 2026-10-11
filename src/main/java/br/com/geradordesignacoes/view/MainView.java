@@ -20,6 +20,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -607,6 +609,21 @@ public class MainView {
                 Pos.CENTER_LEFT
         );
 
+        ImageView logo =
+                new ImageView(
+                        new Image(
+                                getClass()
+                                        .getResourceAsStream(
+                                                "/logo.png"
+                                        )
+                        )
+                );
+
+        logo.setFitWidth(34);
+        logo.setFitHeight(34);
+        logo.setPreserveRatio(true);
+        logo.setSmooth(true);
+
 
         Label titulo =
                 new Label(
@@ -619,7 +636,11 @@ public class MainView {
 
 
         topBar.getChildren().add(
-                titulo
+                new HBox(
+                        10,
+                        logo,
+                        titulo
+                )
         );
 
 
