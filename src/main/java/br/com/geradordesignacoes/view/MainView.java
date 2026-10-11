@@ -48,6 +48,8 @@ public class MainView {
             new EdicaoEscalaView();
 
     private final HistoricoView historicoView;
+    private final ConfiguracaoSalasView configuracaoSalasView =
+            new ConfiguracaoSalasView();
 
     private final EscalaController escalaController;
     private final ProgramacaoController programacaoController;
@@ -399,6 +401,23 @@ public class MainView {
 
         sidebar.getChildren().add(
                 restaurar
+        );
+
+        Button configuracaoSalas =
+                criarBotaoMenu(
+                        FontAwesomeSolid.COG,
+                        "Configurações de salas",
+                        false
+                );
+
+        configuracaoSalas.setOnAction(event -> {
+            ativarBotao(configuracaoSalas);
+            configuracaoSalasView.atualizar();
+            mostrarTela(configuracaoSalasView.getView());
+        });
+
+        sidebar.getChildren().add(
+                configuracaoSalas
         );
 
 
