@@ -1,18 +1,18 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$stageRoot = Join-Path $projectRoot "dist\GeradorDesignacoes-1.2.0"
+$stageRoot = Join-Path $projectRoot "dist\GeradorDesignacoes-1.2.1"
 $appDir = Join-Path $stageRoot "app"
 $runtimeDir = Join-Path $stageRoot "runtime"
 $installerDir = Join-Path $projectRoot "Instalador"
-$installerPath = Join-Path $installerDir "GeradorDesignacoes-1.2.0.exe"
+$installerPath = Join-Path $installerDir "GeradorDesignacoes-1.2.1.exe"
 $iconPath = Join-Path $projectRoot "src\main\resources\logo.ico"
 
 function Require-Command {
     param([string]$Name)
 
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-        throw "Pré-requisito não encontrado: $Name"
+        throw "PrÃ©-requisito nÃ£o encontrado: $Name"
     }
 }
 
@@ -41,15 +41,15 @@ if (-not $env:JAVA_HOME) {
 $javaHome = (Resolve-Path $env:JAVA_HOME).Path
 $jmods = Join-Path $javaHome "jmods"
 if (-not (Test-Path (Join-Path $jmods "java.base.jmod"))) {
-    throw "JAVA_HOME não aponta para um JDK com a pasta jmods."
+    throw "JAVA_HOME nÃ£o aponta para um JDK com a pasta jmods."
 }
 
 if (Test-Path $stageRoot) {
-    throw "A pasta de preparação já existe; remova-a manualmente para evitar sobrescrever artefatos."
+    throw "A pasta de preparaÃ§Ã£o jÃ¡ existe; remova-a manualmente para evitar sobrescrever artefatos."
 }
 
 if (Test-Path $installerPath) {
-    throw "O instalador de destino já existe; não será sobrescrito: $installerPath"
+    throw "O instalador de destino jÃ¡ existe; nÃ£o serÃ¡ sobrescrito: $installerPath"
 }
 
 New-Item -ItemType Directory -Force $appDir | Out-Null
@@ -57,11 +57,11 @@ New-Item -ItemType Directory -Force $installerDir | Out-Null
 
 Push-Location $projectRoot
 try {
-    Invoke-Checked "Compilando a aplicação" {
+    Invoke-Checked "Compilando a aplicaÃ§Ã£o" {
         mvn clean package -DskipTests
     }
 
-    Invoke-Checked "Copiando dependências de runtime" {
+    Invoke-Checked "Copiando dependÃªncias de runtime" {
         mvn dependency:copy-dependencies `
             -DincludeScope=runtime `
             -DoutputDirectory="$appDir"
@@ -70,9 +70,9 @@ try {
     Pop-Location
 }
 
-$jarPath = Join-Path $projectRoot "target\gerador-designacoes-1.2.0.jar"
+$jarPath = Join-Path $projectRoot "target\gerador-designacoes-1.2.1.jar"
 if (-not (Test-Path $jarPath)) {
-    throw "JAR da aplicação não encontrado: $jarPath"
+    throw "JAR da aplicaÃ§Ã£o nÃ£o encontrado: $jarPath"
 }
 Copy-Item $jarPath $appDir
 
@@ -80,12 +80,12 @@ $modelDir = Join-Path $appDir "modelos"
 New-Item -ItemType Directory -Force $modelDir | Out-Null
 $modelPath = Join-Path $projectRoot "modelos\S-89_T.pdf"
 if (-not (Test-Path $modelPath)) {
-    throw "Modelo S-89 não encontrado: $modelPath"
+    throw "Modelo S-89 nÃ£o encontrado: $modelPath"
 }
 Copy-Item $modelPath $modelDir
 
 if (-not (Test-Path $iconPath)) {
-    throw "Ícone do aplicativo não encontrado: $iconPath"
+    throw "Ãcone do aplicativo nÃ£o encontrado: $iconPath"
 }
 
 $requiredPatterns = @(
@@ -101,7 +101,7 @@ $requiredPatterns = @(
 
 foreach ($pattern in $requiredPatterns) {
     if (-not (Get-ChildItem $appDir -Filter $pattern -File)) {
-        throw "Dependência de runtime ausente na área de empacotamento: $pattern"
+        throw "DependÃªncia de runtime ausente na Ã¡rea de empacotamento: $pattern"
     }
 }
 
@@ -120,9 +120,9 @@ Invoke-Checked "Gerando instalador Windows" {
     jpackage `
         --type exe `
         --name GeradorDesignacoes `
-        --app-version 1.2.0 `
+        --app-version 1.2.1 `
         --input $appDir `
-        --main-jar "gerador-designacoes-1.2.0.jar" `
+        --main-jar "gerador-designacoes-1.2.1.jar" `
         --main-class "br.com.geradordesignacoes.MainApp" `
         --runtime-image $runtimeDir `
         --icon $iconPath `
@@ -130,7 +130,7 @@ Invoke-Checked "Gerando instalador Windows" {
         --dest $installerDir `
         --win-shortcut `
         --win-menu `
-        --win-menu-group "Gerador de Designações"
+        --win-menu-group "Gerador de DesignaÃ§Ãµes"
 }
 
 if (-not (Test-Path $installerPath)) {
@@ -138,3 +138,4 @@ if (-not (Test-Path $installerPath)) {
 }
 
 Write-Host "Instalador criado: $installerPath"
+
