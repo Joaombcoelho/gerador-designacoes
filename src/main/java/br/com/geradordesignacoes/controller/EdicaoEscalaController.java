@@ -6,7 +6,11 @@ import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Escala;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
+import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.model.TipoParte;
+import br.com.geradordesignacoes.service.ControleDesignacoes;
 import br.com.geradordesignacoes.service.RegrasService;
 
 import java.time.LocalDate;
@@ -100,9 +104,26 @@ public class EdicaoEscalaController {
             TipoParticipacao tipoParticipacao,
             Pessoa participanteAtual
     ) {
+        return listarPessoasParaSelecao(
+                parte,
+                tipoParticipacao,
+                participanteAtual,
+                null
+        );
+    }
+
+    public List<Pessoa> listarPessoasParaSelecao(
+            Parte parte,
+            TipoParticipacao tipoParticipacao,
+            Pessoa participanteAtual,
+            Integer designacaoAtualId
+    ) {
         if (parte == null || tipoParticipacao == null) {
             return List.of();
         }
+
+        ControleDesignacoes controle =
+                criarControleDaReuniao(designacaoAtualId);
 
         LinkedHashSet<Pessoa> pessoas =
                 new LinkedHashSet<>(
@@ -110,12 +131,12 @@ public class EdicaoEscalaController {
                                 .stream()
                                 .filter(
                                         pessoa ->
-                                                regrasService
-                                                        .podeExercerParticipacao(
-                                                                pessoa,
-                                                                parte,
-                                                                tipoParticipacao
-                                                        )
+                                                pessoaElegivel(
+                                                        pessoa,
+                                                        parte,
+                                                        tipoParticipacao,
+                                                        controle
+                                                )
                                 )
                                 .sorted(
                                         Comparator.comparing(
@@ -131,6 +152,40 @@ public class EdicaoEscalaController {
         }
 
         return pessoas.stream().toList();
+    }
+
+    private boolean pessoaElegivel(
+            Pessoa pessoa,
+            Parte parte,
+            TipoParticipacao tipoParticipacao,
+            ControleDesignacoes controle
+    ) {
+        if (!regrasService.podeExercerParticipacao(
+                pessoa,
+                parte,
+                tipoParticipacao
+        )) {
+            return false;
+        }
+
+        if (controle.ehPresidente(pessoa)) {
+            return false;
+        }
+
+        if (controle.getPessoasDesignadas().contains(pessoa)
+                && pessoa.getPrivilegio() !=
+                Privilegio.ANCIAO
+                && pessoa.getPrivilegio() !=
+                Privilegio.SERVO_MINISTERIAL) {
+            return false;
+        }
+
+        return escalaSelecionada == null
+                || !controle.possuiConflitoTesourosJoias(
+                pessoa,
+                parte,
+                escalaSelecionada.getData()
+        );
     }
 
     public List<LocalDate> verificarConflitos(
@@ -197,10 +252,32 @@ public class EdicaoEscalaController {
                 obterDesignacao(designacaoId);
 
         validarResponsavel(novoResponsavel);
+        validarParticipante(
+                designacao.parte(),
+                novoResponsavel,
+                tipoParticipacaoDoResponsavel(designacao.parte()),
+                designacao.id()
+        );
 
         validarAjudanteObrigatorio(
                 designacao.parte(),
                 novoAjudante
+        );
+
+        if (novoAjudante != null) {
+            validarParticipante(
+                    designacao.parte(),
+                    novoAjudante,
+                    TipoParticipacao.AJUDANTE,
+                    designacao.id()
+            );
+        }
+
+        validarCompatibilidadeDaParte(
+                designacao.parte(),
+                novoResponsavel,
+                novoAjudante,
+                designacao.id()
         );
 
         atualizarDesignacao(
@@ -245,6 +322,12 @@ public class EdicaoEscalaController {
                 parte,
                 responsavel
         );
+        validarParticipante(
+                parte,
+                responsavel,
+                tipoParticipacaoDoResponsavel(parte),
+                null
+        );
         validarAjudanteObrigatorio(
                 parte,
                 ajudante
@@ -253,9 +336,23 @@ public class EdicaoEscalaController {
                 parte,
                 ajudante
         );
+        if (ajudante != null) {
+            validarParticipante(
+                    parte,
+                    ajudante,
+                    TipoParticipacao.AJUDANTE,
+                    null
+            );
+        }
         validarPessoasDiferentes(
                 responsavel,
                 ajudante
+        );
+        validarCompatibilidadeDaParte(
+                parte,
+                responsavel,
+                ajudante,
+                null
         );
 
         escalaDAO.adicionarDesignacao(
@@ -348,6 +445,114 @@ public class EdicaoEscalaController {
                     "O responsável selecionado não pode realizar esta parte."
             );
         }
+    }
+
+    private void validarParticipante(
+                Parte parte,
+                Pessoa pessoa,
+                TipoParticipacao tipoParticipacao,
+                Integer designacaoAtualId
+        ) {
+            if (!pessoaElegivel(
+                    pessoa,
+                    parte,
+                    tipoParticipacao,
+                    criarControleDaReuniao(designacaoAtualId)
+            )) {
+                throw new IllegalArgumentException(
+                        "A pessoa selecionada não pode exercer esta participação."
+                );
+            }
+        }
+
+    private void validarCompatibilidadeDaParte(
+                Parte parte,
+                Pessoa responsavel,
+                Pessoa ajudante,
+                Integer designacaoAtualId
+        ) {
+            if (parte.getTipo() == TipoParte.DEMONSTRACAO
+                    && !regrasService.podeFormarDemonstracao(
+                    parte,
+                    responsavel,
+                    ajudante,
+                    criarControleDaReuniao(designacaoAtualId)
+                            .getPessoasDesignadas()
+            )) {
+                throw new IllegalArgumentException(
+                        "O responsável e o ajudante não são compatíveis para esta demonstração."
+                );
+            }
+        }
+
+    private ControleDesignacoes criarControleDaReuniao(
+                Integer designacaoAtualId
+        ) {
+            ControleDesignacoes controle =
+                    new ControleDesignacoes();
+
+            if (escalaSelecionada == null) {
+                return controle;
+            }
+
+            for (Designacao designacao :
+                    escalaSelecionada.getDesignacoes()) {
+
+                if (designacao.id() != null
+                        && designacao.id().equals(designacaoAtualId)) {
+                    continue;
+                }
+
+                TipoParticipacao tipoResponsavel =
+                        tipoParticipacaoDoResponsavel(
+                                designacao.parte()
+                        );
+
+                if (designacao.responsavel() != null) {
+                    controle.registrarParticipacao(
+                            new ParticipacaoDesignacao(
+                                    designacao.data(),
+                                    designacao.responsavel(),
+                                    designacao.parte(),
+                                    tipoResponsavel
+                            )
+                    );
+
+                    if (tipoResponsavel
+                            == TipoParticipacao.PRESIDENTE) {
+                        controle.definirPresidente(
+                                designacao.responsavel()
+                        );
+                    }
+                }
+
+                if (designacao.ajudante() != null) {
+                    controle.registrarParticipacao(
+                            new ParticipacaoDesignacao(
+                                    designacao.data(),
+                                    designacao.ajudante(),
+                                    designacao.parte(),
+                                    TipoParticipacao.AJUDANTE
+                            )
+                    );
+                }
+            }
+
+            return controle;
+        }
+
+    private TipoParticipacao tipoParticipacaoDoResponsavel(
+                Parte parte
+        ) {
+            if (parte.getTipo() == TipoParte.DIRIGENTE_ESTUDO) {
+                return TipoParticipacao.DIRIGENTE;
+            }
+
+            return parte.getParticipacoesNecessarias()
+                    .stream()
+                    .filter(tipo -> tipo != TipoParticipacao.AJUDANTE)
+                    .findFirst()
+                    .orElse(TipoParticipacao.RESPONSAVEL);
     }
 
     private void validarAjudantePodeRealizarParte(

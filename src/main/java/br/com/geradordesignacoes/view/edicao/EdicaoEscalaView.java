@@ -516,6 +516,7 @@ public class EdicaoEscalaView {
                         return;
                     }
 
+                    designacaoSelecionada = null;
                     atualizarListasDePessoas(selecionada, null, null);
                 });
 
@@ -587,7 +588,12 @@ public class EdicaoEscalaView {
         comboResponsavel.setItems(
                 FXCollections.observableArrayList(
                         controller.listarPessoasParaSelecao(
-                                parte, tipoResponsavel, responsavelAtual
+                                parte,
+                                tipoResponsavel,
+                                responsavelAtual,
+                                designacaoSelecionada == null
+                                        ? null
+                                        : designacaoSelecionada.id()
                         )
                 )
         );
@@ -597,7 +603,10 @@ public class EdicaoEscalaView {
                         controller.listarPessoasParaSelecao(
                                 parte,
                                 TipoParticipacao.AJUDANTE,
-                                ajudanteAtual
+                                ajudanteAtual,
+                                designacaoSelecionada == null
+                                        ? null
+                                        : designacaoSelecionada.id()
                         )
                 )
         );

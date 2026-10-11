@@ -83,7 +83,7 @@ class RegraLeituraTest {
                 true,
                 true,
                 true,
-                false,
+                true,
                 true,
                 false,
                 false,

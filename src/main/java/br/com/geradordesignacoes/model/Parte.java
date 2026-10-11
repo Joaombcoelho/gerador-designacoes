@@ -387,7 +387,8 @@ public class Parte {
          * ser designadas para a parte Leitura.
          */
         if (tipo == TipoParticipacao.LEITOR) {
-            return nivelLeituraPermitido(pessoa);
+            return nivelLeituraPermitido(pessoa)
+                    && pessoa.podeExercer(tipo);
         }
 
         return pessoa.podeExercer(tipo);

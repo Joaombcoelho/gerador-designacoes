@@ -259,6 +259,425 @@ class EdicaoEscalaControllerTest extends BaseDAOTest {
         );
     }
 
+    @Test
+    void deveFiltrarParticipantesPelaPermissaoDaParticipacaoConcreta() {
+        Pessoa leitor = criarPessoaComPermissoes(
+                "Leitor",
+                Sexo.MASCULINO,
+                Privilegio.PUBLICADOR,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+                false
+        );
+        Pessoa semPermissaoDeLeitura = criarPessoaComPermissoes(
+                "Sem leitura",
+                Sexo.MASCULINO,
+                Privilegio.PUBLICADOR,
+                true,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false
+        );
+        Parte parte = parteDAO.salvar(
+                new Parte(
+                        "Leitura concreta",
+                        TipoParte.LEITURA,
+                        Privilegio.PUBLICADOR,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.LEITOR)
+                )
+        );
+
+        List<Pessoa> pessoas = controller.listarPessoasParaSelecao(
+                parte,
+                TipoParticipacao.LEITOR
+        );
+
+        assertTrue(pessoas.contains(leitor));
+        assertFalse(pessoas.contains(semPermissaoDeLeitura));
+    }
+
+    @Test
+    void deveFiltrarDirigenteELeitorInternoDoEstudoBiblico() {
+        Pessoa dirigente = criarPessoaComPermissoes(
+                "Dirigente",
+                Sexo.MASCULINO,
+                Privilegio.SERVO_MINISTERIAL,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true
+        );
+        Pessoa leitorExperiente = criarPessoaComPermissoes(
+                "Leitor experiente",
+                Sexo.MASCULINO,
+                Privilegio.BATIZADO,
+                false,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                NivelLeitura.EXPERIENTE
+        );
+        Pessoa leitorBasico = criarPessoaComPermissoes(
+                "Leitor básico",
+                Sexo.MASCULINO,
+                Privilegio.BATIZADO,
+                false,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                NivelLeitura.BASICO
+        );
+        Parte estudo = parteDAO.salvar(
+                new Parte(
+                        "Estudo Bíblico",
+                        TipoParte.DIRIGENTE_ESTUDO,
+                        Privilegio.SERVO_MINISTERIAL,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        2,
+                        true,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.DIRIGENTE)
+                )
+        );
+
+        List<Pessoa> dirigentes = controller.listarPessoasParaSelecao(
+                estudo,
+                TipoParticipacao.DIRIGENTE
+        );
+        List<Pessoa> leitores = controller.listarPessoasParaSelecao(
+                estudo,
+                TipoParticipacao.AJUDANTE
+        );
+
+        assertTrue(dirigentes.contains(dirigente));
+        assertFalse(dirigentes.contains(leitorExperiente));
+        assertTrue(leitores.contains(leitorExperiente));
+        assertFalse(leitores.contains(leitorBasico));
+    }
+
+    @Test
+    void naoDeveOferecerPresidenteParaOutraDesignacaoNaMesmaReuniao() {
+        Pessoa presidente = criarPessoaComPermissoes(
+                "Presidente",
+                Sexo.MASCULINO,
+                Privilegio.ANCIAO,
+                true,
+                true,
+                false,
+                true,
+                true,
+                true,
+                false
+        );
+        Parte partePresidente = parteDAO.salvar(
+                new Parte(
+                        "Presidente",
+                        TipoParte.PRESIDENTE_REUNIAO,
+                        Privilegio.ANCIAO,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.PRESIDENTE)
+                )
+        );
+        Parte outraParte = criarParteSemAjudante("Outra parte");
+        Escala escala = criarEscala(
+                LocalDate.of(2026, 9, 3),
+                new Designacao(
+                        LocalDate.of(2026, 9, 3),
+                        partePresidente,
+                        presidente,
+                        null
+                )
+        );
+        escalaDAO.adicionarDesignacao(
+                escala.getId(),
+                outraParte.getId(),
+                presidente.getId(),
+                null
+        );
+
+        controller.selecionarEscala(escala.getId());
+
+        List<Pessoa> pessoas = controller.listarPessoasParaSelecao(
+                outraParte,
+                TipoParticipacao.RESPONSAVEL
+        );
+
+        assertFalse(pessoas.contains(presidente));
+    }
+
+    @Test
+    void naoDeveOferecerPessoaComConflitoTesourosEJoiasNaMesmaReuniao() {
+        Pessoa pessoa = criarPessoaComPermissoes(
+                "Pessoa com Tesouros",
+                Sexo.MASCULINO,
+                Privilegio.SERVO_MINISTERIAL,
+                true,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false
+        );
+        Parte tesouros = parteDAO.salvar(
+                new Parte(
+                        "Discurso - Tesouros da Palavra de Deus",
+                        TipoParte.DISCURSO_TESOUROS,
+                        Privilegio.SERVO_MINISTERIAL,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.ORADOR)
+                )
+        );
+        Parte joias = parteDAO.salvar(
+                new Parte(
+                        "Joias espirituais",
+                        TipoParte.JOIAS_ESPIRITUAIS,
+                        Privilegio.SERVO_MINISTERIAL,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.ORADOR)
+                )
+        );
+        LocalDate data = LocalDate.of(2026, 9, 3);
+        Escala escala = criarEscala(
+                data,
+                new Designacao(data, tesouros, pessoa, null)
+        );
+
+        controller.selecionarEscala(escala.getId());
+
+        assertFalse(
+                controller.listarPessoasParaSelecao(
+                        joias,
+                        TipoParticipacao.ORADOR
+                ).contains(pessoa)
+        );
+    }
+
+    @Test
+    void devePermitirSubstituicaoSemConsiderarADesignacaoAtualComoConflito() {
+        Pessoa pessoa = criarPessoaComPermissoes(
+                "Participante atual",
+                Sexo.MASCULINO,
+                Privilegio.SERVO_MINISTERIAL,
+                true,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false
+        );
+        Parte parte = parteDAO.salvar(
+                new Parte(
+                        "Tesouros atual",
+                        TipoParte.DISCURSO_TESOUROS,
+                        Privilegio.SERVO_MINISTERIAL,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.ORADOR)
+                )
+        );
+        LocalDate data = LocalDate.of(2026, 9, 3);
+        Escala escala = criarEscala(
+                data,
+                new Designacao(data, parte, pessoa, null)
+        );
+
+        Designacao designacao = escalaDAO.buscarPorId(escala.getId())
+                .orElseThrow()
+                .getDesignacoes()
+                .get(0);
+        Parte joias = parteDAO.salvar(
+                new Parte(
+                        "Joias atuais",
+                        TipoParte.JOIAS_ESPIRITUAIS,
+                        Privilegio.SERVO_MINISTERIAL,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.ORADOR)
+                )
+        );
+
+        controller.selecionarEscala(escala.getId());
+
+        List<Pessoa> candidatos = controller.listarPessoasParaSelecao(
+                joias,
+                TipoParticipacao.ORADOR,
+                null,
+                designacao.id()
+        );
+
+        assertTrue(
+                candidatos.contains(pessoa)
+        );
+    }
+
+    @Test
+    void deveConsiderarTodasAsDesignacoesAoAdicionarParte() {
+        Pessoa pessoaJaDesignada = criarPessoaComPermissoes(
+                "Pessoa já designada",
+                Sexo.MASCULINO,
+                Privilegio.PUBLICADOR,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+        );
+        Pessoa novoResponsavel = criarPessoaComPermissoes(
+                "Novo responsável",
+                Sexo.MASCULINO,
+                Privilegio.PUBLICADOR,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+        );
+        Parte parteExistente = criarParteSemAjudante(
+                "Parte existente"
+        );
+        Parte novaParte = criarParteSemAjudante(
+                "Nova parte"
+        );
+        LocalDate data = LocalDate.of(2026, 9, 3);
+        Escala escala = criarEscala(
+                data,
+                new Designacao(
+                        data,
+                        parteExistente,
+                        pessoaJaDesignada,
+                        null
+                )
+        );
+
+        controller.selecionarEscala(escala.getId());
+
+        List<Pessoa> candidatos = controller.listarPessoasParaSelecao(
+                novaParte,
+                TipoParticipacao.RESPONSAVEL,
+                null,
+                null
+        );
+
+        assertFalse(candidatos.contains(pessoaJaDesignada));
+        assertTrue(candidatos.contains(novoResponsavel));
+    }
+
+    @Test
+    void deveRejeitarParticipanteInvalidoEnviadoDiretamenteAoSalvar() {
+        Pessoa responsavel = criarPessoa("Responsável válido");
+        Pessoa inativo = criarPessoaInativo("Responsável inativo");
+        Parte parte = criarParteSemAjudante("Parte direta");
+        LocalDate data = LocalDate.of(2026, 9, 3);
+        Escala escala = criarEscala(
+                data,
+                new Designacao(data, parte, responsavel, null)
+        );
+        Designacao designacao = escalaDAO.buscarPorId(escala.getId())
+                .orElseThrow()
+                .getDesignacoes()
+                .get(0);
+
+        controller.selecionarEscala(escala.getId());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.salvarAlteracoes(
+                        designacao.id(),
+                        inativo,
+                        null
+                )
+        );
+    }
+
+    @Test
+    void deveRejeitarDemonstracaoComResponsavelEAjudanteDeSexosDiferentes() {
+        Pessoa responsavel = criarPessoaComPermissoes(
+                "Responsável",
+                Sexo.MASCULINO,
+                Privilegio.PUBLICADOR,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false
+        );
+        Pessoa ajudante = criarPessoaComPermissoes(
+                "Ajudante",
+                Sexo.FEMININO,
+                Privilegio.PUBLICADOR,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false
+        );
+        Parte parte = criarParteComAjudante();
+        Escala escala = criarEscalaVazia(
+                LocalDate.of(2026, 9, 3)
+        );
+
+        controller.selecionarEscala(escala.getId());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> controller.adicionarParte(
+                        parte,
+                        responsavel,
+                        ajudante
+                )
+        );
+    }
+
 
     @Test
     void deveAdicionarNovaParteNaEscala() {
@@ -615,6 +1034,64 @@ class EdicaoEscalaControllerTest extends BaseDAOTest {
                         false,
                         false,
                         false,
+                        privilegio,
+                        nivelLeitura
+                )
+        );
+    }
+
+    private Pessoa criarPessoaComPermissoes(
+            String nome,
+            Sexo sexo,
+            Privilegio privilegio,
+            boolean responsavel,
+            boolean ajudante,
+            boolean leitura,
+            boolean discurso,
+            boolean oracao,
+            boolean presidente,
+            boolean dirigente
+    ) {
+        return criarPessoaComPermissoes(
+                nome,
+                sexo,
+                privilegio,
+                responsavel,
+                ajudante,
+                leitura,
+                discurso,
+                oracao,
+                presidente,
+                dirigente,
+                NivelLeitura.BASICO
+        );
+    }
+
+    private Pessoa criarPessoaComPermissoes(
+            String nome,
+            Sexo sexo,
+            Privilegio privilegio,
+            boolean responsavel,
+            boolean ajudante,
+            boolean leitura,
+            boolean discurso,
+            boolean oracao,
+            boolean presidente,
+            boolean dirigente,
+            NivelLeitura nivelLeitura
+    ) {
+        return pessoaDAO.salvar(
+                new Pessoa(
+                        nome,
+                        sexo,
+                        true,
+                        responsavel,
+                        ajudante,
+                        leitura,
+                        discurso,
+                        oracao,
+                        presidente,
+                        dirigente,
                         privilegio,
                         nivelLeitura
                 )
