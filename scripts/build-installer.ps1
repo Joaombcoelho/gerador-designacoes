@@ -6,6 +6,7 @@ $appDir = Join-Path $stageRoot "app"
 $runtimeDir = Join-Path $stageRoot "runtime"
 $installerDir = Join-Path $projectRoot "Instalador"
 $installerPath = Join-Path $installerDir "GeradorDesignacoes-1.2.0.exe"
+$iconPath = Join-Path $projectRoot "src\main\resources\logo.ico"
 
 function Require-Command {
     param([string]$Name)
@@ -83,6 +84,10 @@ if (-not (Test-Path $modelPath)) {
 }
 Copy-Item $modelPath $modelDir
 
+if (-not (Test-Path $iconPath)) {
+    throw "Ícone do aplicativo não encontrado: $iconPath"
+}
+
 $requiredPatterns = @(
     "javafx-base-*-win.jar",
     "javafx-controls-*-win.jar",
@@ -120,6 +125,7 @@ Invoke-Checked "Gerando instalador Windows" {
         --main-jar "gerador-designacoes-1.2.0.jar" `
         --main-class "br.com.geradordesignacoes.MainApp" `
         --runtime-image $runtimeDir `
+        --icon $iconPath `
         --java-options '--module-path $APPDIR --add-modules javafx.controls,javafx.fxml' `
         --dest $installerDir `
         --win-shortcut `
