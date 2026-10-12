@@ -14,19 +14,14 @@ public class RegrasSalasAuxiliaresService {
 
     private final RegrasService regrasService = new RegrasService();
 
+
     public boolean parteElegivel(Parte parte) {
-        if (parte == null
-                || parte.getTipo() == null
-                || parte.getSecao() == null) {
+        if (parte == null || parte.getTipo() == null) {
             return false;
         }
 
-        if (parte.getTipo() == TipoParte.LEITURA) {
-            return true;
-        }
-
-        return parte.getSecao() == SecaoParte.MINISTERIO
-                && parte.getTipo() != TipoParte.O_QUE_VOCE_DIRIA;
+        return parte.getTipo() == TipoParte.LEITURA
+                || parte.getTipo() == TipoParte.DEMONSTRACAO;
     }
 
     public boolean podeParticipar(

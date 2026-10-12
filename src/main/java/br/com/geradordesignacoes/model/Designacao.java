@@ -1,3 +1,4 @@
+
 package br.com.geradordesignacoes.model;
 
 import java.time.LocalDate;
@@ -8,7 +9,8 @@ public record Designacao(
         LocalDate data,
         Parte parte,
         Pessoa responsavel,
-        Pessoa ajudante
+        Pessoa ajudante,
+        SalaDesignacao sala
 ) {
 
     public Designacao(
@@ -17,16 +19,25 @@ public record Designacao(
             Pessoa responsavel,
             Pessoa ajudante
     ) {
-
         this(
                 null,
                 data,
                 parte,
                 responsavel,
-                ajudante
+                ajudante,
+                SalaDesignacao.PRINCIPAL
         );
     }
 
+    public Designacao(
+            LocalDate data,
+            Parte parte,
+            Pessoa responsavel,
+            Pessoa ajudante,
+            SalaDesignacao sala
+    ) {
+        this(null, data, parte, responsavel, ajudante, sala);
+    }
 
     public Designacao(
             Integer id,
@@ -35,7 +46,24 @@ public record Designacao(
             Pessoa responsavel,
             Pessoa ajudante
     ) {
+        this(
+                id,
+                data,
+                parte,
+                responsavel,
+                ajudante,
+                SalaDesignacao.PRINCIPAL
+        );
+    }
 
+    public Designacao(
+            Integer id,
+            LocalDate data,
+            Parte parte,
+            Pessoa responsavel,
+            Pessoa ajudante,
+            SalaDesignacao sala
+    ) {
         this.id = id;
 
         this.data = Objects.requireNonNull(
@@ -59,30 +87,28 @@ public record Designacao(
         if (parte.getExigeAjudante()
                 && ajudante == null
                 && parte.getTipo() != TipoParte.DIRIGENTE_ESTUDO) {
-
             throw new IllegalArgumentException(
                     "Esta parte exige um ajudante."
             );
         }
 
         this.ajudante = ajudante;
+
+        this.sala = Objects.requireNonNull(
+                sala,
+                "A sala da designação não pode ser nula."
+        );
     }
 
-
     public Pessoa getParticipante(TipoParticipacao tipoParticipacao) {
-
         Objects.requireNonNull(
                 tipoParticipacao,
                 "O tipo de participação não pode ser nulo."
         );
 
-
         return switch (tipoParticipacao) {
-
             case RESPONSAVEL -> responsavel;
-
             case AJUDANTE -> ajudante;
-
             default -> throw new IllegalArgumentException(
                     "Tipo de participação não encontrado na designação: "
                             + tipoParticipacao
@@ -90,14 +116,16 @@ public record Designacao(
         };
     }
 
-
     @Override
     public String toString() {
-
         StringBuilder texto = new StringBuilder();
 
         texto.append("Data: ")
                 .append(data)
+                .append("\n");
+
+        texto.append("Sala: ")
+                .append(sala)
                 .append("\n");
 
         texto.append("Parte: ")
@@ -105,7 +133,6 @@ public record Designacao(
                 .append("\n");
 
         if (ajudante != null) {
-
             texto.append("Ajudante: ")
                     .append(ajudante.getNome())
                     .append("\n");
@@ -116,7 +143,6 @@ public record Designacao(
                     .append(responsavel.getNome())
                     .append("\n");
         }
-
 
         return texto.toString();
     }
