@@ -33,9 +33,12 @@ public class PessoaDAO {
                     pode_ser_presidente,
                     pode_ser_dirigente,
                     privilegio,
-                    nivel_leitura
+                    nivel_leitura,
+                    pode_participar_sala_principal,
+                    pode_participar_sala_b,
+                    pode_participar_sala_c
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
 
@@ -222,7 +225,10 @@ public class PessoaDAO {
                     pode_ser_presidente = ?,
                     pode_ser_dirigente = ?,
                     privilegio = ?,
-                    nivel_leitura = ?
+                    nivel_leitura = ?,
+                    pode_participar_sala_principal = ?,
+                    pode_participar_sala_b = ?,
+                    pode_participar_sala_c = ?
                 WHERE id = ?
                 """;
 
@@ -241,9 +247,23 @@ public class PessoaDAO {
                     pessoa
             );
 
+            statement.setBoolean(
+                    13,
+                    pessoa.podeParticiparSalaPrincipal()
+            );
+
+            statement.setBoolean(
+                    14,
+                    pessoa.podeParticiparSalaB()
+            );
+
+            statement.setBoolean(
+                    15,
+                    pessoa.podeParticiparSalaC()
+            );
 
             statement.setInt(
-                    13,
+                    16,
                     pessoa.getId()
             );
 
@@ -381,6 +401,20 @@ public class PessoaDAO {
                 12,
                 pessoa.getNivelLeitura().name()
         );
+        statement.setBoolean(
+                13,
+                pessoa.podeParticiparSalaPrincipal()
+        );
+
+        statement.setBoolean(
+                14,
+                pessoa.podeParticiparSalaB()
+        );
+
+        statement.setBoolean(
+                15,
+                pessoa.podeParticiparSalaC()
+        );
     }
 
 
@@ -420,7 +454,13 @@ public class PessoaDAO {
 
                         NivelLeitura.valueOf(
                                 resultSet.getString("nivel_leitura")
-                        )
+                        ),
+
+                        resultSet.getInt("pode_participar_sala_principal") == 1,
+
+                        resultSet.getInt("pode_participar_sala_b") == 1,
+
+                        resultSet.getInt("pode_participar_sala_c") == 1
                 );
 
 

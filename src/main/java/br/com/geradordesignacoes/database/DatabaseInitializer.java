@@ -2,136 +2,135 @@ package br.com.geradordesignacoes.database;
 
 import br.com.geradordesignacoes.model.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DatabaseInitializer {
 
     private static final String CREATE_TABLE_PESSOA = """
-
-        CREATE TABLE IF NOT EXISTS pessoa (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            sexo TEXT NOT NULL,
-            ativo INTEGER NOT NULL,
-            pode_ser_responsavel INTEGER NOT NULL,
-            pode_ser_ajudante INTEGER NOT NULL,
-            pode_fazer_leitura INTEGER NOT NULL,
-            pode_fazer_discurso INTEGER NOT NULL,
-            pode_fazer_oracao INTEGER NOT NULL DEFAULT 0,
-            pode_ser_presidente INTEGER NOT NULL DEFAULT 0,
-            pode_ser_dirigente INTEGER NOT NULL DEFAULT 0,
-            privilegio TEXT NOT NULL,
-            nivel_leitura TEXT NOT NULL DEFAULT 'BASICO'
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS pessoa (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                sexo TEXT NOT NULL,
+                ativo INTEGER NOT NULL,
+                pode_ser_responsavel INTEGER NOT NULL,
+                pode_ser_ajudante INTEGER NOT NULL,
+                pode_fazer_leitura INTEGER NOT NULL,
+                pode_fazer_discurso INTEGER NOT NULL,
+                pode_fazer_oracao INTEGER NOT NULL DEFAULT 0,
+                pode_ser_presidente INTEGER NOT NULL DEFAULT 0,
+                pode_ser_dirigente INTEGER NOT NULL DEFAULT 0,
+                privilegio TEXT NOT NULL,
+                nivel_leitura TEXT NOT NULL DEFAULT 'BASICO',
+                pode_participar_sala_principal INTEGER NOT NULL DEFAULT 1,
+                pode_participar_sala_b INTEGER NOT NULL DEFAULT 1,
+                pode_participar_sala_c INTEGER NOT NULL DEFAULT 1
+            );
+            
+            """;
 
 
     private static final String CREATE_TABLE_PARTE = """
-
-        CREATE TABLE IF NOT EXISTS parte (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            tipo TEXT NOT NULL,
-            privilegio_minimo TEXT NOT NULL,
-            exige_ajudante INTEGER NOT NULL,
-            sexo_permitido TEXT NOT NULL,
-            quantidade_minima_participantes INTEGER NOT NULL,
-            gera_formulario INTEGER NOT NULL,
-            nivel_leitura_minimo TEXT NOT NULL DEFAULT 'BASICO',
-            secao TEXT,
-            tipo_variacao TEXT,
-            possui_tema INTEGER NOT NULL DEFAULT 0,
-            ordem INTEGER NOT NULL DEFAULT 999
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS parte (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                tipo TEXT NOT NULL,
+                privilegio_minimo TEXT NOT NULL,
+                exige_ajudante INTEGER NOT NULL,
+                sexo_permitido TEXT NOT NULL,
+                quantidade_minima_participantes INTEGER NOT NULL,
+                gera_formulario INTEGER NOT NULL,
+                nivel_leitura_minimo TEXT NOT NULL DEFAULT 'BASICO',
+                secao TEXT,
+                tipo_variacao TEXT,
+                possui_tema INTEGER NOT NULL DEFAULT 0,
+                ordem INTEGER NOT NULL DEFAULT 999
+            );
+            
+            """;
 
 
     private static final String CREATE_TABLE_PARTE_PARTICIPACAO_NECESSARIA = """
-
-        CREATE TABLE IF NOT EXISTS parte_participacao_necessaria (
-            parte_id INTEGER NOT NULL,
-            tipo_participacao TEXT NOT NULL,
-            ordem INTEGER NOT NULL,
-
-            PRIMARY KEY (parte_id, tipo_participacao),
-
-            FOREIGN KEY (parte_id)
-                REFERENCES parte(id)
-                ON DELETE CASCADE
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS parte_participacao_necessaria (
+                parte_id INTEGER NOT NULL,
+                tipo_participacao TEXT NOT NULL,
+                ordem INTEGER NOT NULL,
+            
+                PRIMARY KEY (parte_id, tipo_participacao),
+            
+                FOREIGN KEY (parte_id)
+                    REFERENCES parte(id)
+                    ON DELETE CASCADE
+            );
+            
+            """;
 
 
     private static final String CREATE_TABLE_HISTORICO_DESIGNACOES = """
-
-        CREATE TABLE IF NOT EXISTS historico_designacoes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            data DATE NOT NULL,
-            pessoa_id INTEGER NOT NULL,
-            parte_id INTEGER NOT NULL,
-            tipo_participacao TEXT NOT NULL,
-
-            UNIQUE(
-                data,
-                pessoa_id,
-                parte_id,
-                tipo_participacao
-            ),
-
-            FOREIGN KEY (pessoa_id)
-                REFERENCES pessoa(id),
-
-            FOREIGN KEY (parte_id)
-                REFERENCES parte(id)
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS historico_designacoes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data DATE NOT NULL,
+                pessoa_id INTEGER NOT NULL,
+                parte_id INTEGER NOT NULL,
+                tipo_participacao TEXT NOT NULL,
+            
+                UNIQUE(
+                    data,
+                    pessoa_id,
+                    parte_id,
+                    tipo_participacao
+                ),
+            
+                FOREIGN KEY (pessoa_id)
+                    REFERENCES pessoa(id),
+            
+                FOREIGN KEY (parte_id)
+                    REFERENCES parte(id)
+            );
+            
+            """;
 
 
     private static final String CREATE_TABLE_ESCALA = """
-
-        CREATE TABLE IF NOT EXISTS escala (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            data DATE NOT NULL,
-            status TEXT NOT NULL,
-            data_geracao TEXT NOT NULL,
-            data_salvamento TEXT
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS escala (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data DATE NOT NULL,
+                status TEXT NOT NULL,
+                data_geracao TEXT NOT NULL,
+                data_salvamento TEXT
+            );
+            
+            """;
 
 
     private static final String CREATE_TABLE_DESIGNACAO = """
-
-        CREATE TABLE IF NOT EXISTS designacao (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            escala_id INTEGER NOT NULL,
-            parte_id INTEGER NOT NULL,
-            responsavel_id INTEGER,
-            ajudante_id INTEGER,
-
-            FOREIGN KEY (escala_id)
-                REFERENCES escala(id)
-                ON DELETE CASCADE,
-
-            FOREIGN KEY (parte_id)
-                REFERENCES parte(id),
-
-            FOREIGN KEY (responsavel_id)
-                REFERENCES pessoa(id),
-
-            FOREIGN KEY (ajudante_id)
-                REFERENCES pessoa(id)
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS designacao (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                escala_id INTEGER NOT NULL,
+                parte_id INTEGER NOT NULL,
+                responsavel_id INTEGER,
+                ajudante_id INTEGER,
+            
+                FOREIGN KEY (escala_id)
+                    REFERENCES escala(id)
+                    ON DELETE CASCADE,
+            
+                FOREIGN KEY (parte_id)
+                    REFERENCES parte(id),
+            
+                FOREIGN KEY (responsavel_id)
+                    REFERENCES pessoa(id),
+            
+                FOREIGN KEY (ajudante_id)
+                    REFERENCES pessoa(id)
+            );
+            
+            """;
 
 
     /*
@@ -141,57 +140,57 @@ public class DatabaseInitializer {
      */
 
     private static final String CREATE_TABLE_PROGRAMACAO_SEMANA = """
-
-        CREATE TABLE IF NOT EXISTS programacao_semana (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            data DATE NOT NULL UNIQUE,
-            sala_b_habilitada INTEGER NOT NULL DEFAULT 0,
-            sala_c_habilitada INTEGER NOT NULL DEFAULT 0
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS programacao_semana (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data DATE NOT NULL UNIQUE,
+                sala_b_habilitada INTEGER NOT NULL DEFAULT 0,
+                sala_c_habilitada INTEGER NOT NULL DEFAULT 0
+            );
+            
+            """;
 
     private static final String CREATE_TABLE_CONFIGURACAO_SALAS = """
-
-        CREATE TABLE IF NOT EXISTS configuracao_salas (
-            id INTEGER PRIMARY KEY CHECK (id = 1),
-            sala_b_habilitada INTEGER NOT NULL DEFAULT 0,
-            sala_c_habilitada INTEGER NOT NULL DEFAULT 0
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS configuracao_salas (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                sala_b_habilitada INTEGER NOT NULL DEFAULT 0,
+                sala_c_habilitada INTEGER NOT NULL DEFAULT 0
+            );
+            
+            """;
 
 
     private static final String CREATE_TABLE_PROGRAMACAO_PARTE = """
-
-        CREATE TABLE IF NOT EXISTS programacao_parte (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-            programacao_semana_id INTEGER NOT NULL,
-            parte_id INTEGER NOT NULL,
-
-            ordem INTEGER NOT NULL,
-            tema TEXT,
-
-            FOREIGN KEY (programacao_semana_id)
-                REFERENCES programacao_semana(id)
-                ON DELETE CASCADE,
-
-            FOREIGN KEY (parte_id)
-                REFERENCES parte(id),
-
-            UNIQUE (
-                programacao_semana_id,
-                parte_id
-            ),
-
-            UNIQUE (
-                programacao_semana_id,
-                ordem
-            )
-        );
-
-        """;
+            
+            CREATE TABLE IF NOT EXISTS programacao_parte (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+            
+                programacao_semana_id INTEGER NOT NULL,
+                parte_id INTEGER NOT NULL,
+            
+                ordem INTEGER NOT NULL,
+                tema TEXT,
+            
+                FOREIGN KEY (programacao_semana_id)
+                    REFERENCES programacao_semana(id)
+                    ON DELETE CASCADE,
+            
+                FOREIGN KEY (parte_id)
+                    REFERENCES parte(id),
+            
+                UNIQUE (
+                    programacao_semana_id,
+                    parte_id
+                ),
+            
+                UNIQUE (
+                    programacao_semana_id,
+                    ordem
+                )
+            );
+            
+            """;
 
 
     /*
@@ -224,7 +223,7 @@ public class DatabaseInitializer {
             statement.execute(
                     CREATE_TABLE_PESSOA
             );
-
+            adicionarColunasPermissaoSalasPessoa(connection);
 
             /*
              * ----------------------------------------------------
@@ -293,6 +292,9 @@ public class DatabaseInitializer {
             statement.execute(
                     CREATE_TABLE_PROGRAMACAO_SEMANA
             );
+
+
+
             adicionarColunasSalasProgramacaoSemana(connection);
             statement.execute(CREATE_TABLE_CONFIGURACAO_SALAS);
             statement.execute("""
@@ -349,7 +351,51 @@ public class DatabaseInitializer {
         adicionarColunaSeNecessario(connection, "sala_b_habilitada");
         adicionarColunaSeNecessario(connection, "sala_c_habilitada");
     }
+    private static void adicionarColunasPermissaoSalasPessoa(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaPessoaSeNecessario(
+                connection,
+                "pode_participar_sala_principal"
+        );
 
+        adicionarColunaPessoaSeNecessario(
+                connection,
+                "pode_participar_sala_b"
+        );
+
+        adicionarColunaPessoaSeNecessario(
+                connection,
+                "pode_participar_sala_c"
+        );
+    }
+
+    private static void adicionarColunaPessoaSeNecessario(
+            Connection connection,
+            String coluna
+    ) throws SQLException {
+
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(
+                        "PRAGMA table_info(pessoa)"
+                )
+        ) {
+            while (resultSet.next()) {
+                if (coluna.equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(
+                    "ALTER TABLE pessoa ADD COLUMN "
+                            + coluna
+                            + " INTEGER NOT NULL DEFAULT 1"
+            );
+        }
+    }
     private static void adicionarColunaSeNecessario(
             Connection connection,
             String coluna
@@ -413,89 +459,89 @@ public class DatabaseInitializer {
     }
 
     private static void migrarResponsavelDesignacaoNullable(
-                Connection connection
-        ) throws SQLException {
-            boolean responsavelObrigatorio = false;
+            Connection connection
+    ) throws SQLException {
+        boolean responsavelObrigatorio = false;
 
-            try (PreparedStatement statement = connection.prepareStatement(
-                    "PRAGMA table_info(designacao)"
-            );
-                 ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    if ("responsavel_id".equals(resultSet.getString("name"))) {
-                        responsavelObrigatorio = resultSet.getInt("notnull") == 1;
-                        break;
-                    }
-                }
-            }
-
-            if (!responsavelObrigatorio) {
-                return;
-            }
-
-            boolean foreignKeysAtivos;
-            try (Statement statement = connection.createStatement();
-                 ResultSet resultSet = statement.executeQuery("PRAGMA foreign_keys")) {
-                foreignKeysAtivos = resultSet.next() && resultSet.getInt(1) == 1;
-            }
-
-            if (foreignKeysAtivos) {
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("PRAGMA foreign_keys = OFF");
-                }
-            }
-
-            boolean autoCommitAnterior = connection.getAutoCommit();
-            connection.setAutoCommit(false);
-            try (Statement statement = connection.createStatement()) {
-                statement.execute("""
-                        CREATE TABLE designacao_migracao (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            escala_id INTEGER NOT NULL,
-                            parte_id INTEGER NOT NULL,
-                            responsavel_id INTEGER,
-                            ajudante_id INTEGER,
-                            FOREIGN KEY (escala_id) REFERENCES escala(id) ON DELETE CASCADE,
-                            FOREIGN KEY (parte_id) REFERENCES parte(id),
-                            FOREIGN KEY (responsavel_id) REFERENCES pessoa(id),
-                            FOREIGN KEY (ajudante_id) REFERENCES pessoa(id)
-                        )
-                        """);
-                statement.execute("""
-                        INSERT INTO designacao_migracao
-                            (id, escala_id, parte_id, responsavel_id, ajudante_id)
-                        SELECT id, escala_id, parte_id, responsavel_id, ajudante_id
-                        FROM designacao
-                        """);
-                statement.execute("DROP TABLE designacao");
-                statement.execute("ALTER TABLE designacao_migracao RENAME TO designacao");
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                throw e;
-            } finally {
-                connection.setAutoCommit(autoCommitAnterior);
-                if (foreignKeysAtivos) {
-                    try (Statement statement = connection.createStatement()) {
-                        statement.execute("PRAGMA foreign_keys = ON");
-                    }
+        try (PreparedStatement statement = connection.prepareStatement(
+                "PRAGMA table_info(designacao)"
+        );
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                if ("responsavel_id".equals(resultSet.getString("name"))) {
+                    responsavelObrigatorio = resultSet.getInt("notnull") == 1;
+                    break;
                 }
             }
         }
 
-    private static void removerAjudanteConfiguradoNoEstudoBiblico(
-                Connection connection
-        ) throws SQLException {
-            try (PreparedStatement statement = connection.prepareStatement("""
-                    DELETE FROM parte_participacao_necessaria
-                    WHERE tipo_participacao = 'AJUDANTE'
-                      AND parte_id IN (
-                          SELECT id FROM parte
-                          WHERE tipo = 'DIRIGENTE_ESTUDO'
-                      )
-                    """)) {
-                statement.executeUpdate();
+        if (!responsavelObrigatorio) {
+            return;
+        }
+
+        boolean foreignKeysAtivos;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA foreign_keys")) {
+            foreignKeysAtivos = resultSet.next() && resultSet.getInt(1) == 1;
+        }
+
+        if (foreignKeysAtivos) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("PRAGMA foreign_keys = OFF");
             }
+        }
+
+        boolean autoCommitAnterior = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("""
+                    CREATE TABLE designacao_migracao (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        escala_id INTEGER NOT NULL,
+                        parte_id INTEGER NOT NULL,
+                        responsavel_id INTEGER,
+                        ajudante_id INTEGER,
+                        FOREIGN KEY (escala_id) REFERENCES escala(id) ON DELETE CASCADE,
+                        FOREIGN KEY (parte_id) REFERENCES parte(id),
+                        FOREIGN KEY (responsavel_id) REFERENCES pessoa(id),
+                        FOREIGN KEY (ajudante_id) REFERENCES pessoa(id)
+                    )
+                    """);
+            statement.execute("""
+                    INSERT INTO designacao_migracao
+                        (id, escala_id, parte_id, responsavel_id, ajudante_id)
+                    SELECT id, escala_id, parte_id, responsavel_id, ajudante_id
+                    FROM designacao
+                    """);
+            statement.execute("DROP TABLE designacao");
+            statement.execute("ALTER TABLE designacao_migracao RENAME TO designacao");
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(autoCommitAnterior);
+            if (foreignKeysAtivos) {
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute("PRAGMA foreign_keys = ON");
+                }
+            }
+        }
+    }
+
+    private static void removerAjudanteConfiguradoNoEstudoBiblico(
+            Connection connection
+    ) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                DELETE FROM parte_participacao_necessaria
+                WHERE tipo_participacao = 'AJUDANTE'
+                  AND parte_id IN (
+                      SELECT id FROM parte
+                      WHERE tipo = 'DIRIGENTE_ESTUDO'
+                  )
+                """)) {
+            statement.executeUpdate();
+        }
     }
 
 
@@ -509,8 +555,8 @@ public class DatabaseInitializer {
     ) throws SQLException {
 
         String sqlVerificar = """
-        PRAGMA table_info(parte)
-        """;
+                PRAGMA table_info(parte)
+                """;
 
         boolean colunaExiste = false;
 
@@ -540,9 +586,9 @@ public class DatabaseInitializer {
                          connection.createStatement()) {
 
                 statement.execute("""
-                ALTER TABLE parte
-                ADD COLUMN ordem INTEGER NOT NULL DEFAULT 999
-                """);
+                        ALTER TABLE parte
+                        ADD COLUMN ordem INTEGER NOT NULL DEFAULT 999
+                        """);
             }
         }
     }
@@ -561,22 +607,22 @@ public class DatabaseInitializer {
          */
 
         String sqlFixas = """
-        UPDATE parte
-        SET tipo_variacao = 'FIXA'
-        WHERE tipo IN (
-            'PRESIDENTE_REUNIAO',
-            'ORACAO_INICIAL',
-            'DISCURSO_TESOUROS',
-            'JOIAS_ESPIRITUAIS',
-            'LEITURA',
-            'DIRIGENTE_ESTUDO',
-            'ORACAO_FINAL'
-        )
-        AND (
-            tipo_variacao IS NULL
-            OR TRIM(tipo_variacao) = ''
-        )
-        """;
+                UPDATE parte
+                SET tipo_variacao = 'FIXA'
+                WHERE tipo IN (
+                    'PRESIDENTE_REUNIAO',
+                    'ORACAO_INICIAL',
+                    'DISCURSO_TESOUROS',
+                    'JOIAS_ESPIRITUAIS',
+                    'LEITURA',
+                    'DIRIGENTE_ESTUDO',
+                    'ORACAO_FINAL'
+                )
+                AND (
+                    tipo_variacao IS NULL
+                    OR TRIM(tipo_variacao) = ''
+                )
+                """;
 
 
         /*
@@ -586,17 +632,17 @@ public class DatabaseInitializer {
          */
 
         String sqlVariaveis = """
-        UPDATE parte
-        SET tipo_variacao = 'VARIAVEL'
-        WHERE (
-            tipo = 'DEMONSTRACAO'
-            OR tipo = 'O_QUE_VOCE_DIRIA'
-        )
-        AND (
-            tipo_variacao IS NULL
-            OR TRIM(tipo_variacao) = ''
-        )
-        """;
+                UPDATE parte
+                SET tipo_variacao = 'VARIAVEL'
+                WHERE (
+                    tipo = 'DEMONSTRACAO'
+                    OR tipo = 'O_QUE_VOCE_DIRIA'
+                )
+                AND (
+                    tipo_variacao IS NULL
+                    OR TRIM(tipo_variacao) = ''
+                )
+                """;
 
 
         try (
@@ -629,10 +675,10 @@ public class DatabaseInitializer {
     ) throws SQLException {
 
         String sql = """
-        UPDATE parte
-        SET ordem = ?
-        WHERE tipo = ?
-        """;
+                UPDATE parte
+                SET ordem = ?
+                WHERE tipo = ?
+                """;
 
         try (PreparedStatement statement =
                      connection.prepareStatement(sql)) {
@@ -667,81 +713,25 @@ public class DatabaseInitializer {
                     TipoParte.LEITURA
             );
 
-            /*
-             * As partes variáveis do Ministério mantêm
-             * uma ordem padrão entre si.
-             */
-            atualizarOrdemPorNome(
-                    statement,
-                    6,
-                    "Iniciando Conversas"
-            );
-
-            atualizarOrdemPorNome(
-                    statement,
-                    7,
-                    "Cultivando Interesse"
-            );
-
-            atualizarOrdemPorNome(
-                    statement,
-                    9,
-                    "Fazendo Discípulos"
-            );
-
-            atualizarOrdemPorNome(
-                    statement,
-                    10,
-                    "Explicando suas crenças"
-            );
-
-            atualizarOrdem(
-                    statement,
-                    8,
-                    TipoParte.O_QUE_VOCE_DIRIA
-            );
-
-            atualizarOrdem(
-                    statement,
-                    11,
-                    TipoParte.DISCURSO
-            );
-
-            atualizarOrdem(
-                    statement,
-                    12,
-                    TipoParte.PARTE_1
-            );
-
-            atualizarOrdem(
-                    statement,
-                    13,
-                    TipoParte.PARTE_2
-            );
-
-            atualizarOrdem(
-                    statement,
-                    14,
-                    TipoParte.PARTE_3
-            );
-
-            atualizarOrdem(
-                    statement,
-                    15,
-                    TipoParte.NECESSIDADES_LOCAIS
-            );
-
-            atualizarOrdem(
-                    statement,
-                    16,
-                    TipoParte.DIRIGENTE_ESTUDO
-            );
-
-            atualizarOrdem(
-                    statement,
-                    17,
-                    TipoParte.ORACAO_FINAL
-            );
+            /* * Partes do Ministério e as suas variações. * Cada variação possui uma ordem própria. */
+            atualizarOrdemPorNome(statement, 6, "Iniciando Conversas");
+            atualizarOrdemPorNome(statement, 7, "Iniciando Conversas _ De casa em casa");
+            atualizarOrdemPorNome(statement, 8, "Iniciando Conversas _ Testemunho informal");
+            atualizarOrdemPorNome(statement, 9, "Iniciando Conversas _ Testemunho público");
+            atualizarOrdemPorNome(statement, 10, "Cultivando Interesse");
+            atualizarOrdemPorNome(statement, 11, "Cultivando Interesse _ De casa em casa");
+            atualizarOrdemPorNome(statement, 12, "Cultivando Interesse _ Testemunho informal");
+            atualizarOrdemPorNome(statement, 13, "Cultivando Interesse _ Testemunho público");
+            atualizarOrdem(statement, 14, TipoParte.O_QUE_VOCE_DIRIA);
+            atualizarOrdemPorNome(statement, 15, "Fazendo Discípulos");
+            atualizarOrdemPorNome(statement, 16, "Explicando suas crenças");
+            atualizarOrdemPorNome(statement, 17, "Discurso — Ministério");
+            atualizarOrdem(statement, 18, TipoParte.PARTE_1);
+            atualizarOrdem(statement, 19, TipoParte.PARTE_2);
+            atualizarOrdem(statement, 20, TipoParte.PARTE_3);
+            atualizarOrdem(statement, 21, TipoParte.NECESSIDADES_LOCAIS);
+            atualizarOrdem(statement, 22, TipoParte.DIRIGENTE_ESTUDO);
+            atualizarOrdem(statement, 23, TipoParte.ORACAO_FINAL);
         }
     }
 
@@ -750,45 +740,45 @@ public class DatabaseInitializer {
     ) throws SQLException {
 
         String sqlVerificar = """
-
-    SELECT id
-    FROM parte
-    WHERE tipo = ?
-      AND nome = ?
-
-    """;
+                
+                SELECT id
+                FROM parte
+                WHERE tipo = ?
+                  AND nome = ?
+                
+                """;
 
 
         String sqlInserir = """
-
-            INSERT INTO parte (
-                nome,
-                tipo,
-                privilegio_minimo,
-                exige_ajudante,
-                sexo_permitido,
-                quantidade_minima_participantes,
-                gera_formulario,
-                nivel_leitura_minimo,
-                secao,
-                tipo_variacao,
-                possui_tema
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-
-            """;
+                
+                INSERT INTO parte (
+                    nome,
+                    tipo,
+                    privilegio_minimo,
+                    exige_ajudante,
+                    sexo_permitido,
+                    quantidade_minima_participantes,
+                    gera_formulario,
+                    nivel_leitura_minimo,
+                    secao,
+                    tipo_variacao,
+                    possui_tema
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                
+                """;
 
 
         String sqlParticipacao = """
-
-            INSERT OR IGNORE INTO parte_participacao_necessaria (
-                parte_id,
-                tipo_participacao,
-                ordem
-            )
-            VALUES (?, ?, ?)
-
-            """;
+                
+                INSERT OR IGNORE INTO parte_participacao_necessaria (
+                    parte_id,
+                    tipo_participacao,
+                    ordem
+                )
+                VALUES (?, ?, ?)
+                
+                """;
 
 
         try (
@@ -1234,6 +1224,15 @@ public class DatabaseInitializer {
 
                     TipoParticipacao.ORACAO_FINAL
             );
+
+            /* * VARIAÇÕES — INICIANDO CONVERSAS */
+            inserirParte(verificar, inserir, participacao, "Iniciando Conversas _ De casa em casa", TipoParte.DEMONSTRACAO, Privilegio.PUBLICADOR, SexoPermitido.AMBOS, 2, true, true, NivelLeitura.BASICO, SecaoParte.MINISTERIO, TipoVariacaoParte.VARIAVEL, false, TipoParticipacao.RESPONSAVEL, TipoParticipacao.AJUDANTE);
+            inserirParte(verificar, inserir, participacao, "Iniciando Conversas _ Testemunho informal", TipoParte.DEMONSTRACAO, Privilegio.PUBLICADOR, SexoPermitido.AMBOS, 2, true, true, NivelLeitura.BASICO, SecaoParte.MINISTERIO, TipoVariacaoParte.VARIAVEL, false, TipoParticipacao.RESPONSAVEL, TipoParticipacao.AJUDANTE);
+            inserirParte(verificar, inserir, participacao, "Iniciando Conversas _ Testemunho público", TipoParte.DEMONSTRACAO, Privilegio.PUBLICADOR, SexoPermitido.AMBOS, 2, true, true, NivelLeitura.BASICO, SecaoParte.MINISTERIO, TipoVariacaoParte.VARIAVEL, false, TipoParticipacao.RESPONSAVEL, TipoParticipacao.AJUDANTE);
+            /* * VARIAÇÕES — CULTIVANDO INTERESSE */
+            inserirParte(verificar, inserir, participacao, "Cultivando Interesse _ De casa em casa", TipoParte.DEMONSTRACAO, Privilegio.PUBLICADOR, SexoPermitido.AMBOS, 2, true, true, NivelLeitura.BASICO, SecaoParte.MINISTERIO, TipoVariacaoParte.VARIAVEL, false, TipoParticipacao.RESPONSAVEL, TipoParticipacao.AJUDANTE);
+            inserirParte(verificar, inserir, participacao, "Cultivando Interesse _ Testemunho informal", TipoParte.DEMONSTRACAO, Privilegio.PUBLICADOR, SexoPermitido.AMBOS, 2, true, true, NivelLeitura.BASICO, SecaoParte.MINISTERIO, TipoVariacaoParte.VARIAVEL, false, TipoParticipacao.RESPONSAVEL, TipoParticipacao.AJUDANTE);
+            inserirParte(verificar, inserir, participacao, "Cultivando Interesse _ Testemunho público", TipoParte.DEMONSTRACAO, Privilegio.PUBLICADOR, SexoPermitido.AMBOS, 2, true, true, NivelLeitura.BASICO, SecaoParte.MINISTERIO, TipoVariacaoParte.VARIAVEL, false, TipoParticipacao.RESPONSAVEL, TipoParticipacao.AJUDANTE);
         }
     }
 
@@ -1424,33 +1423,33 @@ public class DatabaseInitializer {
     ) throws SQLException {
 
         String sqlVerificar = """
-
-            SELECT COUNT(*)
-            FROM pessoa
-            WHERE nome = ?
-
-            """;
+                
+                SELECT COUNT(*)
+                FROM pessoa
+                WHERE nome = ?
+                
+                """;
 
 
         String sqlInserir = """
-
-            INSERT INTO pessoa (
-                nome,
-                sexo,
-                ativo,
-                pode_ser_responsavel,
-                pode_ser_ajudante,
-                pode_fazer_leitura,
-                pode_fazer_discurso,
-                pode_fazer_oracao,
-                pode_ser_presidente,
-                pode_ser_dirigente,
-                privilegio,
-                nivel_leitura
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-
-            """;
+                
+                INSERT INTO pessoa (
+                    nome,
+                    sexo,
+                    ativo,
+                    pode_ser_responsavel,
+                    pode_ser_ajudante,
+                    pode_fazer_leitura,
+                    pode_fazer_discurso,
+                    pode_fazer_oracao,
+                    pode_ser_presidente,
+                    pode_ser_dirigente,
+                    privilegio,
+                    nivel_leitura
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                
+                """;
 
 
         try (
@@ -2004,6 +2003,7 @@ public class DatabaseInitializer {
 
         inserir.executeUpdate();
     }
+
     private static void atualizarOrdem(
             PreparedStatement statement,
             int ordem,
@@ -2022,10 +2022,10 @@ public class DatabaseInitializer {
     ) throws SQLException {
 
         String sql = """
-        UPDATE parte
-        SET ordem = ?
-        WHERE nome = ?
-        """;
+                UPDATE parte
+                SET ordem = ?
+                WHERE nome = ?
+                """;
 
         try (PreparedStatement update =
                      statement.getConnection()

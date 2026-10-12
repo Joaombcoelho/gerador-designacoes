@@ -300,4 +300,66 @@ public class PessoaDAOTest extends BaseDAOTest {
                 excecao.getMessage()
         );
     }
+
+    @Test
+    void deveSalvarBuscarEAtualizarPermissoesDeSalas() {
+
+        PessoaDAO pessoaDAO = new PessoaDAO();
+
+        Pessoa pessoa = new Pessoa(
+                "Teste Permissões de Salas",
+                Sexo.MASCULINO,
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                Privilegio.BATIZADO,
+                NivelLeitura.BASICO,
+                true,
+                false,
+                true
+        );
+
+        pessoaDAO.salvar(pessoa);
+
+        Pessoa salva = pessoaDAO.buscarPorId(pessoa.getId())
+                .orElseThrow();
+
+        assertTrue(salva.podeParticiparSalaPrincipal());
+        assertFalse(salva.podeParticiparSalaB());
+        assertTrue(salva.podeParticiparSalaC());
+
+        Pessoa atualizada = new Pessoa(
+                "Teste Permissões de Salas",
+                Sexo.MASCULINO,
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                Privilegio.BATIZADO,
+                NivelLeitura.BASICO,
+                false,
+                true,
+                false
+        );
+
+        atualizada.setId(pessoa.getId());
+
+        pessoaDAO.atualizar(atualizada);
+
+        Pessoa recuperada = pessoaDAO.buscarPorId(pessoa.getId())
+                .orElseThrow();
+
+        assertFalse(recuperada.podeParticiparSalaPrincipal());
+        assertTrue(recuperada.podeParticiparSalaB());
+        assertFalse(recuperada.podeParticiparSalaC());
+    }
 }

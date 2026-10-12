@@ -21,6 +21,9 @@ public class Pessoa {
 
     private final Privilegio privilegio;
     private final NivelLeitura nivelLeitura;
+    private final boolean podeParticiparSalaPrincipal;
+    private final boolean podeParticiparSalaB;
+    private final boolean podeParticiparSalaC;
 
 
     /**
@@ -55,78 +58,91 @@ public class Pessoa {
     }
 
 
+
     /**
-     * Construtor completo.
+     * Construtor completo compatível com o código existente.
+     * Pessoas já cadastradas continuam habilitadas para as três salas
+     * até que as permissões sejam configuradas no cadastro.
      */
     public Pessoa(
             String nome,
             Sexo sexo,
             boolean ativo,
-
             boolean podeSerResponsavel,
             boolean podeSerAjudante,
-
             boolean podeFazerLeitura,
             boolean podeFazerDiscurso,
             boolean podeFazerOracao,
-
             boolean podeSerPresidente,
             boolean podeSerDirigente,
-
             Privilegio privilegio,
             NivelLeitura nivelLeitura
     ) {
-
-        this.nome = Objects.requireNonNull(
+        this(
                 nome,
-                "nome não pode ser nulo"
-        );
-
-        this.sexo = Objects.requireNonNull(
                 sexo,
-                "sexo não pode ser nulo"
+                ativo,
+                podeSerResponsavel,
+                podeSerAjudante,
+                podeFazerLeitura,
+                podeFazerDiscurso,
+                podeFazerOracao,
+                podeSerPresidente,
+                podeSerDirigente,
+                privilegio,
+                nivelLeitura,
+                true,
+                true,
+                true
         );
-
-
-        this.ativo = ativo;
-
-        this.podeSerResponsavel =
-                podeSerResponsavel;
-
-        this.podeSerAjudante =
-                podeSerAjudante;
-
-        this.podeFazerLeitura =
-                podeFazerLeitura;
-
-        this.podeFazerDiscurso =
-                podeFazerDiscurso;
-
-        this.podeFazerOracao =
-                podeFazerOracao;
-
-
-        this.podeSerPresidente =
-                podeSerPresidente;
-
-        this.podeSerDirigente =
-                podeSerDirigente;
-
-
-        this.privilegio =
-                Objects.requireNonNull(
-                        privilegio,
-                        "privilégio não pode ser nulo"
-                );
-
-
-        this.nivelLeitura =
-                Objects.requireNonNull(
-                        nivelLeitura,
-                        "nível de leitura não pode ser nulo"
-                );
     }
 
+    /**
+     * Construtor completo com permissões específicas por sala.
+     */
+    public Pessoa(
+            String nome,
+            Sexo sexo,
+            boolean ativo,
+            boolean podeSerResponsavel,
+            boolean podeSerAjudante,
+            boolean podeFazerLeitura,
+            boolean podeFazerDiscurso,
+            boolean podeFazerOracao,
+            boolean podeSerPresidente,
+            boolean podeSerDirigente,
+            Privilegio privilegio,
+            NivelLeitura nivelLeitura,
+            boolean podeParticiparSalaPrincipal,
+            boolean podeParticiparSalaB,
+            boolean podeParticiparSalaC
+    ) {
+        this.nome = Objects.requireNonNull(nome, "nome não pode ser nulo");
+        this.sexo = Objects.requireNonNull(sexo, "sexo não pode ser nulo");
+
+        this.ativo = ativo;
+        this.podeSerResponsavel = podeSerResponsavel;
+        this.podeSerAjudante = podeSerAjudante;
+        this.podeFazerLeitura = podeFazerLeitura;
+        this.podeFazerDiscurso = podeFazerDiscurso;
+        this.podeFazerOracao = podeFazerOracao;
+        this.podeSerPresidente = podeSerPresidente;
+        this.podeSerDirigente = podeSerDirigente;
+
+        this.privilegio = Objects.requireNonNull(
+                privilegio,
+                "privilégio não pode ser nulo"
+        );
+
+        this.nivelLeitura = Objects.requireNonNull(
+                nivelLeitura,
+                "nível de leitura não pode ser nulo"
+        );
+
+        this.podeParticiparSalaPrincipal = podeParticiparSalaPrincipal;
+        this.podeParticiparSalaB = podeParticiparSalaB;
+        this.podeParticiparSalaC = podeParticiparSalaC;
+    }
 
 
     public Integer getId() {
@@ -198,7 +214,17 @@ public class Pessoa {
         return nivelLeitura;
     }
 
+    public boolean podeParticiparSalaPrincipal() {
+        return podeParticiparSalaPrincipal;
+    }
 
+    public boolean podeParticiparSalaB() {
+        return podeParticiparSalaB;
+    }
+
+    public boolean podeParticiparSalaC() {
+        return podeParticiparSalaC;
+    }
 
     public boolean podeExercer(
             TipoParticipacao tipo

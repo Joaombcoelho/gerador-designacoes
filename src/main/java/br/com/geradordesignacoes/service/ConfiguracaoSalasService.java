@@ -20,6 +20,19 @@ public class ConfiguracaoSalasService {
     }
 
     public void salvar(ConfiguracaoSalas configuracao) {
-        dao.salvar(configuracao);
+        if (configuracao == null) {
+            throw new IllegalArgumentException(
+                    "A configuração das salas não pode ser nula."
+            );
+        }
+
+        ConfiguracaoSalas configuracaoValida = configuracao;
+
+        if (!configuracao.salaBHabilitada()
+                && configuracao.salaCHabilitada()) {
+            configuracaoValida = new ConfiguracaoSalas(false, false);
+        }
+
+        dao.salvar(configuracaoValida);
     }
 }

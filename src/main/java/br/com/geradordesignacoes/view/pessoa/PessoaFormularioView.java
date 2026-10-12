@@ -26,6 +26,9 @@ public class PessoaFormularioView {
     private final CheckBox checkPresidente;
     private final CheckBox checkDirigente;
     private final CheckBox checkAtivo;
+    private final CheckBox checkSalaPrincipal;
+    private final CheckBox checkSalaB;
+    private final CheckBox checkSalaC;
 
     private final Consumer<Pessoa> aoSalvar;
     private final Consumer<Pessoa> aoAtualizar;
@@ -83,6 +86,14 @@ public class PessoaFormularioView {
 
         checkAtivo = new CheckBox("Pessoa ativa");
         checkAtivo.setSelected(true);
+        checkSalaPrincipal = new CheckBox("Sala Principal");
+        checkSalaPrincipal.setSelected(true);
+
+        checkSalaB = new CheckBox("Sala B");
+        checkSalaB.setSelected(true);
+
+        checkSalaC = new CheckBox("Sala C");
+        checkSalaC.setSelected(true);
 
         criarLayout();
 
@@ -160,11 +171,31 @@ public class PessoaFormularioView {
 
         VBox status = criarCartao("Status do cadastro");
         status.getChildren().add(checkAtivo);
+        VBox salas = criarCartao("Permissões de participação");
+
+        Label descricaoSalas = new Label(
+                "Selecione em quais salas esta pessoa poderá receber designações."
+        );
+        descricaoSalas.getStyleClass().add("page-subtitle");
+        descricaoSalas.setWrapText(true);
+
+        HBox opcoesSalas = new HBox(
+                24,
+                checkSalaPrincipal,
+                checkSalaB,
+                checkSalaC
+        );
+
+        salas.getChildren().addAll(
+                descricaoSalas,
+                opcoesSalas
+        );
 
         VBox conteudo = new VBox(
                 18,
                 dadosPessoais,
                 funcoes,
+                salas,
                 status
         );
 
@@ -294,7 +325,10 @@ public class PessoaFormularioView {
                 checkPresidente.isSelected(),
                 checkDirigente.isSelected(),
                 comboPrivilegio.getValue(),
-                comboNivelLeitura.getValue()
+                comboNivelLeitura.getValue(),
+                checkSalaPrincipal.isSelected(),
+                checkSalaB.isSelected(),
+                checkSalaC.isSelected()
         );
 
         if (pessoaEdicao != null) {
@@ -324,6 +358,18 @@ public class PessoaFormularioView {
         checkDirigente.setSelected(pessoaEdicao.podeSerDirigente());
 
         atualizarPermissoesSexo();
+
+        checkSalaPrincipal.setSelected(
+                pessoaEdicao.podeParticiparSalaPrincipal()
+        );
+
+        checkSalaB.setSelected(
+                pessoaEdicao.podeParticiparSalaB()
+        );
+
+        checkSalaC.setSelected(
+                pessoaEdicao.podeParticiparSalaC()
+        );
     }
 
     private void mostrarMensagem(String mensagem) {
