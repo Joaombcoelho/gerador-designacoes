@@ -15,13 +15,15 @@ public class RegrasSalasAuxiliaresService {
     private final RegrasService regrasService = new RegrasService();
 
 
+
     public boolean parteElegivel(Parte parte) {
         if (parte == null || parte.getTipo() == null) {
             return false;
         }
 
         return parte.getTipo() == TipoParte.LEITURA
-                || parte.getTipo() == TipoParte.DEMONSTRACAO;
+                || parte.getTipo() == TipoParte.DEMONSTRACAO
+                || parte.getTipo() == TipoParte.DISCURSO;
     }
 
     public boolean podeParticipar(
@@ -83,6 +85,38 @@ public class RegrasSalasAuxiliaresService {
         ) || Objects.equals(
                 pessoa.getPrivilegio(),
                 Privilegio.SERVO_MINISTERIAL
+        );
+    }
+
+    public boolean podeExercerParticipacaoNaSala(
+            Pessoa pessoa,
+            Parte parte,
+            SalaAuxiliar sala,
+            TipoParticipacao tipo
+    ) {
+        if (pessoa == null
+                || parte == null
+                || sala == null
+                || tipo == null
+                || !pessoa.isAtivo()
+                || !parteElegivel(parte)
+                || !temPermissaoParaSala(pessoa, sala)) {
+            return false;
+        }
+
+        if (tipo == TipoParticipacao.RESPONSAVEL
+                && !privilegioPermiteSerResponsavel(pessoa)) {
+            return false;
+        }
+
+        if (!parte.necessitaParticipacao(tipo)) {
+            return false;
+        }
+
+        return regrasService.podeExercerParticipacao(
+                pessoa,
+                parte,
+                tipo
         );
     }
 }

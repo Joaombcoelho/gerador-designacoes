@@ -32,7 +32,7 @@ class RegrasSalasAuxiliaresServiceTest {
     @Test
     void devePermitirParteDaSecaoMinisterio() {
         Parte parte = criarParte(
-                TipoParte.INICIANDO_CONVERSAS,
+                TipoParte.DEMONSTRACAO,
                 SecaoParte.MINISTERIO,
                 TipoParticipacao.RESPONSAVEL
         );
@@ -257,7 +257,7 @@ class RegrasSalasAuxiliaresServiceTest {
         );
 
         Parte parte = criarParte(
-                TipoParte.INICIANDO_CONVERSAS,
+                TipoParte.DEMONSTRACAO,
                 SecaoParte.MINISTERIO,
                 TipoParticipacao.RESPONSAVEL
         );
@@ -267,6 +267,45 @@ class RegrasSalasAuxiliaresServiceTest {
                 "Um ancião qualificado e autorizado deve poder ser responsável"
         );
     }
+
+    @Test
+    void devePermitirDiscursoDaSecaoMinisterio() {
+        Parte parte = criarParte(
+                TipoParte.DISCURSO,
+                SecaoParte.MINISTERIO,
+                TipoParticipacao.ORADOR
+        );
+
+        assertTrue(regras.parteElegivel(parte));
+    }
+
+    @Test
+    void naoDevePermitirDiscursoDaSecaoTesouros() {
+        Parte parte = criarParte(
+                TipoParte.DISCURSO_TESOUROS,
+                SecaoParte.TESOUROS_DA_PALAVRA_DE_DEUS,
+                TipoParticipacao.ORADOR
+        );
+
+        assertFalse(regras.parteElegivel(parte));
+    }
+
+    @Test
+    void devePermitirDemonstracoesDoMinisterio() {
+        for (TipoParte tipo : List.of(TipoParte.DEMONSTRACAO)) {
+            Parte parte = criarParte(
+                    tipo,
+                    SecaoParte.MINISTERIO,
+                    TipoParticipacao.RESPONSAVEL
+            );
+
+            assertTrue(
+                    regras.parteElegivel(parte),
+                    "O tipo deveria ser elegível: " + tipo
+            );
+        }
+    }
+
     private Pessoa criarPessoa(
             boolean ativa,
             boolean salaB,
