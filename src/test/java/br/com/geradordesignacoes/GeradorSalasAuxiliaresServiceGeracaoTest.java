@@ -401,8 +401,6 @@ class GeradorSalasAuxiliaresServiceGeracaoTest {
                 false
         );
 
-        System.out.println("Designações: " + resultado.designacoes());
-        System.out.println("Erros: " + resultado.erros());
 
         assertEquals(1, resultado.designacoes().size());
         assertEquals(SalaDesignacao.B, resultado.designacoes().getFirst().sala());
@@ -426,8 +424,7 @@ class GeradorSalasAuxiliaresServiceGeracaoTest {
                 false,
                 true
         );
-        System.out.println("Designações: " + resultado.designacoes());
-        System.out.println("Erros: " + resultado.erros());;
+
 
         assertEquals(1, resultado.designacoes().size());
         assertEquals(SalaDesignacao.C, resultado.designacoes().getFirst().sala());
