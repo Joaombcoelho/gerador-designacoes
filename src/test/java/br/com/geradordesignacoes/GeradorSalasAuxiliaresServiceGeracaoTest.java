@@ -5,7 +5,6 @@ import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.ResultadoGeracaoSalasAuxiliares;
-import br.com.geradordesignacoes.model.SalaAuxiliar;
 import br.com.geradordesignacoes.model.SalaDesignacao;
 import br.com.geradordesignacoes.model.Sexo;
 import br.com.geradordesignacoes.model.SexoPermitido;
@@ -518,6 +517,73 @@ class GeradorSalasAuxiliaresServiceGeracaoTest {
         assertTrue(resultado.possuiErros());
         assertTrue(resultado.erros().stream()
                 .anyMatch(erro -> erro.contains("orador")));
+    }
+
+    @Test
+    void deveAlternarLeitoresEntrePartesElegiveis() {
+        Parte leitura1 = parteLeitura("Leitura 1");
+        Parte leitura2 = parteLeitura("Leitura 2");
+        Parte leitura3 = parteLeitura("Leitura 3");
+
+        Pessoa pessoa1 = leitor("Leitor 1");
+        Pessoa pessoa2 = leitor("Leitor 2");
+
+        ResultadoGeracaoSalasAuxiliares resultado = service.gerar(
+                data,
+                List.of(leitura1, leitura2, leitura3),
+                List.of(pessoa1, pessoa2),
+                List.of(),
+                true,
+                false
+        );
+
+        assertEquals(3, resultado.designacoes().size());
+        assertTrue(resultado.erros().isEmpty());
+
+        assertSame(pessoa1, resultado.designacoes().get(0).responsavel());
+        assertSame(pessoa2, resultado.designacoes().get(1).responsavel());
+        assertSame(pessoa1, resultado.designacoes().get(2).responsavel());
+    }
+
+    @Test
+    void deveAlternarResponsaveisEmDemonstracoes() {
+        Parte demonstracao1 = parteDemonstracao("Demonstração 1");
+        Parte demonstracao2 = parteDemonstracao("Demonstração 2");
+
+        Pessoa responsavel1 = responsavel("Responsável 1");
+        Pessoa responsavel2 = responsavel("Responsável 2");
+        Pessoa ajudante1 = ajudante("Ajudante 1");
+        Pessoa ajudante2 = ajudante("Ajudante 2");
+
+        ResultadoGeracaoSalasAuxiliares resultado = service.gerar(
+                data,
+                List.of(demonstracao1, demonstracao2),
+                List.of(responsavel1, responsavel2, ajudante1, ajudante2),
+                List.of(),
+                true,
+                false
+        );
+
+        assertEquals(2, resultado.designacoes().size());
+        assertTrue(resultado.erros().isEmpty());
+
+        assertSame(
+                responsavel1,
+                resultado.designacoes().get(0).responsavel()
+        );
+        assertSame(
+                responsavel2,
+                resultado.designacoes().get(1).responsavel()
+        );
+
+        assertNotSame(
+                resultado.designacoes().get(0).responsavel(),
+                resultado.designacoes().get(0).ajudante()
+        );
+        assertNotSame(
+                resultado.designacoes().get(1).responsavel(),
+                resultado.designacoes().get(1).ajudante()
+        );
     }
 
     private Parte criarParteDiscurso(String nome) {

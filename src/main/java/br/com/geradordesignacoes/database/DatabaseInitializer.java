@@ -115,6 +115,9 @@ public class DatabaseInitializer {
                 parte_id INTEGER NOT NULL,
                 responsavel_id INTEGER,
                 ajudante_id INTEGER,
+                sala TEXT NOT NULL DEFAULT 'PRINCIPAL'
+                    CHECK (sala IN ('PRINCIPAL', 'B', 'C')),
+                
             
                 FOREIGN KEY (escala_id)
                     REFERENCES escala(id)
@@ -281,7 +284,7 @@ public class DatabaseInitializer {
                     CREATE_TABLE_DESIGNACAO
             );
             migrarResponsavelDesignacaoNullable(connection);
-
+            adicionarColunaSalaDesignacao(connection);
 
             /*
              * ----------------------------------------------------
@@ -344,7 +347,31 @@ public class DatabaseInitializer {
         }
 
     }
+    private static void adicionarColunaSalaDesignacao(
+            Connection connection
+    ) throws SQLException {
 
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(
+                        "PRAGMA table_info(designacao)"
+                )
+        ) {
+            while (resultSet.next()) {
+                if ("sala".equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("""
+                ALTER TABLE designacao
+                ADD COLUMN sala TEXT NOT NULL DEFAULT 'PRINCIPAL'
+                CHECK (sala IN ('PRINCIPAL', 'B', 'C'))
+                """);
+        }
+    }
     private static void adicionarColunasSalasProgramacaoSemana(
             Connection connection
     ) throws SQLException {

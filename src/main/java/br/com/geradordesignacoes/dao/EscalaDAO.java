@@ -1,10 +1,7 @@
 package br.com.geradordesignacoes.dao;
 
 import br.com.geradordesignacoes.database.ConnectionFactory;
-import br.com.geradordesignacoes.model.Designacao;
-import br.com.geradordesignacoes.model.Escala;
-import br.com.geradordesignacoes.model.Parte;
-import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -54,7 +51,7 @@ public class EscalaDAO {
                     }
                 }
 
-                /* * Se já existe uma escala para a data, * reutiliza o ID e atualiza a escala. */
+                /* * Se já existe uma escala para a data, * reutiliza o ‘ID’ e atualiza a escala. */
                 if (escalaExistenteId != null) {
                     escala.setId(escalaExistenteId);
                     String atualizarSql = """ 
@@ -446,11 +443,28 @@ public class EscalaDAO {
         }
     }
 
+
     public void adicionarDesignacao(
             Integer escalaId,
             Integer parteId,
             Integer responsavelId,
             Integer ajudanteId
+    ) {
+        adicionarDesignacao(
+                escalaId,
+                parteId,
+                responsavelId,
+                ajudanteId,
+                SalaDesignacao.PRINCIPAL
+        );
+    }
+
+    public void adicionarDesignacao(
+            Integer escalaId,
+            Integer parteId,
+            Integer responsavelId,
+            Integer ajudanteId,
+            SalaDesignacao sala
     ) {
 
         if (escalaId == null) {
@@ -465,15 +479,22 @@ public class EscalaDAO {
             );
         }
 
+        if (sala == null) {
+            throw new IllegalArgumentException(
+                    "A sala não pode ser nula."
+            );
+        }
+
         String sql = """
-                INSERT INTO designacao (
-                    escala_id,
-                    parte_id,
-                    responsavel_id,
-                    ajudante_id
-                )
-                VALUES (?, ?, ?, ?)
-                """;
+            INSERT INTO designacao (
+                escala_id,
+                parte_id,
+                responsavel_id,
+                ajudante_id,
+                sala
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """;
 
         try (
                 Connection connection =
@@ -483,15 +504,8 @@ public class EscalaDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setInt(
-                    1,
-                    escalaId
-            );
-
-            statement.setInt(
-                    2,
-                    parteId
-            );
+            statement.setInt(1, escalaId);
+            statement.setInt(2, parteId);
 
             if (responsavelId == null) {
                 statement.setNull(3, java.sql.Types.INTEGER);
@@ -500,32 +514,22 @@ public class EscalaDAO {
             }
 
             if (ajudanteId == null) {
-
-                statement.setNull(
-                        4,
-                        java.sql.Types.INTEGER
-                );
-
+                statement.setNull(4, java.sql.Types.INTEGER);
             } else {
-
-                statement.setInt(
-                        4,
-                        ajudanteId
-                );
+                statement.setInt(4, ajudanteId);
             }
 
-            int linhasAfetadas =
-                    statement.executeUpdate();
+            statement.setString(5, sala.name());
+
+            int linhasAfetadas = statement.executeUpdate();
 
             if (linhasAfetadas != 1) {
-
                 throw new RuntimeException(
                         "Não foi possível adicionar a designação."
                 );
             }
 
         } catch (SQLException e) {
-
             throw new RuntimeException(
                     "Erro ao adicionar designação.",
                     e
@@ -627,57 +631,32 @@ public class EscalaDAO {
         }
     }
 
-    private void salvarDesignacoes(
-            Connection connection,
-            Escala escala
-    ) throws SQLException {
-
-        String sql = """
-                INSERT INTO designacao (
-                    escala_id,
-                    parte_id,
-                    responsavel_id,
-                    ajudante_id
-                )
-                VALUES (?, ?, ?, ?)
-                """;
-
-        try (PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
-
+    private void salvarDesignacoes(Connection connection, Escala escala) throws SQLException {
+        String sql =""" 
+            INSERT INTO designacao ( 
+            escala_id, 
+            parte_id, 
+            responsavel_id, 
+            ajudante_id, 
+            sala 
+            ) 
+            VALUES (?, ?, ?, ?, ?)
+            """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
             for (Designacao designacao : escala.getDesignacoes()) {
-
-                statement.setInt(
-                        1,
-                        escala.getId()
-                );
-
-                statement.setInt(
-                        2,
-                        designacao.parte().getId()
-                );
-
+                statement.setInt(1, escala.getId());
+                statement.setInt(2, designacao.parte().getId());
                 if (designacao.responsavel() == null) {
                     statement.setNull(3, java.sql.Types.INTEGER);
                 } else {
                     statement.setInt(3, designacao.responsavel().getId());
                 }
-
                 if (designacao.ajudante() == null) {
-
-                    statement.setNull(
-                            4,
-                            java.sql.Types.INTEGER
-                    );
-
+                    statement.setNull(4, java.sql.Types.INTEGER);
                 } else {
-
-                    statement.setInt(
-                            4,
-                            designacao.ajudante().getId()
-                    );
+                    statement.setInt(4, designacao.ajudante().getId());
                 }
-
+                statement.setString(5, designacao.sala().name());
                 statement.executeUpdate();
             }
         }
@@ -690,27 +669,29 @@ public class EscalaDAO {
             LocalDate data
     ) throws SQLException {
 
+
         String sql = """
-            SELECT
-                d.id,
-                d.parte_id,
-                d.responsavel_id,
-                d.ajudante_id
-            FROM designacao d
-            LEFT JOIN programacao_semana ps
-                ON ps.data = ?
-            LEFT JOIN programacao_parte pp
-                ON pp.programacao_semana_id = ps.id
-               AND pp.parte_id = d.parte_id
-            WHERE d.escala_id = ?
-            ORDER BY
-                CASE
-                    WHEN pp.ordem IS NULL THEN 1
-                    ELSE 0
-                END,
-                pp.ordem,
-                d.id
-            """;
+        SELECT
+            d.id,
+            d.parte_id,
+            d.responsavel_id,
+            d.ajudante_id,
+            d.sala
+        FROM designacao d
+        LEFT JOIN programacao_semana ps
+            ON ps.data = ?
+        LEFT JOIN programacao_parte pp
+            ON pp.programacao_semana_id = ps.id
+           AND pp.parte_id = d.parte_id
+        WHERE d.escala_id = ?
+        ORDER BY
+            CASE
+                WHEN pp.ordem IS NULL THEN 1
+                ELSE 0
+            END,
+            pp.ordem,
+            d.id
+        """;
 
         List<Designacao> designacoes = new ArrayList<>();
 
@@ -780,7 +761,8 @@ public class EscalaDAO {
                                     data,
                                     parte,
                                     responsavel,
-                                    ajudante
+                                    ajudante,
+                                    SalaDesignacao.valueOf(resultSet.getString("sala"))
                             )
                     );
                 }
@@ -802,7 +784,8 @@ public class EscalaDAO {
                     d.parte_id,
                     d.responsavel_id,
                     d.ajudante_id,
-                    e.data
+                    e.data, 
+                    d.sala
                 FROM designacao d
                 JOIN escala e
                     ON e.id = d.escala_id
@@ -874,7 +857,8 @@ public class EscalaDAO {
                         ),
                         parte,
                         responsavel,
-                        ajudante
+                        ajudante,
+                        SalaDesignacao.valueOf(resultSet.getString("sala"))
                 );
             }
         }

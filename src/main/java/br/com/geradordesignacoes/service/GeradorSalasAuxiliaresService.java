@@ -2,7 +2,8 @@
 package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.model.*;
-
+import java.util.EnumMap;
+import java.util.Map;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Objects;
 
 /**
  * Gera designações exclusivamente para as salas auxiliares.
- *
  * Não altera nem regenera as designações da Sala Principal.
  */
 public class GeradorSalasAuxiliaresService {
@@ -109,6 +109,12 @@ public class GeradorSalasAuxiliaresService {
         if (!salaBHabilitada && !salaCHabilitada) {
             return new ResultadoGeracaoSalasAuxiliares(geradas, erros);
         }
+        Map<TipoParticipacao, Integer> cursores =
+                new EnumMap<>(TipoParticipacao.class);
+
+        for (TipoParticipacao tipo : TipoParticipacao.values()) {
+            cursores.put(tipo, 0);
+        }
 
         List<Parte> partesElegiveis = filtrarPartesElegiveis(partes);
 
@@ -116,14 +122,14 @@ public class GeradorSalasAuxiliaresService {
             if (salaBHabilitada) {
                 gerarParaSala(
                         data, parte, pessoas, designacoesPrincipais,
-                        geradas, SalaAuxiliar.B, erros
+                        geradas, SalaAuxiliar.B, cursores, erros
                 );
             }
 
             if (salaCHabilitada) {
                 gerarParaSala(
                         data, parte, pessoas, designacoesPrincipais,
-                        geradas, SalaAuxiliar.C, erros
+                        geradas, SalaAuxiliar.C, cursores, erros
                 );
             }
         }
@@ -138,6 +144,7 @@ public class GeradorSalasAuxiliaresService {
             List<Designacao> designacoesPrincipais,
             List<Designacao> geradas,
             SalaAuxiliar sala,
+            Map<TipoParticipacao, Integer> cursores,
             List<String> erros
     ) {
         List<Pessoa> bloqueadas = new ArrayList<>();
@@ -154,7 +161,7 @@ public class GeradorSalasAuxiliaresService {
         if (parte.getTipo() == TipoParte.LEITURA) {
             Pessoa leitor = selecionarCandidato(
                     pessoas, bloqueadas, parte, sala,
-                    TipoParticipacao.LEITOR
+                    TipoParticipacao.LEITOR, cursores
             );
 
             if (leitor == null) {
@@ -177,7 +184,8 @@ public class GeradorSalasAuxiliaresService {
                     bloqueadas,
                     parte,
                     sala,
-                    TipoParticipacao.ORADOR
+                    TipoParticipacao.ORADOR,
+                    cursores
             );
 
             if (orador == null) {
@@ -204,7 +212,7 @@ public class GeradorSalasAuxiliaresService {
         if (parte.getTipo() == TipoParte.DEMONSTRACAO) {
             Pessoa responsavel = selecionarCandidato(
                     pessoas, bloqueadas, parte, sala,
-                    TipoParticipacao.RESPONSAVEL
+                    TipoParticipacao.RESPONSAVEL, cursores
             );
 
             if (responsavel == null) {
@@ -219,7 +227,7 @@ public class GeradorSalasAuxiliaresService {
 
             Pessoa ajudante = selecionarCandidato(
                     pessoas, bloqueadas, parte, sala,
-                    TipoParticipacao.AJUDANTE
+                    TipoParticipacao.AJUDANTE, cursores
             );
 
             if (ajudante == null) {
@@ -243,13 +251,49 @@ public class GeradorSalasAuxiliaresService {
             List<Pessoa> bloqueadas,
             Parte parte,
             SalaAuxiliar sala,
-            TipoParticipacao participacao
+            TipoParticipacao participacao,
+            Map<TipoParticipacao, Integer> cursores
     ) {
-        return filtrarCandidatos(pessoas, parte, sala, participacao)
-                .stream()
-                .filter(pessoa -> !bloqueadas.contains(pessoa))
-                .findFirst()
-                .orElse(null);
+        if (pessoas.isEmpty()) {
+            return null;
+        }
+
+        List<Pessoa> candidatos = filtrarCandidatos(
+                pessoas,
+                parte,
+                sala,
+                participacao
+        );
+
+        int inicio = Math.floorMod(
+                cursores.getOrDefault(participacao, 0),
+                pessoas.size()
+        );
+
+        for (int deslocamento = 0;
+             deslocamento < pessoas.size();
+             deslocamento++) {
+
+            int indice = (inicio + deslocamento) % pessoas.size();
+            Pessoa candidato = pessoas.get(indice);
+
+            if (candidato == null
+                    || !candidatos.contains(candidato)
+                    || bloqueadas.contains(candidato)) {
+                continue;
+            }
+
+            // A próxima busca desta função começa após
+            // a posição do candidato efetivamente selecionado.
+            cursores.put(
+                    participacao,
+                    (indice + 1) % pessoas.size()
+            );
+
+            return candidato;
+        }
+
+        return null;
     }
 
     private void adicionarParticipantesDaParte(
