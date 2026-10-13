@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -661,5 +663,65 @@ class EscalaDAOTest extends BaseDAOTest {
         );
     }
 
+
+    @Test
+    void deveSalvarERecuperarDesignacoesDeTodasAsSalas() {
+
+        Pessoa pessoa = criarPessoa();
+        Parte parte = criarParte();
+        LocalDate data = LocalDate.of(2026, 10, 14);
+
+        Designacao principal = new Designacao(
+                data,
+                parte,
+                pessoa,
+                null,
+                SalaDesignacao.PRINCIPAL
+        );
+
+        Designacao salaB = new Designacao(
+                data,
+                parte,
+                pessoa,
+                null,
+                SalaDesignacao.B
+        );
+
+        Designacao salaC = new Designacao(
+                data,
+                parte,
+                pessoa,
+                null,
+                SalaDesignacao.C
+        );
+
+        Escala escala = escalaDAO.salvar(
+                new Escala(
+                        data,
+                        List.of(principal, salaB, salaC)
+                )
+        );
+
+        Escala recuperada = escalaDAO.buscarPorId(
+                escala.getId()
+        ).orElseThrow();
+
+        Set<SalaDesignacao> salasRecuperadas =
+                recuperada.getDesignacoes()
+                        .stream()
+                        .map(Designacao::sala)
+                        .collect(Collectors.toSet());
+
+        assertEquals(
+                Set.of(
+                        SalaDesignacao.PRINCIPAL,
+                        SalaDesignacao.B,
+                        SalaDesignacao.C
+                ),
+                salasRecuperadas
+        );
+
+        assertEquals(3, recuperada.getDesignacoes().size());
+    }
 
 }

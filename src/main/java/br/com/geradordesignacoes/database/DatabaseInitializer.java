@@ -485,7 +485,7 @@ public class DatabaseInitializer {
         }
     }
 
-    private static void migrarResponsavelDesignacaoNullable(
+    static void migrarResponsavelDesignacaoNullable(
             Connection connection
     ) throws SQLException {
 
