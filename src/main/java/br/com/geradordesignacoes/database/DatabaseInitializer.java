@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.database;
 import br.com.geradordesignacoes.model.*;
 
 import java.sql.*;
+import java.util.List;
 
 public class DatabaseInitializer {
 
@@ -262,6 +263,8 @@ public class DatabaseInitializer {
                     CREATE_TABLE_HISTORICO_DESIGNACOES
             );
 
+            migrarHistoricoDesignacoesSala(connection);
+
 
             /*
              * ----------------------------------------------------
@@ -372,6 +375,7 @@ public class DatabaseInitializer {
                 """);
         }
     }
+
     private static void adicionarColunasSalasProgramacaoSemana(
             Connection connection
     ) throws SQLException {
@@ -2113,6 +2117,169 @@ public class DatabaseInitializer {
             update.setInt(1, ordem);
             update.setString(2, nome);
             update.executeUpdate();
+        }
+    }
+
+    static void migrarHistoricoDesignacoesSala(
+            Connection connection
+    ) throws SQLException {
+
+        boolean colunaSalaExiste = false;
+        boolean unicidadeIncluiSala = false;
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(
+                     "PRAGMA table_info(historico_designacoes)"
+             )) {
+
+            while (resultSet.next()) {
+                if ("sala".equals(resultSet.getString("name"))) {
+                    colunaSalaExiste = true;
+                    break;
+                }
+            }
+        }
+
+        if (colunaSalaExiste) {
+            try (Statement statement = connection.createStatement();
+                 ResultSet indices = statement.executeQuery(
+                         "PRAGMA index_list(historico_designacoes)"
+                 )) {
+
+                while (indices.next()) {
+                    if (indices.getInt("unique") != 1) {
+                        continue;
+                    }
+
+                    String nomeIndice = indices.getString("name");
+                    List<String> colunas = new java.util.ArrayList<>();
+
+                    try (Statement detalhes = connection.createStatement();
+                         ResultSet colunasIndice = detalhes.executeQuery(
+                                 "PRAGMA index_info('" +
+                                         nomeIndice.replace("'", "''") + "')"
+                         )) {
+
+                        while (colunasIndice.next()) {
+                            colunas.add(
+                                    colunasIndice.getString("name")
+                            );
+                        }
+                    }
+
+                    if (colunas.size() == 5
+                            && colunas.containsAll(List.of(
+                            "data",
+                            "pessoa_id",
+                            "parte_id",
+                            "tipo_participacao",
+                            "sala"
+                    ))) {
+                        unicidadeIncluiSala = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (colunaSalaExiste && unicidadeIncluiSala) {
+            return;
+        }
+
+        boolean foreignKeysAtivos;
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(
+                     "PRAGMA foreign_keys"
+             )) {
+
+            foreignKeysAtivos =
+                    resultSet.next() && resultSet.getInt(1) == 1;
+        }
+
+        if (foreignKeysAtivos) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("PRAGMA foreign_keys = OFF");
+            }
+        }
+
+        boolean autoCommitAnterior = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+
+        try (Statement statement = connection.createStatement()) {
+
+            statement.execute("""
+            CREATE TABLE historico_designacoes_migracao (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data DATE NOT NULL,
+                pessoa_id INTEGER NOT NULL,
+                parte_id INTEGER NOT NULL,
+                tipo_participacao TEXT NOT NULL,
+                sala TEXT NOT NULL DEFAULT 'PRINCIPAL'
+                    CHECK (sala IN ('PRINCIPAL', 'B', 'C')),
+
+                UNIQUE (
+                    data,
+                    pessoa_id,
+                    parte_id,
+                    tipo_participacao,
+                    sala
+                ),
+
+                FOREIGN KEY (pessoa_id)
+                    REFERENCES pessoa(id),
+
+                FOREIGN KEY (parte_id)
+                    REFERENCES parte(id)
+            )
+            """);
+
+            String colunaSalaOrigem = colunaSalaExiste
+                    ? "sala"
+                    : "'PRINCIPAL'";
+
+            statement.execute("""
+            INSERT INTO historico_designacoes_migracao (
+                id,
+                data,
+                pessoa_id,
+                parte_id,
+                tipo_participacao,
+                sala
+            )
+            SELECT
+                id,
+                data,
+                pessoa_id,
+                parte_id,
+                tipo_participacao,
+                %s
+            FROM historico_designacoes
+            """.formatted(colunaSalaOrigem));
+
+            statement.execute("DROP TABLE historico_designacoes");
+
+            statement.execute("""
+            ALTER TABLE historico_designacoes_migracao
+            RENAME TO historico_designacoes
+            """);
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+
+        } finally {
+            try {
+                connection.setAutoCommit(autoCommitAnterior);
+            } finally {
+                if (foreignKeysAtivos) {
+                    try (Statement statement = connection.createStatement()) {
+                        statement.execute("PRAGMA foreign_keys = ON");
+                    }
+                }
+            }
         }
     }
 }

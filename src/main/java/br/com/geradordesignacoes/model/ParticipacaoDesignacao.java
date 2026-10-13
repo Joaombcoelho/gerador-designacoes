@@ -1,19 +1,26 @@
+
 package br.com.geradordesignacoes.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-public record ParticipacaoDesignacao(Integer id, LocalDate data, Pessoa pessoa, Parte parte,
-                                     TipoParticipacao tipoParticipacao) {
+public record ParticipacaoDesignacao(
+        Integer id,
+        LocalDate data,
+        Pessoa pessoa,
+        Parte parte,
+        TipoParticipacao tipoParticipacao,
+        SalaDesignacao sala
+) {
 
     public ParticipacaoDesignacao(
             Integer id,
             LocalDate data,
             Pessoa pessoa,
             Parte parte,
-            TipoParticipacao tipoParticipacao
+            TipoParticipacao tipoParticipacao,
+            SalaDesignacao sala
     ) {
-
         this.id = id;
 
         this.data = Objects.requireNonNull(
@@ -35,46 +42,92 @@ public record ParticipacaoDesignacao(Integer id, LocalDate data, Pessoa pessoa, 
                 tipoParticipacao,
                 "O tipo de participação não pode ser nulo."
         );
+
+        this.sala = Objects.requireNonNull(
+                sala,
+                "A sala não pode ser nula."
+        );
     }
 
+    /**
+     * Construtor legado mantido para compatibilidade.
+     * Participações antigas são consideradas da Sala Principal.
+     */
+    public ParticipacaoDesignacao(
+            Integer id,
+            LocalDate data,
+            Pessoa pessoa,
+            Parte parte,
+            TipoParticipacao tipoParticipacao
+    ) {
+        this(
+                id,
+                data,
+                pessoa,
+                parte,
+                tipoParticipacao,
+                SalaDesignacao.PRINCIPAL
+        );
+    }
 
+    /**
+     * Construtor sem ID, mantendo a compatibilidade.
+     */
     public ParticipacaoDesignacao(
             LocalDate data,
             Pessoa pessoa,
             Parte parte,
             TipoParticipacao tipoParticipacao
     ) {
-
         this(
                 null,
                 data,
                 pessoa,
                 parte,
-                tipoParticipacao
+                tipoParticipacao,
+                SalaDesignacao.PRINCIPAL
         );
     }
 
+    /**
+     * Construtor sem ID para informar explicitamente a sala.
+     */
+    public ParticipacaoDesignacao(
+            LocalDate data,
+            Pessoa pessoa,
+            Parte parte,
+            TipoParticipacao tipoParticipacao,
+            SalaDesignacao sala
+    ) {
+        this(
+                null,
+                data,
+                pessoa,
+                parte,
+                tipoParticipacao,
+                sala
+        );
+    }
 
     @Override
     public String toString() {
-
         return """
                 Data: %s
+                Sala: %s
                 Pessoa: %s
                 Parte: %s
                 Participação: %s
                 """.formatted(
                 data,
+                sala,
                 pessoa,
                 parte,
                 tipoParticipacao
         );
     }
 
-
     @Override
     public boolean equals(Object o) {
-
         if (this == o) {
             return true;
         }
@@ -89,7 +142,6 @@ public record ParticipacaoDesignacao(Integer id, LocalDate data, Pessoa pessoa, 
 
         return id.equals(outra.id);
     }
-
 
     @Override
     public int hashCode() {

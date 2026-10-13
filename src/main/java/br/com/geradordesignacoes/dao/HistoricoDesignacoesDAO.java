@@ -44,9 +44,10 @@ public class HistoricoDesignacoesDAO {
                     data,
                     pessoa_id,
                     parte_id,
-                    tipo_participacao
+                    tipo_participacao,
+                    sala
                 )
-                VALUES (?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
 
@@ -82,6 +83,10 @@ public class HistoricoDesignacoesDAO {
                     participacao.tipoParticipacao().name()
             );
 
+            statement.setString(
+                    5,
+                    participacao.sala().name()
+            );
 
             statement.executeUpdate();
 
@@ -128,14 +133,15 @@ public class HistoricoDesignacoesDAO {
                 WHERE data = ?
                 """;
 
-        String sqlInserir = """
-                INSERT INTO historico_designacoes (
-                    data,
-                    pessoa_id,
-                    parte_id,
-                    tipo_participacao
-                )
-                VALUES (?, ?, ?, ?)
+        String sqlInserir = """ 
+                        INSERT INTO historico_designacoes ( 
+                         data,
+                         pessoa_id,
+                         parte_id,
+                         tipo_participacao,
+                         sala 
+                         ) 
+                        VALUES (?, ?, ?, ?, ?)
                 """;
 
         try (Connection connection =
@@ -182,6 +188,10 @@ public class HistoricoDesignacoesDAO {
                                 4,
                                 participacao.tipoParticipacao().name()
                         );
+
+                        inserir.setString(
+                                5,
+                                participacao.sala().name());
 
                         inserir.addBatch();
                     }
@@ -318,20 +328,15 @@ public class HistoricoDesignacoesDAO {
                         );
 
 
-        TipoParticipacao tipoParticipacao =
-                TipoParticipacao.valueOf(
-                        resultSet.getString(
-                                "tipo_participacao"
-                        )
-                );
-
-
+        TipoParticipacao tipoParticipacao = TipoParticipacao.valueOf(resultSet.getString("tipo_participacao"));
+        SalaDesignacao sala = SalaDesignacao.valueOf(resultSet.getString("sala"));
         return new ParticipacaoDesignacao(
                 id,
                 data,
                 pessoa,
                 parte,
-                tipoParticipacao
+                tipoParticipacao,
+                sala
         );
     }
 

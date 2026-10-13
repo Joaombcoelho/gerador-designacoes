@@ -174,6 +174,246 @@ class DatabaseInitializerTest {
         }
     }
 
+    @Test
+    void devePreservarHistoricoAntigoAoAdicionarColunaSala()
+            throws Exception {
+
+        Path arquivo = diretorioTemporario.resolve("historico-antigo.db");
+
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                CREATE TABLE pessoa (
+                    id INTEGER PRIMARY KEY
+                )
+                """);
+
+                statement.execute("""
+                CREATE TABLE parte (
+                    id INTEGER PRIMARY KEY
+                )
+                """);
+
+                statement.execute("INSERT INTO pessoa (id) VALUES (10)");
+                statement.execute("INSERT INTO parte (id) VALUES (30)");
+
+                statement.execute("""
+                CREATE TABLE historico_designacoes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data DATE NOT NULL,
+                    pessoa_id INTEGER NOT NULL,
+                    parte_id INTEGER NOT NULL,
+                    tipo_participacao TEXT NOT NULL,
+                    UNIQUE (
+                        data,
+                        pessoa_id,
+                        parte_id,
+                        tipo_participacao
+                    ),
+                    FOREIGN KEY (pessoa_id) REFERENCES pessoa(id),
+                    FOREIGN KEY (parte_id) REFERENCES parte(id)
+                )
+                """);
+
+                statement.execute("""
+                INSERT INTO historico_designacoes (
+                    id, data, pessoa_id, parte_id, tipo_participacao
+                )
+                VALUES (
+                    7, '2026-10-01', 10, 30, 'DISCURSO'
+                )
+                """);
+            }
+
+            DatabaseInitializer.migrarHistoricoDesignacoesSala(connection);
+
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultado = statement.executeQuery("""
+                 SELECT id, data, pessoa_id, parte_id,
+                        tipo_participacao, sala
+                 FROM historico_designacoes
+                 WHERE id = 7
+                 """)) {
+
+                assertTrue(resultado.next());
+                assertEquals(7, resultado.getInt("id"));
+                assertEquals("2026-10-01", resultado.getString("data"));
+                assertEquals(10, resultado.getInt("pessoa_id"));
+                assertEquals(30, resultado.getInt("parte_id"));
+                assertEquals(
+                        "DISCURSO",
+                        resultado.getString("tipo_participacao")
+                );
+                assertEquals("PRINCIPAL", resultado.getString("sala"));
+                assertFalse(resultado.next());
+            }
+        }
+    }
+
+    @Test
+    void devePermitirMesmaParticipacaoEmSalasDiferentes()
+            throws Exception {
+
+        Path arquivo = diretorioTemporario.resolve("historico-salas.db");
+
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                CREATE TABLE pessoa (
+                    id INTEGER PRIMARY KEY
+                )
+                """);
+
+                statement.execute("""
+                CREATE TABLE parte (
+                    id INTEGER PRIMARY KEY
+                )
+                """);
+
+                statement.execute("INSERT INTO pessoa (id) VALUES (10)");
+                statement.execute("INSERT INTO parte (id) VALUES (30)");
+
+                statement.execute("""
+                CREATE TABLE historico_designacoes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data DATE NOT NULL,
+                    pessoa_id INTEGER NOT NULL,
+                    parte_id INTEGER NOT NULL,
+                    tipo_participacao TEXT NOT NULL,
+                    UNIQUE (
+                        data,
+                        pessoa_id,
+                        parte_id,
+                        tipo_participacao
+                    ),
+                    FOREIGN KEY (pessoa_id) REFERENCES pessoa(id),
+                    FOREIGN KEY (parte_id) REFERENCES parte(id)
+                )
+                """);
+
+                statement.execute("""
+                INSERT INTO historico_designacoes (
+                    data, pessoa_id, parte_id, tipo_participacao
+                )
+                VALUES (
+                    '2026-10-01', 10, 30, 'DISCURSO'
+                )
+                """);
+            }
+
+            DatabaseInitializer.migrarHistoricoDesignacoesSala(connection);
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                INSERT INTO historico_designacoes (
+                    data, pessoa_id, parte_id, tipo_participacao, sala
+                )
+                VALUES (
+                    '2026-10-01', 10, 30, 'DISCURSO', 'B'
+                )
+                """);
+            }
+
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultado = statement.executeQuery("""
+                 SELECT COUNT(*)
+                 FROM historico_designacoes
+                 WHERE data = '2026-10-01'
+                   AND pessoa_id = 10
+                   AND parte_id = 30
+                   AND tipo_participacao = 'DISCURSO'
+                 """)) {
+
+                assertTrue(resultado.next());
+                assertEquals(2, resultado.getInt(1));
+            }
+        }
+    }
+
+
+    @Test
+    void naoDeveAlterarHistoricoAoExecutarMigracaoNovamente()
+            throws Exception {
+
+        Path arquivo = diretorioTemporario.resolve("historico-repetido.db");
+
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                CREATE TABLE pessoa (
+                    id INTEGER PRIMARY KEY
+                )
+                """);
+
+                statement.execute("""
+                CREATE TABLE parte (
+                    id INTEGER PRIMARY KEY
+                )
+                """);
+
+                statement.execute("INSERT INTO pessoa (id) VALUES (10)");
+                statement.execute("INSERT INTO parte (id) VALUES (30)");
+
+                statement.execute("""
+                CREATE TABLE historico_designacoes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data DATE NOT NULL,
+                    pessoa_id INTEGER NOT NULL,
+                    parte_id INTEGER NOT NULL,
+                    tipo_participacao TEXT NOT NULL,
+                    UNIQUE (
+                        data,
+                        pessoa_id,
+                        parte_id,
+                        tipo_participacao
+                    ),
+                    FOREIGN KEY (pessoa_id) REFERENCES pessoa(id),
+                    FOREIGN KEY (parte_id) REFERENCES parte(id)
+                )
+                """);
+
+                statement.execute("""
+                INSERT INTO historico_designacoes (
+                    data, pessoa_id, parte_id, tipo_participacao
+                )
+                VALUES (
+                    '2026-10-01', 10, 30, 'DISCURSO'
+                )
+                """);
+            }
+
+            DatabaseInitializer.migrarHistoricoDesignacoesSala(connection);
+            DatabaseInitializer.migrarHistoricoDesignacoesSala(connection);
+
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultado = statement.executeQuery("""
+                 SELECT COUNT(*)
+                 FROM historico_designacoes
+                 """)) {
+
+                assertTrue(resultado.next());
+                assertEquals(1, resultado.getInt(1));
+            }
+
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultado = statement.executeQuery("""
+                 SELECT sala
+                 FROM historico_designacoes
+                 """)) {
+
+                assertTrue(resultado.next());
+                assertEquals("PRINCIPAL", resultado.getString("sala"));
+                assertFalse(resultado.next());
+            }
+        }
+    }
+
     private Connection criarBanco(
             Path arquivo,
             boolean possuiSala,
