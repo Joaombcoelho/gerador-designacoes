@@ -30,6 +30,20 @@ public class GeradorEscala {
         return gerar(data, partes, pessoas);
     }
 
+    public ResultadoGeracaoEscala gerarEscalaSemPersistir(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas,
+            HistoricoDesignacoes historico
+    ) {
+        return gerarSemPersistir(
+                data,
+                partes,
+                pessoas,
+                historico
+        );
+    }
+
     public ResultadoGeracaoEscala gerar(LocalDate data, List<Parte> partes, List<Pessoa> pessoas) {
         return gerar(data, partes, pessoas, historicoService.getHistorico());
     }
@@ -47,6 +61,44 @@ public class GeradorEscala {
      */
     public ResultadoGeracaoEscala gerarSemPersistir(LocalDate data, List<Parte> partes, List<Pessoa> pessoas, HistoricoDesignacoes historico) {
         return gerarInterno(data, partes, pessoas, historico, false);
+    }
+
+    /**
+     * Retorna uma cópia do histórico atual.
+     */
+    public HistoricoDesignacoes obterHistorico() {
+        return new HistoricoDesignacoes(
+                historicoService.getHistorico().participacoes()
+        );
+    }
+
+    /**
+     * Gera sem persistir, utilizando as pessoas cadastradas.
+     */
+    public ResultadoGeracaoEscala gerarSemPersistir(
+            LocalDate data,
+            List<Parte> partes,
+            HistoricoDesignacoes historico
+    ) {
+        return gerarSemPersistir(
+                data,
+                partes,
+                pessoaService.listarTodas(),
+                historico
+        );
+    }
+
+    /**
+     * Persiste o histórico de uma data após a confirmação.
+     */
+    public void salvarHistoricoGeracao(
+            LocalDate data,
+            List<ParticipacaoDesignacao> participacoes
+    ) {
+        historicoService.salvarGeracao(
+                data,
+                participacoes
+        );
     }
 
     private ResultadoGeracaoEscala gerarInterno(LocalDate data, List<Parte> partes, List<Pessoa> pessoas, HistoricoDesignacoes historico, boolean persistir) {

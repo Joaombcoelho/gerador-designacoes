@@ -2,6 +2,7 @@ package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.controller.EscalaController;
 import br.com.geradordesignacoes.dao.EscalaDAO;
+import br.com.geradordesignacoes.dao.HistoricoDesignacoesDAO;
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.ConnectionFactory;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +35,8 @@ class IntegracaoEscalaTest extends BaseDAOTest {
             new ProgramacaoSemanaService();
 
     private static boolean javafxInicializado = false;
-
+    private final HistoricoDesignacoesDAO historicoDAO =
+            new HistoricoDesignacoesDAO();
 
     @BeforeAll
     static void inicializarJavaFX() throws Exception {
@@ -507,6 +510,76 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                             + data
             );
         }
+    }
+
+
+    @Test
+    void devePersistirHistoricoSomenteAposConfirmarSalvamento()
+            throws Exception {
+
+        criarPessoas(12);
+
+        List<Parte> partes =
+                criarPartesVariaveis(3);
+
+        YearMonth mes =
+                YearMonth.of(2026, 9);
+
+        List<LocalDate> datasEsperadas =
+                datasDasSemanasDeSetembro();
+
+        configurarTodasAsSemanas(partes);
+
+        assertTrue(
+                historicoDAO.listarTodas().isEmpty(),
+                "O histórico deveria começar vazio neste teste."
+        );
+
+        EscalaView view =
+                criarEscalaView();
+
+        EscalaController controller =
+                obterController(view);
+
+        assertTrue(
+                controller.gerarEscalasDoMes(mes),
+                "A geração mensal deveria ser concluída."
+        );
+
+        assertTrue(
+                historicoDAO.listarTodas().isEmpty(),
+                "Gerar as escalas não deveria persistir o histórico "
+                        + "antes da confirmação do usuário."
+        );
+
+        assertTrue(
+                controller.salvarEscalasGeradas(),
+                "O salvamento das escalas deveria ser concluído."
+        );
+
+        List<ParticipacaoDesignacao> historico =
+                historicoDAO.listarTodas();
+
+        assertFalse(
+                historico.isEmpty(),
+                "O histórico deveria ser persistido após salvar."
+        );
+
+        assertEquals(
+                Set.copyOf(datasEsperadas),
+                historico.stream()
+                        .map(ParticipacaoDesignacao::data)
+                        .collect(java.util.stream.Collectors.toSet()),
+                "O histórico deveria conter as cinco datas geradas."
+        );
+
+        assertTrue(
+                historico.stream()
+                        .allMatch(p ->
+                                p.sala() == SalaDesignacao.PRINCIPAL),
+                "Nesta primeira etapa, o histórico deve conter "
+                        + "somente as participações da Sala Principal."
+        );
     }
 
 

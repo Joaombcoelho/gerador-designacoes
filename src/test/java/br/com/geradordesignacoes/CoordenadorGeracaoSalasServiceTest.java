@@ -432,6 +432,94 @@ class CoordenadorGeracaoSalasServiceTest extends BaseDAOTest {
     }
 
 
+    @Test
+    void deveCorrigirHistoricoAoRegenerarDataQueTeveErros() {
+        LocalDate data = LocalDate.of(2026, 10, 20);
+
+        configuracaoDAO.salvar(new ConfiguracaoSalas(true, true));
+
+        Pessoa pessoaPrincipal = criarPessoa(
+                "Participante Principal",
+                false,
+                false
+        );
+
+        Pessoa participanteAntigoB = criarPessoa(
+                "Participante Antigo B",
+                true,
+                false
+        );
+
+        List<Parte> partes = criarPartes();
+
+        CoordenadorGeracaoSalasService coordenador = criarCoordenador();
+
+        ResultadoGeracaoSalasCoordenadas primeiraGeracao =
+                coordenador.gerar(
+                        data,
+                        partes,
+                        List.of(pessoaPrincipal, participanteAntigoB)
+                );
+
+        assertTrue(
+                primeiraGeracao.possuiErros(),
+                "A primeira geração deveria apresentar erro na Sala C."
+        );
+
+        assertTrue(
+                historicoDAO.listarTodas().stream()
+                        .anyMatch(p ->
+                                p.data().equals(data)
+                                        && p.pessoa().getId().equals(
+                                        participanteAntigoB.getId())
+                                        && p.sala() == SalaDesignacao.B),
+                "A primeira geração deveria registrar a designação válida da Sala B."
+        );
+
+        // Regenera a mesma data com participantes suficientes.
+        List<Pessoa> novasPessoas = criarPessoas();
+
+        ResultadoGeracaoSalasCoordenadas segundaGeracao =
+                coordenador.gerar(data, partes, novasPessoas);
+
+        assertFalse(
+                segundaGeracao.possuiErros(),
+                "A segunda geração deveria concluir sem erros: "
+                        + segundaGeracao.erros()
+        );
+
+        List<ParticipacaoDesignacao> historicoDaData =
+                historicoDAO.listarTodas().stream()
+                        .filter(p -> p.data().equals(data))
+                        .toList();
+
+        assertTrue(
+                historicoDaData.stream()
+                        .noneMatch(p ->
+                                p.pessoa().getId().equals(
+                                        participanteAntigoB.getId())),
+                "O histórico não deve manter a designação antiga da Sala B."
+        );
+
+        assertTrue(
+                historicoDaData.stream()
+                        .anyMatch(p -> p.sala() == SalaDesignacao.PRINCIPAL),
+                "A nova geração deve registrar a Sala Principal."
+        );
+
+        assertTrue(
+                historicoDaData.stream()
+                        .anyMatch(p -> p.sala() == SalaDesignacao.B),
+                "A nova geração deve registrar a Sala B."
+        );
+
+        assertTrue(
+                historicoDaData.stream()
+                        .anyMatch(p -> p.sala() == SalaDesignacao.C),
+                "A nova geração deve registrar a Sala C."
+        );
+    }
+
     private CoordenadorGeracaoSalasService criarCoordenador() {
         return new CoordenadorGeracaoSalasService(
                 new GeradorEscala(new RegrasService()),

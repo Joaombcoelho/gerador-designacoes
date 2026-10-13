@@ -1,4 +1,3 @@
-
 package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.model.*;
@@ -30,21 +29,82 @@ public class CoordenadorGeracaoSalasService {
                 Objects.requireNonNull(historicoService);
     }
 
+    /**
+     * Gera as designações e persiste o histórico da data.
+     * Mantém o comportamento utilizado pela geração individual.
+     */
     public ResultadoGeracaoSalasCoordenadas gerar(
             LocalDate data,
             List<Parte> partes,
             List<Pessoa> pessoas
     ) {
-        Objects.requireNonNull(data, "A data não pode ser nula.");
-        Objects.requireNonNull(partes, "As partes não podem ser nulas.");
-        Objects.requireNonNull(pessoas, "As pessoas não podem ser nulas.");
+        return gerarInterno(
+                data,
+                partes,
+                pessoas,
+                historicoService.getHistorico(),
+                true
+        );
+    }
 
-        // Exclui as participações da própria data durante a regeneração.
+    /**
+     * Gera as designações sem persistir o histórico.
+     *
+     * Permite que outra camada, como a geração mensal,
+     * controle quando as participações serão salvas.
+     *
+     * O histórico recebido pode incluir participações
+     * temporárias das semanas já geradas no mesmo mês.
+     */
+    public ResultadoGeracaoSalasCoordenadas gerarSemPersistir(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas,
+            HistoricoDesignacoes historico
+    ) {
+        return gerarInterno(
+                data,
+                partes,
+                pessoas,
+                historico,
+                false
+        );
+    }
+
+    private ResultadoGeracaoSalasCoordenadas gerarInterno(
+            LocalDate data,
+            List<Parte> partes,
+            List<Pessoa> pessoas,
+            HistoricoDesignacoes historico,
+            boolean persistirHistorico
+    ) {
+        Objects.requireNonNull(
+                data,
+                "A data não pode ser nula."
+        );
+        Objects.requireNonNull(
+                partes,
+                "As partes não podem ser nulas."
+        );
+        Objects.requireNonNull(
+                pessoas,
+                "As pessoas não podem ser nulas."
+        );
+        Objects.requireNonNull(
+                historico,
+                "O histórico não pode ser nulo."
+        );
+
+        /*
+         * Remove do histórico usado na seleção somente
+         * as participações da data que está sendo gerada.
+         *
+         * As demais datas são preservadas.
+         */
         HistoricoDesignacoes historicoSemData =
-                historicoService.getHistorico()
-                        .semParticipacoesDaData(data);
+                historico.semParticipacoesDaData(data);
 
-        // Gera a Sala Principal sem persistir antecipadamente.
+        // Gera a Sala Principal sem persistência antecipada.
         ResultadoGeracaoEscala resultadoPrincipal =
                 geradorEscala.gerarSemPersistir(
                         data,
@@ -73,7 +133,10 @@ public class CoordenadorGeracaoSalasService {
         List<ParticipacaoDesignacao> participacoes =
                 new ArrayList<>();
 
-        // Mantém somente as novas participações da Sala Principal.
+        /*
+         * Mantém somente as novas participações da
+         * Sala Principal correspondentes à data gerada.
+         */
         resultadoPrincipal.participacoes().stream()
                 .filter(p -> p.data().equals(data))
                 .filter(p -> p.sala() == SalaDesignacao.PRINCIPAL)
@@ -92,8 +155,17 @@ public class CoordenadorGeracaoSalasService {
         erros.addAll(resultadoPrincipal.erros());
         erros.addAll(resultadoAuxiliar.erros());
 
-        // Uma única operação para substituir o histórico da data.
-        historicoService.salvarGeracao(data, participacoes);
+        /*
+         * Persiste somente quando o fluxo solicitou.
+         * Na geração mensal, as participações permanecem
+         * em memória até a confirmação do salvamento.
+         */
+        if (persistirHistorico) {
+            historicoService.salvarGeracao(
+                    data,
+                    participacoes
+            );
+        }
 
         return new ResultadoGeracaoSalasCoordenadas(
                 resultadoPrincipal,

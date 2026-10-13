@@ -9,6 +9,9 @@ import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.ResultadoGeracaoEscala;
+import br.com.geradordesignacoes.model.HistoricoDesignacoes;
+import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
+import br.com.geradordesignacoes.model.SalaDesignacao;
 import br.com.geradordesignacoes.service.BackupService;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.ParteService;
@@ -22,6 +25,8 @@ import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class EscalaController {
 
@@ -35,6 +40,7 @@ public class EscalaController {
 
     private ResultadoGeracaoEscala ultimoResultado;
     private boolean escalaSalva;
+    private boolean geracaoMensalPendente;
 
     public EscalaController(EscalaView view) {
 
@@ -218,6 +224,7 @@ public class EscalaController {
         );
 
         escalaSalva = false;
+        geracaoMensalPendente = false;
     }
 
     private void preencherTabela(
@@ -512,6 +519,7 @@ public class EscalaController {
             backupService.criarBackup();
 
             escalaSalva = true;
+            geracaoMensalPendente = false;
 
             informarSalvamentoSucesso(
                     quantidadeSalva
@@ -531,11 +539,8 @@ public class EscalaController {
 
         int quantidadeSalva = 0;
 
-        for (
-                ResultadoGeracaoEscala resultado
-                :
-                resultadosGeracao.values()
-        ) {
+        // Primeiro salva todas as escalas geradas.
+        for (ResultadoGeracaoEscala resultado : resultadosGeracao.values()) {
 
             if (resultado == null) {
                 continue;
@@ -546,6 +551,31 @@ public class EscalaController {
             );
 
             quantidadeSalva++;
+        }
+
+        // No fluxo mensal, salva o histórico somente após confirmação.
+        if (geracaoMensalPendente) {
+            for (Map.Entry<LocalDate, ResultadoGeracaoEscala> entrada
+                    : resultadosGeracao.entrySet()) {
+
+                ResultadoGeracaoEscala resultado = entrada.getValue();
+
+                if (resultado == null) {
+                    continue;
+                }
+
+                LocalDate data = entrada.getKey();
+
+                List<ParticipacaoDesignacao> participacoesDaData =
+                        resultado.participacoes().stream()
+                                .filter(p -> p.data().equals(data))
+                                .toList();
+
+                geradorEscala.salvarHistoricoGeracao(
+                        data,
+                        participacoesDaData
+                );
+            }
         }
 
         return quantidadeSalva;
@@ -607,6 +637,8 @@ public class EscalaController {
         try {
 
             resultadosGeracao.clear();
+            geracaoMensalPendente = false;
+            escalaSalva = false;
 
             List<ProgramacaoSemana> semanas =
                     programacaoSemanaService
@@ -627,6 +659,7 @@ public class EscalaController {
 
             validarQuantidadeEscalasGeradas();
 
+            geracaoMensalPendente = true;
             escalaSalva = false;
 
             view.exibirEscalas(
@@ -641,6 +674,8 @@ public class EscalaController {
             return true;
 
         } catch (Exception e) {
+            resultadosGeracao.clear();
+            geracaoMensalPendente = false;
 
             tratarErroGeracaoMensal(e);
 
@@ -651,40 +686,67 @@ public class EscalaController {
     private void gerarEscalasDasSemanas(
             List<ProgramacaoSemana> semanas
     ) {
+        Set<LocalDate> datasDoMes = semanas.stream()
+                .map(ProgramacaoSemana::data)
+                .collect(Collectors.toSet());
+
+        /*
+         * Remove do histórico temporário as participações da
+         * Sala Principal nas datas que serão regeneradas.
+         *
+         * Preserva as outras datas e as participações das
+         * salas auxiliares já existentes.
+         */
+        HistoricoDesignacoes historicoTemporario =
+                new HistoricoDesignacoes(
+                        geradorEscala.obterHistorico()
+                                .participacoes()
+                                .stream()
+                                .filter(p ->
+                                        !datasDoMes.contains(p.data())
+                                                || p.sala() != SalaDesignacao.PRINCIPAL
+                                )
+                                .toList()
+                );
 
         for (ProgramacaoSemana semana : semanas) {
-
             ResultadoGeracaoEscala resultado =
                     gerarEscalaDaSemana(
-                            semana
+                            semana,
+                            historicoTemporario
                     );
 
             resultadosGeracao.put(
                     semana.data(),
                     resultado
             );
+
+            /*
+             * Incorpora ao histórico temporário as novas
+             * participações da Sala Principal. Isso permite
+             * que a próxima semana considere as anteriores.
+             */
+            resultado.participacoes().stream()
+                    .filter(p -> p.data().equals(semana.data()))
+                    .filter(p -> p.sala() == SalaDesignacao.PRINCIPAL)
+                    .forEach(historicoTemporario::adicionar);
         }
     }
 
     private ResultadoGeracaoEscala gerarEscalaDaSemana(
-            ProgramacaoSemana semana
+            ProgramacaoSemana semana,
+            HistoricoDesignacoes historicoTemporario
     ) {
-
-        List<Parte> partes =
-                obterPartesDaSemana(
-                        semana
-                );
+        List<Parte> partes = obterPartesDaSemana(semana);
 
         ResultadoGeracaoEscala resultado =
-                geradorEscala.gerarEscala(
+                geradorEscala.gerarSemPersistir(
                         semana.data(),
-                        partes
+                        partes,
+                        historicoTemporario
                 );
 
-        if (
-                resultado == null
-                        || resultado.escala() == null
-        ) {
+        if (resultado == null || resultado.escala() == null) {
             throw new IllegalStateException(
                     "Não foi possível gerar a escala de "
                             + semana.data()
