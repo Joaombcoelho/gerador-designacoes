@@ -451,7 +451,7 @@ public class HistoricoDesignacoesDAOTest extends BaseDAOTest {
                         .anyMatch(p -> p.sala() == SalaDesignacao.B)
         );
     }
-    
+
     @Test
     void deveSubstituirParticipacoesPreservandoSalasEOutrasDatas() {
 
@@ -633,6 +633,133 @@ public class HistoricoDesignacoesDAOTest extends BaseDAOTest {
 
         assertEquals(1, daData.size());
         assertEquals(SalaDesignacao.PRINCIPAL, daData.get(0).sala());
+    }
+
+    @Test
+    void devePreservarHistoricoAnteriorQuandoSubstituicaoFalha() {
+        LocalDate data = LocalDate.of(2026, 10, 20);
+
+        Pessoa pessoaAnterior = new Pessoa(
+                "Pessoa Histórico Anterior",
+                Sexo.MASCULINO,
+                true,
+                true,
+                true,
+                true,
+                false,
+                Privilegio.BATIZADO
+        );
+        pessoaDAO.salvar(pessoaAnterior);
+
+        Pessoa pessoaNova = new Pessoa(
+                "Pessoa Nova",
+                Sexo.MASCULINO,
+                true,
+                true,
+                true,
+                true,
+                false,
+                Privilegio.BATIZADO
+        );
+        pessoaDAO.salvar(pessoaNova);
+
+        Parte parte = parteDAO.salvar(
+                new Parte(
+                        "Leitura Transação",
+                        TipoParte.LEITURA,
+                        Privilegio.BATIZADO,
+                        false,
+                        SexoPermitido.AMBOS,
+                        1,
+                        false,
+                        List.of(TipoParticipacao.LEITOR)
+                )
+        );
+
+        ParticipacaoDesignacao participacaoAnterior =
+                new ParticipacaoDesignacao(
+                        data,
+                        pessoaAnterior,
+                        parte,
+                        TipoParticipacao.LEITOR,
+                        SalaDesignacao.PRINCIPAL
+                );
+
+        historicoDAO.substituirParticipacoesDaData(
+                data,
+                List.of(participacaoAnterior)
+        );
+
+        ParticipacaoDesignacao participacaoValida =
+                new ParticipacaoDesignacao(
+                        data,
+                        pessoaNova,
+                        parte,
+                        TipoParticipacao.LEITOR,
+                        SalaDesignacao.B
+                );
+
+        Pessoa pessoaInexistente = new Pessoa(
+                "Pessoa Inexistente",
+                Sexo.MASCULINO,
+                true,
+                true,
+                true,
+                true,
+                false,
+                Privilegio.BATIZADO
+        );
+        pessoaInexistente.setId(999999);
+
+        ParticipacaoDesignacao participacaoInvalida =
+                new ParticipacaoDesignacao(
+                        data,
+                        pessoaInexistente,
+                        parte,
+                        TipoParticipacao.LEITOR,
+                        SalaDesignacao.C
+                );
+
+        assertThrows(
+                RuntimeException.class,
+                () -> historicoDAO.substituirParticipacoesDaData(
+                        data,
+                        List.of(
+                                participacaoValida,
+                                participacaoInvalida
+                        )
+                ),
+                "A substituição deveria falhar ao referenciar uma pessoa inexistente."
+        );
+
+        List<ParticipacaoDesignacao> historico =
+                historicoDAO.listarTodas();
+
+        assertEquals(
+                1,
+                historico.size(),
+                "A falha não deve deixar registros parciais."
+        );
+
+        ParticipacaoDesignacao recuperada = historico.get(0);
+
+        assertEquals(
+                pessoaAnterior.getId(),
+                recuperada.pessoa().getId(),
+                "A participação anterior deve continuar preservada."
+        );
+
+        assertEquals(
+                parte.getId(),
+                recuperada.parte().getId()
+        );
+
+        assertEquals(
+                SalaDesignacao.PRINCIPAL,
+                recuperada.sala()
+        );
+
+        assertEquals(data, recuperada.data());
     }
 
     private Pessoa criarPessoa(String nome) {
