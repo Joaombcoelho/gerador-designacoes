@@ -452,6 +452,41 @@ public class GeradorEscalaHistoricoTest extends BaseDAOTest {
         );
     }
 
+    @Test
+    void deveGerarSemPersistirHistoricoAutomaticamente() {
+        List<Pessoa> pessoas = criarPessoas();
+        List<Parte> partes = criarPartes();
+        LocalDate data = LocalDate.of(2026, 10, 20);
+
+        GeradorEscala gerador =
+                new GeradorEscala(new RegrasService());
+
+        ResultadoGeracaoEscala resultado =
+                gerador.gerarSemPersistir(
+                        data,
+                        partes,
+                        pessoas,
+                        new HistoricoDesignacoes(
+                                historicoDAO.listarTodas()
+                        )
+                );
+
+        assertFalse(
+                resultado.possuiErros(),
+                "Erros na geração: " + resultado.erros()
+        );
+
+        assertFalse(
+                resultado.escala().getDesignacoes().isEmpty(),
+                "A escala deveria ter designações."
+        );
+
+        assertTrue(
+                historicoDAO.listarTodas().stream()
+                        .noneMatch(p -> p.data().equals(data)),
+                "A geração sem persistência não deveria gravar o histórico."
+        );
+    }
 
     private long contarPorData(
             List<ParticipacaoDesignacao> participacoes,

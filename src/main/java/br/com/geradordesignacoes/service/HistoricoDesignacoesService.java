@@ -128,22 +128,22 @@ public class HistoricoDesignacoesService {
         }
     }
 
-    public void salvarGeracao(
-            List<ParticipacaoDesignacao> participacoes
-    ) {
-        if (participacoes == null
-                || participacoes.isEmpty()) {
+    public void salvarGeracao(List<ParticipacaoDesignacao> participacoes) {
+        if (participacoes == null || participacoes.isEmpty()) {
             return;
         }
+        LocalDate data = participacoes.get(0).data();
+        salvarGeracao(data, participacoes);
+    }
 
-        LocalDate data =
-                participacoes.get(0).data();
-
-        historicoDAO.substituirParticipacoesDaData(
-                data,
-                participacoes
-        );
-
+    public void salvarGeracao(LocalDate data, List<ParticipacaoDesignacao> participacoes) {
+        if (data == null) {
+            throw new IllegalArgumentException("Data não pode ser nula.");
+        }
+        if (participacoes == null) {
+            throw new IllegalArgumentException("Participações não podem ser nulas.");
+        }
+        historicoDAO.substituirParticipacoesDaData(data, participacoes);
         carregar();
     }
 }

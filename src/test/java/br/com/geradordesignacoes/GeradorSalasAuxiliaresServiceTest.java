@@ -140,6 +140,80 @@ class GeradorSalasAuxiliaresServiceTest {
         );
     }
 
+    @Test
+    void deveGerarDesignacoesNasSalasHabilitadasSemReutilizarParticipantes() {
+        Pessoa pessoaSalaB = criarPessoa(
+                "Pessoa Sala B", true, false
+        );
+
+        Pessoa pessoaSalaC = criarPessoa(
+                "Pessoa Sala C", false, true
+        );
+
+        Parte leitura = criarParte(
+                "Leitura",
+                TipoParte.LEITURA,
+                TipoParticipacao.LEITOR
+        );
+
+        ResultadoGeracaoSalasAuxiliares resultado = gerador.gerar(
+                java.time.LocalDate.of(2026, 10, 20),
+                List.of(leitura),
+                List.of(pessoaSalaB, pessoaSalaC),
+                List.of(),
+                true,
+                true
+        );
+
+        assertFalse(
+                resultado.possuiErros(),
+                "Erros na geração: " + resultado.erros()
+        );
+
+        assertEquals(
+                2,
+                resultado.designacoes().size(),
+                "Deveria gerar uma designação em cada sala."
+        );
+
+        assertTrue(
+                resultado.designacoes().stream()
+                        .anyMatch(d -> d.sala() == SalaDesignacao.B)
+        );
+
+        assertTrue(
+                resultado.designacoes().stream()
+                        .anyMatch(d -> d.sala() == SalaDesignacao.C)
+        );
+
+        assertNotEquals(
+                resultado.designacoes().get(0).responsavel(),
+                resultado.designacoes().get(1).responsavel(),
+                "A mesma pessoa não deve ser designada nas duas salas para a mesma parte."
+        );
+    }
+
+    @Test
+    void naoDeveGerarDesignacoesQuandoSalasAuxiliaresEstaoDesabilitadas() {
+        Parte leitura = criarParte(
+                "Leitura",
+                TipoParte.LEITURA,
+                TipoParticipacao.LEITOR
+        );
+
+        ResultadoGeracaoSalasAuxiliares resultado = gerador.gerar(
+                java.time.LocalDate.of(2026, 10, 20),
+                List.of(leitura),
+                List.of(criarPessoa("Pessoa", true, true)),
+                List.of(),
+                false,
+                false
+        );
+
+        assertTrue(resultado.designacoes().isEmpty());
+        assertFalse(resultado.possuiErros());
+    }
+
     private Pessoa criarPessoa(
             String nome,
             boolean salaB,

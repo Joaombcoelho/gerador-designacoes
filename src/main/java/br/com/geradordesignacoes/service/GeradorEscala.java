@@ -39,13 +39,26 @@ public class GeradorEscala {
     }
 
     public ResultadoGeracaoEscala gerar(LocalDate data, List<Parte> partes, List<Pessoa> pessoas, HistoricoDesignacoes historico) {
+        return gerarInterno(data, partes, pessoas, historico, true);
+    }
+
+    /**
+     * Gera a escala sem persistir as novas participações. * Útil quando outra camada precisa coordenar várias salas.
+     */
+    public ResultadoGeracaoEscala gerarSemPersistir(LocalDate data, List<Parte> partes, List<Pessoa> pessoas, HistoricoDesignacoes historico) {
+        return gerarInterno(data, partes, pessoas, historico, false);
+    }
+
+    private ResultadoGeracaoEscala gerarInterno(LocalDate data, List<Parte> partes, List<Pessoa> pessoas, HistoricoDesignacoes historico, boolean persistir) {
         List<Designacao> designacoes = new ArrayList<>();
         List<String> erros = new ArrayList<>();
         List<DiagnosticoSelecaoPessoa> diagnosticos = new ArrayList<>();
         List<Parte> partesOrdenadas = ordenarPartesComPresidentePrimeiro(partes);
         ControleDesignacoes controleDesignacoes = criarControleDesignacoes(historico);
         Pessoa presidenteDaReuniao = processarPartes(data, partesOrdenadas, pessoas, designacoes, controleDesignacoes, diagnosticos, erros);
-        salvarNovasParticipacoes(controleDesignacoes, historico);
+        if (persistir) {
+            salvarNovasParticipacoes(controleDesignacoes, historico);
+        }
         Escala escala = criarEscala(data, designacoes, presidenteDaReuniao);
         return new ResultadoGeracaoEscala(escala, controleDesignacoes.getParticipacoes(), erros, diagnosticos);
     }
