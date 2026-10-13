@@ -488,16 +488,25 @@ public class DatabaseInitializer {
     private static void migrarResponsavelDesignacaoNullable(
             Connection connection
     ) throws SQLException {
-        boolean responsavelObrigatorio = false;
 
-        try (PreparedStatement statement = connection.prepareStatement(
-                "PRAGMA table_info(designacao)"
-        );
-             ResultSet resultSet = statement.executeQuery()) {
+        boolean responsavelObrigatorio = false;
+        boolean colunaSalaExiste = false;
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(
+                     "PRAGMA table_info(designacao)"
+             )) {
+
             while (resultSet.next()) {
-                if ("responsavel_id".equals(resultSet.getString("name"))) {
-                    responsavelObrigatorio = resultSet.getInt("notnull") == 1;
-                    break;
+                String nomeColuna = resultSet.getString("name");
+
+                if ("responsavel_id".equals(nomeColuna)) {
+                    responsavelObrigatorio =
+                            resultSet.getInt("notnull") == 1;
+                }
+
+                if ("sala".equals(nomeColuna)) {
+                    colunaSalaExiste = true;
                 }
             }
         }
@@ -507,9 +516,14 @@ public class DatabaseInitializer {
         }
 
         boolean foreignKeysAtivos;
+
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("PRAGMA foreign_keys")) {
-            foreignKeysAtivos = resultSet.next() && resultSet.getInt(1) == 1;
+             ResultSet resultSet = statement.executeQuery(
+                     "PRAGMA foreign_keys"
+             )) {
+
+            foreignKeysAtivos =
+                    resultSet.next() && resultSet.getInt(1) == 1;
         }
 
         if (foreignKeysAtivos) {
@@ -520,37 +534,75 @@ public class DatabaseInitializer {
 
         boolean autoCommitAnterior = connection.getAutoCommit();
         connection.setAutoCommit(false);
+
         try (Statement statement = connection.createStatement()) {
+
             statement.execute("""
-                    CREATE TABLE designacao_migracao (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        escala_id INTEGER NOT NULL,
-                        parte_id INTEGER NOT NULL,
-                        responsavel_id INTEGER,
-                        ajudante_id INTEGER,
-                        FOREIGN KEY (escala_id) REFERENCES escala(id) ON DELETE CASCADE,
-                        FOREIGN KEY (parte_id) REFERENCES parte(id),
-                        FOREIGN KEY (responsavel_id) REFERENCES pessoa(id),
-                        FOREIGN KEY (ajudante_id) REFERENCES pessoa(id)
-                    )
-                    """);
+                CREATE TABLE designacao_migracao (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    escala_id INTEGER NOT NULL,
+                    parte_id INTEGER NOT NULL,
+                    responsavel_id INTEGER,
+                    ajudante_id INTEGER,
+                    sala TEXT NOT NULL DEFAULT 'PRINCIPAL'
+                        CHECK (sala IN ('PRINCIPAL', 'B', 'C')),
+                    FOREIGN KEY (escala_id)
+                        REFERENCES escala(id) ON DELETE CASCADE,
+                    FOREIGN KEY (parte_id)
+                        REFERENCES parte(id),
+                    FOREIGN KEY (responsavel_id)
+                        REFERENCES pessoa(id),
+                    FOREIGN KEY (ajudante_id)
+                        REFERENCES pessoa(id)
+                )
+                """);
+
+            String colunasDestino = """
+                id, escala_id, parte_id,
+                responsavel_id, ajudante_id, sala
+                """;
+
+            String colunasOrigem = colunaSalaExiste
+                    ? """
+                  id, escala_id, parte_id,
+                  responsavel_id, ajudante_id,
+                  sala
+                  """
+                    : """
+                  id, escala_id, parte_id,
+                  responsavel_id, ajudante_id,
+                  'PRINCIPAL'
+                  """;
+
             statement.execute("""
-                    INSERT INTO designacao_migracao
-                        (id, escala_id, parte_id, responsavel_id, ajudante_id)
-                    SELECT id, escala_id, parte_id, responsavel_id, ajudante_id
-                    FROM designacao
-                    """);
+                INSERT INTO designacao_migracao (
+                    %s
+                )
+                SELECT %s
+                FROM designacao
+                """.formatted(colunasDestino, colunasOrigem));
+
             statement.execute("DROP TABLE designacao");
-            statement.execute("ALTER TABLE designacao_migracao RENAME TO designacao");
+
+            statement.execute("""
+                ALTER TABLE designacao_migracao
+                RENAME TO designacao
+                """);
+
             connection.commit();
+
         } catch (SQLException e) {
             connection.rollback();
             throw e;
+
         } finally {
-            connection.setAutoCommit(autoCommitAnterior);
-            if (foreignKeysAtivos) {
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("PRAGMA foreign_keys = ON");
+            try {
+                connection.setAutoCommit(autoCommitAnterior);
+            } finally {
+                if (foreignKeysAtivos) {
+                    try (Statement statement = connection.createStatement()) {
+                        statement.execute("PRAGMA foreign_keys = ON");
+                    }
                 }
             }
         }
