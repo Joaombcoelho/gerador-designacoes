@@ -457,27 +457,48 @@ public class DatabaseInitializer {
         }
     }
 
-    private static void adicionarColunaDuracaoPadraoParte(Connection connection) throws SQLException {
-        adicionarColunaInteiraOpcional(connection, "parte", "duracao_padrao_minutos");
+    private static void adicionarColunaDuracaoPadraoParte(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaInteiraOpcional(
+                connection,
+                "parte",
+                "duracao_padrao_minutos"
+        );
     }
 
-    private static void adicionarColunaDuracaoProgramacaoParte(Connection connection) throws SQLException {
-        adicionarColunaInteiraOpcional(connection, "programacao_parte", "duracao_minutos");
+    private static void adicionarColunaDuracaoProgramacaoParte(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaInteiraOpcional(
+                connection,
+                "programacao_parte",
+                "duracao_minutos"
+        );
     }
 
     private static void adicionarColunaInteiraOpcional(
-            Connection connection, String tabela, String coluna
+            Connection connection,
+            String tabela,
+            String coluna
     ) throws SQLException {
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(" + tabela + ")")) {
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(
+                        "PRAGMA table_info(" + tabela + ")"
+                )
+        ) {
             while (resultSet.next()) {
                 if (coluna.equals(resultSet.getString("name"))) {
                     return;
                 }
             }
         }
+
         try (Statement statement = connection.createStatement()) {
-            statement.execute("ALTER TABLE " + tabela + " ADD COLUMN " + coluna + " INTEGER");
+            statement.execute(
+                    "ALTER TABLE " + tabela + " ADD COLUMN " + coluna + " INTEGER"
+            );
         }
     }
 
