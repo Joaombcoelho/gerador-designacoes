@@ -219,24 +219,43 @@ public class ProgramacaoParteDAO {
     }
 
 
-    public void atualizarDuracaoMinutos(Integer id, Integer duracaoMinutos) {
+    public void atualizarDuracaoMinutos(
+            Integer id,
+            Integer duracaoMinutos
+    ) {
         validarDuracao(duracaoMinutos);
-        String sql = "UPDATE programacao_parte SET duracao_minutos = ? WHERE id = ?";
-        try (Connection connection = ConnectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        String sql = """
+                UPDATE programacao_parte
+                SET duracao_minutos = ?
+                WHERE id = ?
+                """;
+
+        try (
+                Connection connection = ConnectionFactory.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
+        ) {
             statement.setObject(1, duracaoMinutos);
             statement.setInt(2, id);
+
             if (statement.executeUpdate() != 1) {
-                throw new RuntimeException("Parte da programação não encontrada.");
+                throw new RuntimeException(
+                        "Parte da programação não encontrada."
+                );
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar duração da parte da programação.", e);
+            throw new RuntimeException(
+                    "Erro ao atualizar duração da parte da programação.",
+                    e
+            );
         }
     }
 
     private void validarDuracao(Integer duracaoMinutos) {
         if (duracaoMinutos != null && duracaoMinutos <= 0) {
-            throw new IllegalArgumentException("A duração deve ser maior que zero.");
+            throw new IllegalArgumentException(
+                    "A duração deve ser maior que zero."
+            );
         }
     }
 
