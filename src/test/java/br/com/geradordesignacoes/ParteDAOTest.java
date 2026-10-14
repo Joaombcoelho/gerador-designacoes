@@ -51,6 +51,42 @@ public class ParteDAOTest extends BaseDAOTest {
     }
 
     @Test
+    void devePersistirDuracaoPadraoOpcional() {
+        ParteDAO dao = new ParteDAO();
+        Parte parte = new Parte(
+                "Parte com duração",
+                TipoParte.DISCURSO,
+                Privilegio.BATIZADO,
+                false,
+                SexoPermitido.MASCULINO,
+                1,
+                false,
+                List.of(TipoParticipacao.ORADOR)
+        );
+        parte.setDuracaoPadraoMinutos(10);
+        Parte salva = dao.salvar(parte);
+        assertEquals(10, dao.buscarPorId(salva.getId()).orElseThrow().getDuracaoPadraoMinutos());
+        salva.setDuracaoPadraoMinutos(null);
+        dao.atualizar(salva);
+        assertNull(dao.buscarPorId(salva.getId()).orElseThrow().getDuracaoPadraoMinutos());
+    }
+
+    @Test
+    void deveRejeitarDuracaoPadraoNaoPositiva() {
+        Parte parte = new Parte(
+                "Parte inválida",
+                TipoParte.DISCURSO,
+                Privilegio.BATIZADO,
+                false,
+                SexoPermitido.MASCULINO,
+                1,
+                false,
+                List.of(TipoParticipacao.ORADOR)
+        );
+        assertThrows(IllegalArgumentException.class, () -> parte.setDuracaoPadraoMinutos(0));
+    }
+
+    @Test
     void deveListarParteComParticipacoesNecessarias() {
 
         ParteDAO parteDAO = new ParteDAO();
