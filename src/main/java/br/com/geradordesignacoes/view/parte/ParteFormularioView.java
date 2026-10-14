@@ -333,7 +333,6 @@ public class ParteFormularioView {
                         requisitos,
                         participacoes
                 );
-        parte.setDuracaoPadraoMinutos(duracaoPadrao);
 
 
         ScrollPane rolagem =
@@ -703,6 +702,7 @@ public class ParteFormularioView {
 
                         participacoes
                 );
+        parte.setDuracaoPadraoMinutos(duracaoPadrao);
 
 
         if (parteEdicao == null) {
