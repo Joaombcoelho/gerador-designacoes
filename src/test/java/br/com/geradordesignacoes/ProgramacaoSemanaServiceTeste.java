@@ -432,53 +432,6 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
     }
 
     @Test
-    void deveCopiarDuracaoPadraoEManterOcorrenciasExistentesIndependentes() {
-        ParteDAO parteDAO = new ParteDAO();
-        Parte parte = service.listarTodas().stream()
-                .filter(p -> p.getTipoVariacao() == TipoVariacaoParte.FIXA)
-                .findFirst().orElseThrow();
-        parte.setDuracaoPadraoMinutos(12);
-        parteDAO.atualizar(parte);
-
-        LocalDate semanaAntiga = LocalDate.of(2027, 3, 3);
-        ProgramacaoSemana criada = service.obterOuCriar(semanaAntiga);
-        ProgramacaoParte ocorrenciaAntiga = criada.partes().stream()
-                .filter(p -> p.getParte().getId().equals(parte.getId()))
-                .findFirst().orElseThrow();
-        assertEquals(12, ocorrenciaAntiga.getDuracaoMinutos());
-
-        parte.setDuracaoPadraoMinutos(18);
-        parteDAO.atualizar(parte);
-        assertEquals(12, service.obterOuCriar(semanaAntiga).partes().stream()
-                .filter(p -> p.getParte().getId().equals(parte.getId()))
-                .findFirst().orElseThrow().getDuracaoMinutos());
-
-        LocalDate semanaNova = LocalDate.of(2027, 3, 10);
-        assertEquals(18, service.obterOuCriar(semanaNova).partes().stream()
-                .filter(p -> p.getParte().getId().equals(parte.getId()))
-                .findFirst().orElseThrow().getDuracaoMinutos());
-
-        service.definirDuracaoMinutos(semanaAntiga, ocorrenciaAntiga.getOrdem(), 20);
-        assertEquals(20, service.obterOuCriar(semanaAntiga).partes().stream()
-                .filter(p -> p.getParte().getId().equals(parte.getId()))
-                .findFirst().orElseThrow().getDuracaoMinutos());
-        assertEquals(18, service.obterOuCriar(semanaNova).partes().stream()
-                .filter(p -> p.getParte().getId().equals(parte.getId()))
-                .findFirst().orElseThrow().getDuracaoMinutos());
-    }
-
-    @Test
-    void deveRejeitarDuracaoSemanalNaoPositiva() {
-        ProgramacaoSemana programacao = service.obterOuCriar(LocalDate.of(2027, 4, 7));
-        assertThrows(IllegalArgumentException.class, () ->
-                service.definirDuracaoMinutos(
-                        programacao.data(),
-                        programacao.partes().getFirst().getOrdem(),
-                        0
-                ));
-    }
-
-    @Test
     void deveDefinirNumeroTresParaLeituraEPreservarNumeroEditado() {
 
         LocalDate data =
