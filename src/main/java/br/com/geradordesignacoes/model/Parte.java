@@ -20,6 +20,7 @@ public class Parte {
     private final TipoVariacaoParte tipoVariacao;
     private final boolean possuiTema;
     private final int ordem;
+    private Integer duracaoPadraoMinutos;
 
     /**
      * Construtor principal.
@@ -325,6 +326,19 @@ public class Parte {
 
     public int getOrdem() {
         return ordem;
+    }
+
+    public Integer getDuracaoPadraoMinutos() {
+        return duracaoPadraoMinutos;
+    }
+
+    public void setDuracaoPadraoMinutos(Integer duracaoPadraoMinutos) {
+        if (duracaoPadraoMinutos != null && duracaoPadraoMinutos <= 0) {
+            throw new IllegalArgumentException(
+                    "A duração padrão deve ser maior que zero."
+            );
+        }
+        this.duracaoPadraoMinutos = duracaoPadraoMinutos;
     }
 
     public List<TipoParticipacao> getParticipacoesNecessarias() {
