@@ -23,6 +23,7 @@ public class ParteFormularioView {
     private final Runnable aoCancelar;
 
     private final TextField campoNome;
+    private final TextField campoDuracaoPadrao;
 
     private final ComboBox<TipoParte> comboTipo;
     private final ComboBox<SecaoParte> comboSecao;
@@ -55,6 +56,10 @@ public class ParteFormularioView {
         campoNome = new TextField();
         campoNome.setPromptText("Digite o nome da parte");
         campoNome.getStyleClass().add("text-field");
+
+        campoDuracaoPadrao = new TextField();
+        campoDuracaoPadrao.setPromptText("Minutos ou deixe vazio");
+        campoDuracaoPadrao.getStyleClass().add("text-field");
 
         comboTipo = new ComboBox<>();
         comboTipo.getItems().addAll(TipoParte.values());
@@ -240,6 +245,13 @@ public class ParteFormularioView {
                 6
         );
 
+        adicionarCampo(
+                gradeDados,
+                "Duração padrão (minutos)",
+                campoDuracaoPadrao,
+                7
+        );
+
 
         dadosBasicos.getChildren()
                 .add(gradeDados);
@@ -321,6 +333,7 @@ public class ParteFormularioView {
                         requisitos,
                         participacoes
                 );
+        parte.setDuracaoPadraoMinutos(duracaoPadrao);
 
 
         ScrollPane rolagem =
@@ -496,6 +509,12 @@ public class ParteFormularioView {
                 parteEdicao.getTipoVariacao()
         );
 
+        campoDuracaoPadrao.setText(
+                parteEdicao.getDuracaoPadraoMinutos() == null
+                        ? ""
+                        : parteEdicao.getDuracaoPadraoMinutos().toString()
+        );
+
 
         if (parteEdicao.getTipo()
                 == TipoParte.LEITURA) {
@@ -635,6 +654,22 @@ public class ParteFormularioView {
                         :
                         NivelLeitura.BASICO;
 
+
+        Integer duracaoPadrao;
+        String textoDuracao = campoDuracaoPadrao.getText().trim();
+        if (textoDuracao.isEmpty()) {
+            duracaoPadrao = null;
+        } else {
+            try {
+                duracaoPadrao = Integer.valueOf(textoDuracao);
+                if (duracaoPadrao <= 0) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+                mostrarMensagem("Informe uma duração inteira positiva em minutos ou deixe o campo vazio.");
+                return;
+            }
+        }
 
         Parte parte =
                 new Parte(
