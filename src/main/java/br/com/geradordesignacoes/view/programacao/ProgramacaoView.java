@@ -53,6 +53,9 @@ public class ProgramacaoView {
 
     private final Button botaoSalvarNumeroOficial;
 
+    private final TextField campoDuracao;
+    private final Button botaoSalvarDuracao;
+
     private final Label labelStatus;
 
     private Consumer<Parte> onParteSelecionadaChanged;
@@ -138,6 +141,14 @@ public class ProgramacaoView {
 
         botaoSalvarNumeroOficial = new Button("Salvar Número");
         botaoSalvarNumeroOficial.getStyleClass().add("secondary-button");
+
+        campoDuracao = new TextField();
+        campoDuracao.setPromptText("Minutos ou vazio");
+        campoDuracao.getStyleClass().add("text-field");
+        campoDuracao.setPrefWidth(180);
+
+        botaoSalvarDuracao = new Button("Salvar Duração");
+        botaoSalvarDuracao.getStyleClass().add("secondary-button");
 
         labelStatus = new Label(
                 "Selecione um mês para configurar a programação."
@@ -590,10 +601,18 @@ public class ProgramacaoView {
                 Pos.CENTER_LEFT
         );
 
+        Label tituloDuracao = new Label("Duração da parte (minutos)");
+        tituloDuracao.getStyleClass().add("card-title");
+        HBox linhaDuracao = new HBox(10, campoDuracao, botaoSalvarDuracao);
+        linhaDuracao.setAlignment(Pos.CENTER_LEFT);
+
         painel.getChildren().addAll(
                 criarEspacamento(4),
                 tituloNumero,
-                linhaNumero
+                linhaNumero,
+                criarEspacamento(4),
+                tituloDuracao,
+                linhaDuracao
         );
 
         painel.setPadding(
@@ -753,8 +772,15 @@ public class ProgramacaoView {
     }
 
     public Button getBotaoSalvarNumeroOficial() {
-
         return botaoSalvarNumeroOficial;
+    }
+
+    public TextField getCampoDuracao() {
+        return campoDuracao;
+    }
+
+    public Button getBotaoSalvarDuracao() {
+        return botaoSalvarDuracao;
     }
 
 
