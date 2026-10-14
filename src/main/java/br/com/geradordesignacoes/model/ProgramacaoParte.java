@@ -8,6 +8,7 @@ public class ProgramacaoParte {
     private final Parte parte;
     private final int ordem;
     private String tema;
+    private Integer duracaoMinutos;
 
     /*
      * Número oficial da parte na programação semanal.
@@ -71,6 +72,19 @@ public class ProgramacaoParte {
 
     public void setTema(String tema) {
         this.tema = tema;
+    }
+
+    public Integer getDuracaoMinutos() {
+        return duracaoMinutos;
+    }
+
+    public void setDuracaoMinutos(Integer duracaoMinutos) {
+        if (duracaoMinutos != null && duracaoMinutos <= 0) {
+            throw new IllegalArgumentException(
+                    "A duração deve ser maior que zero."
+            );
+        }
+        this.duracaoMinutos = duracaoMinutos;
     }
 
     public Integer getNumeroOficial() {
