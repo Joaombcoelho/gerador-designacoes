@@ -62,9 +62,10 @@ public class ProgramacaoParteDAO {
         parte_id,
         ordem,
         tema,
-        numero_oficial
+        numero_oficial,
+        duracao_minutos
     )
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?)
     """;
 
 
@@ -98,6 +99,11 @@ public class ProgramacaoParteDAO {
             statement.setObject(
                     5,
                     programacaoParte.getNumeroOficial()
+            );
+
+            statement.setObject(
+                    6,
+                    programacaoParte.getDuracaoMinutos()
             );
 
             statement.executeUpdate();
@@ -213,6 +219,27 @@ public class ProgramacaoParteDAO {
     }
 
 
+    public void atualizarDuracaoMinutos(Integer id, Integer duracaoMinutos) {
+        validarDuracao(duracaoMinutos);
+        String sql = "UPDATE programacao_parte SET duracao_minutos = ? WHERE id = ?";
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setObject(1, duracaoMinutos);
+            statement.setInt(2, id);
+            if (statement.executeUpdate() != 1) {
+                throw new RuntimeException("Parte da programação não encontrada.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar duração da parte da programação.", e);
+        }
+    }
+
+    private void validarDuracao(Integer duracaoMinutos) {
+        if (duracaoMinutos != null && duracaoMinutos <= 0) {
+            throw new IllegalArgumentException("A duração deve ser maior que zero.");
+        }
+    }
+
     public List<ProgramacaoParte> listarPorSemana(
             int programacaoSemanaId
     ) {
@@ -243,7 +270,7 @@ public class ProgramacaoParteDAO {
     ) throws SQLException {
 
         String sql = """
-                SELECT id, parte_id, ordem, tema, numero_oficial
+                SELECT id, parte_id, ordem, tema, numero_oficial, duracao_minutos
                               FROM programacao_parte
                               WHERE programacao_semana_id = ?
                               ORDER BY ordem
@@ -297,6 +324,9 @@ public class ProgramacaoParteDAO {
                                     resultSet.getString("tema"),
                                     (Integer) resultSet.getObject("numero_oficial")
                             );
+                    programacaoParte.setDuracaoMinutos(
+                            (Integer) resultSet.getObject("duracao_minutos")
+                    );
 
 
                     partes.add(
