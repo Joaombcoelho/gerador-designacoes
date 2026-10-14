@@ -26,9 +26,10 @@ public class ParteDAO {
                     secao,
                     tipo_variacao,
                     possui_tema,
-                    ordem
+                    ordem,
+                    duracao_padrao_minutos
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
 
@@ -95,6 +96,9 @@ public class ParteDAO {
                                     parte.getOrdem(),
                                     parte.getParticipacoesNecessarias()
                             );
+                    parteSalva.setDuracaoPadraoMinutos(
+                            parte.getDuracaoPadraoMinutos()
+                    );
 
 
                     salvarParticipacoesNecessarias(
@@ -252,7 +256,8 @@ public class ParteDAO {
                     secao = ?,
                     tipo_variacao = ?,
                     possui_tema = ?,
-                    ordem = ?
+                    ordem = ?,
+                    duracao_padrao_minutos = ?
                 WHERE id = ?
                 """;
 
@@ -280,7 +285,7 @@ public class ParteDAO {
 
 
                 statement.setInt(
-                        13,
+                        14,
                         parte.getId()
                 );
 
@@ -396,6 +401,11 @@ public class ParteDAO {
                 12,
                 parte.getOrdem()
         );
+
+        statement.setObject(
+                13,
+                parte.getDuracaoPadraoMinutos()
+        );
     }
 
 
@@ -428,7 +438,7 @@ public class ParteDAO {
                 resultSet.getString("tipo_variacao");
 
 
-        return new Parte(
+        Parte parte = new Parte(
                 id,
 
                 resultSet.getString("nome"),
@@ -484,6 +494,11 @@ public class ParteDAO {
                         id
                 )
         );
+
+        parte.setDuracaoPadraoMinutos(
+                (Integer) resultSet.getObject("duracao_padrao_minutos")
+        );
+        return parte;
     }
 
     private void salvarParticipacoesNecessarias(
