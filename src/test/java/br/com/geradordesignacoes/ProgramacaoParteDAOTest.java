@@ -232,6 +232,25 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
 
 
     @Test
+    void devePersistirDuracaoDaOcorrenciaSemAfetarNumeroETema() {
+        int semanaId = criarProgramacaoSemana();
+        Parte parte = obterParteInicial("DISCURSO_TESOUROS");
+        ProgramacaoParte ocorrencia = new ProgramacaoParte(parte, 1, "Tema de teste");
+        ocorrencia.setDuracaoMinutos(12);
+        programacaoParteDAO.salvar(semanaId, ocorrencia);
+        ProgramacaoParte recuperada = programacaoParteDAO.listarPorSemana(semanaId).get(0);
+        assertEquals(12, recuperada.getDuracaoMinutos());
+        programacaoParteDAO.atualizarDuracaoMinutos(recuperada.getId(), null);
+        assertNull(programacaoParteDAO.listarPorSemana(semanaId).get(0).getDuracaoMinutos());
+    }
+
+    @Test
+    void deveRejeitarDuracaoDaOcorrenciaNaoPositiva() {
+        assertThrows(IllegalArgumentException.class,
+                () -> programacaoParteDAO.atualizarDuracaoMinutos(1, 0));
+    }
+
+    @Test
     void deveExcluirParteDaProgramacao() {
 
         int semanaId = criarProgramacaoSemana();
