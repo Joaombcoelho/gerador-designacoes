@@ -46,7 +46,8 @@ public class DatabaseInitializer {
                 secao TEXT,
                 tipo_variacao TEXT,
                 possui_tema INTEGER NOT NULL DEFAULT 0,
-                ordem INTEGER NOT NULL DEFAULT 999
+                ordem INTEGER NOT NULL DEFAULT 999,
+                duracao_padrao_minutos INTEGER
             );
             
             """;
@@ -175,6 +176,7 @@ public class DatabaseInitializer {
             
                 ordem INTEGER NOT NULL,
                 tema TEXT,
+                duracao_minutos INTEGER,
             
                 FOREIGN KEY (programacao_semana_id)
                     REFERENCES programacao_semana(id)
@@ -239,6 +241,7 @@ public class DatabaseInitializer {
                     CREATE_TABLE_PARTE
             );
             adicionarColunaOrdemParte(connection);
+            adicionarColunaDuracaoPadraoParte(connection);
 
             migrarTipoVariacaoPartes(connection);
             /*
@@ -315,6 +318,7 @@ public class DatabaseInitializer {
             );
 
             adicionarColunaNumeroOficialProgramacaoParte(connection);
+            adicionarColunaDuracaoProgramacaoParte(connection);
 
 
             /*
@@ -449,6 +453,51 @@ public class DatabaseInitializer {
                     "ALTER TABLE programacao_semana ADD COLUMN "
                             + coluna
                             + " INTEGER NOT NULL DEFAULT 0"
+            );
+        }
+    }
+
+    private static void adicionarColunaDuracaoPadraoParte(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaInteiraOpcional(
+                connection,
+                "parte",
+                "duracao_padrao_minutos"
+        );
+    }
+
+    private static void adicionarColunaDuracaoProgramacaoParte(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaInteiraOpcional(
+                connection,
+                "programacao_parte",
+                "duracao_minutos"
+        );
+    }
+
+    private static void adicionarColunaInteiraOpcional(
+            Connection connection,
+            String tabela,
+            String coluna
+    ) throws SQLException {
+        try (
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(
+                        "PRAGMA table_info(" + tabela + ")"
+                )
+        ) {
+            while (resultSet.next()) {
+                if (coluna.equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(
+                    "ALTER TABLE " + tabela + " ADD COLUMN " + coluna + " INTEGER"
             );
         }
     }

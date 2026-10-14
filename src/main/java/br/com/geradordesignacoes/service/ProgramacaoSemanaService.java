@@ -114,11 +114,10 @@ public class ProgramacaoSemanaService {
                             parteFixa
                     );
 
-            ProgramacaoParte programacaoParte =
-                    new ProgramacaoParte(
-                            parteFixa,
-                            novaOrdem
-                    );
+            ProgramacaoParte programacaoParte = criarProgramacaoParte(
+                    parteFixa,
+                    novaOrdem
+            );
 
             atribuirNumeroPadraoLeitura(programacaoParte);
 
@@ -209,6 +208,44 @@ public class ProgramacaoSemanaService {
         programacaoParteDAO.atualizarTema(
                         programacaoParte.getId(),
                         temaNormalizado
+        );
+    }
+
+    /**
+     * Define ou remove a duração de uma ocorrência semanal.
+     * Um valor nulo representa uma duração ainda pendente.
+     */
+    public void definirDuracaoMinutos(
+            LocalDate data,
+            int ordem,
+            Integer duracaoMinutos
+    ) {
+        validarData(data);
+
+        if (ordem <= 0) {
+            throw new IllegalArgumentException(
+                    "A ordem deve ser maior que zero."
+            );
+        }
+
+        if (duracaoMinutos != null && duracaoMinutos <= 0) {
+            throw new IllegalArgumentException(
+                    "A duração deve ser maior que zero."
+            );
+        }
+
+        ProgramacaoSemana programacao = obterOuCriar(data);
+        ProgramacaoParte programacaoParte = programacao.partes()
+                .stream()
+                .filter(parte -> parte.getOrdem() == ordem)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Parte da programação não encontrada."
+                ));
+
+        programacaoParteDAO.atualizarDuracaoMinutos(
+                programacaoParte.getId(),
+                duracaoMinutos
         );
     }
 
@@ -310,7 +347,9 @@ public class ProgramacaoSemanaService {
                         parte,
                         ordem
                 );
-
+        programacaoParte.setDuracaoMinutos(
+                parte.getDuracaoPadraoMinutos()
+        );
         atribuirNumeroPadraoLeitura(programacaoParte);
 
         return programacaoParte;
@@ -535,7 +574,7 @@ public class ProgramacaoSemanaService {
 
         for (Parte parte : partesOrdenadas) {
             programacao.adicionarParte(
-                    new ProgramacaoParte(
+                    criarProgramacaoParte(
                             parte,
                             ordem++
                     )
@@ -606,11 +645,10 @@ public class ProgramacaoSemanaService {
         int novaOrdem =
                 obterProximaOrdem(programacao);
 
-        ProgramacaoParte programacaoParte =
-                new ProgramacaoParte(
-                        parte,
-                        novaOrdem
-                );
+        ProgramacaoParte programacaoParte = criarProgramacaoParte(
+                parte,
+                novaOrdem
+        );
 
         atribuirNumeroPadraoLeitura(programacaoParte);
 

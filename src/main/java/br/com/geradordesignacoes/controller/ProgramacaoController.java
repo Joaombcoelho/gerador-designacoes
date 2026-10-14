@@ -117,6 +117,9 @@ public class ProgramacaoController {
                         event -> salvarNumeroOficial()
                 );
 
+        view.getBotaoSalvarDuracao()
+                .setOnAction(event -> salvarDuracao());
+
 
         view.getBotaoGerar()
                 .setOnAction(
@@ -372,9 +375,8 @@ public class ProgramacaoController {
         view.getCampoTema()
                 .clear();
 
-        view.getCampoNumeroOficial()
-                .clear();
-
+        view.getCampoNumeroOficial().clear();
+        view.getCampoDuracao().clear();
 
         atualizarStatusSemana(
                 programacao.data()
@@ -625,9 +627,9 @@ public class ProgramacaoController {
 
         if (parte == null) {
 
-            view.getCampoTema()
-                    .clear();
-
+            view.getCampoTema().clear();
+            view.getCampoNumeroOficial().clear();
+            view.getCampoDuracao().clear();
             return;
         }
 
@@ -676,10 +678,16 @@ public class ProgramacaoController {
                                                         .getNumeroOficial()
                                                         .toString()
                                         );
+                                view.getCampoDuracao().setText(
+                                        programacaoParte.getDuracaoMinutos() == null
+                                                ? ""
+                                                : programacaoParte.getDuracaoMinutos().toString()
+                                );
                             },
                             () -> {
                                 view.getCampoTema().clear();
                                 view.getCampoNumeroOficial().clear();
+                                view.getCampoDuracao().clear();
                             }
                     );
 
@@ -892,6 +900,70 @@ public class ProgramacaoController {
         }
     }
 
+
+    private void salvarDuracao() {
+        LocalDate data = obterDataSelecionada();
+
+        if (data == null) {
+            view.atualizarStatus("Selecione uma reunião.");
+            return;
+        }
+
+        Parte parte = view.getListaPartes()
+                .getSelectionModel()
+                .getSelectedItem();
+
+        if (parte == null || !view.isParteSelecionada(parte.getId())) {
+            view.atualizarStatus(
+                    "Selecione uma parte que esteja na programação."
+            );
+            return;
+        }
+
+        String texto = view.getCampoDuracao().getText().trim();
+        Integer duracao;
+
+        if (texto.isEmpty()) {
+            duracao = null;
+        } else {
+            try {
+                duracao = Integer.valueOf(texto);
+                if (duracao <= 0) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+                view.atualizarStatus(
+                        "Informe uma duração inteira positiva em minutos ou deixe o campo vazio."
+                );
+                return;
+            }
+        }
+
+        try {
+            ProgramacaoSemana programacao = service.obterOuCriar(data);
+            ProgramacaoParte ocorrencia = programacao.partes().stream()
+                    .filter(item -> item.getParte().getId().equals(parte.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Parte não encontrada na programação."
+                    ));
+
+            service.definirDuracaoMinutos(
+                    data,
+                    ocorrencia.getOrdem(),
+                    duracao
+            );
+            carregarProgramacao(data);
+            view.getListaPartes().getSelectionModel().select(parte);
+            selecionarParte(parte);
+            view.atualizarStatus("Duração salva com sucesso.");
+        } catch (Exception e) {
+            view.atualizarStatus(
+                    "Erro ao salvar duração: " + e.getMessage()
+            );
+            e.printStackTrace();
+        }
+    }
 
     private void gerarEscalas() {
 
