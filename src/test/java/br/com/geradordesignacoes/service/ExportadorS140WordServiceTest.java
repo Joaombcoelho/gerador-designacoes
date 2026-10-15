@@ -2,7 +2,7 @@ package br.com.geradordesignacoes.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;\nimport br.com.geradordesignacoes.model.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -101,6 +101,35 @@ class ExportadorS140WordServiceTest {
 
             assertEquals("15/10/2026 e 15/10/2026", paragrafo.getText());
         }
+    }
+
+    @Test
+    void deveExibirNomeDaParteQuandoTemaNaoFoiInformado() {
+        Parte parte = new Parte(
+                1, "Iniciando conversas", TipoParte.INICIANDO_CONVERSAS,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS,
+                1, false, NivelLeitura.BASICO, SecaoParte.MINISTERIO,
+                TipoVariacaoParte.VARIAVEL, true, 1, List.of());
+        ProgramacaoParte programacaoParte = new ProgramacaoParte(parte, 1, null);
+
+        assertEquals(
+                "Iniciando conversas",
+                ExportadorS140WordService.textoParteExportacao(programacaoParte));
+    }
+
+    @Test
+    void deveManterNomeDaParteEAcrescentarTemaQuandoInformado() {
+        Parte parte = new Parte(
+                1, "Iniciando conversas", TipoParte.INICIANDO_CONVERSAS,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS,
+                1, false, NivelLeitura.BASICO, SecaoParte.MINISTERIO,
+                TipoVariacaoParte.VARIAVEL, true, 1, List.of());
+        ProgramacaoParte programacaoParte =
+                new ProgramacaoParte(parte, 1, "Abordagem informal");
+
+        assertEquals(
+                "Iniciando conversas: Abordagem informal",
+                ExportadorS140WordService.textoParteExportacao(programacaoParte));
     }
 
     @Test
