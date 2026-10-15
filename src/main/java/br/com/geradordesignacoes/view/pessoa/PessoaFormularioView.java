@@ -264,8 +264,7 @@ public class PessoaFormularioView {
     private void atualizarPermissoesAnciao() {
         Privilegio privilegio = comboPrivilegio.getValue();
         boolean anciao = privilegio == Privilegio.ANCIAO;
-        boolean podeDirigirEstudo = anciao
-                || privilegio == Privilegio.SERVO_MINISTERIAL;
+        boolean podeDirigirEstudo = privilegioPodeDirigirEstudo(privilegio);
 
         checkPresidente.setDisable(!anciao);
         checkDirigente.setDisable(!podeDirigirEstudo);
@@ -279,6 +278,11 @@ public class PessoaFormularioView {
                 checkDirigente.setSelected(false);
             }
         }
+    }
+
+    static boolean privilegioPodeDirigirEstudo(Privilegio privilegio) {
+        return privilegio == Privilegio.ANCIAO
+                || privilegio == Privilegio.SERVO_MINISTERIAL;
     }
 
     private void atualizarPermissoesSexo() {
