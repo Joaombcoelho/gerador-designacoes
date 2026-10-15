@@ -1,15 +1,25 @@
 package br.com.geradordesignacoes.service;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExportadorS140WordServiceTest {
+
+    @TempDir
+    Path diretorioTemporario;
 
     private final ExportadorS140WordService service =
             new ExportadorS140WordService();
@@ -53,4 +63,50 @@ class ExportadorS140WordServiceTest {
                 service.datasReunioes(YearMonth.of(2026, 10), DayOfWeek.SUNDAY)
         );
     }
+    @Test
+    void deveRejeitarMesNuloAntesDeAcessarArquivosOuBanco() {
+        IllegalArgumentException erro = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.exportar(null, null, null)
+        );
+
+        assertTrue(erro.getMessage().contains("Selecione o mês"));
+    }
+
+    @Test
+    void deveRejeitarModeloInexistenteAntesDeCarregarDados() {
+        IllegalArgumentException erro = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.exportar(
+                        YearMonth.of(2026, 10),
+                        Path.of("modelo-s140-inexistente.docx"),
+                        Path.of("saida-s140.docx")
+                )
+        );
+
+        assertTrue(erro.getMessage().contains("modelo oficial S-140"));
+    }
+
+    @Test
+    void deveExigirDestinoComExtensaoDocx() throws IOException {
+        Path modelo = diretorioTemporario.resolve("modelo.docx");
+        try (XWPFDocument documento = new XWPFDocument()) {
+            documento.createParagraph().createRun().setText("Modelo de teste");
+            try (var saida = Files.newOutputStream(modelo)) {
+                documento.write(saida);
+            }
+        }
+
+        IllegalArgumentException erro = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.exportar(
+                        YearMonth.of(2026, 10),
+                        modelo,
+                        diretorioTemporario.resolve("saida-s140.txt")
+                )
+        );
+
+        assertTrue(erro.getMessage().contains("extensão .docx"));
+    }
+
 }

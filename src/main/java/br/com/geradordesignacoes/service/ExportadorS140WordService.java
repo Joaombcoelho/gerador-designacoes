@@ -336,18 +336,29 @@ public class ExportadorS140WordService {
     }
 
     private void limparBloco(XWPFTable tabela, int linhaData) {
-        for (int deslocamento = 0; deslocamento <= 23 && linhaData + deslocamento < tabela.getNumberOfRows(); deslocamento++) {
-            XWPFTableRow linha = tabela.getRow(linhaData + deslocamento);
-            for (XWPFTableCell celula : linha.getTableCells()) {
-                if (celula.getText().contains("[DATA]") || celula.getText().contains("LEITURA SEMANAL DA BÍBLIA") ||
-                        celula.getText().contains("[Tema]") || celula.getText().contains("[Nome]") ||
-                        celula.getText().contains("[Nome/Nome]") || celula.getText().contains("Cântico [número]")) {
-                    substituirNaCelula(celula, "[DATA]", "");
-                substituirNaCelula(celula, " | LEITURA SEMANAL DA BÍBLIA", "");
-                substituirNaCelula(celula, "[Tema]", "");
-                    substituirNaCelula(celula, "[Nome/Nome]", "");
-                    substituirNaCelula(celula, "[Nome]", "");
-                    substituirNaCelula(celula, "Cântico [número]", "Cântico");
+        // Alguns blocos compartilham a página com o anterior. Só limpa o
+        // cabeçalho de página quando ele pertence exclusivamente a este bloco.
+        int linhaCabecalho = linhaData - 2;
+        if (linhaCabecalho >= 0
+                && tabela.getRow(linhaCabecalho).getTableCells().stream()
+                .anyMatch(celula -> celula.getText().contains("[NOME DA CONGREGAÇÃO]"))) {
+            limparLinha(tabela.getRow(linhaCabecalho));
+        }
+
+        for (int deslocamento = 0;
+             deslocamento <= 23 && linhaData + deslocamento < tabela.getNumberOfRows();
+             deslocamento++) {
+            limparLinha(tabela.getRow(linhaData + deslocamento));
+        }
+    }
+
+    private void limparLinha(XWPFTableRow linha) {
+        for (XWPFTableCell celula : linha.getTableCells()) {
+            for (XWPFParagraph paragrafo : celula.getParagraphs()) {
+                for (XWPFRun run : paragrafo.getRuns()) {
+                    if (run.getText(0) != null) {
+                        run.setText("", 0);
+                    }
                 }
             }
         }

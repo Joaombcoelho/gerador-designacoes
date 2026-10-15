@@ -10,6 +10,7 @@ import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.service.HorarioS140Service;
 import br.com.geradordesignacoes.service.ExportadorS89Service;
 import br.com.geradordesignacoes.service.ExportadorS140WordService;
+import br.com.geradordesignacoes.service.ConfiguracaoGeralService;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
 import java.time.DayOfWeek;
@@ -38,6 +39,8 @@ public class ProgramacaoController {
 
     private final ExportadorS140WordService exportadorS140WordService;
 
+    private final ConfiguracaoGeralService configuracaoGeralService;
+
     private final List<LocalDate> semanas;
 
 
@@ -58,6 +61,7 @@ public class ProgramacaoController {
         this.exportadorS89Service =
                 new ExportadorS89Service();
         this.exportadorS140WordService = new ExportadorS140WordService();
+        this.configuracaoGeralService = new ConfiguracaoGeralService();
 
         this.semanas =
                 new ArrayList<>();
@@ -256,15 +260,16 @@ public class ProgramacaoController {
         List<LocalDate> resultado =
                 new ArrayList<>();
 
+        DayOfWeek diaReuniao = configuracaoGeralService.buscar()
+                .diaReuniaoHabitual();
+
         LocalDate data =
                 mes.atDay(1);
 
         while (data.getMonth()
                 == mes.getMonth()) {
 
-            if (data.getDayOfWeek()
-                    == DayOfWeek.WEDNESDAY) {
-
+            if (data.getDayOfWeek() == diaReuniao) {
                 resultado.add(data);
             }
 
