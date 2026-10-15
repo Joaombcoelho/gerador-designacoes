@@ -133,6 +133,58 @@ class ExportadorS140WordServiceTest {
     }
 
     @Test
+    void deveExibirDirigenteELeitorDoEstudoBiblico() {
+        Parte estudo = new Parte(
+                8, "Estudo Bíblico", TipoParte.DIRIGENTE_ESTUDO,
+                Privilegio.SERVO_MINISTERIAL, false, SexoPermitido.MASCULINO,
+                1, false, NivelLeitura.BASICO, SecaoParte.NOSSA_VIDA_CRISTA,
+                TipoVariacaoParte.FIXA, true, 1, List.of());
+        Pessoa dirigente = pessoaTeste("Dirigente", 1);
+        Pessoa leitor = pessoaTeste("Leitor", 2);
+        List<Designacao> designacoes = List.of(
+                new Designacao(LocalDate.of(2026, 10, 7), estudo, dirigente, null),
+                new Designacao(LocalDate.of(2026, 10, 7), estudo, null, leitor));
+
+        assertEquals(
+                "Dirigente/Leitor",
+                ExportadorS140WordService.textoParticipantesEstudoBiblico(designacoes, 8));
+    }
+
+    @Test
+    void deveIdentificarLinhasOpcionaisSemPartesProgramadasParaRemocao() {
+        Parte ministerio = criarParteTeste(
+                10, "Iniciando conversas", TipoParte.INICIANDO_CONVERSAS,
+                SecaoParte.MINISTERIO, 1);
+        Parte ministerio2 = criarParteTeste(
+                11, "Cultivando interesse", TipoParte.CULTIVANDO_INTERESSE,
+                SecaoParte.MINISTERIO, 2);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(LocalDate.of(2026, 10, 7));
+        programacao.adicionarParte(new ProgramacaoParte(ministerio, 1, null));
+        programacao.adicionarParte(new ProgramacaoParte(ministerio2, 2, null));
+
+        assertEquals(
+                List.of(114, 119, 120),
+                ExportadorS140WordService.linhasPartesNaoUtilizadas(programacao, 102));
+    }
+
+    private Pessoa pessoaTeste(String nome, int id) {
+        Pessoa pessoa = new Pessoa(
+                nome, Sexo.MASCULINO, true, true, true,
+                true, true, true, false, true,
+                Privilegio.SERVO_MINISTERIAL, NivelLeitura.BASICO);
+        pessoa.setId(id);
+        return pessoa;
+    }
+
+    private Parte criarParteTeste(
+            int id, String nome, TipoParte tipo, SecaoParte secao, int ordem) {
+        return new Parte(
+                id, nome, tipo, Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS,
+                1, false, NivelLeitura.BASICO, secao,
+                TipoVariacaoParte.VARIAVEL, true, ordem, List.of());
+    }
+
+    @Test
     void deveRejeitarMesNuloAntesDeAcessarArquivosOuBanco() {
         IllegalArgumentException erro = assertThrows(
                 IllegalArgumentException.class,
