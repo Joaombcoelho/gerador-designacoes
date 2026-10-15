@@ -330,6 +330,71 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
     }
 
 
+    @Test
+    void devePersistirCanticosEConselheiroDaSalaB() {
+        LocalDate data = LocalDate.of(2026, 10, 7);
+        int pessoaId = new br.com.geradordesignacoes.dao.PessoaDAO()
+                .listarTodos().get(0).getId();
+        ProgramacaoSemana programacao = new ProgramacaoSemana(
+                null,
+                data,
+                List.of(),
+                true,
+                false,
+                pessoaId,
+                "103",
+                "12",
+                "45"
+        );
+
+        programacaoSemanaDAO.salvar(programacao);
+
+        ProgramacaoSemana encontrada = programacaoSemanaDAO.buscarPorData(data);
+
+        assertNotNull(encontrada);
+        assertEquals(pessoaId, encontrada.conselheiroSalaBId());
+        assertEquals("103", encontrada.canticoInicial());
+        assertEquals("12", encontrada.canticoMeio());
+        assertEquals("45", encontrada.canticoFinal());
+        assertTrue(encontrada.salaBHabilitada());
+        assertFalse(encontrada.salaCHabilitada());
+    }
+
+    @Test
+    void devePermitirCamposS140VaziosEmProgramacaoExistente() {
+        LocalDate data = LocalDate.of(2026, 10, 14);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(data);
+
+        programacaoSemanaDAO.salvar(programacao);
+
+        ProgramacaoSemana encontrada = programacaoSemanaDAO.buscarPorData(data);
+
+        assertNotNull(encontrada);
+        assertNull(encontrada.conselheiroSalaBId());
+        assertNull(encontrada.canticoInicial());
+        assertNull(encontrada.canticoMeio());
+        assertNull(encontrada.canticoFinal());
+    }
+
+    @Test
+    void deveNormalizarCanticosVaziosComoNulos() {
+        ProgramacaoSemana programacao = new ProgramacaoSemana(
+                null,
+                LocalDate.of(2026, 10, 21),
+                List.of(),
+                false,
+                false,
+                null,
+                "  ",
+                "",
+                null
+        );
+
+        assertNull(programacao.canticoInicial());
+        assertNull(programacao.canticoMeio());
+        assertNull(programacao.canticoFinal());
+    }
+
     private Parte obterParteInicial(
             String tipo
     ) {
