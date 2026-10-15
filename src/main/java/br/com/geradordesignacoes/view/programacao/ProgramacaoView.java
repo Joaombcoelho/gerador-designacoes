@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.view.programacao;
 
 import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.HorarioS140Calculado;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
@@ -15,12 +16,14 @@ import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class ProgramacaoView {
 
@@ -64,6 +67,8 @@ public class ProgramacaoView {
     private final TextField campoCanticoFinal;
     private final ComboBox<Pessoa> campoConselheiroSalaB;
     private final Button botaoSalvarDadosS140;
+    private final Button botaoHorariosS140;
+    private BiConsumer<List<String>, Map<String, LocalTime>> onSalvarAjustesHorarios;
 
     private Consumer<Parte> onParteSelecionadaChanged;
 
@@ -165,6 +170,8 @@ public class ProgramacaoView {
         campoConselheiroSalaB.setMaxWidth(Double.MAX_VALUE);
         botaoSalvarDadosS140 = new Button("Salvar dados do S-140");
         botaoSalvarDadosS140.getStyleClass().add("secondary-button");
+        botaoHorariosS140 = new Button("Horários do S-140");
+        botaoHorariosS140.getStyleClass().add("secondary-button");
 
         labelStatus = new Label(
                 "Selecione um mês para configurar a programação."
@@ -600,7 +607,7 @@ public class ProgramacaoView {
         VBox seletorConselheiro = new VBox(4, labelConselheiro, campoConselheiroSalaB);
         HBox.setHgrow(seletorConselheiro, Priority.ALWAYS);
 
-        HBox linhaConselheiro = new HBox(8, seletorConselheiro, botaoSalvarDadosS140);
+        HBox linhaConselheiro = new HBox(8, seletorConselheiro, botaoSalvarDadosS140, botaoHorariosS140);
         linhaConselheiro.setAlignment(Pos.BOTTOM_LEFT);
 
         return new VBox(8, titulo, canticos, linhaConselheiro);
@@ -825,6 +832,93 @@ public class ProgramacaoView {
     public TextField getCampoCanticoFinal() { return campoCanticoFinal; }
     public ComboBox<Pessoa> getCampoConselheiroSalaB() { return campoConselheiroSalaB; }
     public Button getBotaoSalvarDadosS140() { return botaoSalvarDadosS140; }
+    public Button getBotaoHorariosS140() {
+        return botaoHorariosS140;
+    }
+
+    public void setOnSalvarAjustesHorarios(
+            BiConsumer<List<String>, Map<String, LocalTime>> callback
+    ) {
+        onSalvarAjustesHorarios = callback;
+    }
+
+    /**
+     * Exibe os horários calculados e permite manter ou remover
+     * ajustes manuais para a reunião selecionada.
+     */
+    public void abrirDialogoHorariosS140(
+            List<HorarioS140Calculado> horarios,
+            Map<String, LocalTime> ajustesManuais
+    ) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Horários da reunião — S-140");
+        dialog.setHeaderText("Os horários são recalculados automaticamente. Informe HH:mm para fixar um horário; deixe vazio para voltar ao cálculo automático.");
+
+        ButtonType salvar = new ButtonType("Salvar ajustes", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(salvar, ButtonType.CANCEL);
+
+        VBox linhas = new VBox(8);
+        linhas.setPadding(new Insets(12));
+        Map<String, TextField> campos = new java.util.LinkedHashMap<>();
+
+        for (HorarioS140Calculado item : horarios) {
+            Label descricao = new Label(item.descricao());
+            descricao.setMinWidth(210);
+            Label horario = new Label(
+                    item.horarioInicio() == null
+                            ? "Horário pendente"
+                            : item.horarioInicio() + " – "
+                                + (item.horarioFim() == null ? "fim pendente" : item.horarioFim())
+            );
+            horario.setMinWidth(130);
+            TextField campo = new TextField();
+            campo.setPromptText("HH:mm (automático)");
+            campo.setPrefWidth(145);
+            LocalTime manual = ajustesManuais.get(item.chave());
+            campo.setText(manual == null ? "" : manual.toString());
+            campos.put(item.chave(), campo);
+
+            HBox linha = new HBox(10, descricao, horario, campo);
+            linha.setAlignment(Pos.CENTER_LEFT);
+            linhas.getChildren().add(linha);
+        }
+
+        ScrollPane rolagem = new ScrollPane(linhas);
+        rolagem.setFitToWidth(true);
+        rolagem.setPrefViewportWidth(700);
+        rolagem.setPrefViewportHeight(440);
+        dialog.getDialogPane().setContent(rolagem);
+        dialog.setResultConverter(botao -> botao);
+
+        dialog.showAndWait().ifPresent(botao -> {
+            if (botao != salvar || onSalvarAjustesHorarios == null) {
+                return;
+            }
+
+            Map<String, LocalTime> novosAjustes = new java.util.LinkedHashMap<>();
+            try {
+                for (Map.Entry<String, TextField> entrada : campos.entrySet()) {
+                    String texto = entrada.getValue().getText();
+                    if (texto != null && !texto.isBlank()) {
+                        novosAjustes.put(entrada.getKey(), LocalTime.parse(texto.trim()));
+                    }
+                }
+            } catch (java.time.format.DateTimeParseException e) {
+                Alert alerta = new Alert(Alert.AlertType.ERROR);
+                alerta.setTitle("Horário inválido");
+                alerta.setHeaderText("Use o formato de 24 horas HH:mm.");
+                alerta.setContentText("Exemplo: 20:15.");
+                alerta.showAndWait();
+                return;
+            }
+
+            onSalvarAjustesHorarios.accept(
+                    List.copyOf(campos.keySet()),
+                    Map.copyOf(novosAjustes)
+            );
+        });
+    }
+
 
     public void carregarConselheirosSalaB(List<Pessoa> pessoas) {
         campoConselheiroSalaB.setItems(FXCollections.observableArrayList(pessoas));
