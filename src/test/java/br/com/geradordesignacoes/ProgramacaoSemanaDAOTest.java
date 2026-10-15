@@ -333,13 +333,15 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
     @Test
     void devePersistirCanticosEConselheiroDaSalaB() {
         LocalDate data = LocalDate.of(2026, 10, 7);
+        int pessoaId = new br.com.geradordesignacoes.dao.PessoaDAO()
+                .listarTodos().get(0).getId();
         ProgramacaoSemana programacao = new ProgramacaoSemana(
                 null,
                 data,
                 List.of(),
                 true,
                 false,
-                42,
+                pessoaId,
                 "103",
                 "12",
                 "45"
@@ -350,7 +352,7 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
         ProgramacaoSemana encontrada = programacaoSemanaDAO.buscarPorData(data);
 
         assertNotNull(encontrada);
-        assertEquals(42, encontrada.conselheiroSalaBId());
+        assertEquals(pessoaId, encontrada.conselheiroSalaBId());
         assertEquals("103", encontrada.canticoInicial());
         assertEquals("12", encontrada.canticoMeio());
         assertEquals("45", encontrada.canticoFinal());
