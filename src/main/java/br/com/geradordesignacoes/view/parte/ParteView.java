@@ -132,7 +132,7 @@ public class ParteView {
 
         tabela.setItems(dados);
         tabela.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY
+                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
         );
 
         tabela.getStyleClass().add("table-view");
