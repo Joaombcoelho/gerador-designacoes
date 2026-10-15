@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -34,6 +35,7 @@ public class ExportadorS140WordService {
     private final ConfiguracaoGeralService configuracaoService;
     private final CarregadorDadosExportacaoS140Service carregador;
     private final HorarioS140Service horarioService;
+    private final PessoaDAO pessoaDAO = new PessoaDAO();
 
     public ExportadorS140WordService() {
         this(new ConfiguracaoGeralService(),
@@ -386,8 +388,7 @@ public class ExportadorS140WordService {
 
     private String nomePorId(Integer id) {
         if (id == null) return "";
-        // O nome do conselheiro é carregado de uma designação já persistida, sem modificar o banco.
-        return "";
+        return pessoaDAO.buscarPorId(id).map(Pessoa::getNome).orElse("");
     }
 
     private static String nome(Pessoa pessoa) {
