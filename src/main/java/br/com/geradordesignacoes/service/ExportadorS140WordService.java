@@ -84,7 +84,13 @@ public class ExportadorS140WordService {
         List<String> pendencias = new ArrayList<>();
         for (LocalDate data : datas) {
             try {
-                semanas.add(carregador.carregar(data));
+                DadosExportacaoS140Semana dados = carregador.carregar(data);
+                List<String> problemas = validarSemana(dados);
+                if (problemas.isEmpty()) {
+                    semanas.add(dados);
+                } else {
+                    pendencias.add(data.format(DATA) + ": " + String.join("; ", problemas));
+                }
             } catch (RuntimeException e) {
                 pendencias.add(data.format(DATA) + ": " + e.getMessage());
             }
@@ -122,6 +128,20 @@ public class ExportadorS140WordService {
             }
         }
         return destino;
+    }
+
+    private List<String> validarSemana(DadosExportacaoS140Semana dados) {
+        List<String> problemas = new ArrayList<>();
+        if (dados.escala().getPresidente() == null) {
+            problemas.add("presidente não definido na escala salva");
+        }
+        if (dados.escala().getOracaoInicial() == null) {
+            problemas.add("oração inicial não definida na escala salva");
+        }
+        if (dados.programacao().partes().isEmpty()) {
+            problemas.add("a programação semanal não possui partes");
+        }
+        return problemas;
     }
 
     private void preencherSemana(XWPFTable tabela, int linhaData, DadosExportacaoS140Semana dados) {
