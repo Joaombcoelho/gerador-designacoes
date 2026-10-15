@@ -548,7 +548,7 @@ public class HistoricoView {
 
 
         tabela.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN_FLEX_LAST_COLUMN
+                TableView.CONSTRAINED_RESIZE_POLICY
         );
 
 
@@ -616,7 +616,7 @@ public class HistoricoView {
 
 
         tabelaDetalhes.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN_FLEX_LAST_COLUMN
+                TableView.CONSTRAINED_RESIZE_POLICY
         );
 
 
