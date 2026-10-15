@@ -72,7 +72,6 @@ public class EscalaDAO {
                     } /* * Remove as designações antigas da escala * e grava as novas. */
                     salvarPapeisEspeciais(connection, escala);
                     excluirDesignacoes(connection, escala.getId());
-                    salvarPapeisEspeciais(connection, escala);
                     salvarDesignacoes(connection, escala);
                     connection.commit();
                     return escala;
@@ -97,6 +96,7 @@ public class EscalaDAO {
                             throw new RuntimeException("Não foi possível obter o ID da escala.");
                         }
                     }
+                    salvarPapeisEspeciais(connection, escala);
                     salvarDesignacoes(connection, escala);
                     connection.commit();
                     return escala;
