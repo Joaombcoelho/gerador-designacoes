@@ -10,6 +10,7 @@ import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.ConfiguracaoSalas;
+import br.com.geradordesignacoes.model.ConfiguracaoGeral;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
@@ -27,6 +28,7 @@ public class ProgramacaoSemanaService {
     private final ProgramacaoParteDAO programacaoParteDAO;
     private final ConfiguracaoSalasService configuracaoSalasService;
     private final PessoaDAO pessoaDAO;
+    private final ConfiguracaoGeralService configuracaoGeralService;
 
     public ProgramacaoSemanaService() {
         this.parteDAO = new ParteDAO();
@@ -34,6 +36,7 @@ public class ProgramacaoSemanaService {
         this.programacaoParteDAO = new ProgramacaoParteDAO();
         this.configuracaoSalasService = new ConfiguracaoSalasService();
         this.pessoaDAO = new PessoaDAO();
+        this.configuracaoGeralService = new ConfiguracaoGeralService();
     }
 
     /**
@@ -817,7 +820,7 @@ public class ProgramacaoSemanaService {
     /**
      * Lista todas as reuniões do mês.
      *
-     * Um mês pode possuir 4 ou 5 quartas-feiras.
+     * Um mês pode possuir 4 ou 5 reuniões, conforme o dia habitual configurado.
      */
     public List<ProgramacaoSemana> listarSemanasDoMes(
             YearMonth mes
@@ -828,6 +831,9 @@ public class ProgramacaoSemanaService {
             );
         }
 
+        DayOfWeek diaReuniao = configuracaoGeralService.buscar()
+                .diaReuniaoHabitual();
+
         List<ProgramacaoSemana> semanas =
                 new ArrayList<>();
 
@@ -837,7 +843,7 @@ public class ProgramacaoSemanaService {
         while (data.getMonth() == mes.getMonth()) {
 
             if (data.getDayOfWeek()
-                    == DayOfWeek.WEDNESDAY) {
+                    == diaReuniao) {
 
                 ProgramacaoSemana programacao =
                         obterOuCriar(data);
