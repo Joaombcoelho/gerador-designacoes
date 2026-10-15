@@ -160,44 +160,18 @@ public class RegrasService {
     private boolean ehParteTesouros(
             Parte parte
     ) {
-        if (parte == null) {
-            return false;
-        }
-
-        String nome =
-                parte.getNome();
-
-        return nome != null
-                && (
-                nome.equalsIgnoreCase(
-                        "Discurso - Tesouros"
-                )
-                        || nome.equalsIgnoreCase(
-                        "Discurso – Tesouros"
-                )
-                        || nome.equalsIgnoreCase(
-                        "Discurso - Tesouros da Palavra de Deus"
-                )
-                        || nome.equalsIgnoreCase(
-                        "Discurso – Tesouros da Palavra de Deus"
-                )
-        );
+        return parte != null
+                && parte.getTipo()
+                == TipoParte.DISCURSO_TESOUROS;
     }
 
 
     private boolean ehParteJoias(
             Parte parte
     ) {
-        if (parte == null) {
-            return false;
-        }
-
-        String nome =
-                parte.getNome();
-
-        return nome != null
-                && nome.toLowerCase()
-                .contains("joias espirituais");
+        return parte != null
+                && parte.getTipo()
+                == TipoParte.JOIAS_ESPIRITUAIS;
     }
 
 
