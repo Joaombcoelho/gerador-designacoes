@@ -4,7 +4,6 @@ import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.SalaAuxiliar;
-import br.com.geradordesignacoes.model.SecaoParte;
 import br.com.geradordesignacoes.model.TipoParticipacao;
 import br.com.geradordesignacoes.model.TipoParte;
 
