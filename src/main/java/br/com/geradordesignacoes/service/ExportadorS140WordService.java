@@ -247,32 +247,38 @@ public class ExportadorS140WordService {
         List<HorarioS140Calculado> horarios = horarioService.calcular(programacao);
         definirHorario(tabela.getRow(linhaData + 3), horarios, "CANTICO_ORACAO_INICIAL");
         definirHorario(tabela.getRow(linhaData + 4), horarios, "COMENTARIOS_INICIAIS");
-        for (ProgramacaoParte parte : programacao.partes()) {
-            definirHorarioPorChave(tabela, linhaData, horarios, "PARTE_" + parte.getParte().getId(), parte);
+        List<ProgramacaoParte> tesouros = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.TESOUROS_DA_PALAVRA_DE_DEUS)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem)).toList();
+        for (ProgramacaoParte parte : tesouros) {
+            int linha = switch (parte.getParte().getTipo()) {
+                case DISCURSO_TESOUROS -> linhaData + 7;
+                case JOIAS_ESPIRITUAIS -> linhaData + 8;
+                case LEITURA -> linhaData + 9;
+                default -> -1;
+            };
+            if (linha >= 0) definirHorario(tabela.getRow(linha), horarios, "PARTE_" + parte.getParte().getId());
+        }
+        List<ProgramacaoParte> ministerio = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.MINISTERIO)
+                .filter(p -> p.getParte().getTipo() != TipoParte.O_QUE_VOCE_DIRIA)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem)).toList();
+        for (int i = 0; i < ministerio.size() && i < 4; i++) {
+            ProgramacaoParte parte = ministerio.get(i);
+            definirHorario(tabela.getRow(linhaData + 12 + i), horarios, "PARTE_" + parte.getParte().getId());
+        }
+        List<ProgramacaoParte> vidaCrista = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.NOSSA_VIDA_CRISTA)
+                .filter(p -> p.getParte().getTipo() != TipoParte.DIRIGENTE_ESTUDO)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem)).toList();
+        for (int i = 0; i < vidaCrista.size() && i < 2; i++) {
+            ProgramacaoParte parte = vidaCrista.get(i);
+            definirHorario(tabela.getRow(linhaData + 19 + i), horarios, "PARTE_" + parte.getParte().getId());
         }
         definirHorario(tabela.getRow(linhaData + 18), horarios, "CANTICO_MEIO");
         definirHorario(tabela.getRow(linhaData + 21), horarios, "ESTUDO_BIBLICO");
         definirHorario(tabela.getRow(linhaData + 22), horarios, "COMENTARIOS_FINAIS");
         definirHorario(tabela.getRow(linhaData + 23), horarios, "CANTICO_ORACAO_FINAL");
-    }
-
-    private void definirHorarioPorChave(XWPFTable tabela, int linhaData,
-                                        List<HorarioS140Calculado> horarios, String chave,
-                                        ProgramacaoParte parte) {
-        int linha = -1;
-        TipoParte tipo = parte.getParte().getTipo();
-        if (tipo == TipoParte.DISCURSO_TESOUROS) linha = linhaData + 7;
-        else if (tipo == TipoParte.JOIAS_ESPIRITUAIS) linha = linhaData + 8;
-        else if (tipo == TipoParte.LEITURA) linha = linhaData + 9;
-        else if (parte.getParte().getSecao() == SecaoParte.MINISTERIO) {
-            List<ProgramacaoParte> itens = parte.getParte().getSecao() == SecaoParte.MINISTERIO
-                    ? List.of(parte) : List.of();
-            // A posição de cada parte do Ministério é resolvida pela ordem salva abaixo.
-            linha = linhaData + 12;
-        } else if (parte.getParte().getSecao() == SecaoParte.NOSSA_VIDA_CRISTA) {
-            linha = linhaData + 19;
-        }
-        if (linha >= 0) definirHorario(tabela.getRow(linha), horarios, chave);
     }
 
     private void definirHorario(XWPFTableRow linha, List<HorarioS140Calculado> horarios, String chave) {
@@ -303,7 +309,9 @@ public class ExportadorS140WordService {
             for (XWPFTableCell celula : linha.getTableCells()) {
                 if (celula.getText().contains("[Tema]") || celula.getText().contains("[Nome]") ||
                         celula.getText().contains("[Nome/Nome]") || celula.getText().contains("Cântico [número]")) {
-                    substituirNaCelula(celula, "[Tema]", "");
+                    substituirNaCelula(celula, "[DATA]", "");
+                substituirNaCelula(celula, " | LEITURA SEMANAL DA BÍBLIA", "");
+                substituirNaCelula(celula, "[Tema]", "");
                     substituirNaCelula(celula, "[Nome/Nome]", "");
                     substituirNaCelula(celula, "[Nome]", "");
                     substituirNaCelula(celula, "Cântico [número]", "Cântico");
