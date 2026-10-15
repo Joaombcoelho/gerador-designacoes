@@ -67,7 +67,6 @@ class CalculadoraHorarioS140Test {
 
         assertEquals(LocalTime.of(19, 35), resultado.get(1).horarioInicio());
         assertNull(resultado.get(1).horarioFim());
-        assertNull(resultado.get(2).horarioInicio() == null ? null : null);
         assertEquals(LocalTime.of(20, 0), resultado.get(2).horarioInicio());
         assertEquals(LocalTime.of(20, 10), resultado.get(3).horarioInicio());
     }
