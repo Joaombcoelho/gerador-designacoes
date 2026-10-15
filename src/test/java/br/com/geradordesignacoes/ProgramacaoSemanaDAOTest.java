@@ -377,6 +377,25 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
     }
 
     @Test
+    void deveAtualizarDadosS140SemAlterarPartesDaProgramacao() {
+        LocalDate data = LocalDate.of(2026, 10, 28);
+        Parte parte = obterParteInicial("DISCURSO_TESOUROS");
+        ProgramacaoSemana programacao = new ProgramacaoSemana(data);
+        programacao.adicionarParte(new ProgramacaoParte(parte, 1, "Tema preservado"));
+        programacaoSemanaDAO.salvar(programacao);
+
+        programacaoSemanaDAO.atualizarDadosS140(data, null, "103", "  ", "45");
+
+        ProgramacaoSemana encontrada = programacaoSemanaDAO.buscarPorData(data);
+        assertNotNull(encontrada);
+        assertEquals("103", encontrada.canticoInicial());
+        assertNull(encontrada.canticoMeio());
+        assertEquals("45", encontrada.canticoFinal());
+        assertEquals(1, encontrada.partes().size());
+        assertEquals("Tema preservado", encontrada.partes().get(0).getTema());
+    }
+
+    @Test
     void deveNormalizarCanticosVaziosComoNulos() {
         ProgramacaoSemana programacao = new ProgramacaoSemana(
                 null,
