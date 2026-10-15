@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.dao.HorarioManualS140DAO;
 import br.com.geradordesignacoes.dao.ConfiguracaoGeralDAO;
 import br.com.geradordesignacoes.model.ConfiguracaoGeral;
 import br.com.geradordesignacoes.model.HorarioS140Calculado;
+import br.com.geradordesignacoes.model.HorarioS140Item;
 import br.com.geradordesignacoes.service.HorarioS140Service;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import java.time.DayOfWeek;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,16 +47,27 @@ class HorarioManualS140DAOTest extends BaseDAOTest {
                 "Teste", DayOfWeek.WEDNESDAY, LocalTime.of(19, 0),
                 5, 1, 4, 3, 5
         ));
-        var programacao = new ProgramacaoSemanaService().obterOuCriar(data);
+        new ProgramacaoSemanaService().obterOuCriar(data);
         HorarioS140Service service = new HorarioS140Service();
 
-        List<HorarioS140Calculado> antes = service.calcular(programacao);
+        // Usa uma parte identificada como PARTE_ID, em vez do bloco artificial
+        // BLOCO_MINISTERIO, que deixou de existir na implementação do S-140.
+        List<HorarioS140Item> itens = List.of(
+                new HorarioS140Item(
+                        "PARTE_999",
+                        "Parte do Ministério",
+                        18,
+                        null
+                )
+        );
+
+        List<HorarioS140Calculado> antes = service.calcular(data, itens);
         assertEquals(LocalTime.of(19, 0), antes.getFirst().horarioInicio());
 
-        service.ajustarHorario(data, "BLOCO_MINISTERIO", LocalTime.of(20, 15));
-        List<HorarioS140Calculado> depois = service.calcular(programacao);
+        service.ajustarHorario(data, "PARTE_999", LocalTime.of(20, 15));
+        List<HorarioS140Calculado> depois = service.calcular(data, itens);
         HorarioS140Calculado ministerio = depois.stream()
-                .filter(item -> item.chave().equals("BLOCO_MINISTERIO"))
+                .filter(item -> item.chave().equals("PARTE_999"))
                 .findFirst()
                 .orElseThrow();
 
