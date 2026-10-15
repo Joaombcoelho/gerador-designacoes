@@ -1,6 +1,5 @@
 package br.com.geradordesignacoes.service;
 
-import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
