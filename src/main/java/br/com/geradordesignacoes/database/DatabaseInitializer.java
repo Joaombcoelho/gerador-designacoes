@@ -150,7 +150,11 @@ public class DatabaseInitializer {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 data DATE NOT NULL UNIQUE,
                 sala_b_habilitada INTEGER NOT NULL DEFAULT 0,
-                sala_c_habilitada INTEGER NOT NULL DEFAULT 0
+                sala_c_habilitada INTEGER NOT NULL DEFAULT 0,
+                conselheiro_sala_b_id INTEGER REFERENCES pessoa(id) ON DELETE SET NULL,
+                cantico_inicial TEXT,
+                cantico_meio TEXT,
+                cantico_final TEXT
             );
             
             """;
@@ -323,6 +327,7 @@ public class DatabaseInitializer {
 
 
             adicionarColunasSalasProgramacaoSemana(connection);
+            adicionarColunasDadosS140ProgramacaoSemana(connection);
             statement.execute(CREATE_TABLE_CONFIGURACAO_SALAS);
             statement.execute("""
                     INSERT OR IGNORE INTO configuracao_salas
@@ -440,6 +445,47 @@ public class DatabaseInitializer {
     ) throws SQLException {
         adicionarColunaSeNecessario(connection, "sala_b_habilitada");
         adicionarColunaSeNecessario(connection, "sala_c_habilitada");
+    }
+
+    private static void adicionarColunasDadosS140ProgramacaoSemana(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaProgramacaoSemanaSeNecessario(
+                connection, "conselheiro_sala_b_id",
+                "INTEGER REFERENCES pessoa(id) ON DELETE SET NULL"
+        );
+        adicionarColunaProgramacaoSemanaSeNecessario(
+                connection, "cantico_inicial", "TEXT"
+        );
+        adicionarColunaProgramacaoSemanaSeNecessario(
+                connection, "cantico_meio", "TEXT"
+        );
+        adicionarColunaProgramacaoSemanaSeNecessario(
+                connection, "cantico_final", "TEXT"
+        );
+    }
+
+    private static void adicionarColunaProgramacaoSemanaSeNecessario(
+            Connection connection,
+            String coluna,
+            String definicao
+    ) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(
+                     "PRAGMA table_info(programacao_semana)")) {
+            while (resultSet.next()) {
+                if (coluna.equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(
+                    "ALTER TABLE programacao_semana ADD COLUMN "
+                            + coluna + " " + definicao
+            );
+        }
     }
     private static void adicionarColunasPermissaoSalasPessoa(
             Connection connection
