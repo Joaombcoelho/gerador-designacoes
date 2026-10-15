@@ -1,16 +1,19 @@
 package br.com.geradordesignacoes.controller;
 
 import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.HorarioS140Calculado;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
+import br.com.geradordesignacoes.service.HorarioS140Service;
 import br.com.geradordesignacoes.service.ExportadorS89Service;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +25,8 @@ public class ProgramacaoController {
     private final ProgramacaoView view;
 
     private final ProgramacaoSemanaService service;
+
+    private final HorarioS140Service horarioS140Service;
 
     private final EscalaController escalaController;
 
@@ -42,6 +47,7 @@ public class ProgramacaoController {
 
         this.service =
                 new ProgramacaoSemanaService();
+        this.horarioS140Service = new HorarioS140Service();
 
         this.exportadorS89Service =
                 new ExportadorS89Service();
@@ -124,6 +130,29 @@ public class ProgramacaoController {
         view.getBotaoSalvarDadosS140()
                 .setOnAction(event -> salvarDadosS140());
 
+        view.getBotaoHorariosS140().setOnAction(event -> abrirHorariosS140());
+        view.setOnSalvarAjustesHorarios((chaves, ajustes) -> {
+            LocalDate dataSelecionada = obterDataSelecionada();
+            if (dataSelecionada == null) {
+                view.atualizarStatus("Selecione uma reunião para ajustar os horários.");
+                return;
+            }
+            try {
+                for (String chave : chaves) {
+                    LocalTime horario = ajustes.get(chave);
+                    if (horario == null) {
+                        horarioS140Service.removerAjusteManual(dataSelecionada, chave);
+                    } else {
+                        horarioS140Service.ajustarHorario(dataSelecionada, chave, horario);
+                    }
+                }
+                view.atualizarStatus("Ajustes de horário do S-140 salvos.");
+                abrirHorariosS140();
+            } catch (Exception e) {
+                view.atualizarStatus("Erro ao salvar os horários: " + e.getMessage());
+            }
+        });
+
 
         view.getBotaoGerar()
                 .setOnAction(
@@ -140,6 +169,26 @@ public class ProgramacaoController {
                 .setOnAction(
                         event -> salvarEscalas()
                 );
+    }
+
+
+    private void abrirHorariosS140() {
+        LocalDate dataSelecionada = obterDataSelecionada();
+        if (dataSelecionada == null) {
+            view.atualizarStatus("Selecione uma reunião para visualizar os horários.");
+            return;
+        }
+
+        try {
+            ProgramacaoSemana programacao = service.obterOuCriar(dataSelecionada);
+            List<HorarioS140Calculado> horarios = horarioS140Service.calcular(programacao);
+            view.abrirDialogoHorariosS140(
+                    horarios,
+                    horarioS140Service.listarAjustesManuais(dataSelecionada)
+            );
+        } catch (Exception e) {
+            view.atualizarStatus("Erro ao calcular os horários do S-140: " + e.getMessage());
+        }
     }
 
 
