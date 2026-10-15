@@ -592,6 +592,45 @@ public class ProgramacaoSemanaService {
     }
 
     /**
+     * Salva os dados complementares da programação semanal usados no S-140.
+     * Campos vazios são persistidos como nulos, sem alterar as partes da semana.
+     */
+    public void salvarDadosS140(
+            LocalDate data,
+            Integer conselheiroSalaBId,
+            String canticoInicial,
+            String canticoMeio,
+            String canticoFinal
+    ) {
+        validarData(data);
+        obterOuCriar(data);
+
+        if (conselheiroSalaBId != null) {
+            boolean pessoaExiste = new br.com.geradordesignacoes.dao.PessoaDAO()
+                    .buscarPorId(conselheiroSalaBId)
+                    .filter(pessoa -> pessoa.isAtivo()
+                            && pessoa.podeParticiparSalaB()
+                            && pessoa.getPrivilegio().atende(
+                                    br.com.geradordesignacoes.model.Privilegio.SERVO_MINISTERIAL))
+                    .isPresent();
+            if (!pessoaExiste) {
+                throw new IllegalArgumentException(
+                        "O conselheiro da Sala B precisa ser ativo, habilitado para a Sala B "
+                                + "e servo ministerial ou ancião."
+                );
+            }
+        }
+
+        programacaoSemanaDAO.atualizarDadosS140(
+                data,
+                conselheiroSalaBId,
+                canticoInicial,
+                canticoMeio,
+                canticoFinal
+        );
+    }
+
+    /**
      * Adiciona uma parte variável à semana.
      */
     public void adicionarParteVariavel(
