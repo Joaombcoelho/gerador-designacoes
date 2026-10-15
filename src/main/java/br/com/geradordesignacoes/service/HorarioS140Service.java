@@ -11,6 +11,8 @@ import br.com.geradordesignacoes.model.TipoParte;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,8 +67,9 @@ public class HorarioS140Service {
     }
 
     /**
-     * Monta a pauta cronológica com as durações padrão conhecidas e
-     * as durações específicas já salvas na programação semanal.
+     * Monta a pauta cronológica usando as partes selecionadas na semana.
+     * Os 18 minutos do Ministério são uma referência, não um bloco artificial
+     * que deva ser somado quando as partes reais ocuparem menos tempo.
      */
     public List<HorarioS140Calculado> calcular(ProgramacaoSemana programacao) {
         Objects.requireNonNull(programacao, "A programação semanal é obrigatória.");
@@ -76,7 +79,7 @@ public class HorarioS140Service {
     public List<HorarioS140Item> criarItens(ProgramacaoSemana programacao) {
         Objects.requireNonNull(programacao, "A programação semanal é obrigatória.");
         ConfiguracaoGeral configuracao = configuracaoGeralService.buscar();
-        java.util.ArrayList<HorarioS140Item> itens = new java.util.ArrayList<>();
+        List<HorarioS140Item> itens = new ArrayList<>();
 
         itens.add(new HorarioS140Item("CANTICO_ORACAO_INICIAL",
                 "Cântico e oração iniciais",
@@ -85,46 +88,29 @@ public class HorarioS140Service {
                 "Comentários iniciais",
                 configuracao.duracaoComentariosIniciaisMinutos(), null));
 
-        programacao.partes().stream()
-                .filter(item -> item.getParte().getSecao() == SecaoParte.TESOUROS_DA_PALAVRA_DE_DEUS)
-                .sorted(java.util.Comparator.comparingInt(ProgramacaoParte::getOrdem))
-                .forEach(item -> {
-                    Integer duracao = item.getDuracaoMinutos();
-                    if (duracao == null) {
-                        duracao = item.getParte().getDuracaoPadraoMinutos();
-                    }
-                    if (duracao == null) {
-                        duracao = switch (item.getParte().getTipo()) {
-                            case DISCURSO_TESOUROS -> 10;
-                            case JOIAS_ESPIRITUAIS -> 10;
-                            case LEITURA -> 4;
-                            default -> null;
-                        };
-                    }
-                    itens.add(new HorarioS140Item(
-                            "PARTE_" + item.getParte().getId(),
-                            item.getParte().getNome(),
-                            duracao,
-                            null));
-                });
+        adicionarPartesDaSecao(
+                itens, programacao, SecaoParte.TESOUROS_DA_PALAVRA_DE_DEUS, false);
 
         itens.add(new HorarioS140Item("CANTICO_MEIO", "Cântico do meio",
                 configuracao.duracaoCanticoMeioMinutos(), null));
 
-        // O bloco do Ministério tem 18 minutos como referência mínima,
-        // não sendo obrigatório preencher esse tempo com designações.
-        itens.add(new HorarioS140Item("BLOCO_MINISTERIO", "Ministério",
-                18, null));
+        // Não se cria um bloco fixo de 18 minutos: cada parte do Ministério
+        // contribui com sua própria duração cadastrada ou ajustada na semana.
+        adicionarPartesDaSecao(itens, programacao, SecaoParte.MINISTERIO, true);
 
-        itens.add(new HorarioS140Item("BLOCO_NOSSA_VIDA_CRISTA",
-                "Nossa Vida Cristã", 15, null));
+        // As partes de Nossa Vida Cristã também são itens individuais.
+        // O total de referência de 15 minutos não é aplicado a cada parte.
+        adicionarPartesDaSecao(itens, programacao, SecaoParte.NOSSA_VIDA_CRISTA, true);
 
-        Integer duracaoEstudo = programacao.partes().stream()
+        ProgramacaoParte estudo = programacao.partes().stream()
                 .filter(item -> item.getParte().getTipo() == TipoParte.DIRIGENTE_ESTUDO)
-                .map(ProgramacaoParte::getDuracaoMinutos)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(30);
+                .min(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .orElse(null);
+
+        Integer duracaoEstudo = estudo == null ? null : obterDuracao(estudo);
+        if (duracaoEstudo == null) {
+            duracaoEstudo = 30;
+        }
         itens.add(new HorarioS140Item("ESTUDO_BIBLICO", "Estudo Bíblico",
                 duracaoEstudo, null));
 
@@ -136,6 +122,43 @@ public class HorarioS140Service {
                 configuracao.duracaoCanticoOracaoFinalMinutos(), null));
 
         return List.copyOf(itens);
+    }
+
+    private void adicionarPartesDaSecao(
+            List<HorarioS140Item> itens,
+            ProgramacaoSemana programacao,
+            SecaoParte secao,
+            boolean excluirEstudoBiblico
+    ) {
+        programacao.partes().stream()
+                .filter(item -> item.getParte().getSecao() == secao)
+                .filter(item -> !excluirEstudoBiblico
+                        || item.getParte().getTipo() != TipoParte.DIRIGENTE_ESTUDO)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .forEach(item -> {
+                    Integer duracao = obterDuracao(item);
+                    itens.add(new HorarioS140Item(
+                            "PARTE_" + item.getParte().getId(),
+                            item.getParte().getNome(),
+                            duracao,
+                            null));
+                });
+    }
+
+    private Integer obterDuracao(ProgramacaoParte item) {
+        Integer duracao = item.getDuracaoMinutos();
+        if (duracao == null) {
+            duracao = item.getParte().getDuracaoPadraoMinutos();
+        }
+        if (duracao == null) {
+            duracao = switch (item.getParte().getTipo()) {
+                case DISCURSO_TESOUROS -> 10;
+                case JOIAS_ESPIRITUAIS -> 10;
+                case LEITURA -> 4;
+                default -> null;
+            };
+        }
+        return duracao;
     }
 
     public void ajustarHorario(LocalDate data, String chaveItem, LocalTime horarioInicio) {
