@@ -123,6 +123,20 @@ public class ExportadorS140WordService {
             for (int i = semanas.size(); i < linhasData.size(); i++) {
                 limparBloco(tabela, linhasData.get(i));
             }
+
+            // Remove apenas linhas opcionais de partes que não foram programadas.
+            // Fazemos isso depois de preencher todos os blocos e em ordem decrescente,
+            // para que os índices dos blocos seguintes não sejam deslocados antes da hora.
+            List<Integer> linhasNaoUtilizadas = new ArrayList<>();
+            for (int i = 0; i < semanas.size(); i++) {
+                linhasNaoUtilizadas.addAll(
+                        linhasPartesNaoUtilizadas(semanas.get(i).programacao(), linhasData.get(i)));
+            }
+            linhasNaoUtilizadas.stream()
+                    .distinct()
+                    .sorted(Comparator.reverseOrder())
+                    .forEach(tabela::removeRow);
+
             try (OutputStream saida = Files.newOutputStream(destino)) {
                 documento.write(saida);
             }
@@ -206,10 +220,9 @@ public class ExportadorS140WordService {
         ProgramacaoParte estudo = programacao.partes().stream()
                 .filter(p -> p.getParte().getTipo() == TipoParte.DIRIGENTE_ESTUDO)
                 .findFirst().orElse(null);
-        Designacao designacaoEstudo = estudo == null ? null
-                : designacao(escala, estudo.getParte().getId(), SalaDesignacao.PRINCIPAL);
         setPlaceholder(tabela.getRow(linhaData + 21), "[Nome/Nome]", 0,
-                designacaoEstudo == null ? "" : nome(designacaoEstudo.responsavel()) + "/" + nome(designacaoEstudo.ajudante()));
+                estudo == null ? "" : textoParticipantesEstudoBiblico(
+                        escala.getDesignacoes(), estudo.getParte().getId()));
 
         setTextoContendo(tabela.getRow(linhaData + 22), "Comentários finais (3 min)",
                 temaComDuracao("Comentários finais", configuracaoService.buscar().duracaoComentariosFinaisMinutos()));
@@ -259,6 +272,53 @@ public class ExportadorS140WordService {
             definirTexto(marcadores.get(marcadores.size() - 1),
                     principal == null ? "" : nome(principal.responsavel()) + "/" + nome(principal.ajudante()));
         }
+    }
+
+    /**
+     * O dirigente e o leitor do Estudo Bíblico são persistidos como duas
+     * designações da mesma parte: uma tem responsável e a outra ajudante.
+     * Não se deve consultar apenas a primeira designação encontrada.
+     */
+    static String textoParticipantesEstudoBiblico(List<Designacao> designacoes, Integer parteId) {
+        List<Designacao> estudo = designacoes.stream()
+                .filter(d -> Objects.equals(d.parte().getId(), parteId))
+                .filter(d -> d.parte().getTipo() == TipoParte.DIRIGENTE_ESTUDO)
+                .toList();
+        Pessoa dirigente = estudo.stream()
+                .map(Designacao::responsavel)
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+        Pessoa leitor = estudo.stream()
+                .map(Designacao::ajudante)
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+        return nome(dirigente) + "/" + nome(leitor);
+    }
+
+    /**
+     * Retorna os índices das linhas de partes opcionais sem programação.
+     * As linhas fixas da reunião e o layout dos blocos não são removidos.
+     */
+    static List<Integer> linhasPartesNaoUtilizadas(ProgramacaoSemana programacao, int linhaData) {
+        List<ProgramacaoParte> ministerio = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.MINISTERIO)
+                .filter(p -> p.getParte().getTipo() != TipoParte.O_QUE_VOCE_DIRIA)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .toList();
+        List<ProgramacaoParte> vidaCrista = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.NOSSA_VIDA_CRISTA)
+                .filter(p -> p.getParte().getTipo() != TipoParte.DIRIGENTE_ESTUDO)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .toList();
+
+        List<Integer> linhas = new ArrayList<>();
+        for (int i = Math.min(ministerio.size(), 4); i < 4; i++) {
+            linhas.add(linhaData + 12 + i);
+        }
+        for (int i = Math.min(vidaCrista.size(), 2); i < 2; i++) {
+            linhas.add(linhaData + 19 + i);
+        }
+        return List.copyOf(linhas);
     }
 
     private void preencherTema(XWPFTableRow linha, ProgramacaoParte parte) {
