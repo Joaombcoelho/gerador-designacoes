@@ -69,7 +69,7 @@ As funcionalidades são organizadas em camadas de modelo, acesso a dados, servi�
 - Backup automático no início da aplicação e a cada 24 horas enquanto ela estiver aberta.
 - Backups automáticos recebem data e hora no nome para evitar a substituição de arquivos anteriores.
 
-## Exportação mensal para Word S-140
+### Exportação mensal para Word S-140
 
 Na tela de **Programação Semanal**, selecione uma data do mês que deseja exportar e utilize a opção **Exportar S-140**. O aplicativo solicita que você selecione o modelo Word (`.docx`) e escolha o destino do arquivo. O nome inicial sugerido atualmente segue o padrão `S-140-AAAA-MM.docx`.
 
@@ -268,7 +268,4 @@ Possíveis evoluções, sem compromisso de implementação neste momento:
 - aprimorar relatórios e filtros de histórico;
 - melhorar a validação e a visualização de conflitos;
 - evoluir a distribuição das designações conforme novas regras confirmadas;
-- permitir configuração de múltiplos locais de reunião e exportação S-89 com base no local selecionado;
 - importar dados da apostila oficial, com extração estruturada, revisão humana e confirmação antes de persistir no banco;
-- validar visualmente o documento S-140 com as diferentes combinações de salas e de partes opcionais;
-- planejar o empacotamento desktop e a atualização da aplicação sem perda do banco local.
