@@ -13,7 +13,8 @@ O projeto reúne em uma única aplicação:
 - geração, revisão, edição e salvamento de escalas;
 - consulta do histórico de designações;
 - backup manual, restauração e backup automático do banco;
-- exportação de designações elegíveis para o formulário PDF S-89.
+- exportação de designações elegíveis para o formulário PDF S-89;
+- exportação mensal da programação e das designações para um documento Word baseado no modelo S-140.
 
 As funcionalidades são organizadas em camadas de modelo, acesso a dados, serviços, controladores e views JavaFX. A aplicação é destinada a uso local e não possui backend ou serviço remoto.
 
@@ -67,6 +68,28 @@ As funcionalidades são organizadas em camadas de modelo, acesso a dados, servi�
 - Restauração de um arquivo `.db` pela interface.
 - Backup automático no início da aplicação e a cada 24 horas enquanto ela estiver aberta.
 - Backups automáticos recebem data e hora no nome para evitar a substituição de arquivos anteriores.
+
+## Exportação mensal para Word S-140
+
+Na tela de **Programação Semanal**, selecione uma data do mês que deseja exportar e utilize a opção **Exportar S-140**. O aplicativo solicita que você selecione o modelo Word (`.docx`) e escolha o destino do arquivo. O nome inicial sugerido atualmente segue o padrão `S-140-AAAA-MM.docx`.
+
+A exportação reúne em um único documento as reuniões que ocorrem no mês, conforme o dia habitual configurado. O exportador aceita meses com quatro ou cinco reuniões, desde que o modelo contenha blocos suficientes e os dados necessários estejam disponíveis.
+
+O documento é preenchido a partir da programação semanal e da escala já salva. A exportação não deve ser usada como substituto da geração, revisão ou salvamento das escalas. Antes de gerar o arquivo, o serviço verifica a disponibilidade dos dados de cada semana e apresenta as pendências encontradas, em vez de prosseguir com semanas incompletas.
+
+O modelo selecionado precisa conter a tabela e os marcadores esperados pelo exportador, incluindo os campos de data, congregação, temas, nomes e horários. A formatação e a disposição do documento dependem da estrutura desse modelo Word. Use o modelo oficial S-140 compatível com a versão do aplicativo.
+
+O documento pode incluir, conforme os dados da programação e da escala:
+
+- nome da congregação e datas das reuniões;
+- presidente, conselheiro da Sala B e participantes das partes;
+- cânticos, comentários, partes da programação e Estudo Bíblico;
+- responsáveis e ajudantes nos campos previstos no modelo;
+- horários calculados pelo serviço de horários S-140, incluindo os ajustes manuais registrados para a data.
+
+A exportação depende de informações obrigatórias da escala salva, como presidente, oração inicial e oração final, além de uma programação com partes. Se faltar algum dado obrigatório ou se o modelo não tiver estrutura suficiente, a operação informa o problema para correção.
+
+**Importante:** o exportador S-140 não deve criar nem salvar programações ou escalas durante a exportação. A preparação do documento utiliza os dados existentes; alterações e confirmações devem ocorrer nos fluxos próprios do aplicativo.
 
 ## Exportação para PDF S-89
 
@@ -126,6 +149,7 @@ As versões abaixo são as declaradas no `pom.xml`:
 - JavaFX Controls e FXML 21.0.7;
 - SQLite JDBC 3.50.3.0;
 - Apache PDFBox 3.0.5;
+- Apache POI OOXML 5.4.1, para leitura e escrita de documentos Word (`.docx`);
 - Ikonli JavaFX 12.3.1;
 - Ikonli FontAwesome 5 Pack 12.3.1;
 - JUnit Jupiter 5.10.2;
@@ -140,7 +164,7 @@ O projeto utiliza uma organização em camadas:
 
 - `model`: entidades, records e enums do domínio, como `Pessoa`, `Parte`, `Designacao`, `Escala`, `ProgramacaoSemana` e `ProgramacaoParte`;
 - `dao`: consultas e operações de persistência no SQLite;
-- `service`: regras de negócio, geração, programação semanal, backup e exportação S-89;
+- `service`: regras de negócio, geração, programação semanal, backup, cálculo de horários S-140 e exportação S-89/S-140;
 - `controller`: coordenação entre views e services;
 - `view`: telas e componentes JavaFX;
 - `database`: conexão, inicialização, migrações, backup e restauração;
@@ -154,7 +178,8 @@ O fluxo principal é iniciado por `MainApp`. Na inicialização, o banco é prep
 - Maven disponível no `PATH`;
 - sistema operacional Windows para o caminho atual de armazenamento baseado em `LOCALAPPDATA`;
 - acesso à internet na primeira compilação, para que o Maven possa baixar as dependências;
-- arquivo `modelos/S-89_T.pdf` presente para utilizar a exportação S-89.
+- arquivo `modelos/S-89_T.pdf` presente para utilizar a exportação S-89;
+- modelo Word oficial S-140 compatível, selecionado na interface, para utilizar a exportação mensal S-140.
 
 ## Instalação e execução
 
@@ -176,7 +201,7 @@ Para compilar e executar todos os testes:
 mvn test
 ```
 
-Os testes ficam em `src/test/java` e cobrem modelos, regras de negócio, services, DAOs, programação semanal, geração de escalas e exportação do S-89.
+Os testes ficam em `src/test/java` e cobrem modelos, regras de negócio, services, DAOs, programação semanal, geração de escalas e funcionalidades de exportação. Execute `mvn test` na versão que pretende integrar; a documentação, por si só, não confirma o resultado de uma execução recente.
 
 ## Banco de dados e persistência
 
@@ -234,16 +259,16 @@ gerador-designacoes/
 
 ## Estado atual e melhorias futuras
 
-O projeto possui uma aplicação desktop funcional para cadastro, programação semanal, geração, edição, persistência e consulta de escalas, com backup local e exportação S-89 para as partes atualmente elegíveis.
+O projeto possui uma aplicação desktop para cadastro, programação semanal, geração, edição, persistência e consulta de escalas, com backup local e exportação S-89 e S-140. A exportação S-140 depende de um modelo Word compatível e de programações e escalas previamente salvas.
 
 O estado atual ainda é direcionado a uso local em Windows.
 
 Possíveis evoluções, sem compromisso de implementação neste momento:
 
-- ampliar os formatos e modelos de exportação;
 - aprimorar relatórios e filtros de histórico;
 - melhorar a validação e a visualização de conflitos;
-- evoluir a distribuição das designações conforme novas regras confirmadas.
+- evoluir a distribuição das designações conforme novas regras confirmadas;
 - permitir configuração de múltiplos locais de reunião e exportação S-89 com base no local selecionado;
-- Leitura do PDF da apostila, para a configuração automatica das partes e obtenção dos temas.
-- Geração do formulário S-140, com toda a programação da reunião e todos os participantes.
+- importar dados da apostila oficial, com extração estruturada, revisão humana e confirmação antes de persistir no banco;
+- validar visualmente o documento S-140 com as diferentes combinações de salas e de partes opcionais;
+- planejar o empacotamento desktop e a atualização da aplicação sem perda do banco local.
