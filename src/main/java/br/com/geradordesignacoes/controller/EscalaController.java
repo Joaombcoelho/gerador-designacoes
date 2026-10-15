@@ -481,7 +481,6 @@ public class EscalaController {
 
     /**
      * Salva no banco todas as escalas atualmente geradas.
-     *
      * Este métodoo é utilizado tanto pela tela Escala
      * quanto pela tela Programação.
      *

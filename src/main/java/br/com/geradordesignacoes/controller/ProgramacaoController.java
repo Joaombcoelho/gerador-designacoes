@@ -120,28 +120,28 @@ public class ProgramacaoController {
                 .getSelectionModel()
                 .selectedItemProperty()
                 .addListener(
-                        (observable, anterior, atual) ->
+                        (observable, _, atual) ->
                                 selecionarParte(atual)
                 );
 
 
         view.getBotaoSalvarTema()
                 .setOnAction(
-                        event -> salvarTema()
+                        _ -> salvarTema()
                 );
 
         view.getBotaoSalvarNumeroOficial()
                 .setOnAction(
-                        event -> salvarNumeroOficial()
+                        _ -> salvarNumeroOficial()
                 );
 
         view.getBotaoSalvarDuracao()
-                .setOnAction(event -> salvarDuracao());
+                .setOnAction(_ -> salvarDuracao());
 
         view.getBotaoSalvarDadosS140()
-                .setOnAction(event -> salvarDadosS140());
+                .setOnAction(_ -> salvarDadosS140());
 
-        view.getBotaoHorariosS140().setOnAction(event -> abrirHorariosS140());
+        view.getBotaoHorariosS140().setOnAction(_ -> abrirHorariosS140());
         view.setOnSalvarAjustesHorarios((chaves, ajustes) -> {
             LocalDate dataSelecionada = obterDataSelecionada();
             if (dataSelecionada == null) {
@@ -167,7 +167,7 @@ public class ProgramacaoController {
 
         view.getBotaoGerar()
                 .setOnAction(
-                        event -> gerarEscalas()
+                        _ -> gerarEscalas()
                 );
 
         view.getBotaoExportarS89()
