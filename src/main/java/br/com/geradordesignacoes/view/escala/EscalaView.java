@@ -312,7 +312,7 @@ public class EscalaView {
 
 
         tabela.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN_FLEX_LAST_COLUMN
+                TableView.CONSTRAINED_RESIZE_POLICY
         );
 
 
