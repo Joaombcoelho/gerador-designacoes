@@ -7,7 +7,6 @@ import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
-import br.com.geradordesignacoes.model.ConfiguracaoSalas;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
