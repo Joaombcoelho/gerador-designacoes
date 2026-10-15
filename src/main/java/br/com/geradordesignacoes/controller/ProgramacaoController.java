@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.controller;
 
 import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
@@ -119,6 +120,9 @@ public class ProgramacaoController {
 
         view.getBotaoSalvarDuracao()
                 .setOnAction(event -> salvarDuracao());
+
+        view.getBotaoSalvarDadosS140()
+                .setOnAction(event -> salvarDadosS140());
 
 
         view.getBotaoGerar()
@@ -283,7 +287,13 @@ public class ProgramacaoController {
 
 
             atualizarListaPartes(programacao);
-
+            view.carregarConselheirosSalaB(service.listarConselheirosSalaB());
+            view.carregarDadosS140(
+                    programacao.canticoInicial(),
+                    programacao.canticoMeio(),
+                    programacao.canticoFinal(),
+                    programacao.conselheiroSalaBId()
+            );
 
             /*
              * Ao entrar na configuração de uma semana,
@@ -900,6 +910,32 @@ public class ProgramacaoController {
         }
     }
 
+
+    private void salvarDadosS140() {
+        LocalDate data = obterDataSelecionada();
+        if (data == null) {
+            view.atualizarStatus("Selecione uma reunião.");
+            return;
+        }
+
+        Pessoa conselheiro = view.getCampoConselheiroSalaB()
+                .getSelectionModel().getSelectedItem();
+        try {
+            service.salvarDadosS140(
+                    data,
+                    conselheiro == null ? null : conselheiro.getId(),
+                    view.getCampoCanticoInicial().getText(),
+                    view.getCampoCanticoMeio().getText(),
+                    view.getCampoCanticoFinal().getText()
+            );
+            view.atualizarStatus("Dados do S-140 salvos com sucesso.");
+        } catch (IllegalArgumentException e) {
+            view.atualizarStatus(e.getMessage());
+        } catch (Exception e) {
+            view.atualizarStatus("Erro ao salvar os dados do S-140: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     private void salvarDuracao() {
         LocalDate data = obterDataSelecionada();
