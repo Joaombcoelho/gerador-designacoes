@@ -11,8 +11,34 @@ public record ProgramacaoSemana(
         LocalDate data,
         List<ProgramacaoParte> partes,
         boolean salaBHabilitada,
-        boolean salaCHabilitada
+        boolean salaCHabilitada,
+        Integer conselheiroSalaBId,
+        String canticoInicial,
+        String canticoMeio,
+        String canticoFinal
 ) {
+
+    public ProgramacaoSemana(
+            Integer id,
+            LocalDate data,
+            List<ProgramacaoParte> partes,
+            boolean salaBHabilitada,
+            boolean salaCHabilitada,
+            Integer conselheiroSalaBId,
+            String canticoInicial,
+            String canticoMeio,
+            String canticoFinal
+    ) {
+        this.id = id;
+        this.data = Objects.requireNonNull(data);
+        this.partes = new ArrayList<>(Objects.requireNonNull(partes));
+        this.salaBHabilitada = salaBHabilitada;
+        this.salaCHabilitada = salaCHabilitada;
+        this.conselheiroSalaBId = conselheiroSalaBId;
+        this.canticoInicial = normalizarCantico(canticoInicial);
+        this.canticoMeio = normalizarCantico(canticoMeio);
+        this.canticoFinal = normalizarCantico(canticoFinal);
+    }
 
     public ProgramacaoSemana(
             Integer id,
@@ -21,19 +47,7 @@ public record ProgramacaoSemana(
             boolean salaBHabilitada,
             boolean salaCHabilitada
     ) {
-
-        this.id = id;
-
-        this.data =
-                Objects.requireNonNull(data);
-
-        this.partes =
-                new ArrayList<>(
-                        Objects.requireNonNull(partes)
-                );
-
-        this.salaBHabilitada = salaBHabilitada;
-        this.salaCHabilitada = salaCHabilitada;
+        this(id, data, partes, salaBHabilitada, salaCHabilitada, null, null, null, null);
     }
 
     public ProgramacaoSemana(
@@ -44,117 +58,68 @@ public record ProgramacaoSemana(
         this(id, data, partes, false, false);
     }
 
-
-    public ProgramacaoSemana(
-            LocalDate data
-    ) {
-
-        this(
-                null,
-                data,
-                new ArrayList<>(),
-                false,
-                false
-        );
+    public ProgramacaoSemana(LocalDate data) {
+        this(null, data, new ArrayList<>(), false, false);
     }
 
     public ProgramacaoSemana(
             LocalDate data,
             ConfiguracaoSalas configuracaoSalas
     ) {
-        this(
-                null,
-                data,
-                new ArrayList<>(),
+        this(null, data, new ArrayList<>(),
                 configuracaoSalas.salaBHabilitada(),
-                configuracaoSalas.salaCHabilitada()
-        );
+                configuracaoSalas.salaCHabilitada());
     }
-
 
     @Override
     public List<ProgramacaoParte> partes() {
-
-        return Collections.unmodifiableList(
-                partes
-        );
+        return Collections.unmodifiableList(partes);
     }
 
-
-    public void adicionarParte(
-            ProgramacaoParte programacaoParte
-    ) {
-
-        partes.add(
-                Objects.requireNonNull(
-                        programacaoParte
-                )
-        );
+    public void adicionarParte(ProgramacaoParte programacaoParte) {
+        partes.add(Objects.requireNonNull(programacaoParte));
     }
 
-
-    public void removerParte(
-            ProgramacaoParte programacaoParte
-    ) {
-
-        partes.remove(
-                programacaoParte
-        );
+    public void removerParte(ProgramacaoParte programacaoParte) {
+        partes.remove(programacaoParte);
     }
 
-    public void definirPartes(
-            List<ProgramacaoParte> partes
-    ) {
-
-        Objects.requireNonNull(
-                partes,
-                "A lista de partes não pode ser nula."
-        );
-
+    public void definirPartes(List<ProgramacaoParte> partes) {
+        Objects.requireNonNull(partes, "A lista de partes não pode ser nula.");
         this.partes.clear();
-
-        this.partes.addAll(
-                partes
-        );
+        this.partes.addAll(partes);
     }
 
     public int getQuantidadePartesVariaveis() {
-
         return (int) partes.stream()
                 .filter(programacaoParte ->
-                        programacaoParte
-                                .getParte()
-                                .getTipoVariacao()
-                                == TipoVariacaoParte.VARIAVEL
-                )
+                        programacaoParte.getParte().getTipoVariacao()
+                                == TipoVariacaoParte.VARIAVEL)
                 .count();
     }
 
-
     public boolean possuiQuantidadeValidaDePartesVariaveis() {
-
-        int quantidade =
-                getQuantidadePartesVariaveis();
-
-        return quantidade >= 3
-                && quantidade <= 6;
+        int quantidade = getQuantidadePartesVariaveis();
+        return quantidade >= 3 && quantidade <= 6;
     }
 
     public List<ProgramacaoParte> getPartesVariaveis() {
-
         return partes.stream()
                 .filter(programacaoParte ->
-                        programacaoParte
-                                .getParte()
-                                .getTipoVariacao()
-                                == TipoVariacaoParte.VARIAVEL
-                )
+                        programacaoParte.getParte().getTipoVariacao()
+                                == TipoVariacaoParte.VARIAVEL)
                 .toList();
+    }
+
+    private static String normalizarCantico(String cantico) {
+        if (cantico == null || cantico.isBlank()) {
+            return null;
+        }
+        return cantico.trim();
     }
 
     @Override
     public String toString() {
-
         return "ProgramacaoSemana{" +
                 "id=" + id +
                 ", data=" + data +
