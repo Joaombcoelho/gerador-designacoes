@@ -12,234 +12,139 @@ public class ProgramacaoSemanaDAO {
 
     private final ProgramacaoParteDAO programacaoParteDAO;
 
-
     public ProgramacaoSemanaDAO() {
-
-        this.programacaoParteDAO =
-                new ProgramacaoParteDAO();
+        this.programacaoParteDAO = new ProgramacaoParteDAO();
     }
 
-
-    public ProgramacaoSemana salvar(
-            ProgramacaoSemana programacaoSemana
-    ) {
-
+    public ProgramacaoSemana salvar(ProgramacaoSemana programacaoSemana) {
         String sql = """
                 INSERT INTO programacao_semana (
-                    data, sala_b_habilitada, sala_c_habilitada
+                    data, sala_b_habilitada, sala_c_habilitada,
+                    conselheiro_sala_b_id, cantico_inicial, cantico_meio, cantico_final
                 )
-                VALUES (?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-
-        try (
-                Connection connection =
-                        ConnectionFactory.getConnection();
-
-                PreparedStatement statement =
-                        connection.prepareStatement(
-                                sql,
-                                Statement.RETURN_GENERATED_KEYS
-                        )
-        ) {
-
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     sql, Statement.RETURN_GENERATED_KEYS)) {
             connection.setAutoCommit(false);
 
-
             try {
-
-                statement.setDate(
-                        1,
-                        Date.valueOf(
-                                programacaoSemana.data()
-                        )
-                );
+                statement.setDate(1, Date.valueOf(programacaoSemana.data()));
                 statement.setBoolean(2, programacaoSemana.salaBHabilitada());
                 statement.setBoolean(3, programacaoSemana.salaCHabilitada());
 
+                if (programacaoSemana.conselheiroSalaBId() == null) {
+                    statement.setNull(4, Types.INTEGER);
+                } else {
+                    statement.setInt(4, programacaoSemana.conselheiroSalaBId());
+                }
+                statement.setString(5, programacaoSemana.canticoInicial());
+                statement.setString(6, programacaoSemana.canticoMeio());
+                statement.setString(7, programacaoSemana.canticoFinal());
 
                 statement.executeUpdate();
 
-
                 int id;
-
-
-                try (
-                        ResultSet generatedKeys =
-                                statement.getGeneratedKeys()
-                ) {
-
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (!generatedKeys.next()) {
-
                         throw new SQLException(
-                                "Não foi possível obter o ID " +
-                                        "da programação semanal."
-                        );
+                                "Não foi possível obter o ID da programação semanal.");
                     }
-
-
-                    id =
-                            generatedKeys.getInt(1);
+                    id = generatedKeys.getInt(1);
                 }
 
-
-                for (
-                        ProgramacaoParte programacaoParte :
-                        programacaoSemana.partes()
-                ) {
-
-                    programacaoParteDAO.salvar(
-                            connection,
-                            id,
-                            programacaoParte
-                    );
+                for (ProgramacaoParte programacaoParte : programacaoSemana.partes()) {
+                    programacaoParteDAO.salvar(connection, id, programacaoParte);
                 }
-
 
                 connection.commit();
-
 
                 return new ProgramacaoSemana(
                         id,
                         programacaoSemana.data(),
                         programacaoSemana.partes(),
                         programacaoSemana.salaBHabilitada(),
-                        programacaoSemana.salaCHabilitada()
+                        programacaoSemana.salaCHabilitada(),
+                        programacaoSemana.conselheiroSalaBId(),
+                        programacaoSemana.canticoInicial(),
+                        programacaoSemana.canticoMeio(),
+                        programacaoSemana.canticoFinal()
                 );
-
-
             } catch (Exception e) {
-
                 connection.rollback();
-
                 throw e;
             }
-
-
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Erro ao salvar programação semanal.",
-                    e
-            );
+            throw new RuntimeException("Erro ao salvar programação semanal.", e);
         }
     }
 
-
-    public ProgramacaoSemana buscarPorData(
-            LocalDate data
-    ) {
-
+    public ProgramacaoSemana buscarPorData(LocalDate data) {
         String sql = """
                 SELECT
                     id,
                     data,
                     sala_b_habilitada,
-                    sala_c_habilitada
+                    sala_c_habilitada,
+                    conselheiro_sala_b_id,
+                    cantico_inicial,
+                    cantico_meio,
+                    cantico_final
                 FROM programacao_semana
                 WHERE data = ?
                 """;
 
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setDate(1, Date.valueOf(data));
 
-        try (
-                Connection connection =
-                        ConnectionFactory.getConnection();
-
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
-
-            statement.setDate(
-                    1,
-                    Date.valueOf(data)
-            );
-
-
-            try (
-                    ResultSet resultSet =
-                            statement.executeQuery()
-            ) {
-
+            try (ResultSet resultSet = statement.executeQuery()) {
                 if (!resultSet.next()) {
-
                     return null;
                 }
 
-
-                int id =
-                        resultSet.getInt("id");
-
+                int id = resultSet.getInt("id");
+                int conselheiroIdValor = resultSet.getInt("conselheiro_sala_b_id");
+                Integer conselheiroId = resultSet.wasNull() ? null : conselheiroIdValor;
 
                 List<ProgramacaoParte> partes =
-                        programacaoParteDAO.listarPorSemana(
-                                connection,
-                                id
-                        );
-
+                        programacaoParteDAO.listarPorSemana(connection, id);
 
                 return new ProgramacaoSemana(
                         id,
-                        resultSet.getDate("data")
-                                .toLocalDate(),
+                        resultSet.getDate("data").toLocalDate(),
                         partes,
                         resultSet.getBoolean("sala_b_habilitada"),
-                        resultSet.getBoolean("sala_c_habilitada")
+                        resultSet.getBoolean("sala_c_habilitada"),
+                        conselheiroId,
+                        resultSet.getString("cantico_inicial"),
+                        resultSet.getString("cantico_meio"),
+                        resultSet.getString("cantico_final")
                 );
             }
-
-
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Erro ao buscar programação semanal.",
-                    e
-            );
+            throw new RuntimeException("Erro ao buscar programação semanal.", e);
         }
     }
 
-
-    public void excluir(
-            Integer id
-    ) {
-
+    public void excluir(Integer id) {
         String sql = """
                 DELETE FROM programacao_semana
                 WHERE id = ?
                 """;
 
-
-        try (
-                Connection connection =
-                        ConnectionFactory.getConnection();
-
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
-
-            statement.setInt(
-                    1,
-                    id
-            );
-
-
-            int linhasAfetadas =
-                    statement.executeUpdate();
-
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            int linhasAfetadas = statement.executeUpdate();
 
             if (linhasAfetadas != 1) {
-
-                throw new RuntimeException(
-                        "Programação semanal não encontrada."
-                );
+                throw new RuntimeException("Programação semanal não encontrada.");
             }
-
-
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Erro ao excluir programação semanal.",
-                    e
-            );
+            throw new RuntimeException("Erro ao excluir programação semanal.", e);
         }
     }
 }
