@@ -1,11 +1,14 @@
 package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.dao.ParteDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.dao.ProgramacaoParteDAO;
 import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
+import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.ConfiguracaoSalas;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
@@ -23,12 +26,14 @@ public class ProgramacaoSemanaService {
     private final ProgramacaoSemanaDAO programacaoSemanaDAO;
     private final ProgramacaoParteDAO programacaoParteDAO;
     private final ConfiguracaoSalasService configuracaoSalasService;
+    private final PessoaDAO pessoaDAO;
 
     public ProgramacaoSemanaService() {
         this.parteDAO = new ParteDAO();
         this.programacaoSemanaDAO = new ProgramacaoSemanaDAO();
         this.programacaoParteDAO = new ProgramacaoParteDAO();
         this.configuracaoSalasService = new ConfiguracaoSalasService();
+        this.pessoaDAO = new PessoaDAO();
     }
 
     /**
@@ -592,6 +597,19 @@ public class ProgramacaoSemanaService {
     }
 
     /**
+     * Lista candidatos elegíveis para aconselhar na Sala B.
+     * Exige pessoa ativa, permissão para a sala e privilégio de servo ministerial ou ancião.
+     */
+    public List<Pessoa> listarConselheirosSalaB() {
+        return pessoaDAO.listarTodos().stream()
+                .filter(Pessoa::isAtivo)
+                .filter(Pessoa::podeParticiparSalaB)
+                .filter(pessoa -> pessoa.getPrivilegio().atende(Privilegio.SERVO_MINISTERIAL))
+                .sorted(Comparator.comparing(Pessoa::getNome, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
+    /**
      * Salva os dados complementares da programação semanal usados no S-140.
      * Campos vazios são persistidos como nulos, sem alterar as partes da semana.
      */
@@ -606,12 +624,10 @@ public class ProgramacaoSemanaService {
         obterOuCriar(data);
 
         if (conselheiroSalaBId != null) {
-            boolean pessoaExiste = new br.com.geradordesignacoes.dao.PessoaDAO()
-                    .buscarPorId(conselheiroSalaBId)
+            boolean pessoaExiste = pessoaDAO.buscarPorId(conselheiroSalaBId)
                     .filter(pessoa -> pessoa.isAtivo()
                             && pessoa.podeParticiparSalaB()
-                            && pessoa.getPrivilegio().atende(
-                                    br.com.geradordesignacoes.model.Privilegio.SERVO_MINISTERIAL))
+                            && pessoa.getPrivilegio().atende(Privilegio.SERVO_MINISTERIAL))
                     .isPresent();
             if (!pessoaExiste) {
                 throw new IllegalArgumentException(
