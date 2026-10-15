@@ -65,6 +65,8 @@ public class ProgramacaoView {
     private final TextField campoCanticoMeio;
     private final TextField campoCanticoFinal;
     private final ComboBox<Pessoa> campoConselheiroSalaB;
+    private Label labelConselheiroSalaB;
+    private VBox seletorConselheiroSalaB;
     private final Button botaoSalvarDadosS140;
     private final Button botaoHorariosS140;
     private BiConsumer<List<String>, Map<String, LocalTime>> onSalvarAjustesHorarios;
@@ -403,34 +405,15 @@ public class ProgramacaoView {
 
         subtitulo.getStyleClass().add("page-subtitle");
 
-        Label labelMes =
-                new Label("Mês da programação");
-
-        labelMes.getStyleClass().add("label");
-
         campoData.setPromptText("Selecione o mês");
         campoData.getStyleClass().add("date-picker");
-
-        campoData.setPrefWidth(180);
-
-        HBox seletorMes =
-                new HBox(
-                        10,
-                        labelMes,
-                        campoData
-                );
-
-        seletorMes.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        campoData.setMaxWidth(Double.MAX_VALUE);
 
         VBox topo =
                 new VBox(
                         6,
                         titulo,
-                        subtitulo,
-                        criarEspacamento(8),
-                        seletorMes
+                        subtitulo
                 );
 
         root.setTop(topo);
@@ -474,7 +457,7 @@ public class ProgramacaoView {
 
         BorderPane.setMargin(
                 centro,
-                new Insets(24, 0, 0, 0)
+                new Insets(8, 0, 0, 0)
         );
 
         root.setCenter(centro);
@@ -513,11 +496,16 @@ public class ProgramacaoView {
                 Pos.CENTER_LEFT
         );
 
+        Label labelMes = new Label("Mês da programação");
+        labelMes.getStyleClass().add("label");
+
         VBox card =
                 new VBox(
                         10,
                         titulo,
                         descricao,
+                        labelMes,
+                        campoData,
                         listaSemanas,
                         botoes
                 );
@@ -598,21 +586,18 @@ public class ProgramacaoView {
         Label titulo = new Label("Dados complementares do S-140");
         titulo.getStyleClass().add("card-title");
 
-        HBox canticos = new HBox(8,
-                criarCampoComRotulo("Inicial", campoCanticoInicial),
-                criarCampoComRotulo("Meio", campoCanticoMeio),
-                criarCampoComRotulo("Final", campoCanticoFinal));
-        canticos.setAlignment(Pos.CENTER_LEFT);
+        labelConselheiroSalaB = new Label("Conselheiro da Sala B");
+        labelConselheiroSalaB.getStyleClass().add("label");
+        seletorConselheiroSalaB = new VBox(4, labelConselheiroSalaB, campoConselheiroSalaB);
+        HBox.setHgrow(seletorConselheiroSalaB, Priority.ALWAYS);
 
-        Label labelConselheiro = new Label("Conselheiro da Sala B");
-        labelConselheiro.getStyleClass().add("label");
-        VBox seletorConselheiro = new VBox(4, labelConselheiro, campoConselheiroSalaB);
-        HBox.setHgrow(seletorConselheiro, Priority.ALWAYS);
-
-        HBox linhaConselheiro = new HBox(8, seletorConselheiro, botaoSalvarDadosS140, botaoHorariosS140);
+        HBox linhaConselheiro = new HBox(8, seletorConselheiroSalaB);
         linhaConselheiro.setAlignment(Pos.BOTTOM_LEFT);
 
-        return new VBox(8, titulo, canticos, linhaConselheiro);
+        HBox acoes = new HBox(8, botaoSalvarDadosS140, botaoHorariosS140);
+        acoes.setAlignment(Pos.CENTER_LEFT);
+
+        return new VBox(8, titulo, linhaConselheiro, acoes);
     }
 
     private VBox criarCampoComRotulo(String rotulo, TextField campo) {
@@ -624,70 +609,50 @@ public class ProgramacaoView {
     }
 
     private VBox criarPainelTema() {
-
-        Label titulo =
-                new Label("Tema da parte selecionada");
-
+        Label titulo = new Label("Tema da parte selecionada");
         titulo.getStyleClass().add("card-title");
 
-        HBox linha =
-                new HBox(
-                        10,
-                        campoTema,
-                        botaoSalvarTema
-                );
+        HBox linhaTema = new HBox(10, campoTema, botaoSalvarTema);
+        HBox.setHgrow(campoTema, Priority.ALWAYS);
+        linhaTema.setAlignment(Pos.CENTER_LEFT);
 
-        HBox.setHgrow(
-                campoTema,
-                Priority.ALWAYS
+        Label tituloDetalhes = new Label("Número oficial, duração e cânticos");
+        tituloDetalhes.getStyleClass().add("card-title");
+
+        campoNumeroOficial.setPromptText("Nº oficial");
+        campoNumeroOficial.setPrefWidth(88);
+        campoNumeroOficial.setMaxWidth(110);
+        campoDuracao.setPromptText("Minutos");
+        campoDuracao.setPrefWidth(78);
+        campoDuracao.setMaxWidth(95);
+
+        HBox linhaDetalhes = new HBox(
+                8,
+                criarCampoComRotulo("Nº oficial", campoNumeroOficial),
+                botaoSalvarNumeroOficial,
+                criarCampoComRotulo("Duração", campoDuracao),
+                botaoSalvarDuracao,
+                criarCampoCompacto("Cântico inicial", campoCanticoInicial),
+                criarCampoCompacto("Cântico do meio", campoCanticoMeio),
+                criarCampoCompacto("Cântico final", campoCanticoFinal)
         );
+        linhaDetalhes.setAlignment(Pos.BOTTOM_LEFT);
 
-        linha.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        VBox painel =
-                new VBox(
-                        8,
-                        titulo,
-                        linha
-                );
-
-        Label tituloNumero =
-                new Label("Número oficial da parte");
-
-        tituloNumero.getStyleClass().add("card-title");
-
-        HBox linhaNumero =
-                new HBox(
-                        10,
-                        campoNumeroOficial,
-                        botaoSalvarNumeroOficial
-                );
-
-        linhaNumero.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        Label tituloDuracao = new Label("Duração da parte (minutos)");
-        tituloDuracao.getStyleClass().add("card-title");
-        HBox linhaDuracao = new HBox(10, campoDuracao, botaoSalvarDuracao);
-        linhaDuracao.setAlignment(Pos.CENTER_LEFT);
-
-        painel.getChildren().addAll(
-                criarEspacamento(4),
-                tituloNumero,
-                linhaNumero,
-                criarEspacamento(4),
-                tituloDuracao,
-                linhaDuracao
-        );
-
-        painel.setPadding(
-                new Insets(12, 0, 0, 0)
-        );
-
+        VBox painel = new VBox(8, titulo, linhaTema, tituloDetalhes, linhaDetalhes);
+        painel.setPadding(new Insets(12, 0, 0, 0));
         return painel;
+    }
+
+    private VBox criarCampoCompacto(String rotulo, TextField campo) {
+        Label label = new Label(rotulo);
+        label.getStyleClass().add("label");
+        campo.setPrefWidth(62);
+        campo.setMinWidth(58);
+        campo.setMaxWidth(70);
+        VBox caixa = new VBox(4, label, campo);
+        caixa.setMinWidth(58);
+        caixa.setMaxWidth(80);
+        return caixa;
     }
 
 
@@ -929,6 +894,14 @@ public class ProgramacaoView {
 
     public void carregarConselheirosSalaB(List<Pessoa> pessoas) {
         campoConselheiroSalaB.setItems(FXCollections.observableArrayList(pessoas));
+    }
+
+    public void definirVisibilidadeConselheiroSalaB(boolean visivel) {
+        if (seletorConselheiroSalaB == null || labelConselheiroSalaB == null) {
+            return;
+        }
+        seletorConselheiroSalaB.setVisible(visivel);
+        seletorConselheiroSalaB.setManaged(visivel);
     }
 
     public void carregarDadosS140(String inicial, String meio, String finalCantico, Integer conselheiroId) {
