@@ -409,10 +409,73 @@ public class ExportadorS140WordService {
         for (XWPFParagraph paragrafo : celula.getParagraphs()) substituirNaParagrafo(paragrafo, marcador, valor);
     }
 
+    /**
+     * Substitui marcadores mesmo quando o Word os divide entre vários runs.
+     * A substituição mantém os runs e seus estilos; o texto substituto herda
+     * o estilo do primeiro run que continha o marcador.
+     */
     private void substituirNaParagrafo(XWPFParagraph paragrafo, String marcador, String valor) {
-        for (XWPFRun run : paragrafo.getRuns()) {
-            String texto = run.getText(0);
-            if (texto != null && texto.contains(marcador)) run.setText(texto.replace(marcador, valor == null ? "" : valor), 0);
+        if (marcador == null || marcador.isEmpty()) {
+            return;
+        }
+
+        List<XWPFRun> runs = paragrafo.getRuns();
+        if (runs.isEmpty()) {
+            return;
+        }
+
+        String substituto = valor == null ? "" : valor;
+        while (true) {
+            List<String> textos = new ArrayList<>(runs.size());
+            StringBuilder textoCompleto = new StringBuilder();
+            for (XWPFRun run : runs) {
+                String texto = run.getText(0);
+                textos.add(texto == null ? "" : texto);
+                textoCompleto.append(texto == null ? "" : texto);
+            }
+
+            int inicio = textoCompleto.indexOf(marcador);
+            if (inicio < 0) {
+                return;
+            }
+            int fim = inicio + marcador.length();
+
+            int indiceRunInicio = -1;
+            int indiceRunFim = -1;
+            int deslocamentoInicio = 0;
+            int deslocamentoFim = 0;
+            int acumulado = 0;
+            for (int i = 0; i < textos.size(); i++) {
+                int proximo = acumulado + textos.get(i).length();
+                if (indiceRunInicio < 0 && inicio >= acumulado && inicio < proximo) {
+                    indiceRunInicio = i;
+                    deslocamentoInicio = inicio - acumulado;
+                }
+                if (fim > acumulado && fim <= proximo) {
+                    indiceRunFim = i;
+                    deslocamentoFim = fim - acumulado;
+                    break;
+                }
+                acumulado = proximo;
+            }
+
+            if (indiceRunInicio < 0 || indiceRunFim < 0) {
+                return;
+            }
+
+            String textoInicio = textos.get(indiceRunInicio);
+            String prefixo = textoInicio.substring(0, deslocamentoInicio);
+            if (indiceRunInicio == indiceRunFim) {
+                String sufixo = textoInicio.substring(deslocamentoFim);
+                runs.get(indiceRunInicio).setText(prefixo + substituto + sufixo, 0);
+            } else {
+                String textoFim = textos.get(indiceRunFim);
+                runs.get(indiceRunInicio).setText(prefixo + substituto, 0);
+                for (int i = indiceRunInicio + 1; i < indiceRunFim; i++) {
+                    runs.get(i).setText("", 0);
+                }
+                runs.get(indiceRunFim).setText(textoFim.substring(deslocamentoFim), 0);
+            }
         }
     }
 
