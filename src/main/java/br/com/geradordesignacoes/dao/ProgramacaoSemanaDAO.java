@@ -129,6 +129,50 @@ public class ProgramacaoSemanaDAO {
         }
     }
 
+    public void atualizarDadosS140(
+            LocalDate data,
+            Integer conselheiroSalaBId,
+            String canticoInicial,
+            String canticoMeio,
+            String canticoFinal
+    ) {
+        String sql = """
+                UPDATE programacao_semana
+                SET conselheiro_sala_b_id = ?,
+                    cantico_inicial = ?,
+                    cantico_meio = ?,
+                    cantico_final = ?
+                WHERE data = ?
+                """;
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            if (conselheiroSalaBId == null) {
+                statement.setNull(1, Types.INTEGER);
+            } else {
+                statement.setInt(1, conselheiroSalaBId);
+            }
+            statement.setString(2, normalizar(canticoInicial));
+            statement.setString(3, normalizar(canticoMeio));
+            statement.setString(4, normalizar(canticoFinal));
+            statement.setDate(5, Date.valueOf(data));
+
+            if (statement.executeUpdate() != 1) {
+                throw new IllegalArgumentException(
+                        "Programação semanal não encontrada para atualizar os dados do S-140."
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao atualizar os dados do S-140.", e
+            );
+        }
+    }
+
+    private String normalizar(String valor) {
+        return valor == null || valor.isBlank() ? null : valor.trim();
+    }
+
     public void excluir(Integer id) {
         String sql = """
                 DELETE FROM programacao_semana
