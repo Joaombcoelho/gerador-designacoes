@@ -239,7 +239,6 @@ gerador-designacoes/
 ├── modelos/
 │   ├── S-89_T.pdf
 │   └── S-89_visualizacao.png
-│   # O modelo Word S-140 é selecionado pelo usuário na exportação.
 ├── screenshot/
 │   ├── Home.jpg
 │   ├── Tela Cadastro parte.jpg
