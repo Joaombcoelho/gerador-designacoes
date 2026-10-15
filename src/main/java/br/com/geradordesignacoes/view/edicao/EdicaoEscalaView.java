@@ -625,8 +625,8 @@ public class EdicaoEscalaView {
     }
 
     private void adicionarParte() {
-        atualizarListaPartes();
-
+        // Não recarregue os itens aqui: substituir a lista do ComboBox recria
+        // as instâncias e pode limpar a parte selecionada e os participantes.
         Parte parte = comboParte.getValue();
         Pessoa responsavel = comboResponsavel.getValue();
         Pessoa ajudante = comboAjudante.getValue();
