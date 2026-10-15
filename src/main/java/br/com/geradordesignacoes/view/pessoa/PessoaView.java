@@ -191,7 +191,7 @@ public class PessoaView {
 
 
         tabela.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY
+                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
         );
 
         tabela.setPlaceholder(

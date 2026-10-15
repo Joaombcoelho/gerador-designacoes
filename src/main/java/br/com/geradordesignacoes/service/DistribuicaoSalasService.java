@@ -1,12 +1,10 @@
 package br.com.geradordesignacoes.service;
 
-import br.com.geradordesignacoes.model.NivelLeitura;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.TipoParte;
-import br.com.geradordesignacoes.model.TipoParticipacao;
 import br.com.geradordesignacoes.model.SecaoParte;
 import java.util.ArrayList;
 import java.util.List;
