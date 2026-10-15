@@ -262,18 +262,22 @@ public class PessoaFormularioView {
     }
 
     private void atualizarPermissoesAnciao() {
-        boolean anciao =
-                comboPrivilegio.getValue() == Privilegio.ANCIAO;
+        Privilegio privilegio = comboPrivilegio.getValue();
+        boolean anciao = privilegio == Privilegio.ANCIAO;
+        boolean podeDirigirEstudo = anciao
+                || privilegio == Privilegio.SERVO_MINISTERIAL;
 
         checkPresidente.setDisable(!anciao);
-        checkDirigente.setDisable(!anciao);
+        checkDirigente.setDisable(!podeDirigirEstudo);
 
         if (anciao) {
             checkPresidente.setSelected(true);
             checkDirigente.setSelected(true);
         } else {
             checkPresidente.setSelected(false);
-            checkDirigente.setSelected(false);
+            if (!podeDirigirEstudo) {
+                checkDirigente.setSelected(false);
+            }
         }
     }
 
