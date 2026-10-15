@@ -279,6 +279,8 @@ public class DatabaseInitializer {
                     CREATE_TABLE_ESCALA
             );
 
+            adicionarColunasPapeisEspeciaisEscala(connection);
+
 
             /*
              * ----------------------------------------------------
@@ -354,6 +356,38 @@ public class DatabaseInitializer {
         }
 
     }
+
+    /**
+     * Persiste os papéis especiais que pertencem à escala, sem depender
+     * da existência de uma parte/designação correspondente.
+     * As colunas são opcionais para preservar escalas antigas.
+     */
+    static void adicionarColunasPapeisEspeciaisEscala(
+            Connection connection
+    ) throws SQLException {
+        adicionarColunaReferenciaPessoaEscala(connection, "presidente_id");
+        adicionarColunaReferenciaPessoaEscala(connection, "dirigente_id");
+        adicionarColunaReferenciaPessoaEscala(connection, "oracao_inicial_id");
+    }
+
+    private static void adicionarColunaReferenciaPessoaEscala(
+            Connection connection,
+            String coluna
+    ) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(escala)")) {
+            while (resultSet.next()) {
+                if (coluna.equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE escala ADD COLUMN " + coluna + " INTEGER REFERENCES pessoa(id)");
+        }
+    }
+
     private static void adicionarColunaSalaDesignacao(
             Connection connection
     ) throws SQLException {

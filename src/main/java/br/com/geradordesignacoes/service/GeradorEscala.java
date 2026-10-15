@@ -303,6 +303,24 @@ public class GeradorEscala {
     private Escala criarEscala(LocalDate data, List<Designacao> designacoes, Pessoa presidenteDaReuniao) {
         Escala escala = new Escala(data, designacoes);
         escala.setPresidente(presidenteDaReuniao);
+
+        for (Designacao designacao : designacoes) {
+            TipoParte tipo = designacao.parte().getTipo();
+            Pessoa participante = designacao.responsavel() != null
+                    ? designacao.responsavel()
+                    : designacao.ajudante();
+
+            if (participante == null) {
+                continue;
+            }
+
+            if (tipo == TipoParte.DIRIGENTE_ESTUDO) {
+                escala.setDirigente(participante);
+            } else if (tipo == TipoParte.ORACAO_INICIAL) {
+                escala.setOracaoInicial(participante);
+            }
+        }
+
         return escala;
     }
 

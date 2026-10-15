@@ -611,4 +611,59 @@ class DatabaseInitializerTest {
             return resultado.next() && resultado.getInt(1) == 1;
         }
     }
+
+
+    private boolean colunaExiste(
+            Connection connection,
+            String coluna,
+            String tabela
+    ) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(
+                     "PRAGMA table_info(" + tabela + ")")) {
+            while (resultSet.next()) {
+                if (coluna.equals(resultSet.getString("name"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Test
+    void deveAdicionarColunasDosPapeisEspeciaisDeFormaIdempotente()
+            throws Exception {
+        Path arquivo = diretorioTemporario.resolve("papeis-especiais.db");
+
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath());
+             Statement statement = connection.createStatement()) {
+            statement.execute("PRAGMA foreign_keys = ON");
+            statement.execute("CREATE TABLE pessoa (id INTEGER PRIMARY KEY)");
+            statement.execute("""
+                    CREATE TABLE escala (
+                        id INTEGER PRIMARY KEY,
+                        data TEXT NOT NULL,
+                        status TEXT NOT NULL,
+                        data_geracao TEXT NOT NULL,
+                        data_salvamento TEXT
+                    )
+                    """);
+            statement.execute("""
+                    INSERT INTO escala (id, data, status, data_geracao)
+                    VALUES (1, '2026-10-21', 'GERADA', '2026-10-15T10:00:00')
+                    """);
+
+            DatabaseInitializer.adicionarColunasPapeisEspeciaisEscala(connection);
+            DatabaseInitializer.adicionarColunasPapeisEspeciaisEscala(connection);
+
+            assertTrue(colunaExiste(connection, "presidente_id", "escala"));
+            assertTrue(colunaExiste(connection, "dirigente_id", "escala"));
+            assertTrue(colunaExiste(connection, "oracao_inicial_id", "escala"));
+
+            assertEquals(1, buscarValor(connection,
+                    "SELECT COUNT(*) FROM escala WHERE id = 1"));
+        }
+    }
+
 }
