@@ -3,6 +3,7 @@ package br.com.geradordesignacoes.service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import br.com.geradordesignacoes.model.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -63,6 +64,135 @@ class ExportadorS140WordServiceTest {
                 service.datasReunioes(YearMonth.of(2026, 10), DayOfWeek.SUNDAY)
         );
     }
+    @Test
+    void deveSubstituirMarcadorDivididoEntreRunsSemPerderTextoAoRedor() throws Exception {
+        try (XWPFDocument documento = new XWPFDocument()) {
+            var paragrafo = documento.createParagraph();
+            paragrafo.createRun().setText("Congregação: [");
+            paragrafo.createRun().setText("NOME DA CONGREGAÇÃO");
+            paragrafo.createRun().setText("] - mês");
+
+            var metodo = ExportadorS140WordService.class.getDeclaredMethod(
+                    "substituirNaParagrafo",
+                    org.apache.poi.xwpf.usermodel.XWPFParagraph.class,
+                    String.class,
+                    String.class);
+            metodo.setAccessible(true);
+            metodo.invoke(service, paragrafo, "[NOME DA CONGREGAÇÃO]", "Central");
+
+            assertEquals("Congregação: Central - mês", paragrafo.getText());
+        }
+    }
+
+    @Test
+    void deveSubstituirMaisDeUmaOcorrenciaDoMesmoMarcadorDividido() throws Exception {
+        try (XWPFDocument documento = new XWPFDocument()) {
+            var paragrafo = documento.createParagraph();
+            paragrafo.createRun().setText("[");
+            paragrafo.createRun().setText("DATA");
+            paragrafo.createRun().setText("] e [DATA]");
+
+            var metodo = ExportadorS140WordService.class.getDeclaredMethod(
+                    "substituirNaParagrafo",
+                    org.apache.poi.xwpf.usermodel.XWPFParagraph.class,
+                    String.class,
+                    String.class);
+            metodo.setAccessible(true);
+            metodo.invoke(service, paragrafo, "[DATA]", "15/10/2026");
+
+            assertEquals("15/10/2026 e 15/10/2026", paragrafo.getText());
+        }
+    }
+
+    @Test
+    void deveExibirNomeDaParteQuandoTemaNaoFoiInformado() {
+        Parte parte = new Parte(
+                1, "Iniciando conversas", TipoParte.INICIANDO_CONVERSAS,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS,
+                1, false, NivelLeitura.BASICO, SecaoParte.MINISTERIO,
+                TipoVariacaoParte.VARIAVEL, true, 1, List.of());
+        ProgramacaoParte programacaoParte = new ProgramacaoParte(parte, 1, null);
+
+        assertEquals(
+                "Iniciando conversas",
+                ExportadorS140WordService.textoParteExportacao(programacaoParte));
+    }
+
+    @Test
+    void deveManterNomeDaParteEAcrescentarTemaQuandoInformado() {
+        Parte parte = new Parte(
+                1, "Iniciando conversas", TipoParte.INICIANDO_CONVERSAS,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS,
+                1, false, NivelLeitura.BASICO, SecaoParte.MINISTERIO,
+                TipoVariacaoParte.VARIAVEL, true, 1, List.of());
+        ProgramacaoParte programacaoParte =
+                new ProgramacaoParte(parte, 1, "Abordagem informal");
+
+        assertEquals(
+                "Iniciando conversas: Abordagem informal",
+                ExportadorS140WordService.textoParteExportacao(programacaoParte));
+    }
+
+    @Test
+    void deveExibirDirigenteELeitorDoEstudoBiblico() {
+        Parte estudo = new Parte(
+                8, "Estudo Bíblico", TipoParte.DIRIGENTE_ESTUDO,
+                Privilegio.SERVO_MINISTERIAL, false, SexoPermitido.MASCULINO,
+                1, false, NivelLeitura.BASICO, SecaoParte.NOSSA_VIDA_CRISTA,
+                TipoVariacaoParte.FIXA, true, 1, List.of());
+        Pessoa dirigente = pessoaTeste("Dirigente", 1);
+        Pessoa leitor = pessoaTeste("Leitor", 2);
+        List<Designacao> designacoes = List.of(
+                new Designacao(LocalDate.of(2026, 10, 7), estudo, dirigente, null),
+                new Designacao(LocalDate.of(2026, 10, 7), estudo, null, leitor));
+
+        assertEquals(
+                "Dirigente/Leitor",
+                ExportadorS140WordService.textoParticipantesEstudoBiblico(designacoes, 8));
+    }
+
+    @Test
+    void deveIdentificarLinhasOpcionaisSemPartesProgramadasParaRemocao() {
+        Parte ministerio = criarParteTeste(
+                10, "Iniciando conversas", TipoParte.INICIANDO_CONVERSAS,
+                SecaoParte.MINISTERIO, 1);
+        Parte ministerio2 = criarParteTeste(
+                11, "Cultivando interesse", TipoParte.CULTIVANDO_INTERESSE,
+                SecaoParte.MINISTERIO, 2);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(LocalDate.of(2026, 10, 7));
+        programacao.adicionarParte(new ProgramacaoParte(ministerio, 1, null));
+        programacao.adicionarParte(new ProgramacaoParte(ministerio2, 2, null));
+
+        assertEquals(
+                List.of(116, 117, 121, 122),
+                ExportadorS140WordService.linhasPartesNaoUtilizadas(programacao, 102));
+    }
+
+    private Pessoa pessoaTeste(String nome, int id) {
+        Pessoa pessoa = new Pessoa(
+                nome, Sexo.MASCULINO, true, true, true,
+                true, true, true, false, true,
+                Privilegio.SERVO_MINISTERIAL, NivelLeitura.BASICO);
+        pessoa.setId(id);
+        return pessoa;
+    }
+
+    private Parte criarParteTeste(
+            int id, String nome, TipoParte tipo, SecaoParte secao, int ordem) {
+        return new Parte(
+                id, nome, tipo, Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS,
+                1, false, NivelLeitura.BASICO, secao,
+                TipoVariacaoParte.VARIAVEL, true, ordem, List.of());
+    }
+
+    @Test
+    void deveGerarNomePadraoDoS140ComMesEAno() {
+        assertEquals(
+                "Programacao_reuniao_meio_de_semana_Outubro_2026.docx",
+                br.com.geradordesignacoes.controller.ProgramacaoController
+                        .nomeArquivoS140(YearMonth.of(2026, 10)));
+    }
+
     @Test
     void deveRejeitarMesNuloAntesDeAcessarArquivosOuBanco() {
         IllegalArgumentException erro = assertThrows(

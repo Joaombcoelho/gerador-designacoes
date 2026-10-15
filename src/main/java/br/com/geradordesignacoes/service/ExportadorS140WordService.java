@@ -123,6 +123,20 @@ public class ExportadorS140WordService {
             for (int i = semanas.size(); i < linhasData.size(); i++) {
                 limparBloco(tabela, linhasData.get(i));
             }
+
+            // Remove apenas linhas opcionais de partes que não foram programadas.
+            // Fazemos isso depois de preencher todos os blocos e em ordem decrescente,
+            // para que os índices dos blocos seguintes não sejam deslocados antes da hora.
+            List<Integer> linhasNaoUtilizadas = new ArrayList<>();
+            for (int i = 0; i < semanas.size(); i++) {
+                linhasNaoUtilizadas.addAll(
+                        linhasPartesNaoUtilizadas(semanas.get(i).programacao(), linhasData.get(i)));
+            }
+            linhasNaoUtilizadas.stream()
+                    .distinct()
+                    .sorted(Comparator.reverseOrder())
+                    .forEach(tabela::removeRow);
+
             try (OutputStream saida = Files.newOutputStream(destino)) {
                 documento.write(saida);
             }
@@ -206,10 +220,9 @@ public class ExportadorS140WordService {
         ProgramacaoParte estudo = programacao.partes().stream()
                 .filter(p -> p.getParte().getTipo() == TipoParte.DIRIGENTE_ESTUDO)
                 .findFirst().orElse(null);
-        Designacao designacaoEstudo = estudo == null ? null
-                : designacao(escala, estudo.getParte().getId(), SalaDesignacao.PRINCIPAL);
         setPlaceholder(tabela.getRow(linhaData + 21), "[Nome/Nome]", 0,
-                designacaoEstudo == null ? "" : nome(designacaoEstudo.responsavel()) + "/" + nome(designacaoEstudo.ajudante()));
+                estudo == null ? "" : textoParticipantesEstudoBiblico(
+                        escala.getDesignacoes(), estudo.getParte().getId()));
 
         setTextoContendo(tabela.getRow(linhaData + 22), "Comentários finais (3 min)",
                 temaComDuracao("Comentários finais", configuracaoService.buscar().duracaoComentariosFinaisMinutos()));
@@ -261,11 +274,58 @@ public class ExportadorS140WordService {
         }
     }
 
+    /**
+     * O dirigente e o leitor do Estudo Bíblico são persistidos como duas
+     * designações da mesma parte: uma tem responsável e a outra ajudante.
+     * Não se deve consultar apenas a primeira designação encontrada.
+     */
+    static String textoParticipantesEstudoBiblico(List<Designacao> designacoes, Integer parteId) {
+        List<Designacao> estudo = designacoes.stream()
+                .filter(d -> Objects.equals(d.parte().getId(), parteId))
+                .filter(d -> d.parte().getTipo() == TipoParte.DIRIGENTE_ESTUDO)
+                .toList();
+        Pessoa dirigente = estudo.stream()
+                .map(Designacao::responsavel)
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+        Pessoa leitor = estudo.stream()
+                .map(Designacao::ajudante)
+                .filter(Objects::nonNull)
+                .findFirst().orElse(null);
+        return nome(dirigente) + "/" + nome(leitor);
+    }
+
+    /**
+     * Retorna os índices das linhas de partes opcionais sem programação.
+     * As linhas fixas da reunião e o layout dos blocos não são removidos.
+     */
+    static List<Integer> linhasPartesNaoUtilizadas(ProgramacaoSemana programacao, int linhaData) {
+        List<ProgramacaoParte> ministerio = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.MINISTERIO)
+                .filter(p -> p.getParte().getTipo() != TipoParte.O_QUE_VOCE_DIRIA)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .toList();
+        List<ProgramacaoParte> vidaCrista = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.NOSSA_VIDA_CRISTA)
+                .filter(p -> p.getParte().getTipo() != TipoParte.DIRIGENTE_ESTUDO)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .toList();
+
+        List<Integer> linhas = new ArrayList<>();
+        for (int i = Math.min(ministerio.size(), 4); i < 4; i++) {
+            linhas.add(linhaData + 12 + i);
+        }
+        for (int i = Math.min(vidaCrista.size(), 2); i < 2; i++) {
+            linhas.add(linhaData + 19 + i);
+        }
+        return List.copyOf(linhas);
+    }
+
     private void preencherTema(XWPFTableRow linha, ProgramacaoParte parte) {
         for (XWPFTableCell celula : linha.getTableCells()) {
             String texto = celula.getText();
             if (texto.contains("[Tema]")) {
-                substituirNaCelula(celula, "[Tema]", textoSeguro(parte.getTema()));
+                substituirNaCelula(celula, "[Tema]", textoParteExportacao(parte));
                 Integer duracao = parte.getDuracaoMinutos() != null
                         ? parte.getDuracaoMinutos() : parte.getParte().getDuracaoPadraoMinutos();
                 substituirNaCelula(celula, "(X min)", duracao == null ? "(duração pendente)" : "(" + duracao + " min)");
@@ -273,6 +333,19 @@ public class ExportadorS140WordService {
                 break;
             }
         }
+    }
+
+    /**
+     * Identifica a parte no formulário mesmo quando a programação não tem tema.
+     * Quando há tema, mantém os dois dados para não perder o assunto cadastrado.
+     */
+    static String textoParteExportacao(ProgramacaoParte parte) {
+        String nomeParte = textoSeguro(parte.getParte().getNome());
+        String tema = textoSeguro(parte.getTema());
+        if (nomeParte.isBlank()) {
+            return tema;
+        }
+        return tema.isBlank() ? nomeParte : nomeParte + ": " + tema;
     }
 
     private void preencherHorarios(XWPFTable tabela, int linhaData, ProgramacaoSemana programacao) {
@@ -409,10 +482,73 @@ public class ExportadorS140WordService {
         for (XWPFParagraph paragrafo : celula.getParagraphs()) substituirNaParagrafo(paragrafo, marcador, valor);
     }
 
+    /**
+     * Substitui marcadores mesmo quando o Word os divide entre vários runs.
+     * A substituição mantém os runs e seus estilos; o texto substituto herda
+     * o estilo do primeiro run que continha o marcador.
+     */
     private void substituirNaParagrafo(XWPFParagraph paragrafo, String marcador, String valor) {
-        for (XWPFRun run : paragrafo.getRuns()) {
-            String texto = run.getText(0);
-            if (texto != null && texto.contains(marcador)) run.setText(texto.replace(marcador, valor == null ? "" : valor), 0);
+        if (marcador == null || marcador.isEmpty()) {
+            return;
+        }
+
+        List<XWPFRun> runs = paragrafo.getRuns();
+        if (runs.isEmpty()) {
+            return;
+        }
+
+        String substituto = valor == null ? "" : valor;
+        while (true) {
+            List<String> textos = new ArrayList<>(runs.size());
+            StringBuilder textoCompleto = new StringBuilder();
+            for (XWPFRun run : runs) {
+                String texto = run.getText(0);
+                textos.add(texto == null ? "" : texto);
+                textoCompleto.append(texto == null ? "" : texto);
+            }
+
+            int inicio = textoCompleto.indexOf(marcador);
+            if (inicio < 0) {
+                return;
+            }
+            int fim = inicio + marcador.length();
+
+            int indiceRunInicio = -1;
+            int indiceRunFim = -1;
+            int deslocamentoInicio = 0;
+            int deslocamentoFim = 0;
+            int acumulado = 0;
+            for (int i = 0; i < textos.size(); i++) {
+                int proximo = acumulado + textos.get(i).length();
+                if (indiceRunInicio < 0 && inicio >= acumulado && inicio < proximo) {
+                    indiceRunInicio = i;
+                    deslocamentoInicio = inicio - acumulado;
+                }
+                if (fim > acumulado && fim <= proximo) {
+                    indiceRunFim = i;
+                    deslocamentoFim = fim - acumulado;
+                    break;
+                }
+                acumulado = proximo;
+            }
+
+            if (indiceRunInicio < 0 || indiceRunFim < 0) {
+                return;
+            }
+
+            String textoInicio = textos.get(indiceRunInicio);
+            String prefixo = textoInicio.substring(0, deslocamentoInicio);
+            if (indiceRunInicio == indiceRunFim) {
+                String sufixo = textoInicio.substring(deslocamentoFim);
+                runs.get(indiceRunInicio).setText(prefixo + substituto + sufixo, 0);
+            } else {
+                String textoFim = textos.get(indiceRunFim);
+                runs.get(indiceRunInicio).setText(prefixo + substituto, 0);
+                for (int i = indiceRunInicio + 1; i < indiceRunFim; i++) {
+                    runs.get(i).setText("", 0);
+                }
+                runs.get(indiceRunFim).setText(textoFim.substring(deslocamentoFim), 0);
+            }
         }
     }
 
