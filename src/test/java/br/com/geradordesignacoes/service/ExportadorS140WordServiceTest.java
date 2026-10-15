@@ -186,6 +186,14 @@ class ExportadorS140WordServiceTest {
     }
 
     @Test
+    void deveGerarNomePadraoDoS140ComMesEAno() {
+        assertEquals(
+                "Programacao_reuniao_meio_de_semana_Outubro_2026.docx",
+                br.com.geradordesignacoes.controller.ProgramacaoController
+                        .nomeArquivoS140(YearMonth.of(2026, 10)));
+    }
+
+    @Test
     void deveRejeitarMesNuloAntesDeAcessarArquivosOuBanco() {
         IllegalArgumentException erro = assertThrows(
                 IllegalArgumentException.class,
