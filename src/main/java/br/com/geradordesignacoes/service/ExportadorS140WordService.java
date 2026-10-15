@@ -211,9 +211,17 @@ public class ExportadorS140WordService {
             return;
         }
         preencherTema(tabela.getRow(linha), parte);
-        Designacao designacao = designacao(escala, parte.getParte().getId(), sala);
-        setPlaceholder(tabela.getRow(linha), "[Nome]", 0,
-                designacao == null ? "" : nome(designacao.responsavel()));
+        List<XWPFTableCell> nomes = celulasComMarcador(tabela.getRow(linha), "[Nome]");
+        if (nomes.size() > 1) {
+            Designacao salaB = designacao(escala, parte.getParte().getId(), SalaDesignacao.B);
+            Designacao principal = designacao(escala, parte.getParte().getId(), SalaDesignacao.PRINCIPAL);
+            substituirNaCelula(nomes.get(0), "[Nome]", salaB == null ? "" : nome(salaB.responsavel()));
+            substituirNaCelula(nomes.get(nomes.size() - 1), "[Nome]", principal == null ? "" : nome(principal.responsavel()));
+        } else {
+            Designacao designacao = designacao(escala, parte.getParte().getId(), sala);
+            setPlaceholder(tabela.getRow(linha), "[Nome]", 0,
+                    designacao == null ? "" : nome(designacao.responsavel()));
+        }
     }
 
     private void preencherNomesSala(XWPFTableRow linha, Escala escala, Integer parteId) {
