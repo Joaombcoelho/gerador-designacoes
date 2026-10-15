@@ -165,6 +165,22 @@ public class DatabaseInitializer {
             
             """;
 
+    private static final String CREATE_TABLE_CONFIGURACAO_GERAL = """
+            
+            CREATE TABLE IF NOT EXISTS configuracoes_gerais (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                nome_congregacao TEXT NOT NULL DEFAULT '',
+                dia_reuniao_habitual TEXT NOT NULL DEFAULT 'WEDNESDAY',
+                horario_inicio TEXT NOT NULL DEFAULT '19:30',
+                duracao_cantico_oracao_inicial_minutos INTEGER NOT NULL DEFAULT 5 CHECK (duracao_cantico_oracao_inicial_minutos > 0),
+                duracao_comentarios_iniciais_minutos INTEGER NOT NULL DEFAULT 1 CHECK (duracao_comentarios_iniciais_minutos > 0),
+                duracao_cantico_meio_minutos INTEGER NOT NULL DEFAULT 4 CHECK (duracao_cantico_meio_minutos > 0),
+                duracao_comentarios_finais_minutos INTEGER NOT NULL DEFAULT 3 CHECK (duracao_comentarios_finais_minutos > 0),
+                duracao_cantico_oracao_final_minutos INTEGER NOT NULL DEFAULT 5 CHECK (duracao_cantico_oracao_final_minutos > 0)
+            );
+            
+            """;
+
 
     private static final String CREATE_TABLE_PROGRAMACAO_PARTE = """
             
@@ -314,6 +330,11 @@ public class DatabaseInitializer {
                     VALUES (1, 0, 0)
                     """);
 
+            statement.execute(CREATE_TABLE_CONFIGURACAO_GERAL);
+            statement.execute("""
+                    INSERT OR IGNORE INTO configuracoes_gerais (id)
+                    VALUES (1)
+                    """);
 
             statement.execute(
                     CREATE_TABLE_PROGRAMACAO_PARTE
