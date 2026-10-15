@@ -265,7 +265,7 @@ public class ExportadorS140WordService {
         for (XWPFTableCell celula : linha.getTableCells()) {
             String texto = celula.getText();
             if (texto.contains("[Tema]")) {
-                substituirNaCelula(celula, "[Tema]", textoSeguro(parte.getTema()));
+                substituirNaCelula(celula, "[Tema]", textoParteExportacao(parte));
                 Integer duracao = parte.getDuracaoMinutos() != null
                         ? parte.getDuracaoMinutos() : parte.getParte().getDuracaoPadraoMinutos();
                 substituirNaCelula(celula, "(X min)", duracao == null ? "(duração pendente)" : "(" + duracao + " min)");
@@ -273,6 +273,19 @@ public class ExportadorS140WordService {
                 break;
             }
         }
+    }
+
+    /**
+     * Identifica a parte no formulário mesmo quando a programação não tem tema.
+     * Quando há tema, mantém os dois dados para não perder o assunto cadastrado.
+     */
+    static String textoParteExportacao(ProgramacaoParte parte) {
+        String nomeParte = textoSeguro(parte.getParte().getNome());
+        String tema = textoSeguro(parte.getTema());
+        if (nomeParte.isBlank()) {
+            return tema;
+        }
+        return tema.isBlank() ? nomeParte : nomeParte + ": " + tema;
     }
 
     private void preencherHorarios(XWPFTable tabela, int linhaData, ProgramacaoSemana programacao) {
