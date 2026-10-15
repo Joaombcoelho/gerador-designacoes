@@ -45,6 +45,8 @@ public class ProgramacaoView {
 
     private final Button botaoExportarS89;
 
+    private final Button botaoExportarS140;
+
     private final Button botaoSalvar;
 
     private final ListView<Parte> listaPartes;
@@ -131,6 +133,9 @@ public class ProgramacaoView {
 
         botaoExportarS89 = new Button("Exportar S-89");
         botaoExportarS89.getStyleClass().add("secondary-button");
+
+        botaoExportarS140 = new Button("Exportar S-140 Word");
+        botaoExportarS140.getStyleClass().add("secondary-button");
 
         botaoSalvar = new Button("Salvar");
         botaoSalvar.getStyleClass().add("primary-button");
@@ -709,6 +714,7 @@ public class ProgramacaoView {
                         labelStatus,
                         botaoSalvar,
                         botaoExportarS89,
+                        botaoExportarS140,
                         botaoGerar
                 );
 
@@ -794,6 +800,10 @@ public class ProgramacaoView {
     public Button getBotaoExportarS89() {
 
         return botaoExportarS89;
+    }
+
+    public Button getBotaoExportarS140() {
+        return botaoExportarS140;
     }
 
 
