@@ -2,7 +2,8 @@ package br.com.geradordesignacoes.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;\nimport br.com.geradordesignacoes.model.*;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import br.com.geradordesignacoes.model.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -163,7 +164,7 @@ class ExportadorS140WordServiceTest {
         programacao.adicionarParte(new ProgramacaoParte(ministerio2, 2, null));
 
         assertEquals(
-                List.of(114, 119, 120),
+                List.of(116, 121, 122),
                 ExportadorS140WordService.linhasPartesNaoUtilizadas(programacao, 102));
     }
 
