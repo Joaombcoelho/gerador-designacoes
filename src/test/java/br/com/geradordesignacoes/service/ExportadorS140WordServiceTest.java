@@ -64,6 +64,46 @@ class ExportadorS140WordServiceTest {
         );
     }
     @Test
+    void deveSubstituirMarcadorDivididoEntreRunsSemPerderTextoAoRedor() throws Exception {
+        try (XWPFDocument documento = new XWPFDocument()) {
+            var paragrafo = documento.createParagraph();
+            paragrafo.createRun().setText("Congregação: [");
+            paragrafo.createRun().setText("NOME DA CONGREGAÇÃO");
+            paragrafo.createRun().setText("] - mês");
+
+            var metodo = ExportadorS140WordService.class.getDeclaredMethod(
+                    "substituirNaParagrafo",
+                    org.apache.poi.xwpf.usermodel.XWPFParagraph.class,
+                    String.class,
+                    String.class);
+            metodo.setAccessible(true);
+            metodo.invoke(service, paragrafo, "[NOME DA CONGREGAÇÃO]", "Central");
+
+            assertEquals("Congregação: Central - mês", paragrafo.getText());
+        }
+    }
+
+    @Test
+    void deveSubstituirMaisDeUmaOcorrenciaDoMesmoMarcadorDividido() throws Exception {
+        try (XWPFDocument documento = new XWPFDocument()) {
+            var paragrafo = documento.createParagraph();
+            paragrafo.createRun().setText("[");
+            paragrafo.createRun().setText("DATA");
+            paragrafo.createRun().setText("] e [DATA]");
+
+            var metodo = ExportadorS140WordService.class.getDeclaredMethod(
+                    "substituirNaParagrafo",
+                    org.apache.poi.xwpf.usermodel.XWPFParagraph.class,
+                    String.class,
+                    String.class);
+            metodo.setAccessible(true);
+            metodo.invoke(service, paragrafo, "[DATA]", "15/10/2026");
+
+            assertEquals("15/10/2026 e 15/10/2026", paragrafo.getText());
+        }
+    }
+
+    @Test
     void deveRejeitarMesNuloAntesDeAcessarArquivosOuBanco() {
         IllegalArgumentException erro = assertThrows(
                 IllegalArgumentException.class,
