@@ -315,7 +315,8 @@ public class ExportadorS140WordService {
         for (int deslocamento = 0; deslocamento <= 23 && linhaData + deslocamento < tabela.getNumberOfRows(); deslocamento++) {
             XWPFTableRow linha = tabela.getRow(linhaData + deslocamento);
             for (XWPFTableCell celula : linha.getTableCells()) {
-                if (celula.getText().contains("[Tema]") || celula.getText().contains("[Nome]") ||
+                if (celula.getText().contains("[DATA]") || celula.getText().contains("LEITURA SEMANAL DA BÍBLIA") ||
+                        celula.getText().contains("[Tema]") || celula.getText().contains("[Nome]") ||
                         celula.getText().contains("[Nome/Nome]") || celula.getText().contains("Cântico [número]")) {
                     substituirNaCelula(celula, "[DATA]", "");
                 substituirNaCelula(celula, " | LEITURA SEMANAL DA BÍBLIA", "");
