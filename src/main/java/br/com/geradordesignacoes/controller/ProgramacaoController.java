@@ -9,12 +9,16 @@ import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.service.HorarioS140Service;
 import br.com.geradordesignacoes.service.ExportadorS89Service;
+import br.com.geradordesignacoes.service.ExportadorS140WordService;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.nio.file.Path;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +35,8 @@ public class ProgramacaoController {
     private final EscalaController escalaController;
 
     private final ExportadorS89Service exportadorS89Service;
+
+    private final ExportadorS140WordService exportadorS140WordService;
 
     private final List<LocalDate> semanas;
 
@@ -51,6 +57,7 @@ public class ProgramacaoController {
 
         this.exportadorS89Service =
                 new ExportadorS89Service();
+        this.exportadorS140WordService = new ExportadorS140WordService();
 
         this.semanas =
                 new ArrayList<>();
@@ -163,6 +170,8 @@ public class ProgramacaoController {
                 .setOnAction(
                         event -> exportarS89()
                 );
+
+        view.getBotaoExportarS140().setOnAction(event -> exportarS140());
 
 
         view.getBotaoSalvar()
@@ -1104,6 +1113,47 @@ public class ProgramacaoController {
                     "Não foi possível exportar o S-89: "
                             + e.getMessage()
             );
+        }
+    }
+
+
+    private void exportarS140() {
+        LocalDate selecionada = view.getCampoData().getValue();
+        if (selecionada == null) {
+            view.atualizarStatus("Selecione o mês que deseja exportar.");
+            return;
+        }
+
+        Window janela = view.getView().getScene() == null
+                ? null : view.getView().getScene().getWindow();
+
+        FileChooser seletorModelo = new FileChooser();
+        seletorModelo.setTitle("Selecione o modelo oficial S-140 em Word");
+        seletorModelo.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Documento Word (*.docx)", "*.docx"));
+        java.io.File modelo = seletorModelo.showOpenDialog(janela);
+        if (modelo == null) {
+            view.atualizarStatus("Exportação S-140 cancelada: modelo não selecionado.");
+            return;
+        }
+
+        FileChooser seletorDestino = new FileChooser();
+        seletorDestino.setTitle("Salvar programação mensal S-140");
+        seletorDestino.setInitialFileName("S-140-" + YearMonth.from(selecionada) + ".docx");
+        seletorDestino.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Documento Word (*.docx)", "*.docx"));
+        java.io.File destino = seletorDestino.showSaveDialog(janela);
+        if (destino == null) {
+            view.atualizarStatus("Exportação S-140 cancelada.");
+            return;
+        }
+
+        try {
+            Path arquivo = exportadorS140WordService.exportar(
+                    YearMonth.from(selecionada), modelo.toPath(), destino.toPath());
+            view.atualizarStatus("S-140 exportado com sucesso: " + arquivo);
+        } catch (Exception e) {
+            view.atualizarStatus("Não foi possível exportar o S-140: " + e.getMessage());
         }
     }
 
