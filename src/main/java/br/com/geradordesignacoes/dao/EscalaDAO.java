@@ -70,7 +70,9 @@ public class EscalaDAO {
                             throw new RuntimeException("Erro ao atualizar escala.");
                         }
                     } /* * Remove as designações antigas da escala * e grava as novas. */
+                    salvarPapeisEspeciais(connection, escala);
                     excluirDesignacoes(connection, escala.getId());
+                    salvarPapeisEspeciais(connection, escala);
                     salvarDesignacoes(connection, escala);
                     connection.commit();
                     return escala;
@@ -170,6 +172,8 @@ public class EscalaDAO {
                     );
                 }
 
+                salvarPapeisEspeciais(connection, escala);
+
                 excluirDesignacoes(
                         connection,
                         escala.getId()
@@ -256,6 +260,11 @@ public class EscalaDAO {
                             )
                     );
                 }
+
+                PessoaDAO pessoaDAO = new PessoaDAO();
+                escala.setPresidente(buscarPessoaOpcional(pessoaDAO, resultSet, "presidente_id"));
+                escala.setDirigente(buscarPessoaOpcional(pessoaDAO, resultSet, "dirigente_id"));
+                escala.setOracaoInicial(buscarPessoaOpcional(pessoaDAO, resultSet, "oracao_inicial_id"));
 
                 return Optional.of(escala);
             }
@@ -629,6 +638,56 @@ public class EscalaDAO {
 
             statement.executeUpdate();
         }
+    }
+
+
+    private void salvarPapeisEspeciais(
+            Connection connection,
+            Escala escala
+    ) throws SQLException {
+        String sql = """
+                UPDATE escala
+                SET presidente_id = ?,
+                    dirigente_id = ?,
+                    oracao_inicial_id = ?
+                WHERE id = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            definirPessoaOpcional(statement, 1, escala.getPresidente());
+            definirPessoaOpcional(statement, 2, escala.getDirigente());
+            definirPessoaOpcional(statement, 3, escala.getOracaoInicial());
+            statement.setInt(4, escala.getId());
+
+            if (statement.executeUpdate() != 1) {
+                throw new SQLException("Não foi possível salvar os papéis especiais da escala.");
+            }
+        }
+    }
+
+    private void definirPessoaOpcional(
+            PreparedStatement statement,
+            int indice,
+            Pessoa pessoa
+    ) throws SQLException {
+        if (pessoa == null || pessoa.getId() == null) {
+            statement.setNull(indice, java.sql.Types.INTEGER);
+        } else {
+            statement.setInt(indice, pessoa.getId());
+        }
+    }
+
+    private Pessoa buscarPessoaOpcional(
+            PessoaDAO pessoaDAO,
+            ResultSet resultSet,
+            String coluna
+    ) throws SQLException {
+        int pessoaId = resultSet.getInt(coluna);
+        if (resultSet.wasNull()) {
+            return null;
+        }
+        return pessoaDAO.buscarPorId(pessoaId).orElseThrow(() ->
+                new RuntimeException("Pessoa referenciada em " + coluna + " não encontrada."));
     }
 
     private void salvarDesignacoes(Connection connection, Escala escala) throws SQLException {
