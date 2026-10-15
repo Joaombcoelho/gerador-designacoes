@@ -11,6 +11,7 @@ import br.com.geradordesignacoes.service.HorarioS140Service;
 import br.com.geradordesignacoes.service.ExportadorS89Service;
 import br.com.geradordesignacoes.service.ExportadorS140WordService;
 import br.com.geradordesignacoes.service.ConfiguracaoGeralService;
+import br.com.geradordesignacoes.service.ConfiguracaoSalasService;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
 
 import java.time.DayOfWeek;
@@ -62,6 +63,11 @@ public class ProgramacaoController {
                 new ExportadorS89Service();
         this.exportadorS140WordService = new ExportadorS140WordService();
         this.configuracaoGeralService = new ConfiguracaoGeralService();
+
+        ConfiguracaoSalasService configuracaoSalasService = new ConfiguracaoSalasService();
+        view.definirVisibilidadeConselheiroSalaB(
+                configuracaoSalasService.buscar().salaBHabilitada()
+        );
 
         this.semanas =
                 new ArrayList<>();
