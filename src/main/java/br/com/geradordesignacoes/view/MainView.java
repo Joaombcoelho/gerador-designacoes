@@ -7,6 +7,7 @@ import br.com.geradordesignacoes.database.BackupDatabase;
 import br.com.geradordesignacoes.database.RestaurarDatabase;
 import br.com.geradordesignacoes.service.PessoaService;
 import br.com.geradordesignacoes.view.edicao.EdicaoEscalaView;
+import br.com.geradordesignacoes.view.ConfiguracaoGeralView;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
@@ -50,6 +51,8 @@ public class MainView {
     private final HistoricoView historicoView;
     private final ConfiguracaoSalasView configuracaoSalasView =
             new ConfiguracaoSalasView();
+    private final ConfiguracaoGeralView configuracaoGeralView =
+            new ConfiguracaoGeralView();
 
     private final EscalaController escalaController;
     private final ProgramacaoController programacaoController;
@@ -419,6 +422,20 @@ public class MainView {
         sidebar.getChildren().add(
                 configuracaoSalas
         );
+
+        Button configuracoesGerais = criarBotaoMenu(
+                FontAwesomeSolid.COG,
+                "Configurações gerais",
+                false
+        );
+
+        configuracoesGerais.setOnAction(event -> {
+            ativarBotao(configuracoesGerais);
+            configuracaoGeralView.atualizar();
+            mostrarTela(configuracaoGeralView.getView());
+        });
+
+        sidebar.getChildren().add(configuracoesGerais);
 
 
         Button sobre =
