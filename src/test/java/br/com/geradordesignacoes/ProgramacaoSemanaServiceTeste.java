@@ -1,20 +1,15 @@
 package br.com.geradordesignacoes;
 
-import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.ConfiguracaoSalasDAO;
 import br.com.geradordesignacoes.model.ConfiguracaoSalas;
-import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoParte;
-import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProgramacaoSemanaServiceTest extends BaseDAOTest {
