@@ -12,7 +12,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -549,7 +548,7 @@ public class HistoricoView {
 
 
         tabela.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY
+                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
         );
 
 
@@ -617,7 +616,7 @@ public class HistoricoView {
 
 
         tabelaDetalhes.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY
+                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
         );
 
 
