@@ -630,11 +630,11 @@ public class ProgramacaoView {
                 8,
                 criarCampoComRotulo("Nº oficial", campoNumeroOficial),
                 botaoSalvarNumeroOficial,
-                criarCampoComRotulo("Duração", campoDuracao),
+                criarCampoComRotulo("Duração da Parte", campoDuracao),
                 botaoSalvarDuracao,
-                criarCampoCompacto("Cântico inicial", campoCanticoInicial),
-                criarCampoCompacto("Cântico do meio", campoCanticoMeio),
-                criarCampoCompacto("Cântico final", campoCanticoFinal)
+                criarCampoCompacto("Cânt inicial", campoCanticoInicial),
+                criarCampoCompacto("Cânt do meio", campoCanticoMeio),
+                criarCampoCompacto("Cânt final", campoCanticoFinal)
         );
         linhaDetalhes.setAlignment(Pos.BOTTOM_LEFT);
 
