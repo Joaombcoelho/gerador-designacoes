@@ -141,7 +141,7 @@ class HorarioS140ServiceTest extends BaseDAOTest {
                 ordem,
                 List.of()
         );
-        parte.setDuracaoPadraoMinutos(duracao);
+        // O padrão difere da duração semanal para validar que o ajuste da semana prevalece.\n        parte.setDuracaoPadraoMinutos(duracao + 2);
 
         ProgramacaoParte programacaoParte = new ProgramacaoParte(parte, ordem, null);
         programacaoParte.setDuracaoMinutos(duracao);
