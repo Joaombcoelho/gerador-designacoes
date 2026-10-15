@@ -10,7 +10,6 @@ import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.model.ConfiguracaoSalas;
-import br.com.geradordesignacoes.model.ConfiguracaoGeral;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
