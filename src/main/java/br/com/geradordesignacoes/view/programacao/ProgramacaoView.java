@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.view.programacao;
 
 import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 
 import javafx.collections.FXCollections;
@@ -57,6 +58,12 @@ public class ProgramacaoView {
     private final Button botaoSalvarDuracao;
 
     private final Label labelStatus;
+
+    private final TextField campoCanticoInicial;
+    private final TextField campoCanticoMeio;
+    private final TextField campoCanticoFinal;
+    private final ComboBox<Pessoa> campoConselheiroSalaB;
+    private final Button botaoSalvarDadosS140;
 
     private Consumer<Parte> onParteSelecionadaChanged;
 
@@ -149,6 +156,15 @@ public class ProgramacaoView {
 
         botaoSalvarDuracao = new Button("Salvar Duração");
         botaoSalvarDuracao.getStyleClass().add("secondary-button");
+
+        campoCanticoInicial = criarCampoCantico("Número do cântico inicial");
+        campoCanticoMeio = criarCampoCantico("Número do cântico do meio");
+        campoCanticoFinal = criarCampoCantico("Número do cântico final");
+        campoConselheiroSalaB = new ComboBox<>();
+        campoConselheiroSalaB.setPromptText("Selecione o conselheiro da Sala B");
+        campoConselheiroSalaB.setMaxWidth(Double.MAX_VALUE);
+        botaoSalvarDadosS140 = new Button("Salvar dados do S-140");
+        botaoSalvarDadosS140.getStyleClass().add("secondary-button");
 
         labelStatus = new Label(
                 "Selecione um mês para configurar a programação."
@@ -534,12 +550,14 @@ public class ProgramacaoView {
 
         VBox painelTema =
                 criarPainelTema();
+        VBox painelDadosS140 = criarPainelDadosS140();
 
         VBox card =
                 new VBox(
                         10,
                         titulo,
                         instrucao,
+                        painelDadosS140,
                         listaPartes,
                         painelTema
                 );
@@ -554,6 +572,47 @@ public class ProgramacaoView {
         return card;
     }
 
+
+    private TextField criarCampoCantico(String prompt) {
+        TextField campo = new TextField();
+        campo.setPromptText(prompt);
+        campo.setPrefWidth(110);
+        campo.getStyleClass().add("text-field");
+        campo.setTextFormatter(new TextFormatter<String>(change -> {
+            String novoTexto = change.getControlNewText();
+            return novoTexto.matches("\\d{0,3}") ? change : null;
+        }));
+        return campo;
+    }
+
+    private VBox criarPainelDadosS140() {
+        Label titulo = new Label("Dados complementares do S-140");
+        titulo.getStyleClass().add("card-title");
+
+        HBox canticos = new HBox(8,
+                criarCampoComRotulo("Inicial", campoCanticoInicial),
+                criarCampoComRotulo("Meio", campoCanticoMeio),
+                criarCampoComRotulo("Final", campoCanticoFinal));
+        canticos.setAlignment(Pos.CENTER_LEFT);
+
+        Label labelConselheiro = new Label("Conselheiro da Sala B");
+        labelConselheiro.getStyleClass().add("label");
+        VBox seletorConselheiro = new VBox(4, labelConselheiro, campoConselheiroSalaB);
+        HBox.setHgrow(seletorConselheiro, Priority.ALWAYS);
+
+        HBox linhaConselheiro = new HBox(8, seletorConselheiro, botaoSalvarDadosS140);
+        linhaConselheiro.setAlignment(Pos.BOTTOM_LEFT);
+
+        return new VBox(8, titulo, canticos, linhaConselheiro);
+    }
+
+    private VBox criarCampoComRotulo(String rotulo, TextField campo) {
+        Label label = new Label(rotulo);
+        label.getStyleClass().add("label");
+        VBox caixa = new VBox(4, label, campo);
+        HBox.setHgrow(caixa, Priority.ALWAYS);
+        return caixa;
+    }
 
     private VBox criarPainelTema() {
 
@@ -760,6 +819,29 @@ public class ProgramacaoView {
         return campoTema;
     }
 
+
+    public TextField getCampoCanticoInicial() { return campoCanticoInicial; }
+    public TextField getCampoCanticoMeio() { return campoCanticoMeio; }
+    public TextField getCampoCanticoFinal() { return campoCanticoFinal; }
+    public ComboBox<Pessoa> getCampoConselheiroSalaB() { return campoConselheiroSalaB; }
+    public Button getBotaoSalvarDadosS140() { return botaoSalvarDadosS140; }
+
+    public void carregarConselheirosSalaB(List<Pessoa> pessoas) {
+        campoConselheiroSalaB.setItems(FXCollections.observableArrayList(pessoas));
+    }
+
+    public void carregarDadosS140(String inicial, String meio, String finalCantico, Integer conselheiroId) {
+        campoCanticoInicial.setText(inicial == null ? "" : inicial);
+        campoCanticoMeio.setText(meio == null ? "" : meio);
+        campoCanticoFinal.setText(finalCantico == null ? "" : finalCantico);
+        campoConselheiroSalaB.getSelectionModel().clearSelection();
+        if (conselheiroId != null) {
+            campoConselheiroSalaB.getItems().stream()
+                    .filter(pessoa -> conselheiroId.equals(pessoa.getId()))
+                    .findFirst()
+                    .ifPresent(pessoa -> campoConselheiroSalaB.getSelectionModel().select(pessoa));
+        }
+    }
 
     public Button getBotaoSalvarTema() {
 
