@@ -724,4 +724,22 @@ class EscalaDAOTest extends BaseDAOTest {
         assertEquals(3, recuperada.getDesignacoes().size());
     }
 
+    @Test
+    void devePersistirEPermitirRecuperarPapeisEspeciaisDaEscala() {
+        Pessoa pessoa = criarPessoa();
+        LocalDate data = LocalDate.of(2026, 10, 21);
+
+        Escala escala = new Escala(data, List.of());
+        escala.setPresidente(pessoa);
+        escala.setDirigente(pessoa);
+        escala.setOracaoInicial(pessoa);
+
+        Escala salva = escalaDAO.salvar(escala);
+        Escala encontrada = escalaDAO.buscarPorId(salva.getId()).orElseThrow();
+
+        assertEquals(pessoa.getId(), encontrada.getPresidente().getId());
+        assertEquals(pessoa.getId(), encontrada.getDirigente().getId());
+        assertEquals(pessoa.getId(), encontrada.getOracaoInicial().getId());
+    }
+
 }
