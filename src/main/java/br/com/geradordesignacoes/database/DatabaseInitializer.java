@@ -324,6 +324,18 @@ public class DatabaseInitializer {
                     CREATE_TABLE_PROGRAMACAO_SEMANA
             );
 
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS horario_manual_s140 (
+                        data DATE NOT NULL,
+                        chave_item TEXT NOT NULL,
+                        horario_inicio TEXT NOT NULL,
+                        PRIMARY KEY (data, chave_item),
+                        FOREIGN KEY (data)
+                            REFERENCES programacao_semana(data)
+                            ON DELETE CASCADE
+                    )
+                    """);
+
 
 
             adicionarColunasSalasProgramacaoSemana(connection);
