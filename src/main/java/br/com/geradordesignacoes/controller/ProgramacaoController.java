@@ -1198,7 +1198,7 @@ public class ProgramacaoController {
         }
     }
 
-    static String nomeArquivoS140(YearMonth mes) {
+    public static String nomeArquivoS140(YearMonth mes) {
         String nomeMes = mes.getMonth().getDisplayName(
                 java.time.format.TextStyle.FULL, java.util.Locale.forLanguageTag("pt-BR"));
         nomeMes = nomeMes.substring(0, 1).toUpperCase(java.util.Locale.forLanguageTag("pt-BR"))
