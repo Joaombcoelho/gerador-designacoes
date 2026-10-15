@@ -85,36 +85,18 @@ public class HorarioS140Service {
                 "Comentários iniciais",
                 configuracao.duracaoComentariosIniciaisMinutos(), null));
 
-        programacao.partes().stream()
-                .filter(item -> item.getParte().getSecao() == SecaoParte.TESOUROS_DA_PALAVRA_DE_DEUS)
-                .sorted(java.util.Comparator.comparingInt(ProgramacaoParte::getOrdem))
-                .forEach(item -> {
-                    Integer duracao = item.getDuracaoMinutos();
-                    if (duracao == null) {
-                        duracao = item.getParte().getDuracaoPadraoMinutos();
-                    }
-                    if (duracao == null) {
-                        duracao = switch (item.getParte().getTipo()) {
-                            case DISCURSO_TESOUROS -> 10;
-                            case JOIAS_ESPIRITUAIS -> 10;
-                            case LEITURA -> 4;
-                            default -> null;
-                        };
-                    }
-                    itens.add(new HorarioS140Item(
-                            "PARTE_" + item.getParte().getId(),
-                            item.getParte().getNome(),
-                            duracao,
-                            null));
-                });
+        adicionarPartesDaSecao(
+                itens,
+                programacao,
+                SecaoParte.TESOUROS_DA_PALAVRA_DE_DEUS
+        );
 
         itens.add(new HorarioS140Item("CANTICO_MEIO", "Cântico do meio",
                 configuracao.duracaoCanticoMeioMinutos(), null));
 
-        // O bloco do Ministério tem 18 minutos como referência mínima,
-        // não sendo obrigatório preencher esse tempo com designações.
-        itens.add(new HorarioS140Item("BLOCO_MINISTERIO", "Ministério",
-                18, null));
+        // O Ministério não recebe uma duração fixa de 18 minutos.
+        // Os horários seguem a duração real das partes cadastradas na semana.
+        adicionarPartesDaSecao(itens, programacao, SecaoParte.MINISTERIO);
 
         itens.add(new HorarioS140Item("BLOCO_NOSSA_VIDA_CRISTA",
                 "Nossa Vida Cristã", 15, null));
@@ -136,6 +118,37 @@ public class HorarioS140Service {
                 configuracao.duracaoCanticoOracaoFinalMinutos(), null));
 
         return List.copyOf(itens);
+    }
+
+    private void adicionarPartesDaSecao(
+            List<HorarioS140Item> itens,
+            ProgramacaoSemana programacao,
+            SecaoParte secao
+    ) {
+        programacao.partes().stream()
+                .filter(item -> item.getParte().getSecao() == secao)
+                .sorted(java.util.Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .forEach(item -> {
+                    Integer duracao = item.getDuracaoMinutos();
+                    if (duracao == null) {
+                        duracao = item.getParte().getDuracaoPadraoMinutos();
+                    }
+                    if (duracao == null) {
+                        duracao = switch (item.getParte().getTipo()) {
+                            case DISCURSO_TESOUROS -> 10;
+                            case JOIAS_ESPIRITUAIS -> 10;
+                            case LEITURA -> 4;
+                            default -> null;
+                        };
+                    }
+
+                    itens.add(new HorarioS140Item(
+                            "PARTE_" + item.getParte().getId(),
+                            item.getParte().getNome(),
+                            duracao,
+                            null
+                    ));
+                });
     }
 
     public void ajustarHorario(LocalDate data, String chaveItem, LocalTime horarioInicio) {
