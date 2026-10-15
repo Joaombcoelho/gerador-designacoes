@@ -138,6 +138,10 @@ public class ExportadorS140WordService {
         if (dados.escala().getOracaoInicial() == null) {
             problemas.add("oração inicial não definida na escala salva");
         }
+        if (dados.escala().getDesignacoes().stream().noneMatch(d ->
+                d.parte().getTipo() == TipoParte.ORACAO_FINAL && d.sala() == SalaDesignacao.PRINCIPAL)) {
+            problemas.add("oração final não definida na escala salva");
+        }
         if (dados.programacao().partes().isEmpty()) {
             problemas.add("a programação semanal não possui partes");
         }
