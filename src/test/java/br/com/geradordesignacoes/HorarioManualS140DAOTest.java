@@ -1,6 +1,12 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.HorarioManualS140DAO;
+import br.com.geradordesignacoes.dao.ConfiguracaoGeralDAO;
+import br.com.geradordesignacoes.model.ConfiguracaoGeral;
+import br.com.geradordesignacoes.model.HorarioS140Calculado;
+import br.com.geradordesignacoes.service.HorarioS140Service;
+import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
+import java.time.DayOfWeek;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -30,6 +36,31 @@ class HorarioManualS140DAOTest extends BaseDAOTest {
         dao.remover(data, "BLOCO_TESOUROS");
         assertFalse(dao.listarPorData(data).containsKey("BLOCO_TESOUROS"));
         assertTrue(dao.listarPorData(data).containsKey("BLOCO_MINISTERIO"));
+    }
+
+    @Test
+    void deveUsarHorarioConfiguradoEManterAjusteManualAoRecalcular() {
+        LocalDate data = LocalDate.of(2027, 6, 2);
+        new ConfiguracaoGeralDAO().salvar(new ConfiguracaoGeral(
+                "Teste", DayOfWeek.WEDNESDAY, LocalTime.of(19, 0),
+                5, 1, 4, 3, 5
+        ));
+        var programacao = new ProgramacaoSemanaService().obterOuCriar(data);
+        HorarioS140Service service = new HorarioS140Service();
+
+        List<HorarioS140Calculado> antes = service.calcular(programacao);
+        assertEquals(LocalTime.of(19, 0), antes.getFirst().horarioInicio());
+
+        service.ajustarHorario(data, "BLOCO_MINISTERIO", LocalTime.of(20, 15));
+        List<HorarioS140Calculado> depois = service.calcular(programacao);
+        HorarioS140Calculado ministerio = depois.stream()
+                .filter(item -> item.chave().equals("BLOCO_MINISTERIO"))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(LocalTime.of(20, 15), ministerio.horarioInicio());
+        assertTrue(ministerio.horarioManual());
+        assertEquals(LocalTime.of(20, 33), ministerio.horarioFim());
     }
 
     @Test
