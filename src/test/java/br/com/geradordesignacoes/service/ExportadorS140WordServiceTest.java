@@ -164,7 +164,7 @@ class ExportadorS140WordServiceTest {
         programacao.adicionarParte(new ProgramacaoParte(ministerio2, 2, null));
 
         assertEquals(
-                List.of(116, 121, 122),
+                List.of(116, 117, 121, 122),
                 ExportadorS140WordService.linhasPartesNaoUtilizadas(programacao, 102));
     }
 
