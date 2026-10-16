@@ -160,11 +160,29 @@ public class EdicaoEscalaController {
             TipoParticipacao tipoParticipacao,
             ControleDesignacoes controle
     ) {
-        if (!regrasService.podeExercerParticipacao(
-                pessoa,
-                parte,
-                tipoParticipacao
-        )) {
+        /*
+         * Na edição manual, a pessoa responsável pela Leitura Bíblica
+         * pode ter nível de leitura experiente. A restrição a BASICO
+         * continua aplicada pela regra de geração automática (Parte /
+         * RegrasService), mas não deve impedir uma correção manual.
+         * Mantemos as demais regras: pessoa ativa, sexo e privilégio
+         * permitidos pela parte, e permissão para fazer leitura.
+         */
+        boolean leituraBiblicaManual =
+                parte.getTipo() == TipoParte.LEITURA
+                        && tipoParticipacao == TipoParticipacao.LEITOR;
+
+        boolean podeExercer = leituraBiblicaManual
+                ? parte.necessitaParticipacao(tipoParticipacao)
+                        && parte.podeSerRealizadaPor(pessoa)
+                        && pessoa.podeExercer(tipoParticipacao)
+                : regrasService.podeExercerParticipacao(
+                        pessoa,
+                        parte,
+                        tipoParticipacao
+                );
+
+        if (!podeExercer) {
             return false;
         }
 
