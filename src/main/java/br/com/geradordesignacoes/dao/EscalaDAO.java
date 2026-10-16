@@ -294,9 +294,18 @@ public class EscalaDAO {
                 }
 
                 PessoaDAO pessoaDAO = new PessoaDAO();
-                escala.setPresidente(buscarPessoaOpcional(pessoaDAO, resultSet, "presidente_id"));
-                escala.setDirigente(buscarPessoaOpcional(pessoaDAO, resultSet, "dirigente_id"));
-                escala.setOracaoInicial(buscarPessoaOpcional(pessoaDAO, resultSet, "oracao_inicial_id"));
+                // As designações salvas são a fonte atual dos responsáveis.
+                // As colunas especiais são mantidas por compatibilidade com escalas
+                // antigas, mas não devem sobrescrever uma edição manual mais recente.
+                escala.setPresidente(responsavelAtualOuLegado(
+                        escala.getDesignacoes(), TipoParte.PRESIDENTE_REUNIAO,
+                        pessoaDAO, resultSet, "presidente_id"));
+                escala.setDirigente(responsavelAtualOuLegado(
+                        escala.getDesignacoes(), TipoParte.DIRIGENTE_ESTUDO,
+                        pessoaDAO, resultSet, "dirigente_id"));
+                escala.setOracaoInicial(responsavelAtualOuLegado(
+                        escala.getDesignacoes(), TipoParte.ORACAO_INICIAL,
+                        pessoaDAO, resultSet, "oracao_inicial_id"));
 
                 return Optional.of(escala);
             }
@@ -743,6 +752,24 @@ public class EscalaDAO {
         } else {
             statement.setInt(indice, pessoa.getId());
         }
+    }
+
+
+    private Pessoa responsavelAtualOuLegado(
+            List<Designacao> designacoes,
+            TipoParte tipo,
+            PessoaDAO pessoaDAO,
+            ResultSet resultSet,
+            String colunaLegada
+    ) throws SQLException {
+        Designacao designacaoAtual = designacoes.stream()
+                .filter(d -> d.parte().getTipo() == tipo)
+                .findFirst()
+                .orElse(null);
+        if (designacaoAtual != null) {
+            return designacaoAtual.responsavel();
+        }
+        return buscarPessoaOpcional(pessoaDAO, resultSet, colunaLegada);
     }
 
     private Pessoa buscarPessoaOpcional(
