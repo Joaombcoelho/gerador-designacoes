@@ -1,6 +1,5 @@
 package br.com.geradordesignacoes.controller;
 
-import br.com.geradordesignacoes.dao.EscalaDAO;
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Escala;
@@ -34,7 +33,6 @@ public class EscalaController {
     private final EscalaView view;
     private final ParteService parteService;
     private final GeradorEscala geradorEscala;
-    private final EscalaDAO escalaDAO;
     private final BackupService backupService;
     private final ProgramacaoSemanaService programacaoSemanaService;
     private final PersistenciaEscalasService persistenciaEscalasService;
@@ -57,9 +55,6 @@ public class EscalaController {
                 new GeradorEscala(
                         new RegrasService()
                 );
-
-        escalaDAO =
-                new EscalaDAO();
 
         backupService =
                 new BackupService();
