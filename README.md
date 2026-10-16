@@ -124,21 +124,23 @@ Exemplos de intervalo no campo de data:
 28 de Dezembro de 2026 - 03 de Janeiro de 2027
 ```
 
-Por padrão, os arquivos são salvos em:
+Na primeira exportação pela tela **Geração dos formulários**, o aplicativo solicita a pasta base de saída. A escolha fica registrada nas preferências do usuário e será reutilizada nas próximas execuções. Para trocar a pasta, utilize **Definir pasta de saída…** na mesma tela. O aplicativo cria automaticamente as subpastas por formulário, mês e semana, por exemplo:
 
 ```text
-%USERPROFILE%\GeradorDesignacoes\S-89\
-└── Outubro 2026\
-    └── Semana 1 - 07-10-2026\
-        └── S89_Leitura_Biblia.pdf
+Pasta escolhida pelo usuário\\
+└── S-89\\
+    └── Outubro 2026\\
+        └── Semana 1 - 07-10-2026\\
+            └── S89_Leitura_Biblia.pdf
 ```
 
-O exportador não sobrescreve arquivos existentes. O caminho do modelo e o diretório de saída podem ser configurados por propriedades do sistema:
+O exportador não sobrescreve arquivos existentes. O caminho do modelo pode ser configurado por propriedade do sistema:
 
 ```text
--Ds89.template=C:\caminho\S-89_T.pdf
--Ds89.output.dir=C:\caminho\de\saida
+-Ds89.template=C:\\caminho\\S-89_T.pdf
 ```
+
+A propriedade `s89.output.dir` continua disponível para chamadas diretas ao serviço, mas a tela de formulários utiliza a pasta selecionada e salva nas preferências do usuário.
 
 O local da reunião não é obtido do banco; por isso, apenas o checkbox **Salão principal** é marcado automaticamente.
 
