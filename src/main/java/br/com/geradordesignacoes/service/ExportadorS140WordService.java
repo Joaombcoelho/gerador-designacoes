@@ -579,6 +579,8 @@ public class ExportadorS140WordService {
         }
 
         String substituto = valor == null ? "" : valor;
+        int limiteSubstituicoes = -1;
+        int substituicoes = 0;
         while (true) {
             List<String> textos = new ArrayList<>(runs.size());
             StringBuilder textoCompleto = new StringBuilder();
@@ -588,12 +590,31 @@ public class ExportadorS140WordService {
                 textoCompleto.append(texto == null ? "" : texto);
             }
 
-            int inicio = textoCompleto.indexOf(marcador);
+            String textoAntes = textoCompleto.toString();
+            if (limiteSubstituicoes < 0) {
+                limiteSubstituicoes = contarOcorrencias(textoAntes, marcador);
+            }
+            int inicio = textoAntes.indexOf(marcador);
             if (inicio < 0) {
                 return;
             }
-            int fim = inicio + marcador.length();
+            if (substituicoes >= limiteSubstituicoes) {
+                // O número de tentativas fica limitado às ocorrências originais.
+                // Se o documento não progredir como esperado, usa uma substituição
+                // direta e encerra para nunca bloquear a exportação.
+                definirTextoParagrafo(runs, textoAntes.replace(marcador, substituto));
+                return;
+            }
 
+            // Evita reprocessar indefinidamente um marcador que também exista
+            // no próprio texto substituto. Nesse caso, faz uma substituição
+            // única sobre o texto original do parágrafo.
+            if (substituto.contains(marcador)) {
+                definirTextoParagrafo(runs, textoAntes.replace(marcador, substituto));
+                return;
+            }
+
+            int fim = inicio + marcador.length();
             int indiceRunInicio = -1;
             int indiceRunFim = -1;
             int deslocamentoInicio = 0;
@@ -630,6 +651,36 @@ public class ExportadorS140WordService {
                 }
                 runs.get(indiceRunFim).setText(textoFim.substring(deslocamentoFim), 0);
             }
+
+            substituicoes++;
+            StringBuilder textoDepois = new StringBuilder();
+            for (XWPFRun run : runs) {
+                String texto = run.getText(0);
+                textoDepois.append(texto == null ? "" : texto);
+            }
+            if (textoDepois.toString().equals(textoAntes)) {
+                // Proteção contra comportamentos inesperados do documento Word:
+                // garante a substituição e encerra sem prender a exportação.
+                definirTextoParagrafo(runs, textoAntes.replace(marcador, substituto));
+                return;
+            }
+        }
+    }
+
+    private static int contarOcorrencias(String texto, String marcador) {
+        int ocorrencias = 0;
+        int indice = 0;
+        while ((indice = texto.indexOf(marcador, indice)) >= 0) {
+            ocorrencias++;
+            indice += marcador.length();
+        }
+        return ocorrencias;
+    }
+
+    private void definirTextoParagrafo(List<XWPFRun> runs, String texto) {
+        runs.getFirst().setText(texto, 0);
+        for (int i = 1; i < runs.size(); i++) {
+            runs.get(i).setText("", 0);
         }
     }
 
