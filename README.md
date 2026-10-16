@@ -71,9 +71,9 @@ As funcionalidades são organizadas em camadas de modelo, acesso a dados, servi�
 
 ### Geração dos formulários — Word S-140
 
-Na tela **Geração dos formulários**, selecione uma data do mês e clique em **Atualizar dados do banco** para conferir as programações e escalas persistidas. A lista mostra as reuniões encontradas, a quantidade de partes/designações salvas e alguns dados da escala atual. Depois da revisão, utilize **Gerar S-140 Word** para selecionar o modelo Word (`.docx`) e o destino do documento.
+Na tela **Geração dos formulários**, ao selecionar uma data do mês, a lista consulta automaticamente as programações e escalas persistidas. O botão **Consultar novamente** permite repetir a consulta manualmente. A tela também disponibiliza a geração do S-89 em PDF para reuniões que já tenham programação e escala salvas. Utilize **Gerar S-140 Word** para selecionar o modelo Word (`.docx`) e o destino do documento.
 
-A tela de formulários não reutiliza o resultado temporário da geração em memória: ela consulta novamente o SQLite ao atualizar a lista, e o exportador recarrega a programação e a escala salvas na hora de gerar o arquivo. Por isso, as alterações manuais devem estar salvas no banco antes da exportação. Se uma alteração foi feita apenas na tela de geração/revisão e ainda não foi salva, ela não será considerada no formulário.
+A tela de formulários não reutiliza o resultado temporário da geração em memória: ela consulta o SQLite ao selecionar o mês, e o exportador recarrega a programação e a escala salvas na hora de gerar o arquivo. Para os papéis especiais do S-140, as designações atuais salvas no banco prevalecem sobre colunas redundantes antigas, evitando reaproveitar nomes da primeira geração automática. Por isso, as alterações manuais devem estar salvas no banco antes da exportação. Se uma alteração foi feita apenas na tela de geração/revisão e ainda não foi salva, ela não será considerada no formulário.
 
 A exportação reúne em um único documento as reuniões que ocorrem no mês, conforme o dia habitual configurado. O exportador aceita meses com quatro ou cinco reuniões, desde que o modelo contenha blocos suficientes e os dados necessários estejam disponíveis.
 
@@ -95,7 +95,7 @@ A exportação depende de informações obrigatórias da escala salva, como pres
 
 ## Exportação para PDF S-89
 
-Na tela de **Programação Semanal**, selecione a semana e clique em **Exportar S-89**. A exportação consulta somente a escala já salva e a programação correspondente no banco; ela não gera nem substitui escalas automaticamente.
+Na tela **Geração dos formulários**, selecione uma das reuniões disponíveis na lista do S-89 e clique em **Gerar S-89 PDF**. A exportação consulta somente a escala já salva e a programação correspondente no banco; ela não gera nem substitui escalas automaticamente.
 
 Atualmente são exportadas as designações das partes elegíveis:
 
