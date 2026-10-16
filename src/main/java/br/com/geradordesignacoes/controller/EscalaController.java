@@ -81,23 +81,23 @@ public class EscalaController {
 
         view.getBotaoGerar()
                 .setOnAction(
-                        event -> gerarEscala()
+                        _ -> gerarEscala()
                 );
 
         view.getBotaoGerarNovamente()
                 .setOnAction(
-                        event -> gerarNovamente()
+                        _ -> gerarNovamente()
                 );
 
         view.getBotaoSalvar()
                 .setOnAction(
-                        event -> salvarEscala()
+                        _ -> salvarEscala()
                 );
 
         view.getCampoData()
                 .valueProperty()
                 .addListener(
-                        (observable, dataAnterior, novaData) ->
+                        (_, _, novaData) ->
                                 atualizarEscalaSelecionada(novaData)
                 );
     }
