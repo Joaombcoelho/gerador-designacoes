@@ -64,7 +64,7 @@ public class MainApp extends Application {
             stage.show();
 
             stage.setOnCloseRequest(
-                    event -> stop()
+                    _ -> stop()
             );
         } catch (Throwable failure) {
             try {
