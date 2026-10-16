@@ -214,7 +214,8 @@ class IntegracaoEscalaTest extends BaseDAOTest {
             throws Exception {
 
         Pessoa pessoa = criarPessoa("Pessoa transação atômica");
-        Parte parte = criarParteVariavel("Parte transação atômica");
+        Parte parteAntiga = criarParteVariavel("Parte antiga");
+        Parte parteNova = criarParteVariavel("Parte nova");
         Parte parteInexistente = new Parte(
                 999999,
                 "Parte inexistente",
@@ -231,20 +232,39 @@ class IntegracaoEscalaTest extends BaseDAOTest {
         LocalDate primeiraData = LocalDate.of(2026, 9, 1);
         LocalDate segundaData = LocalDate.of(2026, 9, 8);
 
+        // Prepara dados existentes que devem sobreviver à falha.
+        Escala escalaExistente = new Escala(
+                primeiraData,
+                List.of(new Designacao(primeiraData, parteAntiga, pessoa, null))
+        );
+        escalaDAO.salvar(escalaExistente);
+
+        ParticipacaoDesignacao participacaoAntiga =
+                new ParticipacaoDesignacao(
+                        primeiraData,
+                        pessoa,
+                        parteAntiga,
+                        TipoParticipacao.RESPONSAVEL
+                );
+        historicoDAO.substituirParticipacoesDaData(
+                primeiraData,
+                List.of(participacaoAntiga)
+        );
+
         Escala primeiraEscala = new Escala(
                 primeiraData,
-                List.of(new Designacao(primeiraData, parte, pessoa, null))
+                List.of(new Designacao(primeiraData, parteNova, pessoa, null))
         );
         Escala segundaEscala = new Escala(
                 segundaData,
-                List.of(new Designacao(segundaData, parte, pessoa, null))
+                List.of(new Designacao(segundaData, parteNova, pessoa, null))
         );
 
         ParticipacaoDesignacao participacaoValida =
                 new ParticipacaoDesignacao(
                         primeiraData,
                         pessoa,
-                        parte,
+                        parteNova,
                         TipoParticipacao.RESPONSAVEL
                 );
         ParticipacaoDesignacao participacaoInvalida =
@@ -284,13 +304,28 @@ class IntegracaoEscalaTest extends BaseDAOTest {
                 () -> persistencia.salvar(resultados, true)
         );
 
-        assertTrue(
-                escalaDAO.listarTodas().isEmpty(),
-                "A falha no histórico deve reverter também as escalas já inseridas."
+        List<Escala> escalasPersistidas = escalaDAO.listarTodas();
+        assertEquals(
+                1,
+                escalasPersistidas.size(),
+                "A escala da segunda data não pode permanecer parcialmente salva."
         );
-        assertTrue(
-                historicoDAO.listarTodas().isEmpty(),
-                "O histórico da primeira data também deve ser revertido."
+        assertEquals(primeiraData, escalasPersistidas.getFirst().getData());
+        assertEquals(
+                parteAntiga.getId(),
+                escalasPersistidas.getFirst()
+                        .getDesignacoes().getFirst().parte().getId(),
+                "A atualização da escala existente deve ser revertida."
+        );
+
+        List<ParticipacaoDesignacao> historicoPersistido =
+                historicoDAO.listarTodas();
+        assertEquals(1, historicoPersistido.size());
+        assertEquals(primeiraData, historicoPersistido.getFirst().data());
+        assertEquals(
+                parteAntiga.getId(),
+                historicoPersistido.getFirst().parte().getId(),
+                "O histórico anterior deve ser preservado após o rollback."
         );
     }
 
