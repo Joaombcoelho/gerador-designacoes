@@ -119,7 +119,7 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
         assertEquals(
                 "Tema de teste",
                 encontrada.partes()
-                        .get(0)
+                        .getFirst()
                         .getTema()
         );
     }
@@ -213,7 +213,7 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
 
         assertEquals(
                 1,
-                partes.get(0).getOrdem()
+                partes.getFirst().getOrdem()
         );
 
         assertEquals(
@@ -229,7 +229,7 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
 
         assertEquals(
                 "Tema 1",
-                partes.get(0).getTema()
+                partes.getFirst().getTema()
         );
 
 
@@ -333,7 +333,7 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
     void devePersistirCanticosEConselheiroDaSalaB() {
         LocalDate data = LocalDate.of(2026, 10, 7);
         int pessoaId = new br.com.geradordesignacoes.dao.PessoaDAO()
-                .listarTodos().get(0).getId();
+                .listarTodos().getFirst().getId();
         ProgramacaoSemana programacao = new ProgramacaoSemana(
                 null,
                 data,
@@ -391,7 +391,7 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
         assertNull(encontrada.canticoMeio());
         assertEquals("45", encontrada.canticoFinal());
         assertEquals(1, encontrada.partes().size());
-        assertEquals("Tema preservado", encontrada.partes().get(0).getTema());
+        assertEquals("Tema preservado", encontrada.partes().getFirst().getTema());
     }
 
     @Test

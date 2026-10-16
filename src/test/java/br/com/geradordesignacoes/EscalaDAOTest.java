@@ -139,7 +139,7 @@ class EscalaDAOTest extends BaseDAOTest {
         assertEquals(
                 pessoa.getId(),
                 encontrada.getDesignacoes()
-                        .get(0)
+                        .getFirst()
                         .responsavel()
                         .getId()
         );
@@ -193,7 +193,7 @@ class EscalaDAOTest extends BaseDAOTest {
 
         Designacao designacaoSalva =
                 escalaSalva.getDesignacoes()
-                        .get(0);
+                        .getFirst();
 
         escalaDAO.atualizarDesignacao(
                 designacaoSalva.id(),
@@ -209,7 +209,7 @@ class EscalaDAOTest extends BaseDAOTest {
         assertEquals(
                 novoResponsavel.getId(),
                 encontrada.getDesignacoes()
-                        .get(0)
+                        .getFirst()
                         .responsavel()
                         .getId()
         );
@@ -295,7 +295,7 @@ class EscalaDAOTest extends BaseDAOTest {
 
         Designacao designacaoSalva =
                 escalaSalva.getDesignacoes()
-                        .get(0);
+                        .getFirst();
 
         assertEquals(
                 ajudanteOriginal.getId(),
@@ -316,7 +316,7 @@ class EscalaDAOTest extends BaseDAOTest {
         assertEquals(
                 novoAjudante.getId(),
                 encontrada.getDesignacoes()
-                        .get(0)
+                        .getFirst()
                         .ajudante()
                         .getId()
         );
@@ -335,7 +335,7 @@ class EscalaDAOTest extends BaseDAOTest {
                 List.of(new Designacao(LocalDate.of(2026, 8, 5), parte, pessoa, null))
         ));
         Designacao designacaoAtual = escalaDAO.buscarPorId(escalaAtual.getId())
-                .orElseThrow().getDesignacoes().get(0);
+                .orElseThrow().getDesignacoes().getFirst();
 
         escalaDAO.salvar(new Escala(
                 LocalDate.of(2026, 8, 19),
@@ -487,7 +487,7 @@ class EscalaDAOTest extends BaseDAOTest {
 
         Designacao designacaoEncontrada =
                 encontrada.getDesignacoes()
-                        .get(0);
+                        .getFirst();
 
         assertNotNull(
                 designacaoEncontrada.id()
@@ -534,7 +534,7 @@ class EscalaDAOTest extends BaseDAOTest {
 
         Designacao designacaoSalva =
                 encontrada.getDesignacoes()
-                        .get(0);
+                        .getFirst();
 
         assertNotNull(
                 designacaoSalva.id()
@@ -553,7 +553,7 @@ class EscalaDAOTest extends BaseDAOTest {
 
         Designacao designacaoAtualizada =
                 escalaAtualizada.getDesignacoes()
-                        .get(0);
+                        .getFirst();
 
         assertEquals(
                 novoResponsavel.getId(),
@@ -644,7 +644,7 @@ class EscalaDAOTest extends BaseDAOTest {
         assertEquals(
                 novaPessoa.getId(),
                 encontrada.getDesignacoes()
-                        .get(0)
+                        .getFirst()
                         .responsavel()
                         .getId()
         );

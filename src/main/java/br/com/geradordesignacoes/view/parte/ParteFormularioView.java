@@ -92,7 +92,7 @@ public class ParteFormularioView {
         comboTipoVariacao.setMaxWidth(Double.MAX_VALUE);
         comboTipoVariacao.getStyleClass().add("combo-box");
 
-        comboTipo.setOnAction(event -> {
+        comboTipo.setOnAction(_ -> {
 
             boolean leitura =
                     comboTipo.getValue() == TipoParte.LEITURA;
@@ -361,7 +361,7 @@ public class ParteFormularioView {
         salvar.setDefaultButton(true);
 
         salvar.setOnAction(
-                event -> salvar()
+                _ -> salvar()
         );
 
 
@@ -374,7 +374,7 @@ public class ParteFormularioView {
         cancelar.setCancelButton(true);
 
         cancelar.setOnAction(
-                event -> aoCancelar.run()
+                _ -> aoCancelar.run()
         );
 
 

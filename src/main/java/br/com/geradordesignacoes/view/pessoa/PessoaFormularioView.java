@@ -59,13 +59,13 @@ public class PessoaFormularioView {
         comboSexo.getItems().addAll(Sexo.values());
         comboSexo.setMaxWidth(Double.MAX_VALUE);
         comboSexo.getStyleClass().add("combo-box");
-        comboSexo.setOnAction(event -> atualizarPermissoesSexo());
+        comboSexo.setOnAction(_ -> atualizarPermissoesSexo());
 
         comboPrivilegio = new ComboBox<>();
         comboPrivilegio.getItems().addAll(Privilegio.values());
         comboPrivilegio.setMaxWidth(Double.MAX_VALUE);
         comboPrivilegio.getStyleClass().add("combo-box");
-        comboPrivilegio.setOnAction(event -> atualizarPermissoesAnciao());
+        comboPrivilegio.setOnAction(_ -> atualizarPermissoesAnciao());
 
         comboNivelLeitura = new ComboBox<>();
         comboNivelLeitura.getItems().addAll(NivelLeitura.values());
@@ -210,12 +210,12 @@ public class PessoaFormularioView {
         );
         salvar.getStyleClass().add("primary-button");
         salvar.setDefaultButton(true);
-        salvar.setOnAction(event -> salvarPessoa());
+        salvar.setOnAction(_ -> salvarPessoa());
 
         Button cancelar = new Button("Cancelar");
         cancelar.getStyleClass().add("secondary-button");
         cancelar.setCancelButton(true);
-        cancelar.setOnAction(event -> aoCancelar.run());
+        cancelar.setOnAction(_ -> aoCancelar.run());
 
         HBox botoes = new HBox(10, cancelar, salvar);
         botoes.setAlignment(Pos.CENTER_RIGHT);

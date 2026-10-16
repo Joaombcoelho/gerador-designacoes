@@ -200,7 +200,7 @@ public class EdicaoEscalaView {
                 FXCollections.observableArrayList(todasAsPartes)
         );
 
-        combo.setCellFactory(listView -> new ListCell<>() {
+        combo.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(Parte parte, boolean empty) {
                 super.updateItem(parte, empty);
@@ -231,7 +231,7 @@ public class EdicaoEscalaView {
                 FXCollections.observableArrayList(todasAsPessoas)
         );
 
-        combo.setCellFactory(listView -> criarCelulaPessoa());
+        combo.setCellFactory(_ -> criarCelulaPessoa());
         combo.setButtonCell(criarCelulaPessoa());
         combo.setPromptText("Selecione uma pessoa");
 
@@ -334,7 +334,7 @@ public class EdicaoEscalaView {
     }
 
     private void configurarCelulasDesignacoes() {
-        listaDesignacoes.setCellFactory(listView -> new ListCell<>() {
+        listaDesignacoes.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(Designacao designacao, boolean empty) {
                 super.updateItem(designacao, empty);
@@ -450,7 +450,7 @@ public class EdicaoEscalaView {
     }
 
     private void configurarListaSemanas() {
-        listaSemanas.setCellFactory(listView -> new ListCell<>() {
+        listaSemanas.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(Escala escala, boolean empty) {
                 super.updateItem(escala, empty);
@@ -483,7 +483,7 @@ public class EdicaoEscalaView {
     private void configurarListaDesignacoes() {
         listaDesignacoes.getSelectionModel()
                 .selectedItemProperty()
-                .addListener((observable, antiga, selecionada) -> {
+                .addListener((_, _, selecionada) -> {
                     if (selecionada == null) {
                         return;
                     }
@@ -505,12 +505,12 @@ public class EdicaoEscalaView {
     }
 
     private void registrarEventos() {
-        botaoCarregar.setOnAction(event -> carregarSemanas());
-        campoMes.setOnAction(event -> carregarSemanas());
+        botaoCarregar.setOnAction(_ -> carregarSemanas());
+        campoMes.setOnAction(_ -> carregarSemanas());
 
         comboParte.getSelectionModel()
                 .selectedItemProperty()
-                .addListener((observable, antiga, selecionada) -> {
+                .addListener((_, _, selecionada) -> {
                     if (selecionada == null) {
                         limparSelecaoPessoas();
                         return;
@@ -522,7 +522,7 @@ public class EdicaoEscalaView {
 
         listaSemanas.getSelectionModel()
                 .selectedItemProperty()
-                .addListener((observable, antigo, selecionado) -> {
+                .addListener((_, _, selecionado) -> {
                     if (selecionado == null) {
                         return;
                     }
@@ -564,14 +564,14 @@ public class EdicaoEscalaView {
                     }
                 });
 
-        botaoSalvar.setOnAction(event -> salvarAlteracoes());
-        botaoAdicionarParte.setOnAction(event -> adicionarParte());
+        botaoSalvar.setOnAction(_ -> salvarAlteracoes());
+        botaoAdicionarParte.setOnAction(_ -> adicionarParte());
 
         botaoConfirmarConflito.setOnAction(
-                event -> confirmarSalvamentoComConflito()
+                _ -> confirmarSalvamentoComConflito()
         );
 
-        botaoCancelarConflito.setOnAction(event -> {
+        botaoCancelarConflito.setOnAction(_ -> {
             limparConfirmacaoConflito();
             labelStatus.setText("Alteração cancelada.");
         });

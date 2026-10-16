@@ -119,7 +119,7 @@ public class PessoaView {
                 new PropertyValueFactory<>("privilegio")
         );
 
-        colunaPrivilegio.setCellFactory(coluna -> new TableCell<>() {
+        colunaPrivilegio.setCellFactory(_ -> new TableCell<>() {
 
             @Override
             protected void updateItem(Privilegio privilegio, boolean vazio) {
@@ -148,7 +148,7 @@ public class PessoaView {
                 new PropertyValueFactory<>("ativo")
         );
 
-        colunaAtivo.setCellFactory(coluna -> new TableCell<>() {
+        colunaAtivo.setCellFactory(_ -> new TableCell<>() {
 
             @Override
             protected void updateItem(Boolean ativo, boolean vazio) {
@@ -237,19 +237,19 @@ public class PessoaView {
 
 
         novo.setOnAction(
-                event ->
+                _ ->
                         abrirFormulario()
         );
 
 
         editar.setOnAction(
-                event ->
+                _ ->
                         abrirFormularioEdicao()
         );
 
 
         excluir.setOnAction(
-                event ->
+                _ ->
                         excluirPessoa()
         );
 
@@ -464,7 +464,7 @@ public class PessoaView {
         painelConfirmacao.getStyleClass().add("card");
         painelConfirmacao.setPadding(new Insets(16));
 
-        confirmar.setOnAction(event -> {
+        confirmar.setOnAction(_ -> {
             if (pessoaPendenteExclusao != null) {
                 pessoaService.excluir(pessoaPendenteExclusao.getId());
                 pessoaPendenteExclusao = null;
@@ -472,7 +472,7 @@ public class PessoaView {
             }
         });
 
-        cancelar.setOnAction(event -> {
+        cancelar.setOnAction(_ -> {
             pessoaPendenteExclusao = null;
             voltarParaTabela();
         });

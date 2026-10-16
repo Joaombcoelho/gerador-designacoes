@@ -197,7 +197,7 @@ public class ProgramacaoView {
         listaSemanas.setItems(semanas);
 
         listaSemanas.setCellFactory(
-                lista -> new ListCell<>() {
+                _ -> new ListCell<>() {
 
                     @Override
                     protected void updateItem(
@@ -283,13 +283,13 @@ public class ProgramacaoView {
     private void configurarListaPartes() {
 
         listaPartes.setCellFactory(
-                lista -> new ListCell<>() {
+                _ -> new ListCell<>() {
 
                     private final CheckBox checkBox =
                             new CheckBox();
 
                     {
-                        checkBox.setOnAction(event -> {
+                        checkBox.setOnAction(_ -> {
 
                             Parte parte = getItem();
 

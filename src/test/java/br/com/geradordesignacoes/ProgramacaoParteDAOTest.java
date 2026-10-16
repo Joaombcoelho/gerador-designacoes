@@ -65,7 +65,7 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
 
 
         ProgramacaoParte resultado =
-                partes.get(0);
+                partes.getFirst();
 
 
         assertEquals(
@@ -118,7 +118,7 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
 
 
         ProgramacaoParte salva =
-                partes.get(0);
+                partes.getFirst();
 
 
         programacaoParteDAO.atualizarTema(
@@ -135,7 +135,7 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
 
         assertEquals(
                 "Tema novo",
-                atualizadas.get(0).getTema()
+                atualizadas.getFirst().getTema()
         );
     }
 
@@ -166,7 +166,7 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
 
         ProgramacaoParte salva =
                 programacaoParteDAO.listarPorSemana(semanaId)
-                        .get(0);
+                        .getFirst();
 
         assertEquals(
                 7,
@@ -181,7 +181,7 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
         assertEquals(
                 9,
                 programacaoParteDAO.listarPorSemana(semanaId)
-                        .get(0)
+                        .getFirst()
                         .getNumeroOficial()
         );
 
@@ -192,7 +192,7 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
 
         assertNull(
                 programacaoParteDAO.listarPorSemana(semanaId)
-                        .get(0)
+                        .getFirst()
                         .getNumeroOficial()
         );
     }
@@ -238,10 +238,10 @@ class ProgramacaoParteDAOTest extends BaseDAOTest {
         ProgramacaoParte ocorrencia = new ProgramacaoParte(parte, 1, "Tema de teste");
         ocorrencia.setDuracaoMinutos(12);
         programacaoParteDAO.salvar(semanaId, ocorrencia);
-        ProgramacaoParte recuperada = programacaoParteDAO.listarPorSemana(semanaId).get(0);
+        ProgramacaoParte recuperada = programacaoParteDAO.listarPorSemana(semanaId).getFirst();
         assertEquals(12, recuperada.getDuracaoMinutos());
         programacaoParteDAO.atualizarDuracaoMinutos(recuperada.getId(), null);
-        assertNull(programacaoParteDAO.listarPorSemana(semanaId).get(0).getDuracaoMinutos());
+        assertNull(programacaoParteDAO.listarPorSemana(semanaId).getFirst().getDuracaoMinutos());
     }
 
     @Test

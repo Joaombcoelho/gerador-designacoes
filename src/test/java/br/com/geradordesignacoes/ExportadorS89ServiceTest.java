@@ -69,21 +69,21 @@ class ExportadorS89ServiceTest extends BaseDAOTest {
                 ).exportarSemana(data, saida);
 
         assertEquals(1, arquivos.size());
-        assertTrue(Files.exists(arquivos.get(0)));
+        assertTrue(Files.exists(arquivos.getFirst()));
         assertArrayEquals(modeloOriginal, Files.readAllBytes(modelo));
         assertTrue(
-                arquivos.get(0).toString().contains(
+                arquivos.getFirst().toString().contains(
                         "Outubro 2027"
                 )
         );
         assertTrue(
-                arquivos.get(0).toString().contains(
+                arquivos.getFirst().toString().contains(
                         "Semana 1 - 06-10-2027"
                 )
         );
 
         try (PDDocument documento =
-                     Loader.loadPDF(arquivos.get(0).toFile())) {
+                     Loader.loadPDF(arquivos.getFirst().toFile())) {
             assertEquals(
                     pessoa.getNome(),
                     documento.getDocumentCatalog()
@@ -208,7 +208,7 @@ class ExportadorS89ServiceTest extends BaseDAOTest {
                         escalaDAO,
                         new br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO(),
                         Path.of("modelos", "S-89_T.pdf")
-                ).exportarSemana(data, saida).get(0);
+                ).exportarSemana(data, saida).getFirst();
 
         try (PDDocument documento =
                      Loader.loadPDF(arquivo.toFile())) {
