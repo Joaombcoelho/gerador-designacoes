@@ -16,14 +16,26 @@ public class BackupService {
     private final Path pastaBackup;
 
     public BackupService() {
+        this(pastaBackupPadrao());
+    }
+
+    BackupService(Path pastaBackup) {
+        if (pastaBackup == null) {
+            throw new IllegalArgumentException(
+                    "A pasta de backup não pode ser nula."
+            );
+        }
+        this.pastaBackup = pastaBackup.toAbsolutePath().normalize();
+    }
+
+    private static Path pastaBackupPadrao() {
         String localAppData = System.getenv("LOCALAPPDATA");
         if (localAppData == null || localAppData.isBlank()) {
             throw new IllegalStateException(
                     "A variável de ambiente LOCALAPPDATA não está disponível."
             );
         }
-
-        this.pastaBackup = Path.of(
+        return Path.of(
                 localAppData,
                 "GeradorDesignacoes",
                 "backups"

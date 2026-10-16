@@ -11,31 +11,48 @@ public class BackupAutomaticoService {
     private static final long INTERVALO_HORAS = 24;
 
     private final BackupService backupService;
-
     private final ScheduledExecutorService scheduler;
+    private final long intervalo;
+    private final TimeUnit unidadeIntervalo;
     private final Object lifecycleLock = new Object();
     private boolean iniciado;
     private boolean encerrado;
 
     public BackupAutomaticoService() {
+        this(
+                new BackupService(),
+                Executors.newSingleThreadScheduledExecutor(runnable -> {
+                    Thread thread = new Thread(runnable, "backup-automatico");
+                    thread.setDaemon(true);
+                    return thread;
+                }),
+                INTERVALO_HORAS,
+                TimeUnit.HOURS
+        );
+    }
 
-        this.backupService =
-                new BackupService();
+    BackupAutomaticoService(
+            BackupService backupService,
+            ScheduledExecutorService scheduler,
+            long intervalo,
+            TimeUnit unidadeIntervalo
+    ) {
+        if (backupService == null || scheduler == null
+                || unidadeIntervalo == null) {
+            throw new IllegalArgumentException(
+                    "Serviço de backup, agendador e unidade são obrigatórios."
+            );
+        }
+        if (intervalo <= 0) {
+            throw new IllegalArgumentException(
+                    "O intervalo de backup deve ser positivo."
+            );
+        }
 
-        this.scheduler =
-                Executors.newSingleThreadScheduledExecutor(
-                        runnable -> {
-                            Thread thread =
-                                    new Thread(
-                                            runnable,
-                                            "backup-automatico"
-                                    );
-
-                            thread.setDaemon(true);
-
-                            return thread;
-                        }
-                );
+        this.backupService = backupService;
+        this.scheduler = scheduler;
+        this.intervalo = intervalo;
+        this.unidadeIntervalo = unidadeIntervalo;
     }
 
     public void iniciar() {
@@ -60,9 +77,9 @@ public class BackupAutomaticoService {
             if (!encerrado) {
                 scheduler.scheduleAtFixedRate(
                         this::criarBackupAgendado,
-                        INTERVALO_HORAS,
-                        INTERVALO_HORAS,
-                        TimeUnit.HOURS
+                        intervalo,
+                        intervalo,
+                        unidadeIntervalo
                 );
             }
         }
