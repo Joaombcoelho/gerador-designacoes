@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -27,6 +28,8 @@ public class GeracaoFormulariosView {
     private final ListView<String> listaDados;
     private final Button botaoAtualizar;
     private final Button botaoExportarS140;
+    private final ComboBox<LocalDate> campoSemanaS89;
+    private final Button botaoExportarS89;
     private final Label labelStatus;
 
     public GeracaoFormulariosView() {
@@ -42,11 +45,32 @@ public class GeracaoFormulariosView {
         listaDados = new ListView<>();
         listaDados.getStyleClass().add("list-view");
         listaDados.setPlaceholder(new Label(
-                "Selecione um mês e atualize os dados salvos."
+                "Selecione um mês para consultar automaticamente os dados salvos."
         ));
 
-        botaoAtualizar = new Button("Atualizar dados do banco");
+        botaoAtualizar = new Button("Consultar novamente");
         botaoAtualizar.getStyleClass().add("secondary-button");
+
+        campoSemanaS89 = new ComboBox<>();
+        campoSemanaS89.setPromptText("Selecione a reunião para o S-89");
+        campoSemanaS89.setMaxWidth(230);
+        campoSemanaS89.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(LocalDate data) {
+                return data == null ? "" : data.format(
+                        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            }
+
+            @Override
+            public LocalDate fromString(String texto) {
+                return texto == null || texto.isBlank() ? null
+                        : LocalDate.parse(texto,
+                        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            }
+        });
+
+        botaoExportarS89 = new Button("Gerar S-89 PDF");
+        botaoExportarS89.getStyleClass().add("secondary-button");
 
         botaoExportarS140 = new Button("Gerar S-140 Word");
         botaoExportarS140.getStyleClass().add("success-button");
@@ -89,12 +113,16 @@ public class GeracaoFormulariosView {
         BorderPane.setMargin(painel, new Insets(18, 0, 0, 0));
         root.setCenter(painel);
 
+        HBox botoesS89 = new HBox(10,
+                new Label("Reunião do S-89"), campoSemanaS89, botaoExportarS89);
+        botoesS89.setAlignment(Pos.CENTER_LEFT);
+
         HBox botoes = new HBox(10, labelStatus, botaoExportarS140);
         botoes.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(labelStatus, Priority.ALWAYS);
         labelStatus.setMaxWidth(Double.MAX_VALUE);
 
-        VBox rodape = new VBox(12, new Separator(), botoes);
+        VBox rodape = new VBox(12, new Separator(), botoesS89, botoes);
         BorderPane.setMargin(rodape, new Insets(18, 0, 0, 0));
         root.setBottom(rodape);
     }
@@ -113,6 +141,23 @@ public class GeracaoFormulariosView {
 
     public Button getBotaoExportarS140() {
         return botaoExportarS140;
+    }
+
+    public ComboBox<LocalDate> getCampoSemanaS89() {
+        return campoSemanaS89;
+    }
+
+    public Button getBotaoExportarS89() {
+        return botaoExportarS89;
+    }
+
+    public void atualizarDatasS89(List<LocalDate> datas) {
+        campoSemanaS89.setItems(FXCollections.observableArrayList(datas));
+        if (!datas.isEmpty()) {
+            campoSemanaS89.getSelectionModel().selectFirst();
+        } else {
+            campoSemanaS89.getSelectionModel().clearSelection();
+        }
     }
 
     public void atualizarDados(List<String> linhas) {
