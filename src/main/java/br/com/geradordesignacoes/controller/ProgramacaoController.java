@@ -84,7 +84,7 @@ public class ProgramacaoController {
 
         view.getCampoData()
                 .setOnAction(
-                        event -> carregarMes()
+                        _ -> carregarMes()
                 );
 
 
@@ -92,20 +92,20 @@ public class ProgramacaoController {
                 .getSelectionModel()
                 .selectedItemProperty()
                 .addListener(
-                        (observable, anterior, atual) ->
+                        (_, _, atual) ->
                                 carregarSemana(atual)
                 );
 
 
         view.getBotaoAdicionarSemana()
                 .setOnAction(
-                        event -> adicionarSemana()
+                        _ -> adicionarSemana()
                 );
 
 
         view.getBotaoEditarSemana()
                 .setOnAction(
-                        event -> editarSemanaSelecionada()
+                        _ -> editarSemanaSelecionada()
                 );
 
 
@@ -178,15 +178,15 @@ public class ProgramacaoController {
 
         view.getBotaoExportarS89()
                 .setOnAction(
-                        event -> exportarS89()
+                        _ -> exportarS89()
                 );
 
-        view.getBotaoExportarS140().setOnAction(event -> exportarS140());
+        view.getBotaoExportarS140().setOnAction(_ -> exportarS140());
 
 
         view.getBotaoSalvar()
                 .setOnAction(
-                        event -> salvarEscalas()
+                        _ -> salvarEscalas()
                 );
     }
 
