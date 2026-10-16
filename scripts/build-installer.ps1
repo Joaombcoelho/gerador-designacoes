@@ -1,11 +1,11 @@
 ﻿$ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$stageRoot = Join-Path $projectRoot "dist\GeradorDesignacoes-1.2.2"
+$stageRoot = Join-Path $projectRoot "dist\GeradorDesignacoes-1.2.4"
 $appDir = Join-Path $stageRoot "app"
 $runtimeDir = Join-Path $stageRoot "runtime"
 $installerDir = Join-Path $projectRoot "Instalador"
-$installerPath = Join-Path $installerDir "GeradorDesignacoes-1.2.2.exe"
+$installerPath = Join-Path $installerDir "GeradorDesignacoes-1.2.4.exe"
 $iconPath = Join-Path $projectRoot "src\main\resources\logo.ico"
 
 function Require-Command {
@@ -82,7 +82,7 @@ try {
     Pop-Location
 }
 
-$jarPath = Join-Path $projectRoot "target\gerador-designacoes-1.2.2.jar"
+$jarPath = Join-Path $projectRoot "target\gerador-designacoes-1.2.4.jar"
 if (-not (Test-Path $jarPath)) {
     throw "JAR da aplicação não encontrado: $jarPath"
 }
@@ -154,9 +154,9 @@ Invoke-Checked "Gerando instalador Windows" {
     jpackage `
         --type exe `
         --name GeradorDesignacoes `
-        --app-version 1.2.2 `
+        --app-version 1.2.4 `
         --input $appDir `
-        --main-jar "gerador-designacoes-1.2.2.jar" `
+        --main-jar "gerador-designacoes-1.2.4.jar" `
         --main-class "br.com.geradordesignacoes.MainApp" `
         --runtime-image $runtimeDir `
         --icon $iconPath `
