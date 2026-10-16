@@ -281,6 +281,53 @@ class EdicaoEscalaControllerTest extends BaseDAOTest {
     }
 
     @Test
+    void devePermitirLeitorExperienteNaEdicaoManualSemAlterarRegraAutomatica() {
+        Pessoa leitorExperiente = pessoa(
+                "Leitor experiente",
+                Sexo.MASCULINO,
+                true,
+                Privilegio.PUBLICADOR,
+                NivelLeitura.EXPERIENTE,
+                true
+        );
+        Pessoa leitorInativo = pessoa(
+                "Leitor inativo",
+                Sexo.MASCULINO,
+                false,
+                Privilegio.PUBLICADOR,
+                NivelLeitura.EXPERIENTE,
+                true
+        );
+        Parte leituraBiblica = parteDAO.salvar(
+                new Parte(
+                        "Leitura Bíblica",
+                        TipoParte.LEITURA,
+                        Privilegio.PUBLICADOR,
+                        false,
+                        SexoPermitido.MASCULINO,
+                        1,
+                        false,
+                        NivelLeitura.BASICO,
+                        List.of(TipoParticipacao.LEITOR)
+                )
+        );
+
+        List<Pessoa> opcoes = controller.listarPessoasParaSelecao(
+                leituraBiblica,
+                TipoParticipacao.LEITOR
+        );
+
+        assertTrue(opcoes.contains(leitorExperiente));
+        assertFalse(opcoes.contains(leitorInativo));
+        assertFalse(new br.com.geradordesignacoes.service.RegrasService()
+                .podeExercerParticipacao(
+                        leitorExperiente,
+                        leituraBiblica,
+                        TipoParticipacao.LEITOR
+                ));
+    }
+
+    @Test
     void deveManterParticipanteAtualMesmoQueNaoEstejaMaisElegivel() {
         Pessoa atual = pessoa(
                 "Participante atual",
