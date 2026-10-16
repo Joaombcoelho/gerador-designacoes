@@ -398,7 +398,7 @@ public class HistoricoView {
     private void configurarFiltro() {
 
         comboMes.setOnAction(
-                event -> {
+                _ -> {
 
                     YearMonth mes =
                             comboMes.getValue();
@@ -416,8 +416,8 @@ public class HistoricoView {
         tabela.getSelectionModel()
                 .selectedItemProperty()
                 .addListener(
-                        (obs,
-                         antiga,
+                        (_,
+                         _,
                          nova) -> {
 
                             if (
@@ -481,7 +481,7 @@ public class HistoricoView {
 
 
         colunaStatus.setCellFactory(
-                coluna ->
+                _ ->
                         new TableCell<>() {
 
                             private final Label badge = new Label();
@@ -819,7 +819,7 @@ public class HistoricoView {
     private void configurarExclusao() {
 
         botaoExcluir.setOnAction(
-                event -> {
+                _ -> {
 
                     Escala escalaSelecionada =
                             tabela
@@ -843,11 +843,11 @@ public class HistoricoView {
         );
 
         botaoCancelarExclusao.setOnAction(
-                event -> cancelarExclusao()
+                _ -> cancelarExclusao()
         );
 
         botaoConfirmarExclusao.setOnAction(
-                event -> confirmarExclusao()
+                _ -> confirmarExclusao()
         );
     }
 
