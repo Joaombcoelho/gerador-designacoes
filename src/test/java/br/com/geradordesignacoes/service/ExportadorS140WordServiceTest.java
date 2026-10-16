@@ -310,6 +310,7 @@ class ExportadorS140WordServiceTest {
             assertTrue(!texto.contains("[DATA]"));
             assertTrue(!texto.contains("[Nome]"));
             assertTrue(!texto.contains("[Tema]"));
+            assertTrue(!texto.contains("[número]"));
             assertTrue(!texto.contains("[NOME DA CONGREGAÇÃO]"));
         }
     }
