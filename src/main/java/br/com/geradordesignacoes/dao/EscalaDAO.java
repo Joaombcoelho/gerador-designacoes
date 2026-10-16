@@ -294,9 +294,18 @@ public class EscalaDAO {
                 }
 
                 PessoaDAO pessoaDAO = new PessoaDAO();
-                escala.setPresidente(buscarPessoaOpcional(pessoaDAO, resultSet, "presidente_id"));
-                escala.setDirigente(buscarPessoaOpcional(pessoaDAO, resultSet, "dirigente_id"));
-                escala.setOracaoInicial(buscarPessoaOpcional(pessoaDAO, resultSet, "oracao_inicial_id"));
+                // As designações salvas são a fonte atual dos responsáveis.
+                // As colunas especiais são mantidas por compatibilidade com escalas
+                // antigas, mas não devem sobrescrever uma edição manual mais recente.
+                escala.setPresidente(responsavelAtualOuLegado(
+                        escala.getDesignacoes(), TipoParte.PRESIDENTE_REUNIAO,
+                        pessoaDAO, resultSet, "presidente_id"));
+                escala.setDirigente(responsavelAtualOuLegado(
+                        escala.getDesignacoes(), TipoParte.DIRIGENTE_ESTUDO,
+                        pessoaDAO, resultSet, "dirigente_id"));
+                escala.setOracaoInicial(responsavelAtualOuLegado(
+                        escala.getDesignacoes(), TipoParte.ORACAO_INICIAL,
+                        pessoaDAO, resultSet, "oracao_inicial_id"));
 
                 return Optional.of(escala);
             }
@@ -417,66 +426,102 @@ public class EscalaDAO {
             Integer responsavelId,
             Integer ajudanteId
     ) {
-
         if (designacaoId == null) {
             throw new IllegalArgumentException(
                     "ID da designação não pode ser nulo."
             );
         }
 
-        String sql = """
-                UPDATE designacao
-                SET responsavel_id = ?,
-                    ajudante_id = ?
-                WHERE id = ?
-                """;
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            boolean autoCommitOriginal = connection.getAutoCommit();
+            try {
+                connection.setAutoCommit(false);
 
-        try (
-                Connection connection =
-                        ConnectionFactory.getConnection();
+                String tipoParte;
+                int escalaId;
+                String buscarContextoSql = """
+                        SELECT d.escala_id, p.tipo
+                        FROM designacao d
+                        JOIN parte p ON p.id = d.parte_id
+                        WHERE d.id = ?
+                        """;
+                try (PreparedStatement statement =
+                             connection.prepareStatement(buscarContextoSql)) {
+                    statement.setInt(1, designacaoId);
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (!resultSet.next()) {
+                            throw new IllegalArgumentException(
+                                    "Designação não encontrada."
+                            );
+                        }
+                        escalaId = resultSet.getInt("escala_id");
+                        tipoParte = resultSet.getString("tipo");
+                    }
+                }
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+                String atualizarSql = """
+                        UPDATE designacao
+                        SET responsavel_id = ?,
+                            ajudante_id = ?
+                        WHERE id = ?
+                        """;
+                try (PreparedStatement statement =
+                             connection.prepareStatement(atualizarSql)) {
+                    if (responsavelId == null) {
+                        statement.setNull(1, java.sql.Types.INTEGER);
+                    } else {
+                        statement.setInt(1, responsavelId);
+                    }
 
-            if (responsavelId == null) {
-                statement.setNull(1, java.sql.Types.INTEGER);
-            } else {
-                statement.setInt(1, responsavelId);
+                    if (ajudanteId == null) {
+                        statement.setNull(2, java.sql.Types.INTEGER);
+                    } else {
+                        statement.setInt(2, ajudanteId);
+                    }
+                    statement.setInt(3, designacaoId);
+
+                    if (statement.executeUpdate() != 1) {
+                        throw new IllegalArgumentException(
+                                "Designação não encontrada."
+                        );
+                    }
+                }
+
+                // Esses papéis também são armazenados em colunas próprias de escala.
+                // Mantê-los sincronizados evita que o S-140 leia o responsável antigo.
+                String colunaPapelEspecial = switch (TipoParte.valueOf(tipoParte)) {
+                    case PRESIDENTE_REUNIAO -> "presidente_id";
+                    case DIRIGENTE_ESTUDO -> "dirigente_id";
+                    case ORACAO_INICIAL -> "oracao_inicial_id";
+                    default -> null;
+                };
+                if (colunaPapelEspecial != null) {
+                    String atualizarPapelSql = "UPDATE escala SET "
+                            + colunaPapelEspecial + " = ? WHERE id = ?";
+                    try (PreparedStatement statement =
+                                 connection.prepareStatement(atualizarPapelSql)) {
+                        if (responsavelId == null) {
+                            statement.setNull(1, java.sql.Types.INTEGER);
+                        } else {
+                            statement.setInt(1, responsavelId);
+                        }
+                        statement.setInt(2, escalaId);
+                        if (statement.executeUpdate() != 1) {
+                            throw new SQLException(
+                                    "Não foi possível sincronizar o papel especial da escala."
+                            );
+                        }
+                    }
+                }
+
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(autoCommitOriginal);
             }
-
-            if (ajudanteId == null) {
-
-                statement.setNull(
-                        2,
-                        java.sql.Types.INTEGER
-                );
-
-            } else {
-
-                statement.setInt(
-                        2,
-                        ajudanteId
-                );
-            }
-
-            statement.setInt(
-                    3,
-                    designacaoId
-            );
-
-            int linhasAfetadas =
-                    statement.executeUpdate();
-
-            if (linhasAfetadas != 1) {
-
-                throw new RuntimeException(
-                        "Designação não encontrada."
-                );
-            }
-
         } catch (SQLException e) {
-
             throw new RuntimeException(
                     "Erro ao atualizar designação.",
                     e
@@ -707,6 +752,27 @@ public class EscalaDAO {
         } else {
             statement.setInt(indice, pessoa.getId());
         }
+    }
+
+
+    private Pessoa responsavelAtualOuLegado(
+            List<Designacao> designacoes,
+            TipoParte tipo,
+            PessoaDAO pessoaDAO,
+            ResultSet resultSet,
+            String colunaLegada
+    ) throws SQLException {
+        List<Designacao> designacoesDoPapel = designacoes.stream()
+                .filter(d -> d.parte().getTipo() == tipo)
+                .toList();
+        if (!designacoesDoPapel.isEmpty()) {
+            return designacoesDoPapel.stream()
+                    .map(Designacao::responsavel)
+                    .filter(java.util.Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+        }
+        return buscarPessoaOpcional(pessoaDAO, resultSet, colunaLegada);
     }
 
     private Pessoa buscarPessoaOpcional(

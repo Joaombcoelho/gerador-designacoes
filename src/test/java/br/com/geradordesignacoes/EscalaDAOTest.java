@@ -1,11 +1,14 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.EscalaDAO;
+import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -213,6 +216,80 @@ class EscalaDAOTest extends BaseDAOTest {
                         .responsavel()
                         .getId()
         );
+    }
+
+    @Test
+    void deveSincronizarPapeisEspeciaisAoAtualizarDesignacaoManual() {
+        LocalDate data = LocalDate.of(2027, 8, 4);
+        br.com.geradordesignacoes.dao.PessoaDAO pessoaDAO =
+                new br.com.geradordesignacoes.dao.PessoaDAO();
+        Pessoa original = pessoaDAO.salvar(new Pessoa(
+                "Responsável original", Sexo.MASCULINO,
+                true, true, true, false, false, Privilegio.ANCIAO
+        ));
+        Pessoa atualizado = pessoaDAO.salvar(new Pessoa(
+                "Carlos", Sexo.MASCULINO,
+                true, true, true, false, false, Privilegio.ANCIAO
+        ));
+        br.com.geradordesignacoes.dao.ParteDAO parteDAO =
+                new br.com.geradordesignacoes.dao.ParteDAO();
+
+        Parte presidente = parteDAO.salvar(new Parte(
+                "Presidente", TipoParte.PRESIDENTE_REUNIAO,
+                Privilegio.ANCIAO, false, SexoPermitido.AMBOS,
+                1, true, List.of(TipoParticipacao.PRESIDENTE)
+        ));
+        Parte dirigente = parteDAO.salvar(new Parte(
+                "Dirigente do estudo", TipoParte.DIRIGENTE_ESTUDO,
+                Privilegio.ANCIAO, false, SexoPermitido.AMBOS,
+                1, true, List.of(TipoParticipacao.DIRIGENTE)
+        ));
+        Parte oracaoInicial = parteDAO.salvar(new Parte(
+                "Oração inicial", TipoParte.ORACAO_INICIAL,
+                Privilegio.ANCIAO, false, SexoPermitido.AMBOS,
+                1, true, List.of(TipoParticipacao.ORACAO_INICIAL)
+        ));
+
+        Escala escala = new Escala(data, List.of(
+                new Designacao(data, presidente, original, null),
+                new Designacao(data, dirigente, original, null),
+                new Designacao(data, oracaoInicial, original, null)
+        ));
+        escala.setPresidente(original);
+        escala.setDirigente(original);
+        escala.setOracaoInicial(original);
+        Escala salva = escalaDAO.salvar(escala);
+
+        Escala carregada = escalaDAO.buscarPorId(salva.getId()).orElseThrow();
+        for (Designacao designacao : carregada.getDesignacoes()) {
+            escalaDAO.atualizarDesignacao(
+                    designacao.id(), atualizado.getId(), null
+            );
+        }
+
+        // Simula colunas redundantes antigas que ficaram com o valor da
+        // primeira geração, enquanto as designações atuais já foram editadas.
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     UPDATE escala
+                     SET presidente_id = ?, dirigente_id = ?, oracao_inicial_id = ?
+                     WHERE id = ?
+                     """)) {
+            statement.setInt(1, original.getId());
+            statement.setInt(2, original.getId());
+            statement.setInt(3, original.getId());
+            statement.setInt(4, salva.getId());
+            assertEquals(1, statement.executeUpdate());
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        Escala reaberta = escalaDAO.buscarPorId(salva.getId()).orElseThrow();
+        assertEquals(atualizado.getId(), reaberta.getPresidente().getId());
+        assertEquals(atualizado.getId(), reaberta.getDirigente().getId());
+        assertEquals(atualizado.getId(), reaberta.getOracaoInicial().getId());
+        assertTrue(reaberta.getDesignacoes().stream()
+                .allMatch(d -> d.responsavel().getId().equals(atualizado.getId())));
     }
 
     @Test

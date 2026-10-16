@@ -2,6 +2,8 @@ package br.com.geradordesignacoes.view;
 
 import br.com.geradordesignacoes.controller.EscalaController;
 import br.com.geradordesignacoes.controller.ProgramacaoController;
+import br.com.geradordesignacoes.controller.GeracaoFormulariosController;
+import br.com.geradordesignacoes.view.formularios.GeracaoFormulariosView;
 import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.BackupDatabase;
 import br.com.geradordesignacoes.database.RestaurarDatabase;
@@ -45,6 +47,8 @@ public class MainView {
     private final ParteView parteView = new ParteView();
     private final EscalaView escalaView = new EscalaView();
     private final ProgramacaoView programacaoView = new ProgramacaoView();
+    private final GeracaoFormulariosView geracaoFormulariosView =
+            new GeracaoFormulariosView();
     private final EdicaoEscalaView edicaoEscalaView =
             new EdicaoEscalaView();
 
@@ -56,6 +60,7 @@ public class MainView {
 
     private final EscalaController escalaController;
     private final ProgramacaoController programacaoController;
+    private final GeracaoFormulariosController geracaoFormulariosController;
 
     private Button botaoAtivo;
 
@@ -87,6 +92,10 @@ public class MainView {
                         programacaoView,
                         escalaController
                 );
+
+
+        geracaoFormulariosController =
+                new GeracaoFormulariosController(geracaoFormulariosView);
 
 
         historicoView =
@@ -254,6 +263,17 @@ public class MainView {
         sidebar.getChildren().add(
                 programacao
         );
+
+        Button formularios = criarBotaoMenu(
+                FontAwesomeSolid.FILE_ALT,
+                "Geração dos formulários",
+                false
+        );
+        formularios.setOnAction(_ -> {
+            ativarBotao(formularios);
+            mostrarTela(geracaoFormulariosView.getView());
+        });
+        sidebar.getChildren().add(formularios);
 
 
         Label secaoEscala =

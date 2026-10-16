@@ -69,9 +69,11 @@ As funcionalidades são organizadas em camadas de modelo, acesso a dados, servi�
 - Backup automático no início da aplicação e a cada 24 horas enquanto ela estiver aberta.
 - Backups automáticos recebem data e hora no nome para evitar a substituição de arquivos anteriores.
 
-### Exportação mensal para Word S-140
+### Geração dos formulários — Word S-140
 
-Na tela de **Programação Semanal**, selecione uma data do mês que deseja exportar e utilize a opção **Exportar S-140**. O aplicativo solicita que você selecione o modelo Word (`.docx`) e escolha o destino do arquivo. O nome inicial sugerido atualmente segue o padrão `S-140-AAAA-MM.docx`.
+Na tela **Geração dos formulários**, ao selecionar uma data do mês, a lista consulta automaticamente as programações e escalas persistidas. O botão **Consultar novamente** permite repetir a consulta manualmente. A tela também disponibiliza a geração do S-89 em PDF para reuniões que já tenham programação e escala salvas. Utilize **Gerar S-140 Word** para selecionar o modelo Word (`.docx`) e o destino do documento.
+
+A tela de formulários não reutiliza o resultado temporário da geração em memória: ela consulta o SQLite ao selecionar o mês, e o exportador recarrega a programação e a escala salvas na hora de gerar o arquivo. Para os papéis especiais do S-140, as designações atuais salvas no banco prevalecem sobre colunas redundantes antigas, evitando reaproveitar nomes da primeira geração automática. Por isso, as alterações manuais devem estar salvas no banco antes da exportação. Se uma alteração foi feita apenas na tela de geração/revisão e ainda não foi salva, ela não será considerada no formulário.
 
 A exportação reúne em um único documento as reuniões que ocorrem no mês, conforme o dia habitual configurado. O exportador aceita meses com quatro ou cinco reuniões, desde que o modelo contenha blocos suficientes e os dados necessários estejam disponíveis.
 
@@ -93,7 +95,7 @@ A exportação depende de informações obrigatórias da escala salva, como pres
 
 ## Exportação para PDF S-89
 
-Na tela de **Programação Semanal**, selecione a semana e clique em **Exportar S-89**. A exportação consulta somente a escala já salva e a programação correspondente no banco; ela não gera nem substitui escalas automaticamente.
+Na tela **Geração dos formulários**, selecione uma das reuniões disponíveis na lista do S-89 e clique em **Gerar S-89 PDF**. A exportação consulta somente a escala já salva e a programação correspondente no banco; ela não gera nem substitui escalas automaticamente.
 
 Atualmente são exportadas as designações das partes elegíveis:
 
@@ -122,21 +124,23 @@ Exemplos de intervalo no campo de data:
 28 de Dezembro de 2026 - 03 de Janeiro de 2027
 ```
 
-Por padrão, os arquivos são salvos em:
+Na primeira exportação pela tela **Geração dos formulários**, o aplicativo solicita a pasta base de saída. A escolha fica registrada nas preferências do usuário e será reutilizada nas próximas execuções. Para trocar a pasta, utilize **Definir pasta de saída…** na mesma tela. O aplicativo cria automaticamente as subpastas por formulário, mês e semana, por exemplo:
 
 ```text
-%USERPROFILE%\GeradorDesignacoes\S-89\
-└── Outubro 2026\
-    └── Semana 1 - 07-10-2026\
-        └── S89_Leitura_Biblia.pdf
+Pasta escolhida pelo usuário\\
+└── S-89\\
+    └── Outubro 2026\\
+        └── Semana 1 - 07-10-2026\\
+            └── S89_Leitura_Biblia.pdf
 ```
 
-O exportador não sobrescreve arquivos existentes. O caminho do modelo e o diretório de saída podem ser configurados por propriedades do sistema:
+O exportador não sobrescreve arquivos existentes. O caminho do modelo pode ser configurado por propriedade do sistema:
 
 ```text
--Ds89.template=C:\caminho\S-89_T.pdf
--Ds89.output.dir=C:\caminho\de\saida
+-Ds89.template=C:\\caminho\\S-89_T.pdf
 ```
+
+A propriedade `s89.output.dir` continua disponível para chamadas diretas ao serviço, mas a tela de formulários utiliza a pasta selecionada e salva nas preferências do usuário.
 
 O local da reunião não é obtido do banco; por isso, apenas o checkbox **Salão principal** é marcado automaticamente.
 
