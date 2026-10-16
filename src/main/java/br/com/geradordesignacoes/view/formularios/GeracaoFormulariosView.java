@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
@@ -30,6 +31,8 @@ public class GeracaoFormulariosView {
     private final Button botaoExportarS140;
     private final ComboBox<LocalDate> campoSemanaS89;
     private final Button botaoExportarS89;
+    private final Button botaoPastaS89;
+    private final Label labelPastaS89;
     private final Label labelStatus;
 
     public GeracaoFormulariosView() {
@@ -71,6 +74,11 @@ public class GeracaoFormulariosView {
 
         botaoExportarS89 = new Button("Gerar S-89 PDF");
         botaoExportarS89.getStyleClass().add("secondary-button");
+
+        botaoPastaS89 = new Button("Definir pasta de saída…");
+        botaoPastaS89.getStyleClass().add("secondary-button");
+        labelPastaS89 = new Label("Pasta S-89: será solicitada na primeira exportação");
+        labelPastaS89.setWrapText(true);
 
         botaoExportarS140 = new Button("Gerar S-140 Word");
         botaoExportarS140.getStyleClass().add("success-button");
@@ -114,15 +122,18 @@ public class GeracaoFormulariosView {
         root.setCenter(painel);
 
         HBox botoesS89 = new HBox(10,
-                new Label("Reunião do S-89"), campoSemanaS89, botaoExportarS89);
+                new Label("Reunião do S-89"), campoSemanaS89,
+                botaoExportarS89, botaoPastaS89);
         botoesS89.setAlignment(Pos.CENTER_LEFT);
+
+        VBox areaS89 = new VBox(6, botoesS89, labelPastaS89);
 
         HBox botoes = new HBox(10, labelStatus, botaoExportarS140);
         botoes.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(labelStatus, Priority.ALWAYS);
         labelStatus.setMaxWidth(Double.MAX_VALUE);
 
-        VBox rodape = new VBox(12, new Separator(), botoesS89, botoes);
+        VBox rodape = new VBox(12, new Separator(), areaS89, botoes);
         BorderPane.setMargin(rodape, new Insets(18, 0, 0, 0));
         root.setBottom(rodape);
     }
@@ -149,6 +160,16 @@ public class GeracaoFormulariosView {
 
     public Button getBotaoExportarS89() {
         return botaoExportarS89;
+    }
+
+    public Button getBotaoPastaS89() {
+        return botaoPastaS89;
+    }
+
+    public void atualizarPastaS89(String caminho) {
+        labelPastaS89.setText(caminho == null || caminho.isBlank()
+                ? "Pasta S-89: será solicitada na primeira exportação"
+                : "Pasta S-89: " + caminho);
     }
 
     public void atualizarDatasS89(List<LocalDate> datas) {
