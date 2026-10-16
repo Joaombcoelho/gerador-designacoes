@@ -9,7 +9,6 @@ import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.service.HorarioS140Service;
 import br.com.geradordesignacoes.service.ExportadorS89Service;
-import br.com.geradordesignacoes.service.ExportadorS140WordService;
 import br.com.geradordesignacoes.service.ConfiguracaoGeralService;
 import br.com.geradordesignacoes.service.ConfiguracaoSalasService;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
@@ -35,8 +34,6 @@ public class ProgramacaoController {
 
     private final ExportadorS89Service exportadorS89Service;
 
-    private final ExportadorS140WordService exportadorS140WordService;
-
     private final ConfiguracaoGeralService configuracaoGeralService;
 
     private final List<LocalDate> semanas;
@@ -58,7 +55,6 @@ public class ProgramacaoController {
 
         this.exportadorS89Service =
                 new ExportadorS89Service();
-        this.exportadorS140WordService = new ExportadorS140WordService();
         this.configuracaoGeralService = new ConfiguracaoGeralService();
 
         ConfiguracaoSalasService configuracaoSalasService = new ConfiguracaoSalasService();
