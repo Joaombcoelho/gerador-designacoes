@@ -11,7 +11,10 @@ import java.time.YearMonth;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -240,6 +243,104 @@ class ExportadorS140WordServiceTest {
                 new DadosExportacaoS140Semana(data, programacao, escala));
 
         assertTrue(problemas.isEmpty(), () -> String.join("; ", problemas));
+    }
+
+    @Test
+    void deveExportarDocxCompletoComQuatroSemanasERemoverLinhasOpcionais() throws Exception {
+        ConfiguracaoGeral configuracao = new ConfiguracaoGeral(
+                "Congregação de Teste", DayOfWeek.WEDNESDAY,
+                java.time.LocalTime.of(19, 30), 5, 1, 4, 3, 5);
+        ConfiguracaoGeralService configuracaoService = new ConfiguracaoGeralService() {
+            @Override
+            public ConfiguracaoGeral buscar() {
+                return configuracao;
+            }
+        };
+
+        Parte estudo = criarParteTeste(
+                40, "Estudo Bíblico", TipoParte.DIRIGENTE_ESTUDO,
+                SecaoParte.NOSSA_VIDA_CRISTA, 1);
+        Map<LocalDate, DadosExportacaoS140Semana> dadosPorData = new HashMap<>();
+        for (LocalDate data : service.datasReunioes(
+                YearMonth.of(2026, 10), DayOfWeek.WEDNESDAY)) {
+            ProgramacaoSemana programacao = new ProgramacaoSemana(data);
+            programacao.adicionarParte(new ProgramacaoParte(estudo, 1, null));
+            Escala escala = escalaBasica(data);
+            escala.adicionarDesignacao(new Designacao(
+                    data, estudo, pessoaTeste("Dirigente", 11), null));
+            escala.adicionarDesignacao(new Designacao(
+                    data, estudo, null, pessoaTeste("Leitor", 12)));
+            dadosPorData.put(data, new DadosExportacaoS140Semana(data, programacao, escala));
+        }
+
+        CarregadorDadosExportacaoS140Service carregador =
+                new CarregadorDadosExportacaoS140Service() {
+                    @Override
+                    public DadosExportacaoS140Semana carregar(LocalDate data) {
+                        return dadosPorData.get(data);
+                    }
+                };
+        HorarioS140Service horarios = new HorarioS140Service() {
+            @Override
+            public List<HorarioS140Calculado> calcular(ProgramacaoSemana programacao) {
+                return List.of();
+            }
+        };
+        ExportadorS140WordService exportador =
+                new ExportadorS140WordService(configuracaoService, carregador, horarios);
+
+        Path modelo = diretorioTemporario.resolve("modelo-teste.docx");
+        Path destino = diretorioTemporario.resolve("saida.docx");
+        criarModeloDocxTeste(modelo, 4);
+
+        Path resultado = exportador.exportar(YearMonth.of(2026, 10), modelo, destino);
+
+        assertEquals(destino, resultado);
+        assertTrue(Files.isRegularFile(destino));
+        try (XWPFDocument documento = new XWPFDocument(Files.newInputStream(destino))) {
+            var tabela = documento.getTables().getFirst();
+            String texto = tabela.getText();
+            assertEquals(72, tabela.getNumberOfRows(),
+                    "As quatro semanas devem manter apenas as linhas fixas e do Estudo Bíblico");
+            assertTrue(texto.contains("07/10/2026"));
+            assertTrue(texto.contains("14/10/2026"));
+            assertTrue(texto.contains("21/10/2026"));
+            assertTrue(texto.contains("28/10/2026"));
+            assertTrue(texto.contains("Dirigente/Leitor"));
+            assertTrue(!texto.contains("[DATA]"));
+            assertTrue(!texto.contains("[Nome]"));
+            assertTrue(!texto.contains("[Tema]"));
+            assertTrue(!texto.contains("[NOME DA CONGREGAÇÃO]"));
+        }
+    }
+
+    private void criarModeloDocxTeste(Path caminho, int quantidadeSemanas) throws IOException {
+        try (XWPFDocument documento = new XWPFDocument()) {
+            var tabela = documento.createTable();
+            int totalLinhas = quantidadeSemanas * 24;
+            for (int indice = 0; indice < totalLinhas; indice++) {
+                if (indice > 0) {
+                    tabela.createRow();
+                }
+                int deslocamento = indice % 24;
+                String texto = switch (deslocamento) {
+                    case 0 -> "[DATA] [NOME DA CONGREGAÇÃO] [Nome]";
+                    case 1 -> "[Nome]";
+                    case 3 -> "Cântico [número] [Nome]";
+                    case 4 -> "Comentários iniciais (1 min)";
+                    case 7, 8, 9, 12, 13, 14, 15, 19, 20 -> "[Tema] (X min) [Nome/Nome]";
+                    case 18 -> "Cântico [número]";
+                    case 21 -> "[Nome/Nome]";
+                    case 22 -> "Comentários finais (3 min)";
+                    case 23 -> "Cântico [número] [Nome]";
+                    default -> "";
+                };
+                tabela.getRow(indice).getCell(0).setText(texto);
+            }
+            try (OutputStream saida = Files.newOutputStream(caminho)) {
+                documento.write(saida);
+            }
+        }
     }
 
     private Escala escalaBasica(LocalDate data) {
