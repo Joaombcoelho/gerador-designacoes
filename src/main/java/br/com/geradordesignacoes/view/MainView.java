@@ -166,7 +166,7 @@ public class MainView {
                 );
 
         inicio.setOnAction(
-                event -> {
+                _ -> {
 
                     ativarBotao(
                             inicio
@@ -189,7 +189,7 @@ public class MainView {
                 );
 
         pessoas.setOnAction(
-                event -> {
+                _ -> {
 
                     ativarBotao(
                             pessoas
@@ -214,7 +214,7 @@ public class MainView {
                 );
 
         partes.setOnAction(
-                event -> {
+                _ -> {
 
                     ativarBotao(
                             partes
@@ -239,7 +239,7 @@ public class MainView {
                 );
 
         programacao.setOnAction(
-                event -> {
+                _ -> {
 
                     ativarBotao(
                             programacao
@@ -283,7 +283,7 @@ public class MainView {
                 );
 
         gerarEscala.setOnAction(
-                event -> {
+                _ -> {
 
                     ativarBotao(
                             gerarEscala
@@ -308,7 +308,7 @@ public class MainView {
                 );
 
         editarEscalas.setOnAction(
-                event -> {
+                _ -> {
 
                     ativarBotao(
                             editarEscalas
@@ -335,7 +335,7 @@ public class MainView {
                 );
 
         historico.setOnAction(
-                event -> {
+                _ -> {
 
                     ativarBotao(
                             historico
@@ -381,7 +381,7 @@ public class MainView {
                 );
 
         backup.setOnAction(
-                event ->
+                _ ->
                         fazerBackup()
         );
 
@@ -398,7 +398,7 @@ public class MainView {
                 );
 
         restaurar.setOnAction(
-                event ->
+                _ ->
                         restaurarBackup()
         );
 
@@ -413,7 +413,7 @@ public class MainView {
                         false
                 );
 
-        configuracaoSalas.setOnAction(event -> {
+        configuracaoSalas.setOnAction(_ -> {
             ativarBotao(configuracaoSalas);
             configuracaoSalasView.atualizar();
             mostrarTela(configuracaoSalasView.getView());
@@ -429,7 +429,7 @@ public class MainView {
                 false
         );
 
-        configuracoesGerais.setOnAction(event -> {
+        configuracoesGerais.setOnAction(_ -> {
             ativarBotao(configuracoesGerais);
             configuracaoGeralView.atualizar();
             mostrarTela(configuracaoGeralView.getView());
@@ -445,7 +445,7 @@ public class MainView {
                         false
                 );
 
-        sobre.setOnAction(event -> {
+        sobre.setOnAction(_ -> {
             ativarBotao(sobre);
             mostrarSobre();
         });
@@ -484,7 +484,7 @@ public class MainView {
                 );
 
         sair.setOnAction(
-                event ->
+                _ ->
                         System.exit(0)
         );
 
@@ -1046,13 +1046,13 @@ public class MainView {
 
 
         card.setOnMouseClicked(
-                event ->
+                _ ->
                         acao.run()
         );
 
 
         card.setOnMouseEntered(
-                event ->
+                _ ->
                         card.setStyle(
                                 "-fx-border-color: #2B82C5;" +
                                         "-fx-background-color: #2A303B;"
@@ -1061,7 +1061,7 @@ public class MainView {
 
 
         card.setOnMouseExited(
-                event ->
+                _ ->
                         card.setStyle("")
         );
 
