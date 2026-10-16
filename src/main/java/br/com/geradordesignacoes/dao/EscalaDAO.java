@@ -762,12 +762,15 @@ public class EscalaDAO {
             ResultSet resultSet,
             String colunaLegada
     ) throws SQLException {
-        Designacao designacaoAtual = designacoes.stream()
+        List<Designacao> designacoesDoPapel = designacoes.stream()
                 .filter(d -> d.parte().getTipo() == tipo)
-                .findFirst()
-                .orElse(null);
-        if (designacaoAtual != null) {
-            return designacaoAtual.responsavel();
+                .toList();
+        if (!designacoesDoPapel.isEmpty()) {
+            return designacoesDoPapel.stream()
+                    .map(Designacao::responsavel)
+                    .filter(java.util.Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
         }
         return buscarPessoaOpcional(pessoaDAO, resultSet, colunaLegada);
     }
