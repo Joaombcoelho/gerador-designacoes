@@ -8,7 +8,6 @@ import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.service.HorarioS140Service;
-import br.com.geradordesignacoes.service.ExportadorS89Service;
 import br.com.geradordesignacoes.service.ConfiguracaoGeralService;
 import br.com.geradordesignacoes.service.ConfiguracaoSalasService;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
@@ -32,8 +31,6 @@ public class ProgramacaoController {
 
     private final EscalaController escalaController;
 
-    private final ExportadorS89Service exportadorS89Service;
-
     private final ConfiguracaoGeralService configuracaoGeralService;
 
     private final List<LocalDate> semanas;
@@ -53,8 +50,6 @@ public class ProgramacaoController {
                 new ProgramacaoSemanaService();
         this.horarioS140Service = new HorarioS140Service();
 
-        this.exportadorS89Service =
-                new ExportadorS89Service();
         this.configuracaoGeralService = new ConfiguracaoGeralService();
 
         ConfiguracaoSalasService configuracaoSalasService = new ConfiguracaoSalasService();
@@ -167,11 +162,6 @@ public class ProgramacaoController {
         view.getBotaoGerar()
                 .setOnAction(
                         _ -> gerarEscalas()
-                );
-
-        view.getBotaoExportarS89()
-                .setOnAction(
-                        _ -> exportarS89()
                 );
 
 
@@ -1089,35 +1079,6 @@ public class ProgramacaoController {
          */
         view.atualizarBotaoSalvar(true);
     }
-
-    private void exportarS89() {
-        LocalDate data = obterDataSelecionada();
-
-        if (data == null) {
-            view.atualizarStatus(
-                    "Selecione uma semana para exportar."
-            );
-            return;
-        }
-
-        try {
-            List<java.nio.file.Path> arquivos =
-                    exportadorS89Service.exportarSemana(data);
-
-            view.atualizarStatus(
-                    "S-89 exportado com sucesso: "
-                            + arquivos.size()
-                            + " arquivo(s) em "
-                            + arquivos.get(0).getParent()
-            );
-        } catch (Exception e) {
-            view.atualizarStatus(
-                    "Não foi possível exportar o S-89: "
-                            + e.getMessage()
-            );
-        }
-    }
-
 
     public static String nomeArquivoS140(YearMonth mes) {
         String nomeMes = mes.getMonth().getDisplayName(
