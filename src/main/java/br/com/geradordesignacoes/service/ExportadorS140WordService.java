@@ -579,6 +579,8 @@ public class ExportadorS140WordService {
         }
 
         String substituto = valor == null ? "" : valor;
+        int limiteSubstituicoes = -1;
+        int substituicoes = 0;
         while (true) {
             List<String> textos = new ArrayList<>(runs.size());
             StringBuilder textoCompleto = new StringBuilder();
@@ -589,8 +591,18 @@ public class ExportadorS140WordService {
             }
 
             String textoAntes = textoCompleto.toString();
+            if (limiteSubstituicoes < 0) {
+                limiteSubstituicoes = contarOcorrencias(textoAntes, marcador);
+            }
             int inicio = textoAntes.indexOf(marcador);
             if (inicio < 0) {
+                return;
+            }
+            if (substituicoes >= limiteSubstituicoes) {
+                // O número de tentativas fica limitado às ocorrências originais.
+                // Se o documento não progredir como esperado, usa uma substituição
+                // direta e encerra para nunca bloquear a exportação.
+                definirTextoParagrafo(runs, textoAntes.replace(marcador, substituto));
                 return;
             }
 
@@ -640,6 +652,7 @@ public class ExportadorS140WordService {
                 runs.get(indiceRunFim).setText(textoFim.substring(deslocamentoFim), 0);
             }
 
+            substituicoes++;
             StringBuilder textoDepois = new StringBuilder();
             for (XWPFRun run : runs) {
                 String texto = run.getText(0);
@@ -652,6 +665,16 @@ public class ExportadorS140WordService {
                 return;
             }
         }
+    }
+
+    private static int contarOcorrencias(String texto, String marcador) {
+        int ocorrencias = 0;
+        int indice = 0;
+        while ((indice = texto.indexOf(marcador, indice)) >= 0) {
+            ocorrencias++;
+            indice += marcador.length();
+        }
+        return ocorrencias;
     }
 
     private void definirTextoParagrafo(List<XWPFRun> runs, String texto) {
