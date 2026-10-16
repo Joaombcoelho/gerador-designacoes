@@ -31,6 +31,10 @@ As funcionalidades são organizadas em camadas de modelo, acesso a dados, servi�
 ![Tela de histórico](screenshot/Tela%20Historico.jpg)
 
 
+## Integridade das migrações SQLite
+
+Durante a inicialização, a aplicação preenche a ordem padrão apenas para partes cuja coluna `ordem` ainda contém o valor inicial `999`. Assim, a correção de valores ausentes em bancos antigos não deve sobrescrever uma ordem personalizada já salva pelo usuário.
+
 ## Funcionalidades implementadas
 
 ### Cadastros

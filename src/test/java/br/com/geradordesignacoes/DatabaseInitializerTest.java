@@ -414,6 +414,62 @@ class DatabaseInitializerTest {
         }
     }
 
+    @Test
+    void devePreservarOrdemPersonalizadaAoAtualizarOrdensPadrao()
+            throws Exception {
+
+        Path arquivo = diretorioTemporario.resolve("ordem-personalizada.db");
+
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                        CREATE TABLE parte (
+                            id INTEGER PRIMARY KEY,
+                            nome TEXT NOT NULL,
+                            tipo TEXT NOT NULL,
+                            ordem INTEGER NOT NULL DEFAULT 999
+                        )
+                        """);
+
+                statement.execute("""
+                        INSERT INTO parte (id, nome, tipo, ordem)
+                        VALUES
+                            (1, 'Presidente', 'PRESIDENTE_REUNIAO', 42),
+                            (2, 'Oração inicial', 'ORACAO_INICIAL', 999)
+                        """);
+            }
+
+            DatabaseInitializer.atualizarOrdensPadraoPartes(connection);
+
+            assertEquals(
+                    42,
+                    buscarValor(connection,
+                            "SELECT ordem FROM parte WHERE id = 1")
+            );
+            assertEquals(
+                    2,
+                    buscarValor(connection,
+                            "SELECT ordem FROM parte WHERE id = 2")
+            );
+
+            // A segunda execução não deve modificar novamente a ordem salva.
+            DatabaseInitializer.atualizarOrdensPadraoPartes(connection);
+
+            assertEquals(
+                    42,
+                    buscarValor(connection,
+                            "SELECT ordem FROM parte WHERE id = 1")
+            );
+            assertEquals(
+                    2,
+                    buscarValor(connection,
+                            "SELECT ordem FROM parte WHERE id = 2")
+            );
+        }
+    }
+
     private Connection criarBanco(
             Path arquivo,
             boolean possuiSala,
