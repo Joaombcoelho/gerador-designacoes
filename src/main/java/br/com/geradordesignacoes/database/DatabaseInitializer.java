@@ -915,7 +915,7 @@ public class DatabaseInitializer {
         }
     }
 
-    private static void atualizarOrdensPadraoPartes(
+    static void atualizarOrdensPadraoPartes(
             Connection connection
     ) throws SQLException {
 
@@ -923,6 +923,7 @@ public class DatabaseInitializer {
                 UPDATE parte
                 SET ordem = ?
                 WHERE tipo = ?
+                  AND ordem = 999
                 """;
 
         try (PreparedStatement statement =
@@ -2270,6 +2271,7 @@ public class DatabaseInitializer {
                 UPDATE parte
                 SET ordem = ?
                 WHERE nome = ?
+                  AND ordem = 999
                 """;
 
         try (PreparedStatement update =
