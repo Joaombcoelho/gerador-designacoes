@@ -69,9 +69,11 @@ As funcionalidades são organizadas em camadas de modelo, acesso a dados, servi�
 - Backup automático no início da aplicação e a cada 24 horas enquanto ela estiver aberta.
 - Backups automáticos recebem data e hora no nome para evitar a substituição de arquivos anteriores.
 
-### Exportação mensal para Word S-140
+### Geração dos formulários — Word S-140
 
-Na tela de **Programação Semanal**, selecione uma data do mês que deseja exportar e utilize a opção **Exportar S-140**. O aplicativo solicita que você selecione o modelo Word (`.docx`) e escolha o destino do arquivo. O nome inicial sugerido atualmente segue o padrão `S-140-AAAA-MM.docx`.
+Na tela **Geração dos formulários**, selecione uma data do mês e clique em **Atualizar dados do banco** para conferir as programações e escalas persistidas. A lista mostra as reuniões encontradas, a quantidade de partes/designações salvas e alguns dados da escala atual. Depois da revisão, utilize **Gerar S-140 Word** para selecionar o modelo Word (`.docx`) e o destino do documento.
+
+A tela de formulários não reutiliza o resultado temporário da geração em memória: ela consulta novamente o SQLite ao atualizar a lista, e o exportador recarrega a programação e a escala salvas na hora de gerar o arquivo. Por isso, as alterações manuais devem estar salvas no banco antes da exportação. Se uma alteração foi feita apenas na tela de geração/revisão e ainda não foi salva, ela não será considerada no formulário.
 
 A exportação reúne em um único documento as reuniões que ocorrem no mês, conforme o dia habitual configurado. O exportador aceita meses com quatro ou cinco reuniões, desde que o modelo contenha blocos suficientes e os dados necessários estejam disponíveis.
 
