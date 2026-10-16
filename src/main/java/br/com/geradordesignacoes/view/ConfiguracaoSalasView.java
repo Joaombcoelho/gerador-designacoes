@@ -59,7 +59,7 @@ public class ConfiguracaoSalasView {
 
         Button salvar = new Button("Salvar configurações");
         salvar.getStyleClass().add("primary-button");
-        salvar.setOnAction(event -> salvar());
+        salvar.setOnAction(_ -> salvar());
 
         botoes.getChildren().add(salvar);
 
