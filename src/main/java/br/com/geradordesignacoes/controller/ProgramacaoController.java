@@ -18,9 +18,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.nio.file.Path;
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -180,8 +177,6 @@ public class ProgramacaoController {
                 .setOnAction(
                         _ -> exportarS89()
                 );
-
-        view.getBotaoExportarS140().setOnAction(_ -> exportarS140());
 
 
         view.getBotaoSalvar()
@@ -1127,82 +1122,6 @@ public class ProgramacaoController {
         }
     }
 
-
-    private static final java.util.prefs.Preferences PREFERENCIAS_S140 =
-            java.util.prefs.Preferences.userNodeForPackage(ProgramacaoController.class)
-                    .node("exportacao-s140");
-    private static final String CHAVE_MODELO_S140 = "modelo-word";
-    private static final String CHAVE_PASTA_DESTINO_S140 = "pasta-destino";
-
-    private void exportarS140() {
-        LocalDate selecionada = view.getCampoData().getValue();
-        if (selecionada == null) {
-            view.atualizarStatus("Selecione o mês que deseja exportar.");
-            return;
-        }
-
-        Window janela = view.getView().getScene() == null
-                ? null : view.getView().getScene().getWindow();
-
-        FileChooser seletorModelo = new FileChooser();
-        seletorModelo.setTitle("Selecione o modelo oficial S-140 em Word");
-        seletorModelo.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Documento Word (*.docx)", "*.docx"));
-        java.io.File modeloSalvo = arquivoExistente(CHAVE_MODELO_S140);
-        if (modeloSalvo != null) {
-            seletorModelo.setInitialDirectory(modeloSalvo.getParentFile());
-            seletorModelo.setInitialFileName(modeloSalvo.getName());
-        } else {
-            definirPastaInicial(seletorModelo, CHAVE_PASTA_DESTINO_S140);
-        }
-
-        java.io.File modelo = seletorModelo.showOpenDialog(janela);
-        if (modelo == null) {
-            view.atualizarStatus("Exportação S-140 cancelada: modelo não selecionado.");
-            return;
-        }
-        PREFERENCIAS_S140.put(CHAVE_MODELO_S140, modelo.getAbsolutePath());
-
-        FileChooser seletorDestino = new FileChooser();
-        seletorDestino.setTitle("Salvar programação mensal S-140");
-        seletorDestino.setInitialFileName(nomeArquivoS140(YearMonth.from(selecionada)));
-        seletorDestino.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Documento Word (*.docx)", "*.docx"));
-        definirPastaInicial(seletorDestino, CHAVE_PASTA_DESTINO_S140);
-
-        java.io.File destino = seletorDestino.showSaveDialog(janela);
-        if (destino == null) {
-            view.atualizarStatus("Exportação S-140 cancelada.");
-            return;
-        }
-
-        try {
-            Path arquivo = exportadorS140WordService.exportar(
-                    YearMonth.from(selecionada), modelo.toPath(), destino.toPath());
-            PREFERENCIAS_S140.put(CHAVE_PASTA_DESTINO_S140,
-                    destino.getAbsoluteFile().getParent());
-            view.atualizarStatus("S-140 exportado com sucesso: " + arquivo);
-        } catch (Exception e) {
-            view.atualizarStatus("Não foi possível exportar o S-140: " + e.getMessage());
-        }
-    }
-
-    private static java.io.File arquivoExistente(String chave) {
-        String caminho = PREFERENCIAS_S140.get(chave, "");
-        if (caminho.isBlank()) {
-            return null;
-        }
-        java.io.File arquivo = new java.io.File(caminho);
-        return arquivo.isFile() ? arquivo : null;
-    }
-
-    private static void definirPastaInicial(FileChooser seletor, String chave) {
-        String caminho = PREFERENCIAS_S140.get(chave, "");
-        java.io.File pasta = caminho.isBlank() ? null : new java.io.File(caminho);
-        if (pasta != null && pasta.isDirectory()) {
-            seletor.setInitialDirectory(pasta);
-        }
-    }
 
     public static String nomeArquivoS140(YearMonth mes) {
         String nomeMes = mes.getMonth().getDisplayName(
