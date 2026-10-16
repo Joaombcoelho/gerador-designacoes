@@ -23,91 +23,123 @@ public class EscalaDAO {
             );
         }
 
-        String buscarExistenteSql = """ 
-                SELECT id FROM escala WHERE data = ? 
-                """;
-        String inserirSql = """ 
-                INSERT INTO escala 
-                    ( data, 
-                     status, 
-                     data_geracao, 
-                     data_salvamento ) 
-                VALUES (?, ?, ?, ?) 
-                """;
         try (Connection connection = ConnectionFactory.getConnection()) {
-            connection.setAutoCommit(false);
+            boolean autoCommitOriginal = connection.getAutoCommit();
             try {
-                /* * Verifica se já existe uma escala para esta data.
-                 * */
-                Integer escalaExistenteId = null;
-                try (PreparedStatement statement = connection.prepareStatement(
-                        buscarExistenteSql)
-                ) {
-                    statement.setString(1, escala.getData().toString());
-                    try (ResultSet resultSet = statement.executeQuery()) {
-                        if (resultSet.next()) {
-                            escalaExistenteId = resultSet.getInt("id");
-                        }
-                    }
-                }
-
-                /* * Se já existe uma escala para a data, * reutiliza o ‘ID’ e atualiza a escala. */
-                if (escalaExistenteId != null) {
-                    escala.setId(escalaExistenteId);
-                    String atualizarSql = """ 
-                            UPDATE escala SET status = ?, data_geracao = ?, data_salvamento = ? WHERE id = ? """;
-                    try (PreparedStatement statement = connection.prepareStatement(atualizarSql)) {
-                        statement.setString(1, escala.getStatus().name());
-                        statement.setString(2, escala.getDataGeracao().toString());
-                        if (escala.getDataSalvamento() == null) {
-                            statement.setNull(3, java.sql.Types.VARCHAR);
-                        } else {
-                            statement.setString(3, escala.getDataSalvamento().toString());
-                        }
-                        statement.setInt(4, escala.getId());
-                        int linhasAfetadas = statement.executeUpdate();
-                        if (linhasAfetadas != 1) {
-                            throw new RuntimeException("Erro ao atualizar escala.");
-                        }
-                    } /* * Remove as designações antigas da escala * e grava as novas. */
-                    salvarPapeisEspeciais(connection, escala);
-                    excluirDesignacoes(connection, escala.getId());
-                    salvarDesignacoes(connection, escala);
-                    connection.commit();
-                    return escala;
-                } /* * Não existe escala para esta data. * Cria uma nova. */
-                try (PreparedStatement statement = connection.prepareStatement(inserirSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                    statement.setString(1, escala.getData().toString());
-                    statement.setString(2, escala.getStatus().name());
-                    statement.setString(3, escala.getDataGeracao().toString());
-                    if (escala.getDataSalvamento() == null) {
-                        statement.setNull(4, java.sql.Types.VARCHAR);
-                    } else {
-                        statement.setString(4, escala.getDataSalvamento().toString());
-                    }
-                    int linhasAfetadas = statement.executeUpdate();
-                    if (linhasAfetadas != 1) {
-                        throw new RuntimeException("Erro ao salvar escala.");
-                    }
-                    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            escala.setId(generatedKeys.getInt(1));
-                        } else {
-                            throw new RuntimeException("Não foi possível obter o ID da escala.");
-                        }
-                    }
-                    salvarPapeisEspeciais(connection, escala);
-                    salvarDesignacoes(connection, escala);
-                    connection.commit();
-                    return escala;
-                }
+                connection.setAutoCommit(false);
+                Escala salva = salvar(connection, escala);
+                connection.commit();
+                return salva;
             } catch (SQLException | RuntimeException e) {
-                connection.rollback();
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackFailure) {
+                    e.addSuppressed(rollbackFailure);
+                }
                 throw e;
+            } finally {
+                if (connection.getAutoCommit() != autoCommitOriginal) {
+                    connection.setAutoCommit(autoCommitOriginal);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao salvar escala.", e);
         }
+    }
+
+    /**
+     * Salva uma escala na conexão fornecida, sem confirmar nem encerrar
+     * a transação. Permite coordenar a persistência de várias escalas
+     * com o histórico em uma única transação.
+     */
+    public Escala salvar(Connection connection, Escala escala)
+            throws SQLException {
+
+        if (connection == null) {
+            throw new IllegalArgumentException(
+                    "A conexão não pode ser nula."
+            );
+        }
+        if (escala == null) {
+            throw new IllegalArgumentException(
+                    "A escala não pode ser nula."
+            );
+        }
+
+        String buscarExistenteSql = """
+                SELECT id FROM escala WHERE data = ?
+                """;
+        String inserirSql = """
+                INSERT INTO escala
+                    (data, status, data_geracao, data_salvamento)
+                VALUES (?, ?, ?, ?)
+                """;
+
+        Integer escalaExistenteId = null;
+        try (PreparedStatement statement =
+                     connection.prepareStatement(buscarExistenteSql)) {
+            statement.setString(1, escala.getData().toString());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    escalaExistenteId = resultSet.getInt("id");
+                }
+            }
+        }
+
+        if (escalaExistenteId != null) {
+            escala.setId(escalaExistenteId);
+            String atualizarSql = """
+                    UPDATE escala
+                    SET status = ?, data_geracao = ?, data_salvamento = ?
+                    WHERE id = ?
+                    """;
+            try (PreparedStatement statement =
+                         connection.prepareStatement(atualizarSql)) {
+                statement.setString(1, escala.getStatus().name());
+                statement.setString(2, escala.getDataGeracao().toString());
+                if (escala.getDataSalvamento() == null) {
+                    statement.setNull(3, java.sql.Types.VARCHAR);
+                } else {
+                    statement.setString(3, escala.getDataSalvamento().toString());
+                }
+                statement.setInt(4, escala.getId());
+                if (statement.executeUpdate() != 1) {
+                    throw new SQLException("Erro ao atualizar escala.");
+                }
+            }
+            salvarPapeisEspeciais(connection, escala);
+            excluirDesignacoes(connection, escala.getId());
+            salvarDesignacoes(connection, escala);
+            return escala;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                inserirSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, escala.getData().toString());
+            statement.setString(2, escala.getStatus().name());
+            statement.setString(3, escala.getDataGeracao().toString());
+            if (escala.getDataSalvamento() == null) {
+                statement.setNull(4, java.sql.Types.VARCHAR);
+            } else {
+                statement.setString(4, escala.getDataSalvamento().toString());
+            }
+            if (statement.executeUpdate() != 1) {
+                throw new SQLException("Erro ao salvar escala.");
+            }
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    escala.setId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException(
+                            "Não foi possível obter o ID da escala."
+                    );
+                }
+            }
+        }
+
+        salvarPapeisEspeciais(connection, escala);
+        salvarDesignacoes(connection, escala);
+        return escala;
     }
 
     public void atualizar(Escala escala) {

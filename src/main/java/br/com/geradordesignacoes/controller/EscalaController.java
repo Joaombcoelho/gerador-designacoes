@@ -15,6 +15,7 @@ import br.com.geradordesignacoes.model.SalaDesignacao;
 import br.com.geradordesignacoes.service.BackupService;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.ParteService;
+import br.com.geradordesignacoes.service.PersistenciaEscalasService;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
@@ -36,6 +37,7 @@ public class EscalaController {
     private final EscalaDAO escalaDAO;
     private final BackupService backupService;
     private final ProgramacaoSemanaService programacaoSemanaService;
+    private final PersistenciaEscalasService persistenciaEscalasService;
     private final Map<LocalDate, ResultadoGeracaoEscala> resultadosGeracao;
 
     private ResultadoGeracaoEscala ultimoResultado;
@@ -64,6 +66,9 @@ public class EscalaController {
 
         programacaoSemanaService =
                 new ProgramacaoSemanaService();
+
+        persistenciaEscalasService =
+                new PersistenciaEscalasService();
 
         resultadosGeracao =
                 new LinkedHashMap<>();
@@ -536,45 +541,13 @@ public class EscalaController {
 
     private int salvarResultadosGeracao() {
 
-        int quantidadeSalva = 0;
+        int quantidadeSalva = persistenciaEscalasService.salvar(
+                resultadosGeracao,
+                geracaoMensalPendente
+        );
 
-        // Primeiro salva todas as escalas geradas.
-        for (ResultadoGeracaoEscala resultado : resultadosGeracao.values()) {
-
-            if (resultado == null) {
-                continue;
-            }
-
-            escalaDAO.salvar(
-                    resultado.escala()
-            );
-
-            quantidadeSalva++;
-        }
-
-        // No fluxo mensal, salva o histórico somente após confirmação.
         if (geracaoMensalPendente) {
-            for (Map.Entry<LocalDate, ResultadoGeracaoEscala> entrada
-                    : resultadosGeracao.entrySet()) {
-
-                ResultadoGeracaoEscala resultado = entrada.getValue();
-
-                if (resultado == null) {
-                    continue;
-                }
-
-                LocalDate data = entrada.getKey();
-
-                List<ParticipacaoDesignacao> participacoesDaData =
-                        resultado.participacoes().stream()
-                                .filter(p -> p.data().equals(data))
-                                .toList();
-
-                geradorEscala.salvarHistoricoGeracao(
-                        data,
-                        participacoesDaData
-                );
-            }
+            geradorEscala.recarregarHistorico();
         }
 
         return quantidadeSalva;

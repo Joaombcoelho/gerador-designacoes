@@ -9,6 +9,7 @@ import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
+import br.com.geradordesignacoes.service.PersistenciaEscalasService;
 import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import javafx.application.Platform;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -205,6 +207,92 @@ class IntegracaoEscalaTest extends BaseDAOTest {
         );
     }
 
+
+
+    @Test
+    void deveReverterTodasAsEscalasEHistoricoSeUmaDataFalhar()
+            throws Exception {
+
+        Pessoa pessoa = criarPessoa("Pessoa transação atômica");
+        Parte parte = criarParteVariavel("Parte transação atômica");
+        Parte parteInexistente = new Parte(
+                999999,
+                "Parte inexistente",
+                TipoParte.LEITURA,
+                Privilegio.PUBLICADOR,
+                false,
+                SexoPermitido.AMBOS,
+                1,
+                false,
+                NivelLeitura.BASICO,
+                List.of(TipoParticipacao.RESPONSAVEL)
+        );
+
+        LocalDate primeiraData = LocalDate.of(2026, 9, 1);
+        LocalDate segundaData = LocalDate.of(2026, 9, 8);
+
+        Escala primeiraEscala = new Escala(
+                primeiraData,
+                List.of(new Designacao(primeiraData, parte, pessoa, null))
+        );
+        Escala segundaEscala = new Escala(
+                segundaData,
+                List.of(new Designacao(segundaData, parte, pessoa, null))
+        );
+
+        ParticipacaoDesignacao participacaoValida =
+                new ParticipacaoDesignacao(
+                        primeiraData,
+                        pessoa,
+                        parte,
+                        TipoParticipacao.RESPONSAVEL
+                );
+        ParticipacaoDesignacao participacaoInvalida =
+                new ParticipacaoDesignacao(
+                        segundaData,
+                        pessoa,
+                        parteInexistente,
+                        TipoParticipacao.RESPONSAVEL
+                );
+
+        Map<LocalDate, ResultadoGeracaoEscala> resultados =
+                new java.util.LinkedHashMap<>();
+        resultados.put(
+                primeiraData,
+                new ResultadoGeracaoEscala(
+                        primeiraEscala,
+                        List.of(participacaoValida),
+                        List.of(),
+                        List.of()
+                )
+        );
+        resultados.put(
+                segundaData,
+                new ResultadoGeracaoEscala(
+                        segundaEscala,
+                        List.of(participacaoInvalida),
+                        List.of(),
+                        List.of()
+                )
+        );
+
+        PersistenciaEscalasService persistencia =
+                new PersistenciaEscalasService();
+
+        assertThrows(
+                RuntimeException.class,
+                () -> persistencia.salvar(resultados, true)
+        );
+
+        assertTrue(
+                escalaDAO.listarTodas().isEmpty(),
+                "A falha no histórico deve reverter também as escalas já inseridas."
+        );
+        assertTrue(
+                historicoDAO.listarTodas().isEmpty(),
+                "O histórico da primeira data também deve ser revertido."
+        );
+    }
 
     @Test
     void deveRecuperarTodasAsEscalasSalvas()

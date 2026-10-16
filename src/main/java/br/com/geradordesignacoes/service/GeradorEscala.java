@@ -101,6 +101,14 @@ public class GeradorEscala {
         );
     }
 
+    /**
+     * Atualiza o histórico em memória após uma persistência coordenada
+     * por outra camada e já confirmada no banco.
+     */
+    public void recarregarHistorico() {
+        historicoService.carregar();
+    }
+
     private ResultadoGeracaoEscala gerarInterno(LocalDate data, List<Parte> partes, List<Pessoa> pessoas, HistoricoDesignacoes historico, boolean persistir) {
         List<Designacao> designacoes = new ArrayList<>();
         List<String> erros = new ArrayList<>();
