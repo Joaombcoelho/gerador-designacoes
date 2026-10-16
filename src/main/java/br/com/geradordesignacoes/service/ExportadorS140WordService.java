@@ -143,22 +143,104 @@ public class ExportadorS140WordService {
         return destino;
     }
 
-    private List<String> validarSemana(DadosExportacaoS140Semana dados) {
+    static List<String> validarSemana(DadosExportacaoS140Semana dados) {
         List<String> problemas = new ArrayList<>();
-        if (dados.escala().getPresidente() == null) {
-            problemas.add("presidente não definido na escala salva");
+        Escala escala = dados.escala();
+        ProgramacaoSemana programacao = dados.programacao();
+
+        if (!pessoaValida(escala.getPresidente())) problemas.add("presidente não definido na escala salva");
+        if (!pessoaValida(escala.getOracaoInicial())) problemas.add("oração inicial não definida na escala salva");
+
+        Designacao oracaoFinal = escala.getDesignacoes().stream()
+                .filter(d -> d.parte().getTipo() == TipoParte.ORACAO_FINAL)
+                .filter(d -> d.sala() == SalaDesignacao.PRINCIPAL)
+                .findFirst().orElse(null);
+        if (oracaoFinal == null) {
+            problemas.add("oração final não definida na Sala Principal");
+        } else if (!pessoaValida(oracaoFinal.responsavel())) {
+            problemas.add("oração final sem responsável na Sala Principal");
         }
-        if (dados.escala().getOracaoInicial() == null) {
-            problemas.add("oração inicial não definida na escala salva");
-        }
-        if (dados.escala().getDesignacoes().stream().noneMatch(d ->
-                d.parte().getTipo() == TipoParte.ORACAO_FINAL && d.sala() == SalaDesignacao.PRINCIPAL)) {
-            problemas.add("oração final não definida na escala salva");
-        }
-        if (dados.programacao().partes().isEmpty()) {
+
+        if (programacao.partes().isEmpty()) {
             problemas.add("a programação semanal não possui partes");
+            return problemas;
+        }
+
+        List<ProgramacaoParte> tesouros = programacao.partes().stream()
+                .filter(p -> p.getParte().getTipo() == TipoParte.DISCURSO_TESOUROS
+                        || p.getParte().getTipo() == TipoParte.JOIAS_ESPIRITUAIS
+                        || p.getParte().getTipo() == TipoParte.LEITURA)
+                .toList();
+        for (ProgramacaoParte parte : tesouros) {
+            validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.PRINCIPAL);
+            if (programacao.salaBHabilitada()) validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.B);
+        }
+
+        List<ProgramacaoParte> ministerio = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.MINISTERIO)
+                .filter(p -> p.getParte().getTipo() != TipoParte.O_QUE_VOCE_DIRIA)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .toList();
+        if (ministerio.size() > 4) problemas.add("há " + ministerio.size()
+                + " partes do Ministério, mas o S-140 comporta no máximo 4");
+        for (ProgramacaoParte parte : ministerio.stream().limit(4).toList()) {
+            validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.PRINCIPAL);
+            if (programacao.salaBHabilitada()) validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.B);
+        }
+
+        List<ProgramacaoParte> vidaCrista = programacao.partes().stream()
+                .filter(p -> p.getParte().getSecao() == SecaoParte.NOSSA_VIDA_CRISTA)
+                .filter(p -> p.getParte().getTipo() != TipoParte.DIRIGENTE_ESTUDO)
+                .sorted(Comparator.comparingInt(ProgramacaoParte::getOrdem))
+                .toList();
+        if (vidaCrista.size() > 2) problemas.add("há " + vidaCrista.size()
+                + " partes de Nossa Vida Cristã, mas o S-140 comporta no máximo 2");
+        for (ProgramacaoParte parte : vidaCrista.stream().limit(2).toList()) {
+            validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.PRINCIPAL);
+        }
+
+        List<ProgramacaoParte> estudos = programacao.partes().stream()
+                .filter(p -> p.getParte().getTipo() == TipoParte.DIRIGENTE_ESTUDO)
+                .toList();
+        if (estudos.size() > 1) problemas.add("há mais de uma parte de Estudo Bíblico na programação");
+        if (!estudos.isEmpty()) {
+            Integer parteId = estudos.getFirst().getParte().getId();
+            List<Designacao> designacoesEstudo = escala.getDesignacoes().stream()
+                    .filter(d -> Objects.equals(d.parte().getId(), parteId))
+                    .filter(d -> d.parte().getTipo() == TipoParte.DIRIGENTE_ESTUDO)
+                    .toList();
+            if (designacoesEstudo.stream().noneMatch(d -> pessoaValida(d.responsavel()))) {
+                problemas.add("Estudo Bíblico — dirigente não definido");
+            }
+            if (designacoesEstudo.stream().noneMatch(d -> pessoaValida(d.ajudante()))) {
+                problemas.add("Estudo Bíblico — leitor não definido");
+            }
         }
         return problemas;
+    }
+
+    private static void validarDesignacaoParte(List<String> problemas, Escala escala,
+                                               ProgramacaoParte programacaoParte, SalaDesignacao sala) {
+        Parte parte = programacaoParte.getParte();
+        String nomeSala = sala == SalaDesignacao.B ? "Sala B" : "Sala Principal";
+        Designacao designacao = escala.getDesignacoes().stream()
+                .filter(d -> Objects.equals(d.parte().getId(), parte.getId()))
+                .filter(d -> d.sala() == sala)
+                .findFirst().orElse(null);
+        if (designacao == null) {
+            problemas.add(parte.getNome() + " — designação ausente na " + nomeSala);
+            return;
+        }
+        if (!pessoaValida(designacao.responsavel())) {
+            problemas.add(parte.getNome() + " — responsável não definido na " + nomeSala);
+        }
+        if (parte.getExigeAjudante() && !pessoaValida(designacao.ajudante())) {
+            problemas.add(parte.getNome() + " — ajudante não definido na " + nomeSala);
+        }
+    }
+
+    private static boolean pessoaValida(Pessoa pessoa) {
+        return pessoa != null && pessoa.getNome() != null && !pessoa.getNome().isBlank();
     }
 
     private void preencherSemana(XWPFTable tabela, int linhaData, DadosExportacaoS140Semana dados) {

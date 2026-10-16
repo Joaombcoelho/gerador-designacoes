@@ -168,6 +168,92 @@ class ExportadorS140WordServiceTest {
                 ExportadorS140WordService.linhasPartesNaoUtilizadas(programacao, 102));
     }
 
+    @Test
+    void deveRejeitarParteProgramadaSemDesignacaoNaSalaPrincipal() {
+        LocalDate data = LocalDate.of(2026, 10, 7);
+        Parte ministerio = criarParteTeste(
+                30, "Iniciando conversas", TipoParte.INICIANDO_CONVERSAS,
+                SecaoParte.MINISTERIO, 1);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(data);
+        programacao.adicionarParte(new ProgramacaoParte(ministerio, 1, null));
+        Escala escala = escalaBasica(data);
+        List<String> problemas = ExportadorS140WordService.validarSemana(
+                new DadosExportacaoS140Semana(data, programacao, escala));
+
+        assertTrue(problemas.stream().anyMatch(p ->
+                p.contains("Iniciando conversas") && p.contains("Sala Principal")));
+    }
+
+    @Test
+    void deveExigirDesignacaoNaSalaBQuandoElaEstiverHabilitada() {
+        LocalDate data = LocalDate.of(2026, 10, 7);
+        Parte ministerio = criarParteTeste(
+                31, "Cultivando interesse", TipoParte.CULTIVANDO_INTERESSE,
+                SecaoParte.MINISTERIO, 1);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(
+                null, data, List.of(new ProgramacaoParte(ministerio, 1, null)),
+                true, false, null, null, null, null);
+        Escala escala = escalaBasica(data);
+        escala.adicionarDesignacao(new Designacao(
+                data, ministerio, pessoaTeste("Responsável", 10), null,
+                SalaDesignacao.PRINCIPAL));
+
+        List<String> problemas = ExportadorS140WordService.validarSemana(
+                new DadosExportacaoS140Semana(data, programacao, escala));
+
+        assertTrue(problemas.stream().anyMatch(p ->
+                p.contains("Cultivando interesse") && p.contains("Sala B")));
+    }
+
+    @Test
+    void deveApontarDirigenteELeitorAusentesNoEstudoBiblico() {
+        LocalDate data = LocalDate.of(2026, 10, 7);
+        Parte estudo = criarParteTeste(
+                32, "Estudo Bíblico", TipoParte.DIRIGENTE_ESTUDO,
+                SecaoParte.NOSSA_VIDA_CRISTA, 1);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(data);
+        programacao.adicionarParte(new ProgramacaoParte(estudo, 1, null));
+        Escala escala = escalaBasica(data);
+
+        List<String> problemas = ExportadorS140WordService.validarSemana(
+                new DadosExportacaoS140Semana(data, programacao, escala));
+
+        assertTrue(problemas.contains("Estudo Bíblico — dirigente não definido"));
+        assertTrue(problemas.contains("Estudo Bíblico — leitor não definido"));
+    }
+
+    @Test
+    void naoDeveApontarPendenciasQuandoDesignacoesObrigatoriasEstaoPreenchidas() {
+        LocalDate data = LocalDate.of(2026, 10, 7);
+        Parte estudo = criarParteTeste(
+                33, "Estudo Bíblico", TipoParte.DIRIGENTE_ESTUDO,
+                SecaoParte.NOSSA_VIDA_CRISTA, 1);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(data);
+        programacao.adicionarParte(new ProgramacaoParte(estudo, 1, null));
+        Escala escala = escalaBasica(data);
+        escala.adicionarDesignacao(new Designacao(
+                data, estudo, pessoaTeste("Dirigente", 11), null));
+        escala.adicionarDesignacao(new Designacao(
+                data, estudo, null, pessoaTeste("Leitor", 12)));
+
+        List<String> problemas = ExportadorS140WordService.validarSemana(
+                new DadosExportacaoS140Semana(data, programacao, escala));
+
+        assertTrue(problemas.isEmpty(), () -> String.join("; ", problemas));
+    }
+
+    private Escala escalaBasica(LocalDate data) {
+        Parte oracaoFinal = criarParteTeste(
+                90, "Oração final", TipoParte.ORACAO_FINAL,
+                SecaoParte.NOSSA_VIDA_CRISTA, 90);
+        Escala escala = new Escala(data, List.of());
+        escala.setPresidente(pessoaTeste("Presidente", 1));
+        escala.setOracaoInicial(pessoaTeste("Oração inicial", 2));
+        escala.adicionarDesignacao(new Designacao(
+                data, oracaoFinal, pessoaTeste("Oração final", 3), null));
+        return escala;
+    }
+
     private Pessoa pessoaTeste(String nome, int id) {
         Pessoa pessoa = new Pessoa(
                 nome, Sexo.MASCULINO, true, true, true,
