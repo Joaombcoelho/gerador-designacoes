@@ -1,11 +1,14 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.EscalaDAO;
+import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -262,6 +265,23 @@ class EscalaDAOTest extends BaseDAOTest {
             escalaDAO.atualizarDesignacao(
                     designacao.id(), atualizado.getId(), null
             );
+        }
+
+        // Simula colunas redundantes antigas que ficaram com o valor da
+        // primeira geração, enquanto as designações atuais já foram editadas.
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     UPDATE escala
+                     SET presidente_id = ?, dirigente_id = ?, oracao_inicial_id = ?
+                     WHERE id = ?
+                     """)) {
+            statement.setInt(1, original.getId());
+            statement.setInt(2, original.getId());
+            statement.setInt(3, original.getId());
+            statement.setInt(4, salva.getId());
+            assertEquals(1, statement.executeUpdate());
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException(e);
         }
 
         Escala reaberta = escalaDAO.buscarPorId(salva.getId()).orElseThrow();
