@@ -12,7 +12,7 @@ function Require-Command {
     param([string]$Name)
 
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-        throw "PrÃ©-requisito nÃ£o encontrado: $Name"
+        throw "Pré-requisito não encontrado: $Name"
     }
 }
 
@@ -29,6 +29,18 @@ function Invoke-Checked {
     }
 }
 
+function Require-FilePattern {
+    param(
+        [string]$Directory,
+        [string]$Pattern
+    )
+
+    $matches = @(Get-ChildItem $Directory -Filter $Pattern -File -ErrorAction SilentlyContinue)
+    if ($matches.Count -eq 0) {
+        throw "Dependência de runtime ausente na área de empacotamento: $Pattern"
+    }
+}
+
 Require-Command "mvn"
 Require-Command "java"
 Require-Command "jlink"
@@ -41,15 +53,15 @@ if (-not $env:JAVA_HOME) {
 $javaHome = (Resolve-Path $env:JAVA_HOME).Path
 $jmods = Join-Path $javaHome "jmods"
 if (-not (Test-Path (Join-Path $jmods "java.base.jmod"))) {
-    throw "JAVA_HOME nÃ£o aponta para um JDK com a pasta jmods."
+    throw "JAVA_HOME não aponta para um JDK com a pasta jmods."
 }
 
 if (Test-Path $stageRoot) {
-    throw "A pasta de preparaÃ§Ã£o jÃ¡ existe; remova-a manualmente para evitar sobrescrever artefatos."
+    throw "A pasta de preparação já existe; remova-a manualmente para evitar sobrescrever artefatos."
 }
 
 if (Test-Path $installerPath) {
-    throw "O instalador de destino jÃ¡ existe; nÃ£o serÃ¡ sobrescrito: $installerPath"
+    throw "O instalador de destino já existe; não será sobrescrito: $installerPath"
 }
 
 New-Item -ItemType Directory -Force $appDir | Out-Null
@@ -57,11 +69,11 @@ New-Item -ItemType Directory -Force $installerDir | Out-Null
 
 Push-Location $projectRoot
 try {
-    Invoke-Checked "Compilando a aplicaÃ§Ã£o" {
+    Invoke-Checked "Compilando a aplicação" {
         mvn clean package -DskipTests
     }
 
-    Invoke-Checked "Copiando dependÃªncias de runtime" {
+    Invoke-Checked "Copiando dependências de runtime" {
         mvn dependency:copy-dependencies `
             -DincludeScope=runtime `
             -DoutputDirectory="$appDir"
@@ -72,7 +84,7 @@ try {
 
 $jarPath = Join-Path $projectRoot "target\gerador-designacoes-1.2.2.jar"
 if (-not (Test-Path $jarPath)) {
-    throw "JAR da aplicaÃ§Ã£o nÃ£o encontrado: $jarPath"
+    throw "JAR da aplicação não encontrado: $jarPath"
 }
 Copy-Item $jarPath $appDir
 
@@ -80,14 +92,18 @@ $modelDir = Join-Path $appDir "modelos"
 New-Item -ItemType Directory -Force $modelDir | Out-Null
 $modelPath = Join-Path $projectRoot "modelos\S-89_T.pdf"
 if (-not (Test-Path $modelPath)) {
-    throw "Modelo S-89 nÃ£o encontrado: $modelPath"
+    throw "Modelo S-89 não encontrado: $modelPath"
 }
 Copy-Item $modelPath $modelDir
 
 if (-not (Test-Path $iconPath)) {
-    throw "Ãcone do aplicativo nÃ£o encontrado: $iconPath"
+    throw "Ícone do aplicativo não encontrado: $iconPath"
 }
 
+# Verifica bibliotecas usadas pela interface, pelo SQLite e pelas exportações
+# PDF (PDFBox) e Word (Apache POI OOXML), incluindo dependências transitivas
+# essenciais do POI. A cópia de dependências do Maven, sozinha, não garante
+# que todos esses arquivos estejam presentes na área de empacotamento.
 $requiredPatterns = @(
     "javafx-base-*-win.jar",
     "javafx-controls-*-win.jar",
@@ -96,13 +112,23 @@ $requiredPatterns = @(
     "sqlite-jdbc-*.jar",
     "ikonli-javafx-*.jar",
     "ikonli-fontawesome5-pack-*.jar",
-    "pdfbox-*.jar"
+    "pdfbox-*.jar",
+    "poi-*.jar",
+    "poi-ooxml-*.jar",
+    "poi-ooxml-lite-*.jar",
+    "xmlbeans-*.jar",
+    "commons-compress-*.jar",
+    "commons-io-*.jar",
+    "commons-collections4-*.jar",
+    "commons-math3-*.jar",
+    "commons-codec-*.jar",
+    "curvesapi-*.jar",
+    "SparseBitSet-*.jar",
+    "log4j-api-*.jar"
 )
 
 foreach ($pattern in $requiredPatterns) {
-    if (-not (Get-ChildItem $appDir -Filter $pattern -File)) {
-        throw "DependÃªncia de runtime ausente na Ã¡rea de empacotamento: $pattern"
-    }
+    Require-FilePattern -Directory $appDir -Pattern $pattern
 }
 
 Invoke-Checked "Criando runtime Java 22" {
@@ -114,6 +140,14 @@ Invoke-Checked "Criando runtime Java 22" {
         --no-header-files `
         --no-man-pages `
         --compress=2
+}
+
+# Confirma que o runtime reduzido contém os executáveis Java para Windows.
+foreach ($runtimeExecutable in @("java.exe", "javaw.exe")) {
+    $runtimeExecutablePath = Join-Path $runtimeDir "bin\$runtimeExecutable"
+    if (-not (Test-Path $runtimeExecutablePath)) {
+        throw "Executável ausente no runtime empacotado: $runtimeExecutablePath"
+    }
 }
 
 Invoke-Checked "Gerando instalador Windows" {
@@ -130,7 +164,7 @@ Invoke-Checked "Gerando instalador Windows" {
         --dest $installerDir `
         --win-shortcut `
         --win-menu `
-        --win-menu-group "Gerador de DesignaÃ§Ãµes"
+        --win-menu-group "Gerador de Designações"
 }
 
 if (-not (Test-Path $installerPath)) {
@@ -138,4 +172,3 @@ if (-not (Test-Path $installerPath)) {
 }
 
 Write-Host "Instalador criado: $installerPath"
-
