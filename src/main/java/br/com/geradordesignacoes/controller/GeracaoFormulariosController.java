@@ -18,7 +18,6 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.prefs.Preferences;
 
 /**
@@ -101,16 +100,23 @@ public class GeracaoFormulariosController {
 
                 if (escala == null) {
                     linha.append(" — escala não salva");
+                    linhas.add(linha.toString());
                 } else {
                     linha.append(" — escala salva (")
                             .append(escala.getDesignacoes().size())
                             .append(" designações)");
-                    linha.append(" — presidente: ")
-                            .append(nome(escala.getPresidente()));
-                    linha.append(" — oração inicial: ")
-                            .append(nome(escala.getOracaoInicial()));
+                    linhas.add(linha.toString());
+                    linhas.add("   Presidente: " + nome(escala.getPresidente()));
+                    linhas.add("   Oração inicial: " + nome(escala.getOracaoInicial()));
+                    for (br.com.geradordesignacoes.model.Designacao designacao
+                            : escala.getDesignacoes()) {
+                        linhas.add("   • " + designacao.parte().getNome()
+                                + " [" + designacao.sala() + "] — responsável: "
+                                + nome(designacao.responsavel())
+                                + " — ajudante/leitor: "
+                                + nome(designacao.ajudante()));
+                    }
                 }
-                linhas.add(linha.toString());
             }
 
             view.atualizarDados(linhas);
