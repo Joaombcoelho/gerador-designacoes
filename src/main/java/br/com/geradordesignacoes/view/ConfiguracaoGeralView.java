@@ -127,11 +127,11 @@ public class ConfiguracaoGeralView {
 
         Button salvar = new Button("Salvar configurações");
         salvar.getStyleClass().add("primary-button");
-        salvar.setOnAction(event -> salvar());
+        salvar.setOnAction(_ -> salvar());
 
         Button recarregar = new Button("Recarregar");
         recarregar.getStyleClass().add("secondary-button");
-        recarregar.setOnAction(event -> atualizar());
+        recarregar.setOnAction(_ -> atualizar());
 
         HBox botoes = new HBox(10, salvar, recarregar);
         botoes.setAlignment(Pos.CENTER_LEFT);
