@@ -48,8 +48,8 @@ class ImportacaoApostilaJsonServiceTest {
     @Test
     void bloqueiaPreviaQuandoParteEstaDuplicadaOuSecaoNaoReconhecida() throws Exception {
         String json = jsonValido()
-                .replace("\"secao\": \"ministerio\"", "\"secao\": \"desconhecida\"", 1)
-                .replace("\"numero\": 8", "\"numero\": 7");
+                .replaceFirst("\\\"secao\\\": \\"ministerio\\\"", "\\\"secao\\\": \\"desconhecida\\\"")
+                .replace("\\\"numero\\\": 8", "\\\"numero\\\": 7");
         var resultado = new ImportacaoApostilaJsonService().validar(escreverJson(json));
 
         assertFalse(resultado.validoParaPrevia());
@@ -60,7 +60,7 @@ class ImportacaoApostilaJsonServiceTest {
     @Test
     void rejeitaArquivoSemListaDeSemanas() throws Exception {
         var resultado = new ImportacaoApostilaJsonService()
-                .validar(escreverJson("{\"schema_version\":\"1.0\",\"semanas\":[]}"));
+                .validar(escreverJson("{\\"schema_version\\":\\"1.0\\",\\"semanas\\":[]}"));
 
         assertFalse(resultado.validoParaPrevia());
         assertTrue(resultado.erros().stream().anyMatch(e -> e.contains("lista 'semanas'")));
