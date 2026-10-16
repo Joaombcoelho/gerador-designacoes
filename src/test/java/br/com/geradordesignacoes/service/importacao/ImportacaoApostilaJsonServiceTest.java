@@ -16,13 +16,10 @@ class ImportacaoApostilaJsonServiceTest {
     @Test
     void validaJsonCompletoSemAcessarBanco() throws Exception {
         Path arquivo = escreverJson(jsonValido());
-
-        ImportacaoApostilaJsonService.ResultadoValidacao resultado =
-                new ImportacaoApostilaJsonService().validar(arquivo);
+        var resultado = new ImportacaoApostilaJsonService().validar(arquivo);
 
         assertTrue(resultado.validoParaPrevia(), resultado.erros().toString());
         assertEquals(1, resultado.semanas().size());
-
         var semana = resultado.semanas().getFirst();
         assertEquals("2026-11-02", semana.dataInicio().toString());
         assertEquals("2026-11-08", semana.dataFim().toString());
@@ -48,8 +45,8 @@ class ImportacaoApostilaJsonServiceTest {
     @Test
     void bloqueiaPreviaQuandoParteEstaDuplicadaOuSecaoNaoReconhecida() throws Exception {
         String json = jsonValido()
-                .replaceFirst("\\\"secao\\\": \\"ministerio\\\"", "\\\"secao\\\": \\"desconhecida\\\"")
-                .replace("\\\"numero\\\": 8", "\\\"numero\\\": 7");
+                .replace("\\"secao\\": \\"ministerio\\"", "\\"secao\\": \\"desconhecida\\"")
+                .replace("\\"numero\\": 8", "\\"numero\\": 7");
         var resultado = new ImportacaoApostilaJsonService().validar(escreverJson(json));
 
         assertFalse(resultado.validoParaPrevia());
