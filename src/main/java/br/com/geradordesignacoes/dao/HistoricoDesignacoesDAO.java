@@ -105,13 +105,53 @@ public class HistoricoDesignacoesDAO {
             LocalDate data,
             List<ParticipacaoDesignacao> participacoes
     ) {
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            boolean autoCommitOriginal = connection.getAutoCommit();
+            try {
+                connection.setAutoCommit(false);
+                substituirParticipacoesDaData(connection, data, participacoes);
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackFailure) {
+                    e.addSuppressed(rollbackFailure);
+                }
+                throw e;
+            } finally {
+                if (connection.getAutoCommit() != autoCommitOriginal) {
+                    connection.setAutoCommit(autoCommitOriginal);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao substituir histórico da data.",
+                    e
+            );
+        }
+    }
 
+    /**
+     * Substitui o histórico de uma data na conexão informada, sem
+     * confirmar a transação. A transação fica sob responsabilidade
+     * da camada que coordena as gravações.
+     */
+    public void substituirParticipacoesDaData(
+            Connection connection,
+            LocalDate data,
+            List<ParticipacaoDesignacao> participacoes
+    ) throws SQLException {
+
+        if (connection == null) {
+            throw new IllegalArgumentException(
+                    "Conexão não pode ser nula."
+            );
+        }
         if (data == null) {
             throw new IllegalArgumentException(
                     "Data não pode ser nula."
             );
         }
-
         if (participacoes == null) {
             throw new IllegalArgumentException(
                     "Participações não podem ser nulas."
@@ -120,7 +160,6 @@ public class HistoricoDesignacoesDAO {
 
         participacoes.forEach(participacao -> {
             validarParticipacao(participacao);
-
             if (!participacao.data().equals(data)) {
                 throw new IllegalArgumentException(
                         "Participação não pertence à data informada."
@@ -132,93 +171,30 @@ public class HistoricoDesignacoesDAO {
                 DELETE FROM historico_designacoes
                 WHERE data = ?
                 """;
-
-        String sqlInserir = """ 
-                        INSERT INTO historico_designacoes ( 
-                         data,
-                         pessoa_id,
-                         parte_id,
-                         tipo_participacao,
-                         sala 
-                         ) 
-                        VALUES (?, ?, ?, ?, ?)
+        String sqlInserir = """
+                INSERT INTO historico_designacoes (
+                    data, pessoa_id, parte_id, tipo_participacao, sala
+                )
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection =
-                     ConnectionFactory.getConnection()) {
+        try (PreparedStatement excluir = connection.prepareStatement(sqlExcluir)) {
+            excluir.setString(1, data.toString());
+            excluir.executeUpdate();
+        }
 
-            boolean autoCommitOriginal =
-                    connection.getAutoCommit();
-
-            try {
-                connection.setAutoCommit(false);
-
-                try (PreparedStatement excluir =
-                             connection.prepareStatement(sqlExcluir)) {
-
-                    excluir.setString(
-                            1,
-                            data.toString()
-                    );
-
-                    excluir.executeUpdate();
-                }
-
-                try (PreparedStatement inserir =
-                             connection.prepareStatement(sqlInserir)) {
-
-                    for (ParticipacaoDesignacao participacao : participacoes) {
-
-                        inserir.setString(
-                                1,
-                                participacao.data().toString()
-                        );
-
-                        inserir.setInt(
-                                2,
-                                participacao.pessoa().getId()
-                        );
-
-                        inserir.setInt(
-                                3,
-                                participacao.parte().getId()
-                        );
-
-                        inserir.setString(
-                                4,
-                                participacao.tipoParticipacao().name()
-                        );
-
-                        inserir.setString(
-                                5,
-                                participacao.sala().name());
-
-                        inserir.addBatch();
-                    }
-
-                    inserir.executeBatch();
-                }
-
-                connection.commit();
-                connection.setAutoCommit(autoCommitOriginal);
-
-            } catch (SQLException e) {
-
-                connection.rollback();
-                connection.setAutoCommit(autoCommitOriginal);
-
-                throw e;
+        try (PreparedStatement inserir = connection.prepareStatement(sqlInserir)) {
+            for (ParticipacaoDesignacao participacao : participacoes) {
+                inserir.setString(1, participacao.data().toString());
+                inserir.setInt(2, participacao.pessoa().getId());
+                inserir.setInt(3, participacao.parte().getId());
+                inserir.setString(4, participacao.tipoParticipacao().name());
+                inserir.setString(5, participacao.sala().name());
+                inserir.addBatch();
             }
-
-        } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Erro ao substituir histórico da data.",
-                    e
-            );
+            inserir.executeBatch();
         }
     }
-
 
     public List<ParticipacaoDesignacao> listarTodas() {
 

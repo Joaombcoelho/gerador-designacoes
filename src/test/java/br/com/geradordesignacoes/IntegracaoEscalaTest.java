@@ -9,6 +9,7 @@ import br.com.geradordesignacoes.database.ConnectionFactory;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
+import br.com.geradordesignacoes.service.PersistenciaEscalasService;
 import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
 import javafx.application.Platform;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -205,6 +207,127 @@ class IntegracaoEscalaTest extends BaseDAOTest {
         );
     }
 
+
+
+    @Test
+    void deveReverterTodasAsEscalasEHistoricoSeUmaDataFalhar()
+            throws Exception {
+
+        Pessoa pessoa = criarPessoa("Pessoa transação atômica");
+        Parte parteAntiga = criarParteVariavel("Parte antiga");
+        Parte parteNova = criarParteVariavel("Parte nova");
+        Parte parteInexistente = new Parte(
+                999999,
+                "Parte inexistente",
+                TipoParte.LEITURA,
+                Privilegio.PUBLICADOR,
+                false,
+                SexoPermitido.AMBOS,
+                1,
+                false,
+                NivelLeitura.BASICO,
+                List.of(TipoParticipacao.RESPONSAVEL)
+        );
+
+        LocalDate primeiraData = LocalDate.of(2026, 9, 1);
+        LocalDate segundaData = LocalDate.of(2026, 9, 8);
+
+        // Prepara dados existentes que devem sobreviver à falha.
+        Escala escalaExistente = new Escala(
+                primeiraData,
+                List.of(new Designacao(primeiraData, parteAntiga, pessoa, null))
+        );
+        escalaDAO.salvar(escalaExistente);
+
+        ParticipacaoDesignacao participacaoAntiga =
+                new ParticipacaoDesignacao(
+                        primeiraData,
+                        pessoa,
+                        parteAntiga,
+                        TipoParticipacao.RESPONSAVEL
+                );
+        historicoDAO.substituirParticipacoesDaData(
+                primeiraData,
+                List.of(participacaoAntiga)
+        );
+
+        Escala primeiraEscala = new Escala(
+                primeiraData,
+                List.of(new Designacao(primeiraData, parteNova, pessoa, null))
+        );
+        Escala segundaEscala = new Escala(
+                segundaData,
+                List.of(new Designacao(segundaData, parteNova, pessoa, null))
+        );
+
+        ParticipacaoDesignacao participacaoValida =
+                new ParticipacaoDesignacao(
+                        primeiraData,
+                        pessoa,
+                        parteNova,
+                        TipoParticipacao.RESPONSAVEL
+                );
+        ParticipacaoDesignacao participacaoInvalida =
+                new ParticipacaoDesignacao(
+                        segundaData,
+                        pessoa,
+                        parteInexistente,
+                        TipoParticipacao.RESPONSAVEL
+                );
+
+        Map<LocalDate, ResultadoGeracaoEscala> resultados =
+                new java.util.LinkedHashMap<>();
+        resultados.put(
+                primeiraData,
+                new ResultadoGeracaoEscala(
+                        primeiraEscala,
+                        List.of(participacaoValida),
+                        List.of(),
+                        List.of()
+                )
+        );
+        resultados.put(
+                segundaData,
+                new ResultadoGeracaoEscala(
+                        segundaEscala,
+                        List.of(participacaoInvalida),
+                        List.of(),
+                        List.of()
+                )
+        );
+
+        PersistenciaEscalasService persistencia =
+                new PersistenciaEscalasService();
+
+        assertThrows(
+                RuntimeException.class,
+                () -> persistencia.salvar(resultados, true)
+        );
+
+        List<Escala> escalasPersistidas = escalaDAO.listarTodas();
+        assertEquals(
+                1,
+                escalasPersistidas.size(),
+                "A escala da segunda data não pode permanecer parcialmente salva."
+        );
+        assertEquals(primeiraData, escalasPersistidas.getFirst().getData());
+        assertEquals(
+                parteAntiga.getId(),
+                escalasPersistidas.getFirst()
+                        .getDesignacoes().getFirst().parte().getId(),
+                "A atualização da escala existente deve ser revertida."
+        );
+
+        List<ParticipacaoDesignacao> historicoPersistido =
+                historicoDAO.listarTodas();
+        assertEquals(1, historicoPersistido.size());
+        assertEquals(primeiraData, historicoPersistido.getFirst().data());
+        assertEquals(
+                parteAntiga.getId(),
+                historicoPersistido.getFirst().parte().getId(),
+                "O histórico anterior deve ser preservado após o rollback."
+        );
+    }
 
     @Test
     void deveRecuperarTodasAsEscalasSalvas()
