@@ -9,6 +9,7 @@ import br.com.geradordesignacoes.service.ConfiguracaoGeralService;
 import br.com.geradordesignacoes.service.ExportadorS140WordService;
 import br.com.geradordesignacoes.service.ExportadorS89Service;
 import br.com.geradordesignacoes.view.formularios.GeracaoFormulariosView;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -34,6 +35,7 @@ public class GeracaoFormulariosController {
                     .node("exportacao-s140");
     private static final String CHAVE_MODELO = "modelo-word";
     private static final String CHAVE_PASTA_DESTINO = "pasta-destino";
+    private static final String CHAVE_PASTA_S89 = "pasta-saida-s89";
 
     private final GeracaoFormulariosView view;
     private final EscalaDAO escalaDAO;
@@ -83,6 +85,8 @@ public class GeracaoFormulariosController {
         view.getBotaoAtualizar().setOnAction(_ -> atualizarDadosSalvos());
         view.getBotaoExportarS140().setOnAction(_ -> exportarS140());
         view.getBotaoExportarS89().setOnAction(_ -> exportarS89());
+        view.getBotaoPastaS89().setOnAction(_ -> escolherPastaS89());
+        view.atualizarPastaS89(pastaS89Configurada());
         atualizarDadosSalvos();
     }
 
@@ -171,7 +175,11 @@ public class GeracaoFormulariosController {
         }
 
         try {
-            List<Path> arquivos = exportadorS89.exportarSemana(data);
+            Path raizSaida = obterPastaS89();
+            if (raizSaida == null) {
+                return;
+            }
+            List<Path> arquivos = exportadorS89.exportarSemana(data, raizSaida);
             if (arquivos.isEmpty()) {
                 view.atualizarStatus("O S-89 não gerou arquivos para " + data.format(DATA) + ".");
                 return;
@@ -181,6 +189,64 @@ public class GeracaoFormulariosController {
         } catch (Exception e) {
             view.atualizarStatus("Não foi possível gerar o S-89: " + e.getMessage());
         }
+    }
+
+
+    private Path obterPastaS89() {
+        String caminho = PREFERENCIAS.get(CHAVE_PASTA_S89, "");
+        if (!caminho.isBlank()) {
+            Path pasta = Path.of(caminho);
+            if (java.nio.file.Files.isDirectory(pasta)) {
+                return pasta;
+            }
+        }
+        return escolherPastaS89();
+    }
+
+    private Path escolherPastaS89() {
+        Window janela = view.getView().getScene() == null
+                ? null : view.getView().getScene().getWindow();
+        DirectoryChooser seletor = new DirectoryChooser();
+        seletor.setTitle("Escolha a pasta base para os arquivos S-89");
+
+        String caminhoAtual = PREFERENCIAS.get(CHAVE_PASTA_S89, "");
+        File pastaAtual = caminhoAtual.isBlank() ? null : new File(caminhoAtual);
+        if (pastaAtual != null && pastaAtual.isDirectory()) {
+            seletor.setInitialDirectory(pastaAtual);
+        } else {
+            definirPastaInicial(seletor);
+        }
+
+        File escolhida = seletor.showDialog(janela);
+        if (escolhida == null) {
+            view.atualizarStatus("Seleção da pasta S-89 cancelada.");
+            return null;
+        }
+
+        String caminho = escolhida.getAbsolutePath();
+        PREFERENCIAS.put(CHAVE_PASTA_S89, caminho);
+        view.atualizarPastaS89(caminho);
+        view.atualizarStatus("Pasta de saída do S-89 salva: " + caminho);
+        return escolhida.toPath();
+    }
+
+    private static void definirPastaInicial(DirectoryChooser seletor) {
+        String caminho = PREFERENCIAS.get(CHAVE_PASTA_DESTINO, "");
+        File pasta = caminho.isBlank() ? null : new File(caminho);
+        if (pasta != null && pasta.isDirectory()) {
+            seletor.setInitialDirectory(pasta);
+        } else {
+            File home = new File(System.getProperty("user.home"));
+            if (home.isDirectory()) {
+                seletor.setInitialDirectory(home);
+            }
+        }
+    }
+
+    private static String pastaS89Configurada() {
+        String caminho = PREFERENCIAS.get(CHAVE_PASTA_S89, "");
+        return caminho.isBlank() || !new File(caminho).isDirectory()
+                ? "" : caminho;
     }
 
     private void exportarS140() {
