@@ -50,15 +50,15 @@ public class ParteView {
 
         Button novo = new Button("+ Nova Parte");
         novo.getStyleClass().add("primary-button");
-        novo.setOnAction(e -> abrirFormulario(null));
+        novo.setOnAction(_ -> abrirFormulario(null));
 
         Button editar = new Button("Editar");
         editar.getStyleClass().add("secondary-button");
-        editar.setOnAction(e -> editarSelecionado());
+        editar.setOnAction(_ -> editarSelecionado());
 
         Button excluir = new Button("Excluir");
         excluir.getStyleClass().add("danger-button");
-        excluir.setOnAction(e -> excluirSelecionado());
+        excluir.setOnAction(_ -> excluirSelecionado());
 
         HBox botoes = new HBox(10, novo, editar, excluir);
         botoes.setAlignment(Pos.CENTER_LEFT);
@@ -148,7 +148,7 @@ public class ParteView {
     private void abrirFormulario(Parte parte) {
         ParteFormularioView formulario = new ParteFormularioView(
                 parte,
-                resultado -> {
+                _ -> {
                     carregarDados();
                     voltarParaTabela();
                 },
@@ -205,13 +205,13 @@ public class ParteView {
         confirmacao.setPadding(new Insets(16));
         confirmacao.getProperties().put("confirmacao-exclusao", true);
 
-        confirmar.setOnAction(event -> {
+        confirmar.setOnAction(_ -> {
             painelAtual.getChildren().remove(confirmacao);
             parteDAO.excluir(selecionada.getId());
             carregarDados();
         });
 
-        cancelar.setOnAction(event ->
+        cancelar.setOnAction(_ ->
                 painelAtual.getChildren().remove(confirmacao)
         );
 
