@@ -1,6 +1,8 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.EscalaDAO;
+import br.com.geradordesignacoes.dao.ParteDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.DadosExportacaoS140Semana;
 import br.com.geradordesignacoes.model.Escala;
@@ -60,6 +62,62 @@ class CarregadorDadosExportacaoS140ServiceTest extends BaseDAOTest {
         assertEquals(escalaSalva.getId(), dados.escala().getId());
         assertEquals(1, escalaDAO.listarTodas().size());
         assertEquals(1, programacaoDAO.buscarPorData(data).id());
+    }
+
+    @Test
+    void deveCarregarNoS140AAlteracaoManualMaisRecenteSalvaNoBanco() {
+        LocalDate data = LocalDate.of(2027, 7, 28);
+        PessoaDAO pessoaDAO = new PessoaDAO();
+        ParteDAO parteDAO = new ParteDAO();
+
+        var pessoaOriginal = pessoaDAO.salvar(new br.com.geradordesignacoes.model.Pessoa(
+                "Responsável original", br.com.geradordesignacoes.model.Sexo.MASCULINO,
+                true, true, true, true, false,
+                br.com.geradordesignacoes.model.Privilegio.ANCIAO
+        ));
+        var pessoaAtualizada = pessoaDAO.salvar(new br.com.geradordesignacoes.model.Pessoa(
+                "Responsável atualizado", br.com.geradordesignacoes.model.Sexo.MASCULINO,
+                true, true, true, true, false,
+                br.com.geradordesignacoes.model.Privilegio.ANCIAO
+        ));
+        var parte = parteDAO.salvar(new br.com.geradordesignacoes.model.Parte(
+                "Parte de teste",
+                br.com.geradordesignacoes.model.TipoParte.DISCURSO_TESOUROS,
+                br.com.geradordesignacoes.model.Privilegio.PUBLICADOR,
+                false,
+                br.com.geradordesignacoes.model.SexoPermitido.MASCULINO,
+                1,
+                false,
+                List.of(br.com.geradordesignacoes.model.TipoParticipacao.RESPONSAVEL)
+        ));
+
+        new ProgramacaoSemanaService().obterOuCriar(data);
+        escalaDAO.salvar(new Escala(data, List.of(
+                new br.com.geradordesignacoes.model.Designacao(
+                        data, parte, pessoaOriginal, null
+                )
+        )));
+        var designacao = escalaDAO.buscarPorData(data)
+                .orElseThrow()
+                .getDesignacoes()
+                .getFirst();
+
+        escalaDAO.atualizarDesignacao(
+                designacao.id(),
+                pessoaAtualizada.getId(),
+                null
+        );
+
+        DadosExportacaoS140Semana dados = criarService().carregar(data);
+
+        assertEquals(
+                pessoaAtualizada.getId(),
+                dados.escala().getDesignacoes().getFirst().responsavel().getId()
+        );
+        assertNotEquals(
+                pessoaOriginal.getId(),
+                dados.escala().getDesignacoes().getFirst().responsavel().getId()
+        );
     }
 
     @Test
