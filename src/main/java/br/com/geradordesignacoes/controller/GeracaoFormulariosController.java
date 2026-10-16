@@ -90,6 +90,7 @@ public class GeracaoFormulariosController {
         LocalDate selecionada = view.getCampoMes().getValue();
         if (selecionada == null) {
             view.atualizarDados(List.of());
+            view.atualizarDatasS89(List.of());
             view.atualizarStatus("Selecione uma data do mês.");
             return false;
         }
