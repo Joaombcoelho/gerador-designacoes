@@ -7,6 +7,7 @@ import br.com.geradordesignacoes.service.importacao.ImportacaoApostilaJsonServic
 import br.com.geradordesignacoes.service.importacao.MapeadorParteApostilaService;
 import br.com.geradordesignacoes.service.importacao.PreviaImportacaoApostilaService;
 import br.com.geradordesignacoes.service.importacao.RevisaoMapeamentoApostilaService;
+import br.com.geradordesignacoes.service.importacao.ExtratorApostilaRtfService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -21,11 +22,14 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -50,6 +54,9 @@ public class ImportacaoApostilaView {
     private final RevisaoMapeamentoApostilaService revisaoService = new RevisaoMapeamentoApostilaService();
     private final Label arquivoLabel = new Label("Nenhum arquivo selecionado.");
     private final Button conferirButton = new Button("Conferir prévia");
+    private final Button salvarCopiaButton = new Button("Salvar cópia do JSON…");
+    private final ExtratorApostilaRtfService extrator = new ExtratorApostilaRtfService();
+    private Path jsonGeradoTemporario;
     private Path arquivoSelecionado;
     private ImportacaoApostilaJsonService.ResultadoValidacao validacao;
     private List<Parte> catalogo = List.of();
@@ -68,10 +75,18 @@ public class ImportacaoApostilaView {
         instrucao.setWrapText(true);
         instrucao.getStyleClass().add("page-subtitle");
 
-        Button selecionar = new Button("Selecionar JSON…");
+        Button extrair = new Button("Extrair apostila de arquivos RTF…");
+        extrair.setOnAction(_ -> selecionarPastaEExtrair());
+
+        Button selecionar = new Button("Abrir JSON existente…");
         selecionar.setOnAction(_ -> selecionarArquivo());
-        HBox arquivoLinha = new HBox(12, selecionar, arquivoLabel);
+
+        salvarCopiaButton.setDisable(true);
+        salvarCopiaButton.setOnAction(_ -> salvarCopiaJson());
+
+        HBox arquivoLinha = new HBox(12, extrair, selecionar, salvarCopiaButton);
         arquivoLinha.setAlignment(Pos.CENTER_LEFT);
+        arquivoLabel.setWrapText(true);
 
         conferirButton.setDisable(true);
         conferirButton.setOnAction(_ -> conferirPrevia());
@@ -81,7 +96,7 @@ public class ImportacaoApostilaView {
         scroll.setPrefViewportHeight(380);
         VBox.setVgrow(scroll, Priority.ALWAYS);
 
-        root.getChildren().addAll(titulo, instrucao, arquivoLinha, scroll,
+        root.getChildren().addAll(titulo, instrucao, arquivoLinha, arquivoLabel, scroll,
                 conferirButton, resultadoContainer);
     }
 
@@ -100,13 +115,87 @@ public class ImportacaoApostilaView {
         if (arquivo == null) {
             return;
         }
+        carregarArquivo(arquivo.toPath(), arquivo.getName());
+    }
 
+    private void selecionarPastaEExtrair() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("Selecione a pasta com os arquivos RTF da apostila");
+        File pasta = chooser.showDialog(root.getScene() == null
+                ? null : root.getScene().getWindow());
+        if (pasta == null) {
+            return;
+        }
+
+        salvarCopiaButton.setDisable(true);
         try {
-            var resultado = validador.validar(arquivo.toPath());
-            arquivoSelecionado = arquivo.toPath();
+            var resultado = extrator.extrair(pasta.toPath());
+            Path temporario = Files.createTempFile("gerador-apostila-", ".json");
+            Files.writeString(temporario, resultado.json(), StandardCharsets.UTF_8);
+            jsonGeradoTemporario = temporario;
+
+            carregarArquivo(temporario, "JSON extraído: " + pasta.getName()
+                    + " (" + resultado.quantidadeArquivos() + " arquivo(s), "
+                    + resultado.quantidadeSemanas() + " semana(s))");
+
+            Alert resumo = new Alert(resultado.alertas().isEmpty()
+                    ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING);
+            resumo.setTitle("Extração concluída");
+            resumo.setHeaderText("JSON provisório gerado");
+            resumo.setContentText("Arquivos RTF: " + resultado.quantidadeArquivos()
+                    + "\nSemanas identificadas: " + resultado.quantidadeSemanas()
+                    + "\nAlertas para conferência: " + resultado.alertas().size()
+                    + "\n\nO JSON foi carregado na tela. Nenhuma programação foi alterada.");
+            resumo.showAndWait();
+            salvarCopiaButton.setDisable(false);
+        } catch (IOException | RuntimeException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Não foi possível extrair a apostila", e.getMessage());
+        }
+    }
+
+    private void salvarCopiaJson() {
+        if (jsonGeradoTemporario == null || !Files.isRegularFile(jsonGeradoTemporario)) {
+            mostrarAlerta(Alert.AlertType.WARNING, "JSON indisponível",
+                    "Gere um JSON pela extração integrada antes de salvar uma cópia.");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Salvar cópia do JSON extraído");
+        chooser.setInitialFileName("apostila-extraida.json");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Arquivo JSON", "*.json")
+        );
+        File destino = chooser.showSaveDialog(root.getScene() == null
+                ? null : root.getScene().getWindow());
+        if (destino == null) {
+            return;
+        }
+
+        Path caminho = destino.toPath();
+        if (!caminho.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
+            caminho = caminho.resolveSibling(caminho.getFileName() + ".json");
+        }
+        try {
+            Files.copy(jsonGeradoTemporario, caminho,
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            Alert sucesso = new Alert(Alert.AlertType.INFORMATION);
+            sucesso.setTitle("Cópia salva");
+            sucesso.setHeaderText("JSON salvo com sucesso");
+            sucesso.setContentText(caminho.toAbsolutePath().toString());
+            sucesso.showAndWait();
+        } catch (IOException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Não foi possível salvar a cópia do JSON", e.getMessage());
+        }
+    }
+
+    private void carregarArquivo(Path caminho, String descricaoArquivo) {
+        try {
+            var resultado = validador.validar(caminho);
+            arquivoSelecionado = caminho;
             validacao = resultado;
             catalogo = parteDAO.listarTodos();
-            arquivoLabel.setText(arquivo.getName());
+            arquivoLabel.setText(descricaoArquivo);
             montarSemanas();
             resultadoContainer.getChildren().clear();
             exibirMensagens("Validação do JSON", resultado.erros(), resultado.avisos());
