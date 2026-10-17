@@ -122,8 +122,10 @@ public class PreviaImportacaoApostilaService {
                     }
                 } else if (resultado.possuiCorrespondenciaUnica()) {
                     Integer id = resultado.candidatos().getFirst().getId();
-                    if (id != null) {
-                        idsPartesSelecionadas.add(id);
+                    if (id != null && !idsPartesSelecionadas.add(id)) {
+                        erros.add("Semana " + semana.dataInicio() + ": a mesma parte do catálogo foi "
+                                + "associada automaticamente a mais de uma parte da apostila (ID "
+                                + id + "). Confira o mapeamento.");
                     }
                 }
                 partes.add(resultado);
