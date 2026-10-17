@@ -115,6 +115,8 @@ public class ImportacaoApostilaView {
         if (arquivo == null) {
             return;
         }
+        jsonGeradoTemporario = null;
+        salvarCopiaButton.setDisable(true);
         carregarArquivo(arquivo.toPath(), arquivo.getName());
     }
 
@@ -177,13 +179,15 @@ public class ImportacaoApostilaView {
             caminho = caminho.resolveSibling(caminho.getFileName() + ".json");
         }
         try {
-            Files.copy(jsonGeradoTemporario, caminho,
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(jsonGeradoTemporario, caminho);
             Alert sucesso = new Alert(Alert.AlertType.INFORMATION);
             sucesso.setTitle("Cópia salva");
             sucesso.setHeaderText("JSON salvo com sucesso");
             sucesso.setContentText(caminho.toAbsolutePath().toString());
             sucesso.showAndWait();
+        } catch (java.nio.file.FileAlreadyExistsException e) {
+            mostrarAlerta(Alert.AlertType.WARNING, "O arquivo já existe",
+                    "Para evitar sobrescrever um arquivo existente, escolha outro nome ou local.");
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Não foi possível salvar a cópia do JSON", e.getMessage());
         }
