@@ -11,7 +11,7 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 - **Visita do superintendente:** a reunião habitual de quarta-feira passa para terça-feira naquela semana. Na programação, cancelar/substituir o Estudo Bíblico de Congregação e inserir no lugar um discurso da visita com duração de 30 minutos e campo para cadastrar o tema. As demais partes, designações e ajustes manuais devem ser preservados, salvo alterações estritamente necessárias para a mudança do dia.
 - **Assembleia:** cancelar a reunião de quarta-feira da semana do evento, preservando a programação cadastrada.
 - **Congresso:** cancelar a reunião de quarta-feira da semana do evento, preservando a programação cadastrada.
-- **Celebração:** se ocorrer em dia de semana, cancelar a reunião de quarta-feira daquela semana; se ocorrer no fim de semana, manter a reunião de quarta-feira normalmente.
+- **Celebração:** se ocorrer de segunda a sexta-feira, a celebração substitui a reunião habitual de quarta-feira daquela semana, inclusive quando a própria celebração ocorre na quarta-feira. Se ocorrer no sábado ou domingo, a reunião de quarta-feira continua normalmente.
 - **Distribuição temporal informada:** assembleia, congresso e celebração não ocorrem na mesma semana que a visita do superintendente, conforme o cenário descrito pelo usuário. Ainda assim, manter tratamento seguro para sobreposições futuras ou cadastros conflitantes.
 - **Cancelamento:** registrar explicitamente que a reunião foi cancelada, sem apagar a programação já cadastrada.
 - **Programação confirmada:** considera-se confirmada quando a escala daquela data está salva no banco, com status SALVA. Antes de aplicar alterações de eventos a essa data, exibir a prévia das diferenças e exigir confirmação explícita.
@@ -28,8 +28,8 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 | Visita isolada | Mover a reunião de quarta para terça naquela semana; substituir o Estudo Bíblico de Congregação por discurso da visita de 30 minutos, com tema editável; preservar as demais partes |
 | Assembleia | Cancelar a reunião de quarta-feira da semana do evento, preservando a programação |
 | Congresso | Cancelar a reunião de quarta-feira da semana do evento, preservando a programação |
-| Celebração em dia de semana | Cancelar a reunião de quarta-feira daquela semana |
-| Celebração no fim de semana | Manter a reunião de quarta-feira normalmente |
+| Celebração de segunda a sexta-feira | Substituir a reunião de quarta-feira daquela semana pela celebração, inclusive quando a celebração ocorrer na quarta-feira |
+| Celebração no sábado ou domingo | Manter a reunião de quarta-feira normalmente |
 | Cancelamento isolado | Marcar cancelada e preservar os dados existentes |
 | Visita e cancelamento na mesma data | Considerar cancelamento |
 | Conflito entre tipos sem precedência definida | Alertar e solicitar decisão |
@@ -90,11 +90,10 @@ O cancelamento deve ser um estado/resultado explícito da resolução, não a ex
 
 ## Decisões ainda necessárias antes das regras executáveis
 
-1. **Definição operacional de celebração:** confirmar se “dia de semana” significa segunda a sexta-feira e se a regra de cancelamento se aplica sempre à reunião de quarta-feira da mesma semana, mesmo quando a celebração ocorre na própria quarta-feira.
-2. **Conflitos:** além da combinação visita + cancelamento, quais combinações têm precedência definida? As demais devem continuar exigindo decisão explícita. Foi informado que assembleia, congresso e celebração não ocorrem na mesma semana que a visita, mas o sistema ainda deve tratar cadastros sobrepostos com segurança.
-3. **Persistência da decisão:** quando o usuário resolver um conflito, essa decisão deve valer apenas para aquela aplicação ou ficar registrada como resolução do evento/data para futuras prévias?
+1. **Conflitos:** além da combinação visita + cancelamento, quais combinações têm precedência definida? As demais devem continuar exigindo decisão explícita. Foi informado que assembleia, congresso e celebração não ocorrem na mesma semana que a visita, mas o sistema ainda deve tratar cadastros sobrepostos com segurança.
+2. **Persistência da decisão:** quando o usuário resolver um conflito, essa decisão deve valer apenas para aquela aplicação ou ficar registrada como resolução do evento/data para futuras prévias?
 
-A regra da visita do superintendente está definida para esta proposta. As decisões restantes devem ser fechadas antes da implementação do serviço de resolução/aplicação, para evitar codificar suposições de negócio.
+A regra da visita do superintendente e a regra operacional da celebração estão definidas para esta proposta. As decisões restantes devem ser fechadas antes da implementação do serviço de resolução/aplicação, para evitar codificar suposições de negócio.
 
 ## Sequência sugerida de PRs
 
