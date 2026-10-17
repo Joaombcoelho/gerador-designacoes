@@ -8,7 +8,7 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 
 ## Decisões funcionais já acordadas
 
-- **Visita do superintendente:** ajustar a programação habitual, em vez de substituir toda a reunião por um modelo especial. Ainda é necessário definir exatamente quais partes e campos são alterados.
+- **Visita do superintendente:** a reunião habitual de quarta-feira passa para terça-feira naquela semana. Na programação, cancelar/substituir o Estudo Bíblico de Congregação e inserir no lugar um discurso da visita com duração de 30 minutos e campo para cadastrar o tema. As demais partes, designações e ajustes manuais devem ser preservados, salvo alterações estritamente necessárias para a mudança do dia.
 - **Cancelamento:** registrar explicitamente que a reunião foi cancelada, sem apagar a programação já cadastrada.
 - **Programação confirmada:** considera-se confirmada quando a escala daquela data está salva no banco, com status SALVA. Antes de aplicar alterações de eventos a essa data, exibir a prévia das diferenças e exigir confirmação explícita.
 - **Evento retroativo:** apresentar previamente as datas e alterações propostas; nunca modificar o passado silenciosamente, independentemente do status da escala.
@@ -21,7 +21,7 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 | Situação | Comportamento esperado |
 | --- | --- |
 | Nenhum evento aplicável | Manter o comportamento habitual |
-| Visita isolada | Propor os ajustes específicos da visita |
+| Visita isolada | Mover a reunião de quarta para terça naquela semana; substituir o Estudo Bíblico de Congregação por discurso da visita de 30 minutos, com tema editável; preservar as demais partes |
 | Cancelamento isolado | Marcar cancelada e preservar os dados existentes |
 | Visita e cancelamento na mesma data | Considerar cancelamento |
 | Conflito entre tipos sem precedência definida | Alertar e solicitar decisão |
@@ -82,12 +82,11 @@ O cancelamento deve ser um estado/resultado explícito da resolução, não a ex
 
 ## Decisões ainda necessárias antes das regras executáveis
 
-1. **Visita do superintendente:** quais partes, durações, temas, cânticos, papéis ou campos específicos devem mudar? Quais valores vêm de regras fixas e quais devem ser escolhidos pelo usuário?
-2. **Tipos da primeira versão:** além de visita do superintendente e cancelamento, quais outros tipos de evento devem ser suportados desde o início?
-3. **Conflitos:** além da combinação visita + cancelamento, quais combinações têm precedência definida? As demais devem continuar exigindo decisão explícita.
-4. **Persistência da decisão:** quando o usuário resolver um conflito, essa decisão deve valer apenas para aquela aplicação ou ficar registrada como resolução do evento/data para futuras prévias?
+1. **Tipos da primeira versão:** além de visita do superintendente e cancelamento, quais outros tipos de evento devem ser suportados desde o início?
+2. **Conflitos:** além da combinação visita + cancelamento, quais combinações têm precedência definida? As demais devem continuar exigindo decisão explícita.
+3. **Persistência da decisão:** quando o usuário resolver um conflito, essa decisão deve valer apenas para aquela aplicação ou ficar registrada como resolução do evento/data para futuras prévias?
 
-Essas decisões devem ser fechadas antes da implementação do serviço de resolução/aplicação, para evitar codificar suposições de negócio.
+A regra da visita do superintendente está definida para esta proposta. As decisões restantes devem ser fechadas antes da implementação do serviço de resolução/aplicação, para evitar codificar suposições de negócio.
 
 ## Sequência sugerida de PRs
 
