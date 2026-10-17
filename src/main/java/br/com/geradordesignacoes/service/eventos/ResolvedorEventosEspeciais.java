@@ -6,13 +6,9 @@ import br.com.geradordesignacoes.model.TipoEventoEspecial;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Resolve as regras de eventos em memória, sem acessar DAOs, serviços de
