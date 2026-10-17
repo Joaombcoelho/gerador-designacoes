@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Interface de conferência da apostila. Esta tela não grava dados. */
+/** Interface de extração, conferência e confirmação explícita da importação de apostilas. */
 public class ImportacaoApostilaView {
 
     private final VBox root = new VBox(16);
@@ -75,8 +75,8 @@ public class ImportacaoApostilaView {
         Label titulo = new Label("Importação de apostila — prévia");
         titulo.getStyleClass().add("page-title");
         Label instrucao = new Label(
-                "Selecione o JSON gerado pelo extrator. Revise as datas reais das reuniões e os mapeamentos. "
-                        + "Esta tela é somente de conferência: não importa nem altera programações."
+                "Extraia os arquivos RTF ou abra um JSON. Revise as datas reais das reuniões e os mapeamentos; "
+                        + "a gravação só ocorre após prévia válida e confirmação explícita."
         );
         instrucao.setWrapText(true);
         instrucao.getStyleClass().add("page-subtitle");
