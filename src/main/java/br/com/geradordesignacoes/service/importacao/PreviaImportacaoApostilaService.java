@@ -191,8 +191,16 @@ public class PreviaImportacaoApostilaService {
         }
 
         public boolean podeProsseguirParaConfirmacao() {
+            long quantidadeVariaveis = partes.stream()
+                    .filter(MapeadorParteApostilaService.ResultadoMapeamento::possuiCorrespondenciaUnica)
+                    .map(parte -> parte.candidatos().getFirst())
+                    .filter(parte -> parte.getTipoVariacao()
+                            == br.com.geradordesignacoes.model.TipoVariacaoParte.VARIAVEL)
+                    .count();
             return !conflitoProgramacaoExistente
                     && partes.size() == 8
+                    && quantidadeVariaveis >= 3
+                    && quantidadeVariaveis <= 6
                     && partes.stream().allMatch(
                             MapeadorParteApostilaService.ResultadoMapeamento::possuiCorrespondenciaUnica
                     );
