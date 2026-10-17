@@ -30,6 +30,18 @@ A tela fica disponível no menu lateral em **Importar apostila**.
 - Se a mesma parte do catálogo for atribuída a mais de um item da mesma semana, a prévia sinaliza erro.
 - O serviço de prévia continua sem DAO e não persiste escolhas ou programação.
 
-## Limites desta etapa
+## Confirmação e gravação
 
-Esta etapa integra as escolhas manuais ao resultado técnico da prévia, mas não implementa a confirmação final, gravação transacional, criação de partes, nem importação de cânticos para uma programação. A confirmação deve ser desenvolvida separadamente, depois da validação local desta etapa.
+Quando a prévia não contém erros, todas as semanas têm oito mapeamentos únicos e não há datas conflitantes, o botão **Confirmar importação** fica habilitado. A tela apresenta uma confirmação explícita antes de gravar.
+
+- A confirmação usa o resultado da prévia atual; qualquer alteração posterior nas datas ou nas seleções invalida a prévia e exige conferência novamente.
+- O serviço monta cada programação em memória, usa as partes fixas do serviço de programação e as partes variáveis selecionadas, e aplica os temas e durações confirmados.
+- Os cânticos são gravados nos campos da programação semanal.
+- A persistência usa uma única transação para todas as semanas.
+- A transação verifica novamente se alguma data já possui programação. Se houver conflito ou qualquer falha, toda a operação é revertida.
+- Programações existentes não são atualizadas ou sincronizadas e o processo não usa `obterOuCriar`.
+- A importação não cria novos registros no catálogo de partes.
+
+## Limites e validação
+
+A etapa de confirmação está implementada nesta versão, mas precisa ser validada localmente antes de ser integrada. Executar `mvn test` com JDK 22 e testar uma importação simples, várias semanas, conflito com data existente, cancelamento do diálogo e ausência de alterações nas programações anteriores. A documentação não substitui a confirmação desses testes.
