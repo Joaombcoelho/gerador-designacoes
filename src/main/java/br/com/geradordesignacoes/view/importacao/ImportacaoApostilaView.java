@@ -247,7 +247,7 @@ public class ImportacaoApostilaView {
                 escolha.setPromptText("Escolher parte do catálogo");
                 escolha.setMaxWidth(Double.MAX_VALUE);
                 escolha.setCellFactory(celulaParte());
-                escolha.setButtonCell(celulaParte());
+                escolha.setButtonCell(criarCelulaParte());
                 if (sugestao.possuiCorrespondenciaUnica()) {
                     escolha.getSelectionModel().select(sugestao.candidatos().getFirst());
                 }
@@ -292,7 +292,11 @@ public class ImportacaoApostilaView {
     }
 
     private Callback<ListView<Parte>, ListCell<Parte>> celulaParte() {
-        return lista -> new ListCell<>() {
+        return lista -> criarCelulaParte();
+    }
+
+    private ListCell<Parte> criarCelulaParte() {
+        return new ListCell<>() {
             @Override
             protected void updateItem(Parte parte, boolean empty) {
                 super.updateItem(parte, empty);
