@@ -234,6 +234,7 @@ public class ImportacaoApostilaView {
             VBox cartao = new VBox(8, cabecalho, leitura, canticos, dataLinha);
             cartao.getStyleClass().add("card");
             cartao.setPadding(new Insets(14));
+            List<ParteUi> partesUi = new ArrayList<>();
 
             for (var parteJson : semana.partes()) {
                 var sugestao = mapeador.mapear(parteJson, catalogo);
@@ -248,10 +249,6 @@ public class ImportacaoApostilaView {
                 escolha.setMaxWidth(Double.MAX_VALUE);
                 escolha.setCellFactory(celulaParte());
                 escolha.setButtonCell(criarCelulaParte());
-                if (sugestao.possuiCorrespondenciaUnica()) {
-                    escolha.getSelectionModel().select(sugestao.candidatos().getFirst());
-                }
-
                 Label estado = new Label(rotulo(sugestao.situacao()));
                 HBox linha = new HBox(10, descricao, escolha, estado);
                 linha.setAlignment(Pos.CENTER_LEFT);
@@ -272,9 +269,13 @@ public class ImportacaoApostilaView {
                         estado.setText(e.getMessage());
                     }
                 });
+                if (sugestao.possuiCorrespondenciaUnica()) {
+                    escolha.getSelectionModel().select(sugestao.candidatos().getFirst());
+                }
+                partesUi.add(new ParteUi(parteJson.numero(), escolha));
             }
 
-            semanasUi.add(new SemanaUi(semana.dataInicio(), dataReuniao));
+            semanasUi.add(new SemanaUi(semana.dataInicio(), dataReuniao, partesUi));
             semanasContainer.getChildren().add(cartao);
         }
     }
@@ -311,10 +312,19 @@ public class ImportacaoApostilaView {
         }
 
         Map<LocalDate, LocalDate> datas = new HashMap<>();
+        Map<LocalDate, Map<Integer, Parte>> escolhasManuais = new HashMap<>();
         Set<LocalDate> existentes = new HashSet<>();
         List<String> errosTela = new ArrayList<>();
 
         for (SemanaUi semana : semanasUi) {
+            Map<Integer, Parte> escolhasDaSemana = new HashMap<>();
+            for (ParteUi parteUi : semana.partes()) {
+                Parte selecionada = parteUi.escolha().getValue();
+                if (selecionada != null) {
+                    escolhasDaSemana.put(parteUi.numero(), selecionada);
+                }
+            }
+            escolhasManuais.put(semana.dataInicio(), escolhasDaSemana);
             LocalDate data = semana.dataReuniao().getValue();
             if (data == null) {
                 errosTela.add("Informe a data efetiva da reunião para a semana iniciada em "
@@ -338,13 +348,49 @@ public class ImportacaoApostilaView {
         }
 
         try {
-            var previa = previaService.preparar(arquivoSelecionado, datas, catalogo, existentes);
+            var previa = previaService.preparar(
+                    arquivoSelecionado, datas, catalogo, existentes, escolhasManuais);
             resultadoContainer.getChildren().clear();
             exibirMensagens("Resultado da prévia", previa.erros(), previa.avisos());
 
+            DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            for (var semanaPrevia : previa.semanas()) {
+                VBox painelSemana = new VBox(5);
+                painelSemana.getStyleClass().add("card");
+                painelSemana.setPadding(new Insets(12));
+                Label tituloSemana = new Label("Semana " + semanaPrevia.dataInicioApostila().format(formato)
+                        + " — reunião em " + semanaPrevia.dataReuniao().format(formato));
+                tituloSemana.getStyleClass().add("card-title");
+                painelSemana.getChildren().addAll(tituloSemana,
+                        new Label("Leitura bíblica: " + (semanaPrevia.leituraBiblica() == null
+                                ? "não identificada" : semanaPrevia.leituraBiblica())),
+                        new Label("Cânticos: " + valor(semanaPrevia.canticos().abertura()) + " / "
+                                + valor(semanaPrevia.canticos().intermediario()) + " / "
+                                + valor(semanaPrevia.canticos().encerramento())));
+                if (semanaPrevia.conflitoProgramacaoExistente()) {
+                    Label conflito = new Label("BLOQUEIO: já existe programação nesta data.");
+                    conflito.setWrapText(true);
+                    painelSemana.getChildren().add(conflito);
+                }
+                for (var mapeamento : semanaPrevia.partes()) {
+                    String destino = mapeamento.possuiCorrespondenciaUnica()
+                            ? mapeamento.candidatos().getFirst().getNome()
+                                    + " (ID " + mapeamento.candidatos().getFirst().getId() + ")"
+                            : "PENDENTE — " + rotulo(mapeamento.situacao());
+                    Label linhaParte = new Label(mapeamento.numeroParteApostila() + ". "
+                            + mapeamento.tema() + " → " + destino);
+                    linhaParte.setWrapText(true);
+                    painelSemana.getChildren().add(linhaParte);
+                }
+                resultadoContainer.getChildren().add(painelSemana);
+            }
+
             Label resumo = new Label(
-                    "Prévia técnica concluída. As escolhas manuais acima são apenas visuais nesta etapa "
-                            + "e ainda não liberam a importação. Nenhuma alteração foi gravada."
+                    "Prévia técnica concluída usando as escolhas atuais. "
+                            + (previa.podeProsseguirParaConfirmacao()
+                            ? "O mapeamento está completo, mas a confirmação/gravação ainda não está implementada."
+                            : "Existem pendências ou conflitos que precisam ser corrigidos. ")
+                            + "Nenhuma alteração foi gravada no banco."
             );
             resumo.setWrapText(true);
             resumo.getStyleClass().add("card-title");
@@ -399,6 +445,16 @@ public class ImportacaoApostilaView {
         alerta.showAndWait();
     }
 
-    private record SemanaUi(LocalDate dataInicio, DatePicker dataReuniao) {
+    private record SemanaUi(
+            LocalDate dataInicio,
+            DatePicker dataReuniao,
+            List<ParteUi> partes
+    ) {
+        private SemanaUi {
+            partes = List.copyOf(partes);
+        }
+    }
+
+    private record ParteUi(int numero, ComboBox<Parte> escolha) {
     }
 }
