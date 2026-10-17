@@ -15,6 +15,7 @@ import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
+import br.com.geradordesignacoes.view.importacao.ImportacaoApostilaView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -57,6 +58,8 @@ public class MainView {
             new ConfiguracaoSalasView();
     private final ConfiguracaoGeralView configuracaoGeralView =
             new ConfiguracaoGeralView();
+    private final ImportacaoApostilaView importacaoApostilaView =
+            new ImportacaoApostilaView();
 
     private final EscalaController escalaController;
     private final ProgramacaoController programacaoController;
@@ -274,6 +277,17 @@ public class MainView {
             mostrarTela(geracaoFormulariosView.getView());
         });
         sidebar.getChildren().add(formularios);
+
+        Button importarApostila = criarBotaoMenu(
+                FontAwesomeSolid.FILE_ALT,
+                "Importar apostila",
+                false
+        );
+        importarApostila.setOnAction(_ -> {
+            ativarBotao(importarApostila);
+            mostrarTela(importacaoApostilaView.getView());
+        });
+        sidebar.getChildren().add(importarApostila);
 
 
         Label secaoEscala =
