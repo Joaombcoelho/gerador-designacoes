@@ -16,7 +16,7 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 - **Cancelamento:** registrar explicitamente que a reunião foi cancelada, sem apagar a programação já cadastrada.
 - **Programação confirmada:** considera-se confirmada quando a escala daquela data está salva no banco, com status SALVA. Antes de aplicar alterações de eventos a essa data, exibir a prévia das diferenças e exigir confirmação explícita.
 - **Evento retroativo:** apresentar previamente as datas e alterações propostas; nunca modificar o passado silenciosamente, independentemente do status da escala.
-- **Conflitos sem regra de precedência definida:** alertar e exigir decisão explícita do usuário. Não inventar precedência automática.
+- **Conflitos sem regra de precedência definida:** alertar e exigir decisão explícita do usuário. Não inventar precedência automática. A escolha manual vale somente para aquela aplicação; não deve ser persistida como regra para prévias futuras.
 - **Eventos com vários dias:** representar um intervalo inclusivo, mas avaliar cada data separadamente, permitindo exceções por data.
 - **Visita e cancelamento na mesma data:** o cancelamento prevalece.
 
@@ -32,7 +32,7 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 | Celebração no sábado ou domingo | Manter a reunião de quarta-feira normalmente |
 | Cancelamento isolado | Marcar cancelada e preservar os dados existentes |
 | Visita e cancelamento na mesma data | Considerar cancelamento |
-| Conflito entre tipos sem precedência definida | Alertar e solicitar decisão |
+| Conflito entre tipos sem precedência definida | Alertar e solicitar decisão; a escolha vale somente para aquela aplicação |
 | Evento de vários dias | Resolver separadamente para cada data |
 | Evento retroativo | Mostrar prévia e exigir confirmação antes de aplicar |
 | Escala da data com status SALVA | Mostrar diferenças e pedir confirmação antes de gravar |
@@ -91,9 +91,8 @@ O cancelamento deve ser um estado/resultado explícito da resolução, não a ex
 ## Decisões ainda necessárias antes das regras executáveis
 
 1. **Conflitos:** além da combinação visita + cancelamento, quais combinações têm precedência definida? As demais devem continuar exigindo decisão explícita. Foi informado que assembleia, congresso e celebração não ocorrem na mesma semana que a visita, mas o sistema ainda deve tratar cadastros sobrepostos com segurança.
-2. **Persistência da decisão:** quando o usuário resolver um conflito, essa decisão deve valer apenas para aquela aplicação ou ficar registrada como resolução do evento/data para futuras prévias?
 
-A regra da visita do superintendente e a regra operacional da celebração estão definidas para esta proposta. As decisões restantes devem ser fechadas antes da implementação do serviço de resolução/aplicação, para evitar codificar suposições de negócio.
+A regra da visita do superintendente, a regra operacional da celebração e o caráter temporário das escolhas para conflitos estão definidos para esta proposta. Antes da implementação do serviço de resolução/aplicação, ainda é necessário definir como tratar combinações de eventos além da combinação visita + cancelamento, sem inventar precedência.
 
 ## Sequência sugerida de PRs
 
