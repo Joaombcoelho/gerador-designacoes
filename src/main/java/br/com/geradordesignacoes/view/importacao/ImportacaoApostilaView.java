@@ -245,9 +245,10 @@ public class ImportacaoApostilaView {
             resultadoContainer.getChildren().clear();
             exibirMensagens("Resultado da prévia", previa.erros(), previa.avisos());
 
-            Label resumo = new Label(previa.podeProsseguirParaConfirmacao()
-                    ? "Prévia sem pendências automáticas."
-                    : "A prévia ainda exige conferência. Nenhuma alteração foi gravada.");
+            Label resumo = new Label(
+                    "Prévia técnica concluída. As escolhas manuais acima são apenas visuais nesta etapa "
+                            + "e ainda não liberam a importação. Nenhuma alteração foi gravada."
+            );
             resumo.setWrapText(true);
             resumo.getStyleClass().add("card-title");
             resultadoContainer.getChildren().add(resumo);
