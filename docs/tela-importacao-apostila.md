@@ -27,6 +27,6 @@ A tela fica disponível no menu lateral em **Importar apostila**.
 - A data da apostila não é presumida como data da reunião.
 - As escolhas manuais são apenas visuais nesta etapa; ainda não são enviadas ao serviço de confirmação/importação.
 
-## Limites desta PR
+## Limites desta etapa
 
-Esta PR implementa a interface de conferência e a sua navegação no menu. Não implementa a confirmação final, gravação transacional, criação de partes, nem importação de cânticos para uma programação. Essas operações devem ser desenvolvidas somente depois de as PRs de validação, mapeamento, prévia e revisão manual terem sido aprovadas.
+Esta etapa integra a extração RTF à tela já existente e mantém o fluxo de conferência como somente leitura. Não implementa a confirmação final, gravação transacional, criação de partes, nem importação de cânticos para uma programação. Essas operações devem ser desenvolvidas em etapa separada, depois de a extração integrada ser testada.
