@@ -10,8 +10,8 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 
 - **Visita do superintendente:** ajustar a programação habitual, em vez de substituir toda a reunião por um modelo especial. Ainda é necessário definir exatamente quais partes e campos são alterados.
 - **Cancelamento:** registrar explicitamente que a reunião foi cancelada, sem apagar a programação já cadastrada.
-- **Programação já confirmada:** exibir uma prévia das diferenças e pedir confirmação antes de gravar qualquer mudança efetiva.
-- **Evento retroativo:** apresentar previamente as datas e alterações propostas; nunca modificar o passado silenciosamente.
+- **Programação confirmada:** considera-se confirmada quando a escala daquela data está salva no banco, com status SALVA. Antes de aplicar alterações de eventos a essa data, exibir a prévia das diferenças e exigir confirmação explícita.
+- **Evento retroativo:** apresentar previamente as datas e alterações propostas; nunca modificar o passado silenciosamente, independentemente do status da escala.
 - **Conflitos sem regra de precedência definida:** alertar e exigir decisão explícita do usuário. Não inventar precedência automática.
 - **Eventos com vários dias:** representar um intervalo inclusivo, mas avaliar cada data separadamente, permitindo exceções por data.
 - **Visita e cancelamento na mesma data:** o cancelamento prevalece.
@@ -27,7 +27,8 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 | Conflito entre tipos sem precedência definida | Alertar e solicitar decisão |
 | Evento de vários dias | Resolver separadamente para cada data |
 | Evento retroativo | Mostrar prévia e exigir confirmação antes de aplicar |
-| Programação já confirmada | Mostrar diferenças e pedir confirmação antes de gravar |
+| Escala da data com status SALVA | Mostrar diferenças e pedir confirmação antes de gravar |
+| Escala da data com status GERADA | Mostrar prévia das alterações propostas; a aplicação seguirá o fluxo de confirmação definido para o evento |
 
 ## Diagnóstico técnico do código atual
 
@@ -41,7 +42,7 @@ A implementação de eventos especiais deve permanecer independente do fluxo de 
 ### Escalas e histórico
 
 - O modelo Escala possui estados GERADA e SALVA. A tabela escala mantém o status e as datas de geração/salvamento.
-- A programação semanal (ProgramacaoSemana) não possui, no modelo/tabela examinados, um estado próprio de confirmação. Portanto, ainda é necessário decidir se “programação confirmada” significa uma escala salva, uma programação existente/editada ou outro conceito funcional.
+- A confirmação para fins de eventos será determinada pelo status SALVA da escala correspondente à data, conforme decisão funcional.
 - PersistenciaEscalasService.salvar(...) persiste escalas e, quando solicitado, atualiza o histórico na mesma transação SQLite.
 - A persistência da escala existente pode substituir suas designações; por isso, a aplicação de eventos não deve acionar geração/salvamento de escalas como efeito indireto de cadastrar, editar ou consultar eventos.
 - O histórico de participações é armazenado separadamente em historico_designacoes. A funcionalidade de eventos não deve apagá-lo nem reescrevê-lo automaticamente.
@@ -64,7 +65,7 @@ Separar três responsabilidades:
 
 1. **Evento persistido:** identificador, tipo explícito, intervalo de datas, descrição opcional e dados específicos validados para aquele tipo.
 2. **Resolução por data:** serviço puro que recebe os eventos aplicáveis e a programação lida sem efeitos colaterais, produzindo resultado e alertas para aquela data. Intervalos são avaliados data a data.
-3. **Aplicação explícita:** após a prévia, apresentar diferenças e pedir confirmação quando houver mudanças efetivas. Só então persistir, com validações repetidas e transação adequada.
+3. **Aplicação explícita:** após a prévia, apresentar diferenças e pedir confirmação quando houver mudanças efetivas. Para escalas com status SALVA e para eventos retroativos, a confirmação explícita é obrigatória. Só então persistir, com validações repetidas e transação adequada.
 
 O cancelamento deve ser um estado/resultado explícito da resolução, não a exclusão da programação. A resolução deve ser determinística para os casos com regras acordadas; conflitos não definidos devem produzir alertas e solicitar decisão, sem precedência implícita.
 
@@ -85,7 +86,6 @@ O cancelamento deve ser um estado/resultado explícito da resolução, não a ex
 2. **Tipos da primeira versão:** além de visita do superintendente e cancelamento, quais outros tipos de evento devem ser suportados desde o início?
 3. **Conflitos:** além da combinação visita + cancelamento, quais combinações têm precedência definida? As demais devem continuar exigindo decisão explícita.
 4. **Persistência da decisão:** quando o usuário resolver um conflito, essa decisão deve valer apenas para aquela aplicação ou ficar registrada como resolução do evento/data para futuras prévias?
-5. **Significado de programação confirmada:** deve ser associado ao status SALVA da escala, à existência de programação semanal ou a um estado de confirmação separado? O código atual não oferece um estado próprio de confirmação em ProgramacaoSemana.
 
 Essas decisões devem ser fechadas antes da implementação do serviço de resolução/aplicação, para evitar codificar suposições de negócio.
 
