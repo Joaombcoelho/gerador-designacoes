@@ -48,7 +48,7 @@ public class ResolvedorEventosEspeciais {
 
         if (possuiConflitoNaoResolvido(considerados)) {
             List<AcaoResolucaoEvento> alternativas = considerados.stream()
-                    .map(ResolvedorEventosEspeciais::acaoParaTipo)
+                    .map(evento -> acaoParaTipo(evento.tipo()))
                     .filter(acao -> acao != AcaoResolucaoEvento.MANTER_PROGRAMACAO)
                     .distinct()
                     .toList();
