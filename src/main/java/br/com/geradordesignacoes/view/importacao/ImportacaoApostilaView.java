@@ -14,14 +14,18 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
@@ -31,19 +35,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 /** Interface de conferência da apostila. Esta tela não grava dados. */
 public class ImportacaoApostilaView {
 
     private final VBox root = new VBox(16);
+    private final ScrollPane scrollPrincipal = new ScrollPane(root);
     private final VBox semanasContainer = new VBox(14);
     private final VBox resultadoContainer = new VBox(8);
     private final ParteDAO parteDAO = new ParteDAO();
@@ -91,17 +100,16 @@ public class ImportacaoApostilaView {
         conferirButton.setDisable(true);
         conferirButton.setOnAction(_ -> conferirPrevia());
 
-        ScrollPane scroll = new ScrollPane(semanasContainer);
-        scroll.setFitToWidth(true);
-        scroll.setPrefViewportHeight(380);
-        VBox.setVgrow(scroll, Priority.ALWAYS);
+        scrollPrincipal.setFitToWidth(true);
+        scrollPrincipal.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPrincipal.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
-        root.getChildren().addAll(titulo, instrucao, arquivoLinha, arquivoLabel, scroll,
+        root.getChildren().addAll(titulo, instrucao, arquivoLinha, arquivoLabel, semanasContainer,
                 conferirButton, resultadoContainer);
     }
 
     public Parent getView() {
-        return root;
+        return scrollPrincipal;
     }
 
     private void selecionarArquivo() {
@@ -226,9 +234,18 @@ public class ImportacaoApostilaView {
                     + valor(semana.canticos().intermediario()) + " / "
                     + valor(semana.canticos().encerramento()));
 
-            DatePicker dataReuniao = new DatePicker();
-            dataReuniao.setPromptText("Data real da reunião");
-            HBox dataLinha = new HBox(10, new Label("Data efetiva da reunião:"), dataReuniao);
+            ObjectProperty<LocalDate> dataReuniao = new SimpleObjectProperty<>();
+            Label dataSelecionada = new Label("Nenhuma data selecionada");
+            Button selecionarData = new Button("Selecionar data…");
+            selecionarData.setOnAction(_ -> selecionarDataReuniao(
+                    semana.dataInicio(), dataReuniao.get()
+            ).ifPresent(data -> {
+                dataReuniao.set(data);
+                dataSelecionada.setText(data.format(formato));
+                resultadoContainer.getChildren().clear();
+            }));
+            HBox dataLinha = new HBox(10, new Label("Data efetiva da reunião:"),
+                    dataSelecionada, selecionarData);
             dataLinha.setAlignment(Pos.CENTER_LEFT);
 
             VBox cartao = new VBox(8, cabecalho, leitura, canticos, dataLinha);
@@ -317,7 +334,7 @@ public class ImportacaoApostilaView {
         List<String> errosTela = new ArrayList<>();
 
         for (SemanaUi semana : semanasUi) {
-            LocalDate data = semana.dataReuniao().getValue();
+            LocalDate data = semana.dataReuniao().get();
             if (data == null) {
                 errosTela.add("Informe a data efetiva da reunião para a semana iniciada em "
                         + semana.dataInicio() + ".");
@@ -401,6 +418,84 @@ public class ImportacaoApostilaView {
         alerta.showAndWait();
     }
 
-    private record SemanaUi(LocalDate dataInicio, DatePicker dataReuniao) {
+    private Optional<LocalDate> selecionarDataReuniao(LocalDate dataInicio, LocalDate dataAtual) {
+        Dialog<LocalDate> dialog = new Dialog<>();
+        dialog.setTitle("Selecionar data real da reunião");
+        if (root.getScene() != null) {
+            dialog.initOwner(root.getScene().getWindow());
+        }
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+        LocalDate referencia = dataAtual == null ? dataInicio.plusDays(2) : dataAtual;
+        ObjectProperty<LocalDate> mesExibido =
+                new SimpleObjectProperty<>(referencia.withDayOfMonth(1));
+
+        Label tituloMes = new Label();
+        tituloMes.getStyleClass().add("card-title");
+        GridPane calendario = new GridPane();
+        calendario.setHgap(6);
+        calendario.setVgap(6);
+        calendario.setPadding(new Insets(8, 0, 8, 0));
+
+        Runnable renderizarCalendario = () -> {
+            calendario.getChildren().clear();
+            calendario.getColumnConstraints().clear();
+            LocalDate mes = mesExibido.get();
+            tituloMes.setText(mes.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"))
+                    + " de " + mes.getYear());
+
+            String[] diasSemana = {"Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"};
+            for (int coluna = 0; coluna < diasSemana.length; coluna++) {
+                Label dia = new Label(diasSemana[coluna]);
+                dia.setMaxWidth(Double.MAX_VALUE);
+                dia.setAlignment(Pos.CENTER);
+                calendario.add(dia, coluna, 0);
+                javafx.scene.layout.ColumnConstraints restricao =
+                        new javafx.scene.layout.ColumnConstraints();
+                restricao.setPercentWidth(100.0 / 7.0);
+                calendario.getColumnConstraints().add(restricao);
+            }
+
+            int deslocamento = mes.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue();
+            int quantidadeDias = mes.lengthOfMonth();
+            for (int dia = 1; dia <= quantidadeDias; dia++) {
+                int indice = deslocamento + dia - 1;
+                LocalDate data = mes.withDayOfMonth(dia);
+                Button botaoDia = new Button(Integer.toString(dia));
+                botaoDia.setMaxWidth(Double.MAX_VALUE);
+                botaoDia.setOnAction(_ -> {
+                    dialog.setResult(data);
+                    dialog.close();
+                });
+                calendario.add(botaoDia, indice % 7, indice / 7 + 1);
+            }
+        };
+
+        Button mesAnterior = new Button("‹");
+        mesAnterior.setOnAction(_ -> {
+            mesExibido.set(mesExibido.get().minusMonths(1));
+            renderizarCalendario.run();
+        });
+        Button proximoMes = new Button("›");
+        proximoMes.setOnAction(_ -> {
+            mesExibido.set(mesExibido.get().plusMonths(1));
+            renderizarCalendario.run();
+        });
+
+        HBox navegacao = new HBox(12, mesAnterior, tituloMes, proximoMes);
+        navegacao.setAlignment(Pos.CENTER);
+        VBox conteudo = new VBox(12,
+                new Label("Escolha explicitamente o dia da reunião:"),
+                navegacao,
+                calendario);
+        conteudo.setPadding(new Insets(12));
+        dialog.getDialogPane().setContent(conteudo);
+        dialog.getDialogPane().setPrefWidth(360);
+        renderizarCalendario.run();
+
+        return dialog.showAndWait();
+    }
+
+    private record SemanaUi(LocalDate dataInicio, ObjectProperty<LocalDate> dataReuniao) {
     }
 }
