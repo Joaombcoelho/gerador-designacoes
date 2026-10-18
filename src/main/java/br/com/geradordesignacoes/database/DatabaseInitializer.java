@@ -694,17 +694,17 @@ public class DatabaseInitializer {
     private static void validarSemColisaoHistorico(
             Connection connection, int antigoId, int novoId)
             throws SQLException {
-        String sala = colunaExiste(connection, "historico_designacoes", "sala")
-                ? " AND nova.sala = antiga.sala" : "";
+        // Confere exatamente as colunas que compõem a restrição UNIQUE
+        // (data, pessoa_id, parte_id, tipo_participacao), sem depender
+        // de colunas opcionais que variam entre versões do banco.
         String sql = """
-                SELECT antiga.id
-                FROM historico_designacoes antiga
-                JOIN historico_designacoes nova
-                  ON nova.data = antiga.data
-                 AND nova.pessoa_id = antiga.pessoa_id
-                 AND nova.tipo_participacao = antiga.tipo_participacao
-                """ + sala + """
-                WHERE antiga.parte_id = ? AND nova.parte_id = ?
+                SELECT h_antigo.id
+                FROM historico_designacoes AS h_antigo
+                INNER JOIN historico_designacoes AS h_novo
+                  ON h_novo.data = h_antigo.data
+                 AND h_novo.pessoa_id = h_antigo.pessoa_id
+                 AND h_novo.tipo_participacao = h_antigo.tipo_participacao
+                WHERE h_antigo.parte_id = ? AND h_novo.parte_id = ?
                 """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, antigoId);
