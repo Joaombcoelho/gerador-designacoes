@@ -187,7 +187,7 @@ public class AplicacaoEventosEspeciaisService {
                 return new ResultadoAplicacaoEvento(
                         ResultadoAplicacaoEvento.Situacao.JA_APLICADA,
                         rs.getLong("id"),
-                        LocalDate.parse(rs.getString("data_reuniao")),
+                        rs.getDate("data_reuniao").toLocalDate(),
                         EstadoAplicacaoEvento.valueOf(rs.getString("estado")));
             }
         }
@@ -224,7 +224,7 @@ public class AplicacaoEventosEspeciaisService {
         try (PreparedStatement statement = connection.prepareStatement(
                 sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, comando.chaveIdempotencia());
-            statement.setString(2, dataReuniao.toString());
+            statement.setDate(2, Date.valueOf(dataReuniao));
             statement.setString(3, comando.acaoConfirmada().name());
             statement.setString(4, fingerprint);
             statement.setString(5, LocalDateTime.now().toString());
@@ -271,7 +271,7 @@ public class AplicacaoEventosEspeciaisService {
                     aplicacao_id = excluded.aplicacao_id
                 """;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, dataReuniao.toString());
+            statement.setDate(1, Date.valueOf(dataReuniao));
             statement.setString(2, estado.name());
             statement.setLong(3, idAplicacao);
             statement.executeUpdate();
