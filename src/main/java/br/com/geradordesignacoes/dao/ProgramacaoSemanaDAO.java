@@ -86,7 +86,8 @@ public class ProgramacaoSemanaDAO {
 
     /**
      * Persiste várias programações novas numa única transação.
-     * Recusa qualquer data já cadastrada e nunca atualiza registros existentes.
+     * Recusa programações existentes já configuradas. Reutiliza somente rascunhos
+     * vazios criados pela tela, preservando a transação atômica.
      */
     public List<ProgramacaoSemana> salvarTodasNovas(List<ProgramacaoSemana> programacoes) {
         if (programacoes == null || programacoes.isEmpty()) {
@@ -108,7 +109,6 @@ public class ProgramacaoSemanaDAO {
             }
         }
 
-        String consulta = "SELECT 1 FROM programacao_semana WHERE data = ?";
         String insert = """
                 INSERT INTO programacao_semana (
                     data, sala_b_habilitada, sala_c_habilitada,
