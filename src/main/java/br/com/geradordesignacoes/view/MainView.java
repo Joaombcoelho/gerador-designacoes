@@ -15,6 +15,7 @@ import br.com.geradordesignacoes.view.historico.HistoricoView;
 import br.com.geradordesignacoes.view.parte.ParteView;
 import br.com.geradordesignacoes.view.pessoa.PessoaView;
 import br.com.geradordesignacoes.view.programacao.ProgramacaoView;
+import br.com.geradordesignacoes.view.eventos.EventosEspeciaisView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -47,6 +48,8 @@ public class MainView {
     private final ParteView parteView = new ParteView();
     private final EscalaView escalaView = new EscalaView();
     private final ProgramacaoView programacaoView = new ProgramacaoView();
+    private final EventosEspeciaisView eventosEspeciaisView =
+            new EventosEspeciaisView();
     private final GeracaoFormulariosView geracaoFormulariosView =
             new GeracaoFormulariosView();
     private final EdicaoEscalaView edicaoEscalaView =
@@ -263,6 +266,17 @@ public class MainView {
         sidebar.getChildren().add(
                 programacao
         );
+
+        Button eventosEspeciais = criarBotaoMenu(
+                FontAwesomeSolid.CALENDAR_ALT,
+                "Eventos especiais",
+                false
+        );
+        eventosEspeciais.setOnAction(_ -> {
+            ativarBotao(eventosEspeciais);
+            mostrarTela(eventosEspeciaisView.getView());
+        });
+        sidebar.getChildren().add(eventosEspeciais);
 
         Button formularios = criarBotaoMenu(
                 FontAwesomeSolid.FILE_ALT,
