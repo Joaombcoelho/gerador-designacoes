@@ -389,6 +389,60 @@ public class DatabaseInitializer {
                     )
                     """);
 
+            /*
+             * ----------------------------------------------------
+             * APLICAÇÃO DE EVENTOS ESPECIAIS
+             * ----------------------------------------------------
+             * Registro histórico e estado atual explícito. A aplicação
+             * nunca exclui a programação semanal nem seus ajustes S-140.
+             */
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS evento_especial_aplicacao (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        chave_idempotencia TEXT NOT NULL UNIQUE,
+                        data_reuniao DATE NOT NULL,
+                        acao TEXT NOT NULL CHECK (
+                            acao IN ('CANCELAR_REUNIAO', 'SUBSTITUIR_POR_CELEBRACAO')
+                        ),
+                        fingerprint TEXT NOT NULL,
+                        instante_aplicacao TEXT NOT NULL,
+                        estado TEXT NOT NULL CHECK (
+                            estado IN ('CANCELADA', 'SUBSTITUIDA_POR_CELEBRACAO')
+                        ),
+                        FOREIGN KEY (data_reuniao)
+                            REFERENCES programacao_semana(data)
+                            ON DELETE RESTRICT
+                    )
+                    """);
+
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS evento_especial_aplicacao_evento (
+                        aplicacao_id INTEGER NOT NULL,
+                        evento_id INTEGER NOT NULL,
+                        -- Sem FK para evento_especial: o histórico sobrevive à exclusão do cadastro.
+                        PRIMARY KEY (aplicacao_id, evento_id),
+                        FOREIGN KEY (aplicacao_id)
+                            REFERENCES evento_especial_aplicacao(id)
+                            ON DELETE RESTRICT
+                    )
+                    """);
+
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS estado_reuniao_evento (
+                        data_reuniao DATE PRIMARY KEY NOT NULL,
+                        estado TEXT NOT NULL CHECK (
+                            estado IN ('CANCELADA', 'SUBSTITUIDA_POR_CELEBRACAO')
+                        ),
+                        aplicacao_id INTEGER NOT NULL,
+                        FOREIGN KEY (data_reuniao)
+                            REFERENCES programacao_semana(data)
+                            ON DELETE RESTRICT,
+                        FOREIGN KEY (aplicacao_id)
+                            REFERENCES evento_especial_aplicacao(id)
+                            ON DELETE RESTRICT
+                    )
+                    """);
+
             adicionarColunaNumeroOficialProgramacaoParte(connection);
             adicionarColunaDuracaoProgramacaoParte(connection);
 
