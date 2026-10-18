@@ -306,7 +306,10 @@ public class ImportacaoApostilaView {
                     }
                 });
                 if (sugestao.possuiCorrespondenciaUnica()) {
-                    escolha.getSelectionModel().select(sugestao.candidatos().getFirst());
+                    Parte correspondencia = sugestao.candidatos().getFirst();
+                    escolha.getSelectionModel().select(correspondencia);
+                    estado.setText("Reconhecida automaticamente: " + correspondencia.getNome()
+                            + " (ID " + correspondencia.getId() + ")");
                 }
                 partesUi.add(new ParteUi(parteJson.numero(), escolha));
             }
