@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ConfiguracaoSalasDAO;
+import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.ConfiguracaoSalas;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
@@ -20,6 +21,7 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
 
     private final ConfiguracaoSalasDAO configuracaoSalasDAO =
             new ConfiguracaoSalasDAO();
+    private final ProgramacaoSemanaDAO programacaoDAO = new ProgramacaoSemanaDAO();
 
 
     @BeforeEach
@@ -360,6 +362,8 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
         assertFalse(
                 service.estaConfigurada(data)
         );
+        assertNull(programacaoDAO.buscarPorData(data),
+                "Consultar o status não deve criar uma programação vazia.");
     }
 
 
@@ -372,7 +376,21 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
         assertFalse(
                 service.estaConfigurada(data)
         );
+        assertNull(programacaoDAO.buscarPorData(data),
+                "Verificar uma data sem programação deve ser somente leitura.");
     }
+
+    @Test
+    void buscarOuPrepararNaoDevePersistirUmaNovaProgramacao() {
+        LocalDate data = LocalDate.of(2026, 12, 2);
+
+        ProgramacaoSemana preparada = service.buscarOuPreparar(data);
+
+        assertNull( preparada.id());
+        assertFalse( service.estaConfigurada(data));
+        assertNull(programacaoDAO.buscarPorData(data));
+    }
+
     @Test
     void naoDevePermitirAdicionarParteComIdNulo() {
 
