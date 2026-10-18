@@ -396,6 +396,8 @@ public class DatabaseInitializer {
              * ----------------------------------------------------
              */
 
+            normalizarPartesDuplicadas(connection);
+
             cadastrarPartesIniciais(
                     connection
             );
@@ -422,6 +424,310 @@ public class DatabaseInitializer {
             );
         }
 
+    }
+
+
+    /**
+     * Corrige os seis nomes legados antes do cadastro inicial. A migração
+     * preserva os IDs quando existe apenas o registro antigo e remapeia todas
+     * as chaves estrangeiras quando já existem as duas variantes.
+     *
+     * Em caso de colisão que não possa ser resolvida sem perder informação,
+     * toda a operação é revertida e a inicialização falha explicitamente.
+     */
+    static void normalizarPartesDuplicadas(Connection connection)
+            throws SQLException {
+        String[][] nomes = {
+                {"Iniciando Conversas_De casa em casa",
+                        "Iniciando Conversas _ De casa em casa"},
+                {"Iniciando Conversas_Testemunho informal",
+                        "Iniciando Conversas _ Testemunho informal"},
+                {"Iniciando Conversas_Testemunho público",
+                        "Iniciando Conversas _ Testemunho público"},
+                {"Cultivando Interesse_De casa em casa",
+                        "Cultivando Interesse _ De casa em casa"},
+                {"Cultivando Interesse_Testemunho informal",
+                        "Cultivando Interesse _ Testemunho informal"},
+                {"Cultivando Interesse_Testemunho público",
+                        "Cultivando Interesse _ Testemunho público"}
+        };
+
+        boolean autoCommitAnterior = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+        try {
+            for (String[] par : nomes) {
+                Integer antigoId = buscarIdPartePorNome(connection, par[0]);
+                Integer novoId = buscarIdPartePorNome(connection, par[1]);
+
+                if (antigoId == null) {
+                    continue;
+                }
+                if (novoId == null) {
+                    try (PreparedStatement ps = connection.prepareStatement(
+                            "UPDATE parte SET nome = ? WHERE id = ?")) {
+                        ps.setString(1, par[1]);
+                        ps.setInt(2, antigoId);
+                        ps.executeUpdate();
+                    }
+                    continue;
+                }
+                if (antigoId.equals(novoId)) {
+                    continue;
+                }
+
+                validarPartesEquivalentes(connection, antigoId, novoId,
+                        par[0], par[1]);
+                remapearReferenciasParte(connection, antigoId, novoId);
+                try (PreparedStatement ps = connection.prepareStatement(
+                        "DELETE FROM parte WHERE id = ?")) {
+                    ps.setInt(1, antigoId);
+                    if (ps.executeUpdate() != 1) {
+                        throw new SQLException("Não foi possível consolidar a parte legada: " + par[0]);
+                    }
+                }
+            }
+
+            try (Statement st = connection.createStatement();
+                 ResultSet rs = st.executeQuery("PRAGMA foreign_key_check")) {
+                if (rs.next()) {
+                    throw new SQLException("A normalização das partes deixou uma referência estrangeira inválida na tabela "
+                            + rs.getString(1) + ".");
+                }
+            }
+            connection.commit();
+        } catch (SQLException | RuntimeException e) {
+            connection.rollback();
+            if (e instanceof SQLException sqlException) {
+                throw sqlException;
+            }
+            throw e;
+        } finally {
+            connection.setAutoCommit(autoCommitAnterior);
+        }
+    }
+
+    private static Integer buscarIdPartePorNome(
+            Connection connection, String nome) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT id FROM parte WHERE nome = ? ORDER BY id")) {
+            ps.setString(1, nome);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                int id = rs.getInt(1);
+                if (rs.next()) {
+                    throw new SQLException("Há mais de uma parte com o nome '" + nome
+                            + "'. A migração foi cancelada para evitar perda de dados.");
+                }
+                return id;
+            }
+        }
+    }
+
+    private static void validarPartesEquivalentes(
+            Connection connection, int antigoId, int novoId,
+            String nomeAntigo, String nomeNovo) throws SQLException {
+        List<String> colunas = new java.util.ArrayList<>();
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery("PRAGMA table_info(parte)")) {
+            while (rs.next()) {
+                String coluna = rs.getString("name");
+                // A ordem padrão da variante canônica é recalculada pelo
+                // inicializador; registros legados podem continuar com 999.
+                if (!"id".equals(coluna)
+                        && !"nome".equals(coluna)
+                        && !"ordem".equals(coluna)) {
+                    colunas.add(coluna);
+                }
+            }
+        }
+
+        String selecao = String.join(", ", colunas);
+        try (PreparedStatement psAntigo = connection.prepareStatement(
+                    "SELECT " + selecao + " FROM parte WHERE id = ?");
+             PreparedStatement psNovo = connection.prepareStatement(
+                    "SELECT " + selecao + " FROM parte WHERE id = ?")) {
+            psAntigo.setInt(1, antigoId);
+            psNovo.setInt(1, novoId);
+            try (ResultSet antigo = psAntigo.executeQuery();
+                 ResultSet novo = psNovo.executeQuery()) {
+                if (!antigo.next() || !novo.next()) {
+                    throw new SQLException("Não foi possível validar os registros de parte.");
+                }
+                for (int i = 1; i <= colunas.size(); i++) {
+                    Object valorAntigo = antigo.getObject(i);
+                    Object valorNovo = novo.getObject(i);
+                    if (!java.util.Objects.equals(valorAntigo, valorNovo)) {
+                        throw new SQLException("As partes '" + nomeAntigo + "' e '"
+                                + nomeNovo + "' possuem configurações diferentes (coluna "
+                                + colunas.get(i - 1) + "). A migração foi revertida para preservar os dados.");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void remapearReferenciasParte(
+            Connection connection, int antigoId, int novoId)
+            throws SQLException {
+        List<String[]> referencias = new java.util.ArrayList<>();
+        try (Statement st = connection.createStatement();
+             ResultSet tabelas = st.executeQuery(
+                     "SELECT name FROM sqlite_master WHERE type = 'table' "
+                             + "AND name NOT LIKE 'sqlite_%'")) {
+            while (tabelas.next()) {
+                String tabela = tabelas.getString(1);
+                try (Statement fkStatement = connection.createStatement();
+                     ResultSet fks = fkStatement.executeQuery(
+                             "PRAGMA foreign_key_list('" + tabela.replace("'", "''") + "')")) {
+                    while (fks.next()) {
+                        if ("parte".equalsIgnoreCase(fks.getString("table"))
+                                && "id".equalsIgnoreCase(fks.getString("to"))) {
+                            referencias.add(new String[]{tabela, fks.getString("from")});
+                        }
+                    }
+                }
+            }
+        }
+
+        for (String[] referencia : referencias) {
+            String tabela = referencia[0];
+            String coluna = referencia[1];
+            if ("parte".equalsIgnoreCase(tabela)) {
+                continue;
+            }
+            if ("parte_participacao_necessaria".equalsIgnoreCase(tabela)) {
+                consolidarParticipacoesNecessarias(
+                        connection, antigoId, novoId);
+                continue;
+            }
+            if ("programacao_parte".equalsIgnoreCase(tabela)) {
+                consolidarProgramacaoParte(connection, antigoId, novoId);
+                continue;
+            }
+            if ("historico_designacoes".equalsIgnoreCase(tabela)) {
+                validarSemColisaoHistorico(connection, antigoId, novoId);
+            }
+            String sql = "UPDATE \"" + tabela.replace("\"", "\"\"")
+                    + "\" SET \"" + coluna.replace("\"", "\"\"")
+                    + "\" = ? WHERE \"" + coluna.replace("\"", "\"\"") + "\" = ?";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, novoId);
+                ps.setInt(2, antigoId);
+                ps.executeUpdate();
+            }
+        }
+    }
+
+    private static void consolidarParticipacoesNecessarias(
+            Connection connection, int antigoId, int novoId)
+            throws SQLException {
+        try (PreparedStatement conflitos = connection.prepareStatement("""
+                SELECT antiga.tipo_participacao
+                FROM parte_participacao_necessaria antiga
+                JOIN parte_participacao_necessaria nova
+                  ON nova.parte_id = ? 
+                 AND nova.tipo_participacao = antiga.tipo_participacao
+                WHERE antiga.parte_id = ? AND nova.ordem <> antiga.ordem
+                """)) {
+            conflitos.setInt(1, novoId);
+            conflitos.setInt(2, antigoId);
+            try (ResultSet rs = conflitos.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("As partes duplicadas possuem ordenações diferentes para a participação "
+                            + rs.getString(1) + ". A migração foi revertida.");
+                }
+            }
+        }
+        try (PreparedStatement apagarDuplicadas = connection.prepareStatement("""
+                DELETE FROM parte_participacao_necessaria
+                WHERE parte_id = ?
+                  AND tipo_participacao IN (
+                    SELECT tipo_participacao
+                    FROM parte_participacao_necessaria WHERE parte_id = ?
+                  )
+                """)) {
+            apagarDuplicadas.setInt(1, antigoId);
+            apagarDuplicadas.setInt(2, novoId);
+            apagarDuplicadas.executeUpdate();
+        }
+        try (PreparedStatement atualizar = connection.prepareStatement(
+                "UPDATE parte_participacao_necessaria SET parte_id = ? WHERE parte_id = ?")) {
+            atualizar.setInt(1, novoId);
+            atualizar.setInt(2, antigoId);
+            atualizar.executeUpdate();
+        }
+    }
+
+    private static void consolidarProgramacaoParte(
+            Connection connection, int antigoId, int novoId)
+            throws SQLException {
+        try (PreparedStatement conflitos = connection.prepareStatement("""
+                SELECT antiga.id
+                FROM programacao_parte antiga
+                JOIN programacao_parte nova
+                  ON nova.programacao_semana_id = antiga.programacao_semana_id
+                 AND nova.parte_id = ?
+                WHERE antiga.parte_id = ?
+                """)) {
+            conflitos.setInt(1, novoId);
+            conflitos.setInt(2, antigoId);
+            try (ResultSet rs = conflitos.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("As duas variantes de uma parte aparecem na mesma programação semanal. "
+                            + "A migração foi revertida para que nenhuma entrada da programação seja descartada.");
+                }
+            }
+        }
+        try (PreparedStatement atualizar = connection.prepareStatement(
+                "UPDATE programacao_parte SET parte_id = ? WHERE parte_id = ?")) {
+            atualizar.setInt(1, novoId);
+            atualizar.setInt(2, antigoId);
+            atualizar.executeUpdate();
+        }
+    }
+
+    private static void validarSemColisaoHistorico(
+            Connection connection, int antigoId, int novoId)
+            throws SQLException {
+        // Confere exatamente as colunas que compõem a restrição UNIQUE
+        // (data, pessoa_id, parte_id, tipo_participacao), sem depender
+        // de colunas opcionais que variam entre versões do banco.
+        String sql = """
+                SELECT h_antigo.id
+                FROM historico_designacoes AS h_antigo
+                INNER JOIN historico_designacoes AS h_novo
+                  ON h_novo.data = h_antigo.data
+                 AND h_novo.pessoa_id = h_antigo.pessoa_id
+                 AND h_novo.tipo_participacao = h_antigo.tipo_participacao
+                WHERE h_antigo.parte_id = ? AND h_novo.parte_id = ?
+                """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, antigoId);
+            ps.setInt(2, novoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("As partes duplicadas possuem registros de histórico que colidiriam "
+                            + "com a restrição UNIQUE. A migração foi revertida para preservar o histórico.");
+                }
+            }
+        }
+    }
+
+    private static boolean colunaExiste(
+            Connection connection, String tabela, String coluna)
+            throws SQLException {
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(
+                     "PRAGMA table_info('" + tabela.replace("'", "''") + "')")) {
+            while (rs.next()) {
+                if (coluna.equalsIgnoreCase(rs.getString("name"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
