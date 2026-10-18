@@ -316,7 +316,7 @@ public class ImportacaoApostilaView {
         }
     }
 
-    private static LocalDate sugerirDataReuniao(
+    static LocalDate sugerirDataReuniao(
             LocalDate dataInicio,
             LocalDate dataFim,
             DayOfWeek diaHabitual
