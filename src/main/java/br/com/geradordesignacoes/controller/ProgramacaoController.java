@@ -180,7 +180,7 @@ public class ProgramacaoController {
         }
 
         try {
-            ProgramacaoSemana programacao = service.obterOuCriar(dataSelecionada);
+            ProgramacaoSemana programacao = service.buscarOuPreparar(dataSelecionada);
             List<HorarioS140Calculado> horarios = horarioS140Service.calcular(programacao);
             view.abrirDialogoHorariosS140(
                     horarios,
@@ -340,7 +340,7 @@ public class ProgramacaoController {
         try {
 
             ProgramacaoSemana programacao =
-                    service.obterOuCriar(data);
+                    service.buscarOuPreparar(data);
 
 
             atualizarListaPartes(programacao);
@@ -713,7 +713,7 @@ public class ProgramacaoController {
         try {
 
             ProgramacaoSemana programacao =
-                    service.obterOuCriar(data);
+                    service.buscarOuPreparar(data);
 
 
             programacao.partes()

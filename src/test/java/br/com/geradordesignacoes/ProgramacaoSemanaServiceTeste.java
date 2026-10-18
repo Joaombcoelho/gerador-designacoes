@@ -1,7 +1,9 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ConfiguracaoSalasDAO;
+import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.ConfiguracaoSalas;
+import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoParte;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProgramacaoSemanaServiceTest extends BaseDAOTest {
@@ -18,6 +21,7 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
 
     private final ConfiguracaoSalasDAO configuracaoSalasDAO =
             new ConfiguracaoSalasDAO();
+    private final ProgramacaoSemanaDAO programacaoDAO = new ProgramacaoSemanaDAO();
 
 
     @BeforeEach
@@ -358,6 +362,8 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
         assertFalse(
                 service.estaConfigurada(data)
         );
+        assertNull(programacaoDAO.buscarPorData(data),
+                "Consultar o status não deve criar uma programação vazia.");
     }
 
 
@@ -370,7 +376,21 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
         assertFalse(
                 service.estaConfigurada(data)
         );
+        assertNull(programacaoDAO.buscarPorData(data),
+                "Verificar uma data sem programação deve ser somente leitura.");
     }
+
+    @Test
+    void buscarOuPrepararNaoDevePersistirUmaNovaProgramacao() {
+        LocalDate data = LocalDate.of(2026, 12, 2);
+
+        ProgramacaoSemana preparada = service.buscarOuPreparar(data);
+
+        assertNull( preparada.id());
+        assertFalse( service.estaConfigurada(data));
+        assertNull(programacaoDAO.buscarPorData(data));
+    }
+
     @Test
     void naoDevePermitirAdicionarParteComIdNulo() {
 
@@ -424,6 +444,34 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
                                 null
                         )
         );
+    }
+
+    @Test
+    void devePermitirParteVariavelRepetidaSomenteNaImportacao() {
+        List<Parte> variaveis = service.listarPartesVariaveis();
+        assertTrue(variaveis.size() >= 2, "O catálogo de teste precisa de duas partes variáveis.");
+
+        Parte repetida = variaveis.get(0);
+        Parte outra = variaveis.get(1);
+        List<Parte> selecao = List.of(repetida, repetida, outra);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.validarPartesVariaveis(selecao));
+
+        ProgramacaoSemana programacao = service.montarProgramacaoImportada(
+                LocalDate.of(2026, 11, 4), selecao);
+
+        long ocorrencias = programacao.partes().stream()
+                .filter(item -> item.getParte().getId().equals(repetida.getId()))
+                .count();
+        assertEquals(2, ocorrencias);
+        assertNotEquals(
+                programacao.partes().stream()
+                        .filter(item -> item.getParte().getId().equals(repetida.getId()))
+                        .findFirst().orElseThrow().getOrdem(),
+                programacao.partes().stream()
+                        .filter(item -> item.getParte().getId().equals(repetida.getId()))
+                        .skip(1).findFirst().orElseThrow().getOrdem());
     }
 
     @Test

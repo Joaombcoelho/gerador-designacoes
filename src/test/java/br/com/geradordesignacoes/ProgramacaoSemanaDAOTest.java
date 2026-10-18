@@ -4,6 +4,7 @@ package br.com.geradordesignacoes;
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.ProgramacaoParteDAO;
 import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
+import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
@@ -357,6 +358,38 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
         assertEquals("45", encontrada.canticoFinal());
         assertTrue(encontrada.salaBHabilitada());
         assertFalse(encontrada.salaCHabilitada());
+    }
+
+    @Test
+    void importaSobreRascunhoVazioPreservandoIdDaData() {
+        LocalDate data = LocalDate.of(2026, 12, 9);
+        ProgramacaoSemana rascunho = new ProgramacaoSemanaService().obterOuCriar(data);
+        Parte parteVariavel = obterParteInicial("DISCURSO_TESOUROS");
+        ProgramacaoSemana importada = new ProgramacaoSemana(
+                null, data,
+                List.of(new ProgramacaoParte(parteVariavel, 1, "Tema importado")),
+                false, false, null, "101", "102", "103");
+
+        List<ProgramacaoSemana> salvas =
+                programacaoSemanaDAO.salvarTodasNovas(List.of(importada));
+
+        assertEquals(rascunho.id(), salvas.getFirst().id());
+        ProgramacaoSemana recarregada = programacaoSemanaDAO.buscarPorData(data);
+        assertEquals("101", recarregada.canticoInicial());
+        assertEquals(1, recarregada.partes().size());
+        assertEquals("Tema importado", recarregada.partes().getFirst().getTema());
+        assertFalse(programacaoSemanaDAO.podeReutilizarRascunhoVazio(data));
+    }
+
+    @Test
+    void reconheceRascunhoVazioCriadoAoAbrirProgramacao() {
+        LocalDate data = LocalDate.of(2026, 12, 2);
+        new ProgramacaoSemanaService().obterOuCriar(data);
+
+        assertTrue(programacaoSemanaDAO.podeReutilizarRascunhoVazio(data));
+
+        programacaoSemanaDAO.atualizarDadosS140(data, null, "103", null, null);
+        assertFalse(programacaoSemanaDAO.podeReutilizarRascunhoVazio(data));
     }
 
     @Test

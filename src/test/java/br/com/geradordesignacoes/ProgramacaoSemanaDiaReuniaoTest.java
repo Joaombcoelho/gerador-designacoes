@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ConfiguracaoGeralDAO;
+import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.model.ConfiguracaoGeral;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProgramacaoSemanaDiaReuniaoTest extends BaseDAOTest {
 
     private final ConfiguracaoGeralDAO configuracaoDAO = new ConfiguracaoGeralDAO();
+    private final ProgramacaoSemanaDAO programacaoDAO = new ProgramacaoSemanaDAO();
     private final ProgramacaoSemanaService service = new ProgramacaoSemanaService();
 
     @Test
@@ -33,6 +35,8 @@ class ProgramacaoSemanaDiaReuniaoTest extends BaseDAOTest {
                 List.of(2, 9, 16, 23, 30),
                 semanas.stream().map(semana -> semana.data().getDayOfMonth()).toList()
         );
+        assertTrue(semanas.stream().noneMatch(semana ->
+                programacaoDAO.buscarPorData(semana.data()) != null));
     }
 
     @Test
@@ -50,13 +54,11 @@ class ProgramacaoSemanaDiaReuniaoTest extends BaseDAOTest {
                 semanas.stream().map(semana -> semana.data().getDayOfMonth()).toList()
         );
 
-        // Confirma que as datas selecionadas foram persistidas e podem ser recuperadas.
-        assertEquals(
-                semanas.stream().map(ProgramacaoSemana::data).toList(),
-                semanas.stream()
-                        .map(semana -> service.obterOuCriar(semana.data()).data())
-                        .toList()
-        );
+        // Apenas listar as reuniões não deve criar registros no banco.
+        assertTrue(semanas.stream()
+                .allMatch(semana -> semana.id() == null));
+        assertTrue(semanas.stream()
+                .noneMatch(semana -> programacaoDAO.buscarPorData(semana.data()) != null));
     }
 
     private ConfiguracaoGeral configuracao(DayOfWeek dia) {

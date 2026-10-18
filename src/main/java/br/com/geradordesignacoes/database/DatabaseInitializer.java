@@ -196,6 +196,7 @@ public class DatabaseInitializer {
             
                 ordem INTEGER NOT NULL,
                 tema TEXT,
+                numero_oficial INTEGER,
                 duracao_minutos INTEGER,
             
                 FOREIGN KEY (programacao_semana_id)
@@ -204,11 +205,6 @@ public class DatabaseInitializer {
             
                 FOREIGN KEY (parte_id)
                     REFERENCES parte(id),
-            
-                UNIQUE (
-                    programacao_semana_id,
-                    parte_id
-                ),
             
                 UNIQUE (
                     programacao_semana_id,
@@ -391,6 +387,7 @@ public class DatabaseInitializer {
 
             adicionarColunaNumeroOficialProgramacaoParte(connection);
             adicionarColunaDuracaoProgramacaoParte(connection);
+            migrarPermissaoPartesRepetidasNaProgramacao(connection);
 
 
             /*
@@ -645,6 +642,58 @@ public class DatabaseInitializer {
                     "ALTER TABLE " + tabela + " ADD COLUMN " + coluna + " INTEGER"
             );
         }
+    }
+
+    /**
+     * Remove a restrição histórica que impedia repetir a mesma parte do
+     * catálogo na programação semanal. Cada ocorrência continua protegida
+     * por um ID próprio e por uma ordem única dentro da semana.
+     */
+    private static void migrarPermissaoPartesRepetidasNaProgramacao(
+            Connection connection
+    ) throws SQLException {
+        String definicao = null;
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(
+                     "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'programacao_parte'")) {
+            if (resultSet.next()) {
+                definicao = resultSet.getString("sql");
+            }
+        }
+        if (definicao == null) {
+            return;
+        }
+
+        String normalizada = definicao.replaceAll("\\s+", " ").toUpperCase(java.util.Locale.ROOT);
+        if (!normalizada.contains("UNIQUE ( PROGRAMACAO_SEMANA_ID, PARTE_ID )")) {
+            return;
+        }
+
+        boolean autoCommitAnterior = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE programacao_parte RENAME TO programacao_parte_migracao_repeticao");
+            statement.execute(CREATE_TABLE_PROGRAMACAO_PARTE);
+            statement.execute("""
+                    INSERT INTO programacao_parte (
+                        id, programacao_semana_id, parte_id, ordem, tema,
+                        numero_oficial, duracao_minutos
+                    )
+                    SELECT
+                        id, programacao_semana_id, parte_id, ordem, tema,
+                        numero_oficial, duracao_minutos
+                    FROM programacao_parte_migracao_repeticao
+                    """);
+            statement.execute("DROP TABLE programacao_parte_migracao_repeticao");
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(autoCommitAnterior);
+        }
+
+        System.out.println("Migração concluída: a programação aceita ocorrências repetidas de uma parte.");
     }
 
     private static void adicionarColunaNumeroOficialProgramacaoParte(
@@ -993,13 +1042,13 @@ public class DatabaseInitializer {
 
             /* * Partes do Ministério e as suas variações. * Cada variação possui uma ordem própria. */
             atualizarOrdemPorNome(statement, 6, "Iniciando Conversas");
-            atualizarOrdemPorNome(statement, 7, "Iniciando Conversas _ De casa em casa");
-            atualizarOrdemPorNome(statement, 8, "Iniciando Conversas _ Testemunho informal");
-            atualizarOrdemPorNome(statement, 9, "Iniciando Conversas _ Testemunho público");
+            atualizarOrdemPorNome(statement, 7, "Iniciando Conversas_De casa em casa");
+            atualizarOrdemPorNome(statement, 8, "Iniciando Conversas_Testemunho informal");
+            atualizarOrdemPorNome(statement, 9, "Iniciando Conversas_Testemunho público");
             atualizarOrdemPorNome(statement, 10, "Cultivando Interesse");
-            atualizarOrdemPorNome(statement, 11, "Cultivando Interesse _ De casa em casa");
-            atualizarOrdemPorNome(statement, 12, "Cultivando Interesse _ Testemunho informal");
-            atualizarOrdemPorNome(statement, 13, "Cultivando Interesse _ Testemunho público");
+            atualizarOrdemPorNome(statement, 11, "Cultivando Interesse_De casa em casa");
+            atualizarOrdemPorNome(statement, 12, "Cultivando Interesse_Testemunho informal");
+            atualizarOrdemPorNome(statement, 13, "Cultivando Interesse_Testemunho público");
             atualizarOrdem(statement, 14, TipoParte.O_QUE_VOCE_DIRIA);
             atualizarOrdemPorNome(statement, 15, "Fazendo Discípulos");
             atualizarOrdemPorNome(statement, 16, "Explicando suas crenças");

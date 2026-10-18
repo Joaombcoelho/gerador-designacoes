@@ -102,7 +102,6 @@ public class PreviaImportacaoApostilaService {
             }
 
             List<MapeadorParteApostilaService.ResultadoMapeamento> partes = new ArrayList<>();
-            Set<Integer> idsPartesSelecionadas = new HashSet<>();
             Map<Integer, Parte> escolhasDaSemana =
                     escolhasManuais.getOrDefault(semana.dataInicio(), Map.of());
             for (var parte : semana.partes()) {
@@ -111,21 +110,9 @@ public class PreviaImportacaoApostilaService {
                 if (selecionada != null) {
                     try {
                         resultado = revisaoService.aplicarSelecaoManual(resultado, selecionada);
-                        if (!idsPartesSelecionadas.add(selecionada.getId())) {
-                            erros.add("Semana " + semana.dataInicio() + ": a mesma parte do catálogo foi "
-                                    + "selecionada para mais de uma parte da apostila (ID "
-                                    + selecionada.getId() + ").");
-                        }
                     } catch (IllegalArgumentException e) {
                         erros.add("Semana " + semana.dataInicio() + ", parte " + parte.numero()
                                 + ": escolha manual inválida — " + e.getMessage());
-                    }
-                } else if (resultado.possuiCorrespondenciaUnica()) {
-                    Integer id = resultado.candidatos().getFirst().getId();
-                    if (id != null && !idsPartesSelecionadas.add(id)) {
-                        erros.add("Semana " + semana.dataInicio() + ": a mesma parte do catálogo foi "
-                                + "associada automaticamente a mais de uma parte da apostila (ID "
-                                + id + "). Confira o mapeamento.");
                     }
                 }
                 partes.add(resultado);

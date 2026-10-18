@@ -51,22 +51,28 @@ public class ConfirmacaoImportacaoApostilaService {
                     .filter(parte -> parte.getTipoVariacao() == TipoVariacaoParte.VARIAVEL)
                     .toList();
 
-            ProgramacaoSemana programacao = programacaoService.montarProgramacao(
+            ProgramacaoSemana programacao = programacaoService.montarProgramacaoImportada(
                     semana.dataReuniao(), partesVariaveis);
-            Map<Integer, ProgramacaoParte> ocorrenciasPorParteId = new HashMap<>();
+            Map<Integer, List<ProgramacaoParte>> ocorrenciasPorParteId = new HashMap<>();
             for (ProgramacaoParte ocorrencia : programacao.partes()) {
-                ocorrenciasPorParteId.put(ocorrencia.getParte().getId(), ocorrencia);
+                ocorrenciasPorParteId.computeIfAbsent(
+                        ocorrencia.getParte().getId(), _ -> new ArrayList<>()).add(ocorrencia);
             }
+            Map<Integer, Integer> proximaOcorrenciaPorParteId = new HashMap<>();
 
             for (var mapeamento : semana.partes()) {
                 Parte selecionada = mapeamento.candidatos().getFirst();
-                ProgramacaoParte ocorrencia = ocorrenciasPorParteId.get(selecionada.getId());
-                if (ocorrencia == null) {
+                List<ProgramacaoParte> ocorrencias =
+                        ocorrenciasPorParteId.get(selecionada.getId());
+                int indice = proximaOcorrenciaPorParteId.getOrDefault(selecionada.getId(), 0);
+                if (ocorrencias == null || indice >= ocorrencias.size()) {
                     throw new IllegalArgumentException(
-                            "A parte '" + selecionada.getNome()
-                                    + "' não faz parte da programação que seria criada para "
+                            "A ocorrência da parte '" + selecionada.getNome()
+                                    + "' não foi incluída na programação que seria criada para "
                                     + semana.dataReuniao() + ". Nenhuma programação foi gravada.");
                 }
+                ProgramacaoParte ocorrencia = ocorrencias.get(indice);
+                proximaOcorrenciaPorParteId.put(selecionada.getId(), indice + 1);
                 ocorrencia.setTema(mapeamento.tema());
                 ocorrencia.setDuracaoMinutos(mapeamento.duracaoMinutos());
             }

@@ -172,8 +172,8 @@ public class ExportadorS140WordService {
                         || p.getParte().getTipo() == TipoParte.LEITURA)
                 .toList();
         for (ProgramacaoParte parte : tesouros) {
-            validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.PRINCIPAL);
-            if (programacao.salaBHabilitada()) validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.B);
+            validarDesignacaoParte(problemas, programacao, escala, parte, SalaDesignacao.PRINCIPAL);
+            if (programacao.salaBHabilitada()) validarDesignacaoParte(problemas, programacao, escala, parte, SalaDesignacao.B);
         }
 
         List<ProgramacaoParte> ministerio = programacao.partes().stream()
@@ -184,8 +184,8 @@ public class ExportadorS140WordService {
         if (ministerio.size() > 4) problemas.add("há " + ministerio.size()
                 + " partes do Ministério, mas o S-140 comporta no máximo 4");
         for (ProgramacaoParte parte : ministerio.stream().limit(4).toList()) {
-            validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.PRINCIPAL);
-            if (programacao.salaBHabilitada()) validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.B);
+            validarDesignacaoParte(problemas, programacao, escala, parte, SalaDesignacao.PRINCIPAL);
+            if (programacao.salaBHabilitada()) validarDesignacaoParte(problemas, programacao, escala, parte, SalaDesignacao.B);
         }
 
         List<ProgramacaoParte> vidaCrista = programacao.partes().stream()
@@ -196,7 +196,7 @@ public class ExportadorS140WordService {
         if (vidaCrista.size() > 2) problemas.add("há " + vidaCrista.size()
                 + " partes de Nossa Vida Cristã, mas o S-140 comporta no máximo 2");
         for (ProgramacaoParte parte : vidaCrista.stream().limit(2).toList()) {
-            validarDesignacaoParte(problemas, escala, parte, SalaDesignacao.PRINCIPAL);
+            validarDesignacaoParte(problemas, programacao, escala, parte, SalaDesignacao.PRINCIPAL);
         }
 
         List<ProgramacaoParte> estudos = programacao.partes().stream()
@@ -219,14 +219,12 @@ public class ExportadorS140WordService {
         return problemas;
     }
 
-    private static void validarDesignacaoParte(List<String> problemas, Escala escala,
-                                               ProgramacaoParte programacaoParte, SalaDesignacao sala) {
+    private static void validarDesignacaoParte(List<String> problemas, ProgramacaoSemana programacao,
+                                               Escala escala, ProgramacaoParte programacaoParte,
+                                               SalaDesignacao sala) {
         Parte parte = programacaoParte.getParte();
         String nomeSala = sala == SalaDesignacao.B ? "Sala B" : "Sala Principal";
-        Designacao designacao = escala.getDesignacoes().stream()
-                .filter(d -> Objects.equals(d.parte().getId(), parte.getId()))
-                .filter(d -> d.sala() == sala)
-                .findFirst().orElse(null);
+        Designacao designacao = designacao(escala, programacao, programacaoParte, sala);
         if (designacao == null) {
             problemas.add(parte.getNome() + " — designação ausente na " + nomeSala);
             return;
@@ -274,7 +272,7 @@ public class ExportadorS140WordService {
             if (i < ministerio.size()) {
                 ProgramacaoParte parte = ministerio.get(i);
                 preencherTema(tabela.getRow(linha), parte);
-                preencherNomesSala(tabela.getRow(linha), escala, parte.getParte().getId());
+                preencherNomesSala(tabela.getRow(linha), programacao, escala, parte);
             } else {
                 limparMarcadoresParte(tabela.getRow(linha));
             }
@@ -291,7 +289,7 @@ public class ExportadorS140WordService {
             XWPFTableRow linha = tabela.getRow(linhaData + 19 + i);
             if (i < vidaCrista.size()) {
                 preencherTema(linha, vidaCrista.get(i));
-                Designacao d = designacao(escala, vidaCrista.get(i).getParte().getId(), SalaDesignacao.PRINCIPAL);
+                Designacao d = designacao(escala, programacao, vidaCrista.get(i), SalaDesignacao.PRINCIPAL);
                 setPlaceholder(linha, "[Nome]", 0, nome(d == null ? null : d.responsavel()));
             } else {
                 limparMarcadoresParte(linha);
@@ -342,10 +340,11 @@ public class ExportadorS140WordService {
         }
     }
 
-    private void preencherNomesSala(XWPFTableRow linha, Escala escala, Integer parteId) {
+    private void preencherNomesSala(XWPFTableRow linha, ProgramacaoSemana programacao,
+                                    Escala escala, ProgramacaoParte parte) {
         List<XWPFTableCell> marcadores = celulasComMarcador(linha, "[Nome/Nome]");
-        Designacao salaB = designacao(escala, parteId, SalaDesignacao.B);
-        Designacao principal = designacao(escala, parteId, SalaDesignacao.PRINCIPAL);
+        Designacao salaB = designacao(escala, programacao, parte, SalaDesignacao.B);
+        Designacao principal = designacao(escala, programacao, parte, SalaDesignacao.PRINCIPAL);
         if (!marcadores.isEmpty()) {
             definirTexto(marcadores.get(0), salaB == null ? "" : nome(salaB.responsavel()) + "/" + nome(salaB.ajudante()));
         }
@@ -699,9 +698,29 @@ public class ExportadorS140WordService {
         }
     }
 
+    private static Designacao designacao(Escala escala, ProgramacaoSemana programacao,
+                                  ProgramacaoParte ocorrencia, SalaDesignacao sala) {
+        Integer parteId = ocorrencia.getParte().getId();
+        int indiceOcorrencia = 0;
+        for (ProgramacaoParte parte : programacao.partes()) {
+            if (parte.getOrdem() == ocorrencia.getOrdem()) {
+                break;
+            }
+            if (Objects.equals(parte.getParte().getId(), parteId)) {
+                indiceOcorrencia++;
+            }
+        }
+        List<Designacao> correspondentes = escala.getDesignacoes().stream()
+                .filter(d -> Objects.equals(d.parte().getId(), parteId))
+                .filter(d -> d.sala() == sala)
+                .toList();
+        return indiceOcorrencia < correspondentes.size()
+                ? correspondentes.get(indiceOcorrencia) : null;
+    }
+
     private Designacao designacao(Escala escala, Integer parteId, SalaDesignacao sala) {
         return escala.getDesignacoes().stream()
-                .filter(d -> d.parte().getId().equals(parteId))
+                .filter(d -> Objects.equals(d.parte().getId(), parteId))
                 .filter(d -> d.sala() == sala)
                 .findFirst().orElse(null);
     }
