@@ -2,6 +2,7 @@ package br.com.geradordesignacoes.view.importacao;
 
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
+import br.com.geradordesignacoes.service.ConfiguracaoGeralService;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.service.importacao.ImportacaoApostilaJsonService;
 import br.com.geradordesignacoes.service.importacao.MapeadorParteApostilaService;
@@ -39,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
@@ -59,6 +61,7 @@ public class ImportacaoApostilaView {
     private final VBox resultadoContainer = new VBox(8);
     private final ParteDAO parteDAO = new ParteDAO();
     private final ProgramacaoSemanaDAO programacaoDAO = new ProgramacaoSemanaDAO();
+    private final ConfiguracaoGeralService configuracaoGeralService = new ConfiguracaoGeralService();
     private final ImportacaoApostilaJsonService validador = new ImportacaoApostilaJsonService();
     private final MapeadorParteApostilaService mapeador = new MapeadorParteApostilaService();
     private final PreviaImportacaoApostilaService previaService = new PreviaImportacaoApostilaService();
@@ -231,6 +234,7 @@ public class ImportacaoApostilaView {
         semanasContainer.getChildren().clear();
         semanasUi.clear();
         DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DayOfWeek diaReuniaoHabitual = configuracaoGeralService.buscar().diaReuniaoHabitual();
 
         for (var semana : validacao.semanas()) {
             Label cabecalho = new Label("Semana da apostila: "
@@ -244,14 +248,19 @@ public class ImportacaoApostilaView {
                     + valor(semana.canticos().intermediario()) + " / "
                     + valor(semana.canticos().encerramento()));
 
-            ObjectProperty<LocalDate> dataReuniao = new SimpleObjectProperty<>();
-            Label dataSelecionada = new Label("Nenhuma data selecionada");
+            LocalDate dataSugerida = sugerirDataReuniao(
+                    semana.dataInicio(), semana.dataFim(), diaReuniaoHabitual);
+            ObjectProperty<LocalDate> dataReuniao = new SimpleObjectProperty<>(dataSugerida);
+            Label dataSelecionada = new Label(dataSugerida == null
+                    ? "Dia habitual não encontrado no intervalo; selecione a data"
+                    : dataSugerida.format(formato));
             Button selecionarData = new Button("Selecionar data…");
             selecionarData.setOnAction(_ -> selecionarDataReuniao(
                     semana.dataInicio(), dataReuniao.get()
             ).ifPresent(data -> {
                 dataReuniao.set(data);
                 dataSelecionada.setText(data.format(formato));
+                invalidarPrevia();
                 resultadoContainer.getChildren().clear();
             }));
             HBox dataLinha = new HBox(10, new Label("Data efetiva da reunião:"),
@@ -306,6 +315,19 @@ public class ImportacaoApostilaView {
             semanasUi.add(new SemanaUi(semana.dataInicio(), dataReuniao, partesUi));
             semanasContainer.getChildren().add(cartao);
         }
+    }
+
+    private static LocalDate sugerirDataReuniao(
+            LocalDate dataInicio,
+            LocalDate dataFim,
+            DayOfWeek diaHabitual
+    ) {
+        if (dataInicio == null || dataFim == null || diaHabitual == null
+                || dataFim.isBefore(dataInicio)) {
+            return null;
+        }
+        LocalDate candidata = dataInicio.with(TemporalAdjusters.nextOrSame(diaHabitual));
+        return candidata.isAfter(dataFim) ? null : candidata;
     }
 
     private List<Parte> candidatosCompativeis(
