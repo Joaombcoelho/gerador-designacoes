@@ -423,9 +423,7 @@ public class DatabaseInitializer {
                         FOREIGN KEY (aplicacao_id)
                             REFERENCES evento_especial_aplicacao(id)
                             ON DELETE RESTRICT,
-                        FOREIGN KEY (evento_id)
-                            REFERENCES evento_especial(id)
-                            ON DELETE RESTRICT
+                        -- Mantém o ID como referência histórica mesmo após excluir o cadastro do evento.
                     )
                     """);
 
