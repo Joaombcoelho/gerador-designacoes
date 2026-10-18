@@ -35,7 +35,11 @@ public class ResolvedorEventosEspeciais {
         LocalDate quartaFeira = inicioSemana.plusDays(2);
 
         List<EventoEspecial> considerados = eventos.stream()
-                .filter(evento -> aplicaNaSemana(evento, inicioSemana, fimSemana))
+                .filter(evento -> aplicaNaSemana(evento, inicioSemana, fimSemana)
+                        || eventos.stream().anyMatch(outro ->
+                                aplicaNaSemana(outro, inicioSemana, fimSemana)
+                                        && podemExigirDecisao(evento, outro)
+                                        && intervalosSeSobrepoem(evento, outro)))
                 .sorted(Comparator.comparing(EventoEspecial::dataInicio)
                         .thenComparing(evento -> evento.tipo().name()))
                 .toList();
@@ -113,6 +117,25 @@ public class ResolvedorEventosEspeciais {
         return false;
     }
 
+    private static boolean intervalosSeSobrepoem(
+            EventoEspecial primeiro,
+            EventoEspecial segundo
+    ) {
+        return !primeiro.dataFim().isBefore(segundo.dataInicio())
+                && !segundo.dataFim().isBefore(primeiro.dataInicio());
+    }
+
+    private static boolean podemExigirDecisao(
+            EventoEspecial primeiro,
+            EventoEspecial segundo
+    ) {
+        if (primeiro.tipo() != segundo.tipo()) {
+            return true;
+        }
+        return primeiro.tipo() == TipoEventoEspecial.VISITA_SUPERINTENDENTE
+                && !Objects.equals(primeiro.temaDiscurso(), segundo.temaDiscurso());
+    }
+
     private static boolean possuiConflitoNaoResolvido(List<EventoEspecial> eventos) {
         for (int i = 0; i < eventos.size(); i++) {
             EventoEspecial primeiro = eventos.get(i);
@@ -157,11 +180,12 @@ public class ResolvedorEventosEspeciais {
             return false;
         }
 
-        LocalDate inicioSobreposicao = visita.dataInicio().isAfter(cancelamento.dataInicio())
-                ? visita.dataInicio() : cancelamento.dataInicio();
-        LocalDate fimSobreposicao = visita.dataFim().isBefore(cancelamento.dataFim())
-                ? visita.dataFim() : cancelamento.dataFim();
-        return !fimSobreposicao.isBefore(inicioSobreposicao);
+        // A precedência automática só é segura quando os dois registros descrevem
+        // exatamente o mesmo período. Uma interseção parcial não prova que os
+        // efeitos dos eventos coincidem durante todo o período considerado;
+        // nesses casos, a resolução semanal deve pedir decisão explícita.
+        return visita.dataInicio().equals(cancelamento.dataInicio())
+                && visita.dataFim().equals(cancelamento.dataFim());
     }
 
     private static AcaoResolucaoEvento acaoParaTipo(TipoEventoEspecial tipo) {
