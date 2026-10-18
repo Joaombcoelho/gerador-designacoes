@@ -419,11 +419,11 @@ public class DatabaseInitializer {
                     CREATE TABLE IF NOT EXISTS evento_especial_aplicacao_evento (
                         aplicacao_id INTEGER NOT NULL,
                         evento_id INTEGER NOT NULL,
+                        -- Sem FK para evento_especial: o histórico sobrevive à exclusão do cadastro.
                         PRIMARY KEY (aplicacao_id, evento_id),
                         FOREIGN KEY (aplicacao_id)
                             REFERENCES evento_especial_aplicacao(id)
-                            ON DELETE RESTRICT,
-                        -- Mantém o ID como referência histórica mesmo após excluir o cadastro do evento.
+                            ON DELETE RESTRICT
                     )
                     """);
 
