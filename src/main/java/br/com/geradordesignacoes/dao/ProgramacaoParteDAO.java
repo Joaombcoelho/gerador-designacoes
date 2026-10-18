@@ -402,12 +402,9 @@ public class ProgramacaoParteDAO {
             );
 
 
-            int linhasAfetadas =
-                    statement.executeUpdate();
+            int linhasAfetadas = statement.executeUpdate();
 
-
-            if (linhasAfetadas != 1) {
-
+            if (linhasAfetadas == 0) {
                 throw new RuntimeException(
                         "Parte não encontrada na programação semanal."
                 );
