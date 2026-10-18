@@ -357,6 +357,38 @@ public class DatabaseInitializer {
                     CREATE_TABLE_PROGRAMACAO_PARTE
             );
 
+            /*
+             * ----------------------------------------------------
+             * EVENTOS ESPECIAIS
+             * ----------------------------------------------------
+             *
+             * Tabela independente: cadastrar/editar/remover eventos
+             * não modifica programação, escalas, histórico ou S-140.
+             */
+            statement.execute("""
+                    CREATE TABLE IF NOT EXISTS evento_especial (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        tipo TEXT NOT NULL CHECK (
+                            tipo IN (
+                                'VISITA_SUPERINTENDENTE',
+                                'ASSEMBLEIA',
+                                'CONGRESSO',
+                                'CELEBRACAO',
+                                'CANCELAMENTO'
+                            )
+                        ),
+                        data_inicio TEXT NOT NULL,
+                        data_fim TEXT NOT NULL,
+                        tema_discurso TEXT,
+                        descricao TEXT,
+                        CHECK (data_fim >= data_inicio),
+                        CHECK (
+                            tema_discurso IS NULL
+                            OR tipo = 'VISITA_SUPERINTENDENTE'
+                        )
+                    )
+                    """);
+
             adicionarColunaNumeroOficialProgramacaoParte(connection);
             adicionarColunaDuracaoProgramacaoParte(connection);
 
