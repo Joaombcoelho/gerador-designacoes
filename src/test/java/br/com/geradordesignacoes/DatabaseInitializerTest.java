@@ -885,6 +885,70 @@ class DatabaseInitializerTest {
         }
     }
 
+
+    @Test
+    void deveRemapearProgramacaoSemColisaoPreservandoDados()
+            throws Exception {
+        Path arquivo = diretorioTemporario.resolve("parte-programacao-remapeada.db");
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+            criarEsquemaPartes(connection);
+            inserirParte(connection, 10, "Iniciando Conversas_De casa em casa", "CONFIG");
+            inserirParte(connection, 20, "Iniciando Conversas _ De casa em casa", "CONFIG");
+            try (Statement st = connection.createStatement()) {
+                st.execute("INSERT INTO programacao_semana (id, data) VALUES (1, '2026-10-21')");
+                st.execute("INSERT INTO programacao_semana (id, data) VALUES (2, '2026-10-28')");
+                st.execute("INSERT INTO programacao_parte (id, programacao_semana_id, parte_id, ordem, tema, duracao_minutos) VALUES (1, 1, 10, 3, 'Tema preservado', 5)");
+                st.execute("INSERT INTO programacao_parte (id, programacao_semana_id, parte_id, ordem) VALUES (2, 2, 20, 4)");
+            }
+            DatabaseInitializer.normalizarPartesDuplicadas(connection);
+            assertEquals(20, buscarValor(connection,
+                    "SELECT parte_id FROM programacao_parte WHERE id = 1"));
+            assertEquals("Tema preservado", buscarTexto(connection,
+                    "SELECT tema FROM programacao_parte WHERE id = 1"));
+            assertEquals(5, buscarValor(connection,
+                    "SELECT duracao_minutos FROM programacao_parte WHERE id = 1"));
+            assertEquals(20, buscarValor(connection,
+                    "SELECT parte_id FROM programacao_parte WHERE id = 2"));
+        }
+    }
+
+    @Test
+    void deveRemapearHistoricoSemColisaoPreservandoIdentificador()
+            throws Exception {
+        Path arquivo = diretorioTemporario.resolve("parte-historico-remapeado.db");
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+            criarEsquemaPartes(connection);
+            inserirParte(connection, 10, "Iniciando Conversas_De casa em casa", "CONFIG");
+            inserirParte(connection, 20, "Iniciando Conversas _ De casa em casa", "CONFIG");
+            try (Statement st = connection.createStatement()) {
+                st.execute("INSERT INTO pessoa (id) VALUES (3)");
+                st.execute("INSERT INTO historico_designacoes (id, data, pessoa_id, parte_id, tipo_participacao) VALUES (77, '2026-10-01', 3, 10, 'RESPONSAVEL')");
+            }
+            DatabaseInitializer.normalizarPartesDuplicadas(connection);
+            assertEquals(77, buscarValor(connection,
+                    "SELECT id FROM historico_designacoes WHERE parte_id = 20"));
+            assertEquals(0, buscarValor(connection,
+                    "SELECT COUNT(*) FROM historico_designacoes WHERE parte_id = 10"));
+        }
+    }
+
+    @Test
+    void deveIgnorarQuandoNaoExistemNomesLegados()
+            throws Exception {
+        Path arquivo = diretorioTemporario.resolve("sem-partes-legadas.db");
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+            criarEsquemaPartes(connection);
+            inserirParte(connection, 20, "Iniciando Conversas _ De casa em casa", "CONFIG");
+            DatabaseInitializer.normalizarPartesDuplicadas(connection);
+            assertEquals(1, buscarValor(connection, "SELECT COUNT(*) FROM parte"));
+            assertEquals("Iniciando Conversas _ De casa em casa",
+                    buscarTexto(connection, "SELECT nome FROM parte WHERE id = 20"));
+        }
+    }
+
     private void criarEsquemaPartes(Connection connection) throws SQLException {
         try (Statement st = connection.createStatement()) {
             st.execute("PRAGMA foreign_keys = ON");
