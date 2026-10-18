@@ -88,6 +88,20 @@ class AplicacaoEventosEspeciaisServiceTest {
     }
 
     @Test
+    void excluirCadastroDoEventoNaoReverteAplicacaoConfirmada() throws Exception {
+        service.aplicar(comando(UUID.randomUUID().toString(), true));
+        try (Connection c = ConnectionFactory.getConnection();
+             PreparedStatement p = c.prepareStatement("DELETE FROM evento_especial WHERE id = ?")) {
+            p.setLong(1, idEvento);
+            assertEquals(1, p.executeUpdate());
+        }
+        assertEquals(1, contar("evento_especial_aplicacao"));
+        assertEquals(1, contar("evento_especial_aplicacao_evento"));
+        assertEquals(1, contar("estado_reuniao_evento"));
+        assertEquals(1, contar("programacao_semana"));
+    }
+
+    @Test
     void reverteRegistroDeAplicacaoSeGravacaoDoEstadoFalhar() throws Exception {
         try (Connection c = ConnectionFactory.getConnection();
              Statement s = c.createStatement()) {
