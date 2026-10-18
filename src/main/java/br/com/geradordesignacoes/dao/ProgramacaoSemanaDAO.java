@@ -6,7 +6,10 @@ import br.com.geradordesignacoes.model.ProgramacaoSemana;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ProgramacaoSemanaDAO {
 
@@ -78,6 +81,109 @@ public class ProgramacaoSemanaDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao salvar programação semanal.", e);
+        }
+    }
+
+    /**
+     * Persiste várias programações novas numa única transação.
+     * Recusa qualquer data já cadastrada e nunca atualiza registros existentes.
+     */
+    public List<ProgramacaoSemana> salvarTodasNovas(List<ProgramacaoSemana> programacoes) {
+        if (programacoes == null || programacoes.isEmpty()) {
+            throw new IllegalArgumentException("Informe ao menos uma programação para importar.");
+        }
+
+        Set<LocalDate> datas = new HashSet<>();
+        for (ProgramacaoSemana programacao : programacoes) {
+            if (programacao == null || programacao.data() == null) {
+                throw new IllegalArgumentException("Todas as programações precisam ter uma data.");
+            }
+            if (!datas.add(programacao.data())) {
+                throw new IllegalArgumentException(
+                        "A data " + programacao.data() + " aparece mais de uma vez na importação.");
+            }
+            if (programacao.id() != null) {
+                throw new IllegalArgumentException(
+                        "A importação aceita somente programações novas, sem ID persistido.");
+            }
+        }
+
+        String consulta = "SELECT 1 FROM programacao_semana WHERE data = ?";
+        String insert = """
+                INSERT INTO programacao_semana (
+                    data, sala_b_habilitada, sala_c_habilitada,
+                    conselheiro_sala_b_id, cantico_inicial, cantico_meio, cantico_final
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                for (ProgramacaoSemana programacao : programacoes) {
+                    try (PreparedStatement statement = connection.prepareStatement(consulta)) {
+                        statement.setDate(1, Date.valueOf(programacao.data()));
+                        try (ResultSet resultSet = statement.executeQuery()) {
+                            if (resultSet.next()) {
+                                throw new IllegalArgumentException(
+                                        "Já existe uma programação para " + programacao.data()
+                                                + ". Nenhuma alteração foi gravada.");
+                            }
+                        }
+                    }
+                }
+
+                List<ProgramacaoSemana> salvas = new ArrayList<>();
+                for (ProgramacaoSemana programacao : programacoes) {
+                    int id;
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            insert, Statement.RETURN_GENERATED_KEYS)) {
+                        statement.setDate(1, Date.valueOf(programacao.data()));
+                        statement.setBoolean(2, programacao.salaBHabilitada());
+                        statement.setBoolean(3, programacao.salaCHabilitada());
+                        if (programacao.conselheiroSalaBId() == null) {
+                            statement.setNull(4, Types.INTEGER);
+                        } else {
+                            statement.setInt(4, programacao.conselheiroSalaBId());
+                        }
+                        statement.setString(5, programacao.canticoInicial());
+                        statement.setString(6, programacao.canticoMeio());
+                        statement.setString(7, programacao.canticoFinal());
+                        statement.executeUpdate();
+                        try (ResultSet keys = statement.getGeneratedKeys()) {
+                            if (!keys.next()) {
+                                throw new SQLException(
+                                        "Não foi possível obter o ID da programação semanal.");
+                            }
+                            id = keys.getInt(1);
+                        }
+                    }
+
+                    for (ProgramacaoParte parte : programacao.partes()) {
+                        programacaoParteDAO.salvar(connection, id, parte);
+                    }
+                    salvas.add(new ProgramacaoSemana(
+                            id, programacao.data(), programacao.partes(),
+                            programacao.salaBHabilitada(), programacao.salaCHabilitada(),
+                            programacao.conselheiroSalaBId(), programacao.canticoInicial(),
+                            programacao.canticoMeio(), programacao.canticoFinal()));
+                }
+
+                connection.commit();
+                return List.copyOf(salvas);
+            } catch (Exception e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackFailure) {
+                    e.addSuppressed(rollbackFailure);
+                }
+                if (e instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                }
+                throw new RuntimeException("Falha ao importar as programações; a transação foi cancelada.", e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao importar as programações semanais.", e);
         }
     }
 

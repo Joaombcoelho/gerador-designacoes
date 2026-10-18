@@ -15,6 +15,7 @@ O projeto reúne em uma única aplicação:
 - backup manual, restauração e backup automático do banco;
 - exportação de designações elegíveis para o formulário PDF S-89;
 - exportação mensal da programação e das designações para um documento Word baseado no modelo S-140.
+- extração, conferência e importação confirmada de apostilas RTF/JSON para novas programações semanais.
 
 As funcionalidades são organizadas em camadas de modelo, acesso a dados, serviços, controladores e views JavaFX. A aplicação é destinada a uso local e não possui backend ou serviço remoto.
 
@@ -52,6 +53,23 @@ Durante a inicialização, a aplicação preenche a ordem padrão apenas para pa
 - Edição do número oficial de cada `ProgramacaoParte`, individualmente por semana.
 - Números oficiais positivos ou vazios; a ordem interna da programação permanece separada desse número.
 
+
+### Importação de apostilas RTF/JSON
+
+A opção **Importar apostila** permite selecionar uma pasta com arquivos RTF para extrair os dados diretamente na aplicação ou abrir um JSON previamente gerado. O conteúdo extraído é validado e apresentado para conferência antes de qualquer gravação.
+
+Fluxo recomendado:
+
+1. Extrair os arquivos RTF ou abrir um JSON compatível.
+2. Conferir temas, duração, leitura bíblica, cânticos e alertas.
+3. Informar explicitamente a data efetiva da reunião de cada semana; as datas de publicação da apostila não são usadas automaticamente como datas de reunião.
+4. Revisar o mapeamento de cada item para uma parte já cadastrada e corrigir manualmente as sugestões quando necessário.
+5. Executar **Conferir prévia** e revisar o resultado técnico.
+6. Somente quando a prévia estiver válida, usar **Confirmar importação** e confirmar a operação no diálogo.
+
+A importação cria programações somente para datas sem programação existente. A gravação das semanas e de suas partes ocorre em uma única transação: se uma das datas já estiver ocupada ou ocorrer uma falha, a operação inteira é cancelada. A importação não substitui programações existentes nem cria automaticamente novas partes no catálogo. Os mapeamentos precisam apontar para partes já cadastradas e compatíveis com as regras da programação semanal.
+
+A extração, a validação e a prévia são somente de leitura. Nenhuma alteração é gravada antes da confirmação explícita. Para detalhes do formato e das proteções, consulte [docs/importacao-apostilas-json.md](docs/importacao-apostilas-json.md) e [docs/tela-importacao-apostila.md](docs/tela-importacao-apostila.md).
 
 ### Geração e edição de escalas
 

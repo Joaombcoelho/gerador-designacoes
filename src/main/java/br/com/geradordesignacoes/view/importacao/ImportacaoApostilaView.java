@@ -8,11 +8,13 @@ import br.com.geradordesignacoes.service.importacao.MapeadorParteApostilaService
 import br.com.geradordesignacoes.service.importacao.PreviaImportacaoApostilaService;
 import br.com.geradordesignacoes.service.importacao.RevisaoMapeamentoApostilaService;
 import br.com.geradordesignacoes.service.importacao.ExtratorApostilaRtfService;
+import br.com.geradordesignacoes.service.importacao.ConfirmacaoImportacaoApostilaService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -40,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Interface de conferência da apostila. Esta tela não grava dados. */
+/** Interface de extração, conferência e confirmação explícita da importação de apostilas. */
 public class ImportacaoApostilaView {
 
     private final VBox root = new VBox(16);
@@ -54,6 +56,10 @@ public class ImportacaoApostilaView {
     private final RevisaoMapeamentoApostilaService revisaoService = new RevisaoMapeamentoApostilaService();
     private final Label arquivoLabel = new Label("Nenhum arquivo selecionado.");
     private final Button conferirButton = new Button("Conferir prévia");
+    private final Button confirmarImportacaoButton = new Button("Confirmar importação");
+    private final ConfirmacaoImportacaoApostilaService confirmacaoService =
+            new ConfirmacaoImportacaoApostilaService();
+    private PreviaImportacaoApostilaService.PreviaImportacao ultimaPrevia;
     private final Button salvarCopiaButton = new Button("Salvar cópia do JSON…");
     private final ExtratorApostilaRtfService extrator = new ExtratorApostilaRtfService();
     private Path jsonGeradoTemporario;
@@ -69,8 +75,8 @@ public class ImportacaoApostilaView {
         Label titulo = new Label("Importação de apostila — prévia");
         titulo.getStyleClass().add("page-title");
         Label instrucao = new Label(
-                "Selecione o JSON gerado pelo extrator. Revise as datas reais das reuniões e os mapeamentos. "
-                        + "Esta tela é somente de conferência: não importa nem altera programações."
+                "Extraia os arquivos RTF ou abra um JSON. Revise as datas reais das reuniões e os mapeamentos; "
+                        + "a gravação só ocorre após prévia válida e confirmação explícita."
         );
         instrucao.setWrapText(true);
         instrucao.getStyleClass().add("page-subtitle");
@@ -90,18 +96,16 @@ public class ImportacaoApostilaView {
 
         conferirButton.setDisable(true);
         conferirButton.setOnAction(_ -> conferirPrevia());
+        confirmarImportacaoButton.setDisable(true);
+        confirmarImportacaoButton.setOnAction(_ -> confirmarImportacao());
 
-        // A página inteira precisa rolar: os resultados da prévia podem conter
-        // vários cards e não devem comprimir a área de correção dos mapeamentos.
-        VBox conteudo = new VBox(16, titulo, instrucao, arquivoLinha, arquivoLabel,
-                semanasContainer, conferirButton, resultadoContainer);
-        conteudo.setPadding(new Insets(0));
-        ScrollPane scrollTela = new ScrollPane(conteudo);
-        scrollTela.setFitToWidth(true);
-        scrollTela.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollTela.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        VBox.setVgrow(scrollTela, Priority.ALWAYS);
-        root.getChildren().add(scrollTela);
+        ScrollPane scroll = new ScrollPane(semanasContainer);
+        scroll.setFitToWidth(true);
+        scroll.setPrefViewportHeight(380);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+
+        root.getChildren().addAll(titulo, instrucao, arquivoLinha, arquivoLabel, scroll,
+                conferirButton, confirmarImportacaoButton, resultadoContainer);
     }
 
     public Parent getView() {
@@ -207,6 +211,8 @@ public class ImportacaoApostilaView {
             montarSemanas();
             resultadoContainer.getChildren().clear();
             exibirMensagens("Validação do JSON", resultado.erros(), resultado.avisos());
+            ultimaPrevia = null;
+            confirmarImportacaoButton.setDisable(true);
             conferirButton.setDisable(!resultado.validoParaPrevia());
         } catch (IOException | RuntimeException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Não foi possível ler o JSON", e.getMessage());
@@ -232,6 +238,7 @@ public class ImportacaoApostilaView {
 
             DatePicker dataReuniao = new DatePicker();
             dataReuniao.setPromptText("Data real da reunião");
+            dataReuniao.valueProperty().addListener((obs, anterior, novaData) -> invalidarPrevia());
             HBox dataLinha = new HBox(10, new Label("Data efetiva da reunião:"), dataReuniao);
             dataLinha.setAlignment(Pos.CENTER_LEFT);
 
@@ -261,6 +268,7 @@ public class ImportacaoApostilaView {
                 cartao.getChildren().add(linha);
 
                 escolha.valueProperty().addListener((obs, anterior, selecionada) -> {
+                    invalidarPrevia();
                     if (selecionada == null) {
                         estado.setText("Pendente de conferência");
                         return;
@@ -311,6 +319,8 @@ public class ImportacaoApostilaView {
     }
 
     private void conferirPrevia() {
+        ultimaPrevia = null;
+        confirmarImportacaoButton.setDisable(true);
         if (arquivoSelecionado == null || validacao == null) {
             return;
         }
@@ -354,6 +364,8 @@ public class ImportacaoApostilaView {
         try {
             var previa = previaService.preparar(
                     arquivoSelecionado, datas, catalogo, existentes, escolhasManuais);
+            ultimaPrevia = previa;
+            confirmarImportacaoButton.setDisable(!previa.podeProsseguirParaConfirmacao());
             resultadoContainer.getChildren().clear();
             exibirMensagens("Resultado da prévia", previa.erros(), previa.avisos());
 
@@ -392,15 +404,57 @@ public class ImportacaoApostilaView {
             Label resumo = new Label(
                     "Prévia técnica concluída usando as escolhas atuais. "
                             + (previa.podeProsseguirParaConfirmacao()
-                            ? "O mapeamento está completo, mas a confirmação/gravação ainda não está implementada."
+                            ? "O mapeamento está completo. Revise o resultado e use “Confirmar importação” para gravar."
                             : "Existem pendências ou conflitos que precisam ser corrigidos. ")
-                            + "Nenhuma alteração foi gravada no banco."
+                            + "Até a confirmação, nenhuma alteração foi gravada no banco."
             );
             resumo.setWrapText(true);
             resumo.getStyleClass().add("card-title");
             resultadoContainer.getChildren().add(resumo);
         } catch (IOException | RuntimeException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Falha ao preparar prévia", e.getMessage());
+        }
+    }
+
+    private void invalidarPrevia() {
+        ultimaPrevia = null;
+        confirmarImportacaoButton.setDisable(true);
+    }
+
+    private void confirmarImportacao() {
+        var previa = ultimaPrevia;
+        if (previa == null || !previa.podeProsseguirParaConfirmacao()) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Prévia indisponível",
+                    "Confira novamente a prévia antes de confirmar a importação.");
+            confirmarImportacaoButton.setDisable(true);
+            return;
+        }
+
+        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacao.setTitle("Confirmar importação");
+        confirmacao.setHeaderText("Importar " + previa.semanas().size() + " semana(s)?");
+        confirmacao.setContentText(
+                "A operação criará somente programações para datas ainda não cadastradas. "
+                        + "Se alguma data já tiver programação, toda a operação será cancelada. "
+                        + "A gravação das semanas será feita numa única transação. "
+                        + "Esta ação não substitui programações existentes.");
+        if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+
+        confirmarImportacaoButton.setDisable(true);
+        try {
+            var salvas = confirmacaoService.importar(previa);
+            ultimaPrevia = null;
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Importação concluída",
+                    salvas.size() + " programação(ões) foram importadas com sucesso.");
+            resultadoContainer.getChildren().clear();
+            exibirMensagens("Importação concluída", List.of(),
+                    List.of("Programações criadas: " + salvas.size()
+                            + ". Nenhuma programação existente foi substituída."));
+        } catch (RuntimeException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Importação cancelada", e.getMessage());
+            invalidarPrevia();
         }
     }
 
