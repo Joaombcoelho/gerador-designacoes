@@ -121,41 +121,67 @@ public class ProgramacaoSemanaDAO {
             connection.setAutoCommit(false);
             try {
                 for (ProgramacaoSemana programacao : programacoes) {
-                    try (PreparedStatement statement = connection.prepareStatement(consulta)) {
-                        statement.setDate(1, Date.valueOf(programacao.data()));
-                        try (ResultSet resultSet = statement.executeQuery()) {
-                            if (resultSet.next()) {
-                                throw new IllegalArgumentException(
-                                        "Já existe uma programação para " + programacao.data()
-                                                + ". Nenhuma alteração foi gravada.");
-                            }
-                        }
+                    Integer existenteId = buscarIdPorData(connection, programacao.data());
+                    if (existenteId != null && !ehRascunhoVazio(connection, existenteId)) {
+                        throw new IllegalArgumentException(
+                                "Já existe uma programação configurada para " + programacao.data()
+                                        + ". Nenhuma alteração foi gravada.");
                     }
                 }
 
                 List<ProgramacaoSemana> salvas = new ArrayList<>();
                 for (ProgramacaoSemana programacao : programacoes) {
+                    Integer existenteId = buscarIdPorData(connection, programacao.data());
                     int id;
-                    try (PreparedStatement statement = connection.prepareStatement(
-                            insert, Statement.RETURN_GENERATED_KEYS)) {
-                        statement.setDate(1, Date.valueOf(programacao.data()));
-                        statement.setBoolean(2, programacao.salaBHabilitada());
-                        statement.setBoolean(3, programacao.salaCHabilitada());
-                        if (programacao.conselheiroSalaBId() == null) {
-                            statement.setNull(4, Types.INTEGER);
-                        } else {
-                            statement.setInt(4, programacao.conselheiroSalaBId());
-                        }
-                        statement.setString(5, programacao.canticoInicial());
-                        statement.setString(6, programacao.canticoMeio());
-                        statement.setString(7, programacao.canticoFinal());
-                        statement.executeUpdate();
-                        try (ResultSet keys = statement.getGeneratedKeys()) {
-                            if (!keys.next()) {
-                                throw new SQLException(
-                                        "Não foi possível obter o ID da programação semanal.");
+                    if (existenteId != null) {
+                        id = existenteId;
+                        try (PreparedStatement statement = connection.prepareStatement("""
+                                UPDATE programacao_semana
+                                SET sala_b_habilitada = ?, sala_c_habilitada = ?,
+                                    conselheiro_sala_b_id = ?, cantico_inicial = ?,
+                                    cantico_meio = ?, cantico_final = ?
+                                WHERE id = ?
+                                """)) {
+                            statement.setBoolean(1, programacao.salaBHabilitada());
+                            statement.setBoolean(2, programacao.salaCHabilitada());
+                            if (programacao.conselheiroSalaBId() == null) {
+                                statement.setNull(3, Types.INTEGER);
+                            } else {
+                                statement.setInt(3, programacao.conselheiroSalaBId());
                             }
-                            id = keys.getInt(1);
+                            statement.setString(4, programacao.canticoInicial());
+                            statement.setString(5, programacao.canticoMeio());
+                            statement.setString(6, programacao.canticoFinal());
+                            statement.setInt(7, id);
+                            statement.executeUpdate();
+                        }
+                        try (PreparedStatement statement = connection.prepareStatement(
+                                "DELETE FROM programacao_parte WHERE programacao_semana_id = ?")) {
+                            statement.setInt(1, id);
+                            statement.executeUpdate();
+                        }
+                    } else {
+                        try (PreparedStatement statement = connection.prepareStatement(
+                                insert, Statement.RETURN_GENERATED_KEYS)) {
+                            statement.setDate(1, Date.valueOf(programacao.data()));
+                            statement.setBoolean(2, programacao.salaBHabilitada());
+                            statement.setBoolean(3, programacao.salaCHabilitada());
+                            if (programacao.conselheiroSalaBId() == null) {
+                                statement.setNull(4, Types.INTEGER);
+                            } else {
+                                statement.setInt(4, programacao.conselheiroSalaBId());
+                            }
+                            statement.setString(5, programacao.canticoInicial());
+                            statement.setString(6, programacao.canticoMeio());
+                            statement.setString(7, programacao.canticoFinal());
+                            statement.executeUpdate();
+                            try (ResultSet keys = statement.getGeneratedKeys()) {
+                                if (!keys.next()) {
+                                    throw new SQLException(
+                                            "Não foi possível obter o ID da programação semanal.");
+                                }
+                                id = keys.getInt(1);
+                            }
                         }
                     }
 
@@ -185,6 +211,75 @@ public class ProgramacaoSemanaDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao importar as programações semanais.", e);
         }
+    }
+
+    /**
+     * Retorna true apenas para uma programação vazia criada como estrutura
+     * inicial: sem partes variáveis, metadados manuais ou alterações nas partes fixas.
+     */
+    public boolean podeReutilizarRascunhoVazio(LocalDate data) {
+        if (data == null) {
+            throw new IllegalArgumentException("A data não pode ser nula.");
+        }
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            Integer id = buscarIdPorData(connection, data);
+            return id != null && ehRascunhoVazio(connection, id);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar programação vazia.", e);
+        }
+    }
+
+    private Integer buscarIdPorData(Connection connection, LocalDate data) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT id FROM programacao_semana WHERE data = ?")) {
+            statement.setDate(1, Date.valueOf(data));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getInt("id") : null;
+            }
+        }
+    }
+
+    private boolean ehRascunhoVazio(Connection connection, int id) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT conselheiro_sala_b_id, cantico_inicial, cantico_meio, cantico_final
+                FROM programacao_semana WHERE id = ?
+                """)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()
+                        || resultSet.getObject("conselheiro_sala_b_id") != null
+                        || naoVazio(resultSet.getString("cantico_inicial"))
+                        || naoVazio(resultSet.getString("cantico_meio"))
+                        || naoVazio(resultSet.getString("cantico_final"))) {
+                    return false;
+                }
+            }
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT COUNT(*)
+                FROM programacao_parte pp
+                JOIN parte p ON p.id = pp.parte_id
+                WHERE pp.programacao_semana_id = ?
+                  AND (
+                    COALESCE(p.tipo_variacao, 'FIXA') = 'VARIAVEL'
+                    OR TRIM(COALESCE(pp.tema, '')) <> ''
+                    OR pp.duracao_minutos IS NOT p.duracao_padrao_minutos
+                    OR (
+                        pp.numero_oficial IS NOT NULL
+                        AND NOT (p.tipo = 'LEITURA' AND pp.numero_oficial = 3)
+                    )
+                  )
+                """)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() && resultSet.getInt(1) == 0;
+            }
+        }
+    }
+
+    private static boolean naoVazio(String valor) {
+        return valor != null && !valor.isBlank();
     }
 
     /**
