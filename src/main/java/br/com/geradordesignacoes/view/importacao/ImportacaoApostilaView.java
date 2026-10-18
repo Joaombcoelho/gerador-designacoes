@@ -300,7 +300,9 @@ public class ImportacaoApostilaView {
             @Override
             protected void updateItem(Parte parte, boolean empty) {
                 super.updateItem(parte, empty);
-                setText(empty || parte == null ? null : parte.getNome() + " (ID " + parte.getId() + ")");
+                setText(empty || parte == null
+                        ? null
+                        : parte.getNome() + " (ID " + parte.getId() + ")");
             }
         };
     }
