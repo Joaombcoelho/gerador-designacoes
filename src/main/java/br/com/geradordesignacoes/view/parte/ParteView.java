@@ -207,8 +207,14 @@ public class ParteView {
 
         confirmar.setOnAction(_ -> {
             painelAtual.getChildren().remove(confirmacao);
-            parteDAO.excluir(selecionada.getId());
-            carregarDados();
+            try {
+                parteDAO.excluir(selecionada.getId());
+                carregarDados();
+            } catch (RuntimeException erro) {
+                mostrarAviso(erro.getMessage() == null
+                        ? "Não foi possível excluir a parte."
+                        : erro.getMessage());
+            }
         });
 
         cancelar.setOnAction(_ ->
