@@ -219,7 +219,7 @@ public class ExportadorS140WordService {
         return problemas;
     }
 
-    private void validarDesignacaoParte(List<String> problemas, ProgramacaoSemana programacao,
+    private static void validarDesignacaoParte(List<String> problemas, ProgramacaoSemana programacao,
                                                Escala escala, ProgramacaoParte programacaoParte,
                                                SalaDesignacao sala) {
         Parte parte = programacaoParte.getParte();
@@ -698,7 +698,7 @@ public class ExportadorS140WordService {
         }
     }
 
-    private Designacao designacao(Escala escala, ProgramacaoSemana programacao,
+    private static Designacao designacao(Escala escala, ProgramacaoSemana programacao,
                                   ProgramacaoParte ocorrencia, SalaDesignacao sala) {
         Integer parteId = ocorrencia.getParte().getId();
         int indiceOcorrencia = 0;
