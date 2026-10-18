@@ -503,91 +503,88 @@ public class ProgramacaoSemanaService {
     public void validarPartesVariaveis(
             List<Parte> partesSelecionadas
     ) {
+        validarPartesVariaveis(partesSelecionadas, false);
+    }
+
+    private void validarPartesVariaveis(
+            List<Parte> partesSelecionadas,
+            boolean permitirRepetidas
+    ) {
         if (partesSelecionadas == null) {
             throw new IllegalArgumentException(
                     "A lista de partes selecionadas não pode ser nula."
             );
         }
 
-        int quantidade =
-                partesSelecionadas.size();
-
+        int quantidade = partesSelecionadas.size();
         if (quantidade < 3 || quantidade > 6) {
             throw new IllegalArgumentException(
-                    "A programação deve possuir entre "
-                            + "3 e 6 partes variáveis."
+                    "A programação deve possuir entre 3 e 6 partes variáveis."
             );
         }
 
-        boolean possuiParteNaoVariavel =
-                partesSelecionadas.stream()
-                        .anyMatch(
-                                parte ->
-                                        !ehParteVariavel(parte)
-                        );
-
+        boolean possuiParteNaoVariavel = partesSelecionadas.stream()
+                .anyMatch(parte -> !ehParteVariavel(parte));
         if (possuiParteNaoVariavel) {
             throw new IllegalArgumentException(
                     "Somente partes variáveis podem ser selecionadas."
             );
         }
 
-        boolean possuiParteDuplicada =
-                partesSelecionadas.stream()
-                        .map(Parte::getId)
-                        .distinct()
-                        .count()
-                        != partesSelecionadas.size();
-
-        if (possuiParteDuplicada) {
-            throw new IllegalArgumentException(
-                    "Não é permitido selecionar a mesma "
-                            + "parte variável mais de uma vez."
-            );
+        if (!permitirRepetidas) {
+            boolean possuiParteDuplicada = partesSelecionadas.stream()
+                    .map(Parte::getId)
+                    .distinct()
+                    .count() != partesSelecionadas.size();
+            if (possuiParteDuplicada) {
+                throw new IllegalArgumentException(
+                        "Não é permitido selecionar a mesma "
+                                + "parte variável mais de uma vez."
+                );
+            }
         }
     }
 
     /**
-     * Monta uma programação completa em memória.
+     * Monta uma programação completa em memória, mantendo a regra usual
+     * de não permitir que o usuário adicione a mesma parte duas vezes.
      */
     public ProgramacaoSemana montarProgramacao(
             LocalDate data,
             List<Parte> partesVariaveisSelecionadas
     ) {
+        return montarProgramacao(data, partesVariaveisSelecionadas, false);
+    }
+
+    /**
+     * Monta uma programação para importação de apostila. Nesse fluxo, uma
+     * mesma parte do catálogo pode ocorrer mais de uma vez; cada ocorrência
+     * recebe seu próprio registro e ordem para permitir designações distintas.
+     */
+    public ProgramacaoSemana montarProgramacaoImportada(
+            LocalDate data,
+            List<Parte> partesVariaveisSelecionadas
+    ) {
+        return montarProgramacao(data, partesVariaveisSelecionadas, true);
+    }
+
+    private ProgramacaoSemana montarProgramacao(
+            LocalDate data,
+            List<Parte> partesVariaveisSelecionadas,
+            boolean permitirRepetidas
+    ) {
         validarData(data);
+        validarPartesVariaveis(partesVariaveisSelecionadas, permitirRepetidas);
 
-        validarPartesVariaveis(
-                partesVariaveisSelecionadas
-        );
+        List<Parte> partesSelecionadas = new ArrayList<>(listarPartesFixasOrdenadas());
+        partesSelecionadas.addAll(partesVariaveisSelecionadas);
+        List<Parte> partesOrdenadas = ordenarPartes(partesSelecionadas);
 
-        List<Parte> partesSelecionadas =
-                new ArrayList<>(
-                        listarPartesFixasOrdenadas()
-                );
-
-        partesSelecionadas.addAll(
-                partesVariaveisSelecionadas
-        );
-
-        List<Parte> partesOrdenadas =
-                ordenarPartes(
-                        partesSelecionadas
-                );
-
-        ProgramacaoSemana programacao =
-                novaProgramacao(data);
-
+        ProgramacaoSemana programacao = novaProgramacao(data);
         int ordem = 1;
-
         for (Parte parte : partesOrdenadas) {
-            programacao.adicionarParte(
-                    criarProgramacaoParte(
-                            parte,
-                            ordem++
-                    )
-            );
+            programacao.adicionarParte(criarProgramacaoParte(parte, ordem++));
         }
-
         return programacao;
     }
 
