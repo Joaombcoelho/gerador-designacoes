@@ -187,6 +187,39 @@ public class ProgramacaoSemanaDAO {
         }
     }
 
+    /**
+     * Lista as datas de programações já persistidas dentro de um intervalo,
+     * incluindo reuniões em dias diferentes do dia habitual configurado.
+     */
+    public List<LocalDate> listarDatasEntre(LocalDate inicio, LocalDate fim) {
+        if (inicio == null || fim == null || fim.isBefore(inicio)) {
+            throw new IllegalArgumentException("Informe um intervalo de datas válido.");
+        }
+
+        String sql = """
+                SELECT data
+                FROM programacao_semana
+                WHERE data >= ? AND data <= ?
+                ORDER BY data
+                """;
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setDate(1, Date.valueOf(inicio));
+            statement.setDate(2, Date.valueOf(fim));
+
+            List<LocalDate> datas = new ArrayList<>();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    datas.add(resultSet.getDate("data").toLocalDate());
+                }
+            }
+            return List.copyOf(datas);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar datas de programações semanais.", e);
+        }
+    }
+
     public ProgramacaoSemana buscarPorData(LocalDate data) {
         String sql = """
                 SELECT
