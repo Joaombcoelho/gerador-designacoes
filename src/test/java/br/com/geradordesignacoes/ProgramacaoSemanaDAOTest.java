@@ -361,6 +361,27 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
     }
 
     @Test
+    void importaSobreRascunhoVazioPreservandoIdDaData() {
+        LocalDate data = LocalDate.of(2026, 12, 9);
+        ProgramacaoSemana rascunho = new ProgramacaoSemanaService().obterOuCriar(data);
+        Parte parteVariavel = obterParteInicial("DISCURSO_TESOUROS");
+        ProgramacaoSemana importada = new ProgramacaoSemana(
+                null, data,
+                List.of(new ProgramacaoParte(parteVariavel, 1, "Tema importado")),
+                false, false, null, "101", "102", "103");
+
+        List<ProgramacaoSemana> salvas =
+                programacaoSemanaDAO.salvarTodasNovas(List.of(importada));
+
+        assertEquals(rascunho.id(), salvas.getFirst().id());
+        ProgramacaoSemana recarregada = programacaoSemanaDAO.buscarPorData(data);
+        assertEquals("101", recarregada.canticoInicial());
+        assertEquals(1, recarregada.partes().size());
+        assertEquals("Tema importado", recarregada.partes().getFirst().getTema());
+        assertFalse(programacaoSemanaDAO.podeReutilizarRascunhoVazio(data));
+    }
+
+    @Test
     void reconheceRascunhoVazioCriadoAoAbrirProgramacao() {
         LocalDate data = LocalDate.of(2026, 12, 2);
         new ProgramacaoSemanaService().obterOuCriar(data);
