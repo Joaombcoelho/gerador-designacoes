@@ -75,6 +75,10 @@ public class AplicacaoEventosEspeciaisService {
                 List<EventoEspecial> eventos = carregarEventos(connection, comando.idsEventos());
                 ResultadoResolucaoEventos resolucao =
                         resolvedor.resolverSemana(comando.dataReferencia(), eventos);
+                if (resolucao.eventosConsiderados().size() != eventos.size()) {
+                    throw new IllegalArgumentException(
+                            "Um ou mais eventos selecionados não se aplicam à semana da prévia.");
+                }
                 validarDecisao(resolucao, comando.acaoConfirmada());
 
                 // Não criar semana nem sincronizar partes: a programação deve existir previamente.
