@@ -388,7 +388,8 @@ public class ImportacaoApostilaView {
             }
             datas.put(semana.dataInicio(), data);
             try {
-                if (programacaoDAO.buscarPorData(data) != null) {
+                if (programacaoDAO.buscarPorData(data) != null
+                        && !programacaoDAO.podeReutilizarRascunhoVazio(data)) {
                     existentes.add(data);
                 }
             } catch (RuntimeException e) {
