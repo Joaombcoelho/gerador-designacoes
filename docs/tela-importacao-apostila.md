@@ -25,8 +25,23 @@ A tela fica disponível no menu lateral em **Importar apostila**.
 - A tela não grava o JSON nem as escolhas manuais no banco. O JSON gerado fica temporariamente em arquivo local até o encerramento/limpeza pelo sistema.
 - A verificação de programação existente usa consulta por data.
 - A data da apostila não é presumida como data da reunião.
-- As escolhas manuais são apenas visuais nesta etapa; ainda não são enviadas ao serviço de confirmação/importação.
+- As escolhas manuais são enviadas ao serviço de prévia por data inicial da semana e número da parte; a prévia aplica as escolhas ao resultado em memória.
+- A prévia mostra o mapeamento final, leitura bíblica, cânticos e conflitos de programação existente.
+- Se a mesma parte do catálogo for atribuída a mais de um item da mesma semana, a prévia sinaliza erro.
+- O serviço de prévia continua sem DAO e não persiste escolhas ou programação.
 
-## Limites desta etapa
+## Confirmação e gravação
 
-Esta etapa integra a extração RTF à tela já existente e mantém o fluxo de conferência como somente leitura. Não implementa a confirmação final, gravação transacional, criação de partes, nem importação de cânticos para uma programação. Essas operações devem ser desenvolvidas em etapa separada, depois de a extração integrada ser testada.
+Quando a prévia não contém erros, todas as semanas têm oito mapeamentos únicos e não há datas conflitantes, o botão **Confirmar importação** fica habilitado. A tela apresenta uma confirmação explícita antes de gravar.
+
+- A confirmação usa o resultado da prévia atual; qualquer alteração posterior nas datas ou nas seleções invalida a prévia e exige conferência novamente.
+- O serviço monta cada programação em memória, usa as partes fixas do serviço de programação e as partes variáveis selecionadas, e aplica os temas e durações confirmados.
+- Os cânticos são gravados nos campos da programação semanal.
+- A persistência usa uma única transação para todas as semanas.
+- A transação verifica novamente se alguma data já possui programação. Se houver conflito ou qualquer falha, toda a operação é revertida.
+- Programações existentes não são atualizadas ou sincronizadas e o processo não usa `obterOuCriar`.
+- A importação não cria novos registros no catálogo de partes.
+
+## Limites e validação
+
+A etapa de confirmação está implementada nesta versão, mas precisa ser validada localmente antes de ser integrada. Executar `mvn test` com JDK 22 e testar uma importação simples, várias semanas, conflito com data existente, cancelamento do diálogo e ausência de alterações nas programações anteriores. A documentação não substitui a confirmação desses testes.

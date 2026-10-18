@@ -263,7 +263,14 @@ public class ProgramacaoController {
             data = data.plusDays(1);
         }
 
-        return resultado;
+        // Inclui também datas já importadas que não coincidam com o dia habitual.
+        // A consulta é somente de leitura e não cria programações.
+        resultado.addAll(service.listarDatasProgramadasNoMes(mes));
+
+        return resultado.stream()
+                .distinct()
+                .sorted()
+                .toList();
     }
 
     private void atualizarSemanas() {
