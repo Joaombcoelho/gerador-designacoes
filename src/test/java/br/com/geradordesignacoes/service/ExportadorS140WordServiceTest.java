@@ -188,6 +188,29 @@ class ExportadorS140WordServiceTest {
     }
 
     @Test
+    void deveValidarDesignacoesSeparadasParaOcorrenciasRepetidasDaMesmaParte() {
+        LocalDate data = LocalDate.of(2026, 11, 4);
+        Parte ministerio = criarParteTeste(
+                34, "Iniciando conversas - De casa em casa",
+                TipoParte.INICIANDO_CONVERSAS, SecaoParte.MINISTERIO, 1);
+        ProgramacaoSemana programacao = new ProgramacaoSemana(data);
+        programacao.adicionarParte(new ProgramacaoParte(ministerio, 1, "Cena 1"));
+        programacao.adicionarParte(new ProgramacaoParte(ministerio, 2, "Cena 2"));
+
+        Escala escala = escalaBasica(data);
+        escala.adicionarDesignacao(new Designacao(
+                data, ministerio, pessoaTeste("Participante A", 11), null));
+        escala.adicionarDesignacao(new Designacao(
+                data, ministerio, pessoaTeste("Participante B", 12), null));
+
+        List<String> problemas = ExportadorS140WordService.validarSemana(
+                new DadosExportacaoS140Semana(data, programacao, escala));
+
+        assertTrue(problemas.stream().noneMatch(p ->
+                p.contains("Iniciando conversas") && p.contains("designação ausente")));
+    }
+
+    @Test
     void deveExigirDesignacaoNaSalaBQuandoElaEstiverHabilitada() {
         LocalDate data = LocalDate.of(2026, 10, 7);
         Parte ministerio = criarParteTeste(
