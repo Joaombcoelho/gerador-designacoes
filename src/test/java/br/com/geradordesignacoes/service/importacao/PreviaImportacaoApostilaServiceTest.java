@@ -1,6 +1,12 @@
 package br.com.geradordesignacoes.service.importacao;
 
+import br.com.geradordesignacoes.model.NivelLeitura;
 import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.Privilegio;
+import br.com.geradordesignacoes.model.SecaoParte;
+import br.com.geradordesignacoes.model.SexoPermitido;
+import br.com.geradordesignacoes.model.TipoParte;
+import br.com.geradordesignacoes.model.TipoVariacaoParte;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -11,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -76,6 +83,57 @@ class PreviaImportacaoApostilaServiceTest {
         assertTrue(previa.erros().stream()
                 .anyMatch(erro -> erro.contains("selecionada para mais de uma semana")));
         assertFalse(previa.podeProsseguirParaConfirmacao());
+    }
+
+    @Test
+    void deveUsarEscolhaManualNaPreviaTecnica() throws Exception {
+        Path json = criarJsonValido();
+        LocalDate inicioApostila = LocalDate.of(2026, 11, 2);
+        LocalDate dataReuniao = LocalDate.of(2026, 11, 4);
+        Parte selecionada = parte(77, SecaoParte.MINISTERIO, TipoParte.DEMONSTRACAO);
+
+        var previa = service.preparar(
+                json,
+                Map.of(inicioApostila, dataReuniao),
+                List.of(selecionada),
+                Set.of(),
+                Map.of(inicioApostila, Map.of(4, selecionada))
+        );
+
+        var mapeamento = previa.semanas().getFirst().partes().get(3);
+        assertEquals(MapeadorParteApostilaService.SituacaoMapeamento.CORRESPONDENCIA_UNICA,
+                mapeamento.situacao());
+        assertEquals(selecionada, mapeamento.candidatos().getFirst());
+        assertEquals(TipoParte.DEMONSTRACAO, mapeamento.tipoInferido());
+        assertTrue(previa.avisos().stream().anyMatch(aviso -> aviso.contains("exige conferência")));
+        assertFalse(previa.podeProsseguirParaConfirmacao());
+    }
+
+    @Test
+    void deveSinalizarParteManualDuplicadaNaMesmaSemana() throws Exception {
+        Path json = criarJsonValido();
+        LocalDate inicioApostila = LocalDate.of(2026, 11, 2);
+        Parte selecionada = parte(77, SecaoParte.MINISTERIO, TipoParte.DEMONSTRACAO);
+
+        var previa = service.preparar(
+                json,
+                Map.of(inicioApostila, LocalDate.of(2026, 11, 4)),
+                List.of(selecionada),
+                Set.of(),
+                Map.of(inicioApostila, Map.of(4, selecionada, 5, selecionada))
+        );
+
+        assertTrue(previa.erros().stream()
+                .anyMatch(erro -> erro.contains("mesma parte do catálogo")));
+        assertFalse(previa.podeProsseguirParaConfirmacao());
+    }
+
+    private static Parte parte(Integer id, SecaoParte secao, TipoParte tipo) {
+        return new Parte(
+                id, "Parte de teste", tipo, Privilegio.PUBLICADOR, false,
+                SexoPermitido.AMBOS, 1, false, NivelLeitura.BASICO,
+                secao, TipoVariacaoParte.VARIAVEL, true, 1, List.of()
+        );
     }
 
     private Path criarJsonValido() throws Exception {

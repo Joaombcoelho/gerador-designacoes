@@ -1,25 +1,42 @@
-# Importação de apostilas — etapa 1
+# Importação de apostilas RTF/JSON
 
-Esta etapa adiciona a leitura e a validação do JSON produzido por `ExtratorApostilaRtf`.
+A importação usa um fluxo em etapas para separar extração, validação, conferência e gravação.
 
-## O que está implementado
+## Fluxo disponível
 
-- Leitura do JSON com Jackson.
-- Validação de datas, semanas repetidas, oito partes, números duplicados, tema, duração e identificadores de seção.
-- Conversão dos identificadores de seção do JSON para `SecaoParte` do sistema.
-- Leitura de cânticos, subtítulos e descrição curta da designação.
-- Separação de erros impeditivos e avisos que exigem conferência.
-- Testes unitários para um JSON válido, data inválida, seção desconhecida, parte duplicada e lista de semanas vazia.
+1. Extrair arquivos RTF diretamente pela tela ou abrir um JSON existente.
+2. Validar a estrutura JSON, datas, semanas, oito partes, números, temas, duração, seções e cânticos.
+3. Informar a data efetiva da reunião para cada semana, sem presumir que as datas da apostila sejam datas de reunião.
+4. Conferir sugestões de mapeamento e selecionar manualmente partes já cadastradas no catálogo.
+5. Gerar a prévia técnica com o mapeamento final e verificar conflitos.
+6. Confirmar explicitamente a importação quando todas as semanas estiverem válidas.
 
-## Limite intencional desta etapa
+## Persistência e segurança
 
-O serviço `ImportacaoApostilaJsonService` **não acessa DAOs e não grava nem modifica o banco de dados**. Ele devolve uma estrutura validada para ser usada pela próxima etapa, que construirá a prévia de importação.
+- A extração, a validação e a prévia não gravam no banco.
+- A importação aceita apenas mapeamentos completos para partes já cadastradas; esta etapa não cria novos registros no catálogo de partes.
+- As partes variáveis selecionadas precisam respeitar as regras existentes do gerador, incluindo o limite de 3 a 6 por semana.
+- A data efetiva de cada reunião precisa ser informada pelo usuário.
+- Se uma data já possuir programação, a importação é recusada. Não utiliza `obterOuCriar`, pois esse método pode sincronizar partes fixas ou ajustar dados de uma programação existente.
+- As programações de todas as semanas e suas partes são inseridas por `ProgramacaoSemanaDAO.salvarTodasNovas` numa única transação SQLite.
+- A persistência verifica novamente as datas dentro da transação e também depende da restrição única da coluna `programacao_semana.data` para impedir duplicidades concorrentes.
+- Se qualquer semana falhar, a transação é revertida; não deve haver importação parcial.
+- A confirmação na interface é explícita e separada da prévia.
 
-O importador ainda não decide que registro de `Parte` corresponde a cada item da apostila. Esse mapeamento deverá usar os tipos e as regras existentes no sistema, além da seção, e será feito separadamente para evitar associações automáticas incorretas.
+## Dados importados
 
-## Próximas etapas
+Para cada semana, o processo usa os mapeamentos confirmados para associar os itens da apostila às partes existentes, aplica tema e duração às ocorrências correspondentes e transfere os três cânticos para os campos da programação semanal. As partes fixas são montadas pelo serviço de programação já existente; as partes variáveis vêm das escolhas confirmadas.
 
-1. Mapear cada parte extraída para as partes/tipos já cadastrados no banco.
-2. Definir como a semana da apostila se relaciona com a data usada pela programação semanal do aplicativo.
-3. Criar a tela de prévia, com conflitos e dados que precisam de revisão.
-4. Implementar a confirmação e a gravação transacional, protegendo programações e ajustes manuais existentes.
+## Validação local necessária
+
+Antes de integrar esta etapa, execute `mvn test` com JDK 22 e faça o teste prático completo com uma cópia de segurança do banco:
+
+- Importar uma semana com mapeamentos válidos.
+- Importar várias semanas numa mesma operação.
+- Tentar importar uma data que já possui programação e confirmar que nada é alterado.
+- Forçar uma falha de validação antes da gravação e confirmar que a importação não começa.
+- Confirmar que temas, durações, cânticos e partes foram gravados como mostrado na prévia.
+- Conferir que uma falha durante a gravação reverte todas as semanas.
+- Verificar histórico, ajustes manuais e programações anteriores antes e depois do teste.
+
+O resultado dos testes locais não é presumido pela documentação; deve ser confirmado na versão exata que será integrada.
