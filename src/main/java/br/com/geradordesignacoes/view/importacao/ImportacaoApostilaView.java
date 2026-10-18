@@ -115,7 +115,7 @@ public class ImportacaoApostilaView {
         scrollPrincipal.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         root.getChildren().addAll(titulo, instrucao, arquivoLinha, arquivoLabel, semanasContainer,
-                conferirButton, resultadoContainer);
+                conferirButton, resultadoContainer, confirmarImportacaoButton);
     }
 
     public Parent getView() {
