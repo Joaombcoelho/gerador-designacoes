@@ -80,18 +80,18 @@ class PreviaImportacaoApostilaServiceTest {
 
     private Path criarJsonValido() throws Exception {
         Path arquivo = pastaTemporaria.resolve("apostila.json");
-        String semana = jsonSemana("2026-11-02", "2026-11-08");
-
-        String conteudo = """
-            {
-              "schema_version": "1.0",
-              "status_conferencia": "pendente",
-              "semanas": [%s]
-            }
-            """.formatted(semana);
-
-        Files.writeString(arquivo, conteudo);
+        Files.writeString(arquivo, jsonApostila(jsonSemana("2026-11-02", "2026-11-08")));
         return arquivo;
+    }
+
+    private static String jsonApostila(String semana) {
+        return """
+                {
+                  "schema_version": "1.0",
+                  "status_conferencia": "pendente",
+                  "semanas": [%s]
+                }
+                """.formatted(semana);
     }
 
     private Path criarJsonComDuasSemanas() throws Exception {
