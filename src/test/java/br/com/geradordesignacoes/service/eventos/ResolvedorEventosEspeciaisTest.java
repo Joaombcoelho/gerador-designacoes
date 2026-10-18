@@ -153,6 +153,63 @@ class ResolvedorEventosEspeciaisTest {
                 evento(TipoEventoEspecial.CELEBRACAO, "2026-10-14", "2026-10-14", "Tema indevido"));
     }
 
+
+    @Test
+    void visitaECancelamentoComSobreposicaoParcialExigemDecisao() {
+        EventoEspecial visita = evento(TipoEventoEspecial.VISITA_SUPERINTENDENTE,
+                "2026-10-12", "2026-10-20", "Tema");
+        EventoEspecial cancelamento = evento(TipoEventoEspecial.CANCELAMENTO,
+                "2026-10-15", "2026-10-17", null);
+
+        ResultadoResolucaoEventos resultado = resolvedor.resolverSemana(
+                LocalDate.of(2026, 10, 14), List.of(visita, cancelamento));
+
+        assertEquals(AcaoResolucaoEvento.EXIGE_DECISAO, resultado.acao());
+        assertTrue(resultado.exigeDecisaoDoUsuario());
+    }
+
+    @Test
+    void visitaECancelamentoQueSeEncontramApenasNaExtremidadeExigemDecisao() {
+        EventoEspecial visita = evento(TipoEventoEspecial.VISITA_SUPERINTENDENTE,
+                "2026-10-12", "2026-10-20", "Tema");
+        EventoEspecial cancelamento = evento(TipoEventoEspecial.CANCELAMENTO,
+                "2026-10-20", "2026-10-25", null);
+
+        ResultadoResolucaoEventos resultado = resolvedor.resolverSemana(
+                LocalDate.of(2026, 10, 21), List.of(visita, cancelamento));
+
+        assertEquals(AcaoResolucaoEvento.EXIGE_DECISAO, resultado.acao());
+        assertTrue(resultado.exigeDecisaoDoUsuario());
+    }
+
+    @Test
+    void intervalosDiferentesMesmoComDiaCompartilhadoExigemDecisao() {
+        EventoEspecial visita = evento(TipoEventoEspecial.VISITA_SUPERINTENDENTE,
+                "2026-10-12", "2026-10-20", "Tema");
+        EventoEspecial cancelamento = evento(TipoEventoEspecial.CANCELAMENTO,
+                "2026-10-20", "2026-10-20", null);
+
+        ResultadoResolucaoEventos resultado = resolvedor.resolverSemana(
+                LocalDate.of(2026, 10, 14), List.of(visita, cancelamento));
+
+        assertEquals(AcaoResolucaoEvento.EXIGE_DECISAO, resultado.acao());
+        assertTrue(resultado.exigeDecisaoDoUsuario());
+    }
+
+    @Test
+    void eventosSemIntersecaoDeDatasMasNaMesmaSemanaExigemDecisao() {
+        EventoEspecial visita = evento(TipoEventoEspecial.VISITA_SUPERINTENDENTE,
+                "2026-10-13", "2026-10-13", "Tema");
+        EventoEspecial cancelamento = evento(TipoEventoEspecial.CANCELAMENTO,
+                "2026-10-16", "2026-10-16", null);
+
+        ResultadoResolucaoEventos resultado = resolvedor.resolverSemana(
+                LocalDate.of(2026, 10, 14), List.of(visita, cancelamento));
+
+        assertEquals(AcaoResolucaoEvento.EXIGE_DECISAO, resultado.acao());
+        assertTrue(resultado.exigeDecisaoDoUsuario());
+    }
+
     private static EventoEspecial evento(
             TipoEventoEspecial tipo, String inicio, String fim, String tema
     ) {
