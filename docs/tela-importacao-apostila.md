@@ -25,8 +25,11 @@ A tela fica disponível no menu lateral em **Importar apostila**.
 - A tela não grava o JSON nem as escolhas manuais no banco. O JSON gerado fica temporariamente em arquivo local até o encerramento/limpeza pelo sistema.
 - A verificação de programação existente usa consulta por data.
 - A data da apostila não é presumida como data da reunião.
-- As escolhas manuais são apenas visuais nesta etapa; ainda não são enviadas ao serviço de confirmação/importação.
+- As escolhas manuais são enviadas ao serviço de prévia por data inicial da semana e número da parte; a prévia aplica as escolhas ao resultado em memória.
+- A prévia mostra o mapeamento final, leitura bíblica, cânticos e conflitos de programação existente.
+- Se a mesma parte do catálogo for atribuída a mais de um item da mesma semana, a prévia sinaliza erro.
+- O serviço de prévia continua sem DAO e não persiste escolhas ou programação.
 
 ## Limites desta etapa
 
-Esta etapa integra a extração RTF à tela já existente e mantém o fluxo de conferência como somente leitura. Não implementa a confirmação final, gravação transacional, criação de partes, nem importação de cânticos para uma programação. Essas operações devem ser desenvolvidas em etapa separada, depois de a extração integrada ser testada.
+Esta etapa integra as escolhas manuais ao resultado técnico da prévia, mas não implementa a confirmação final, gravação transacional, criação de partes, nem importação de cânticos para uma programação. A confirmação deve ser desenvolvida separadamente, depois da validação local desta etapa.

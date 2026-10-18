@@ -23,17 +23,28 @@ public class PreviaImportacaoApostilaService {
 
     private final ImportacaoApostilaJsonService validador;
     private final MapeadorParteApostilaService mapeador;
+    private final RevisaoMapeamentoApostilaService revisaoService;
 
     public PreviaImportacaoApostilaService() {
-        this(new ImportacaoApostilaJsonService(), new MapeadorParteApostilaService());
+        this(new ImportacaoApostilaJsonService(), new MapeadorParteApostilaService(),
+                new RevisaoMapeamentoApostilaService());
     }
 
     PreviaImportacaoApostilaService(
             ImportacaoApostilaJsonService validador,
             MapeadorParteApostilaService mapeador
     ) {
+        this(validador, mapeador, new RevisaoMapeamentoApostilaService());
+    }
+
+    PreviaImportacaoApostilaService(
+            ImportacaoApostilaJsonService validador,
+            MapeadorParteApostilaService mapeador,
+            RevisaoMapeamentoApostilaService revisaoService
+    ) {
         this.validador = Objects.requireNonNull(validador);
         this.mapeador = Objects.requireNonNull(mapeador);
+        this.revisaoService = Objects.requireNonNull(revisaoService);
     }
 
     public PreviaImportacao preparar(
@@ -42,8 +53,25 @@ public class PreviaImportacaoApostilaService {
             List<Parte> catalogo,
             Set<LocalDate> datasComProgramacaoExistente
     ) throws IOException {
+        return preparar(arquivoJson, datasReuniaoPorInicioDaSemana, catalogo,
+                datasComProgramacaoExistente, Map.of());
+    }
+
+    /**
+     * Monta a prévia usando também as escolhas manuais feitas na interface.
+     * A chave externa é a data inicial da semana da apostila e a interna é
+     * o número da parte na apostila. Nenhuma escolha é persistida.
+     */
+    public PreviaImportacao preparar(
+            Path arquivoJson,
+            Map<LocalDate, LocalDate> datasReuniaoPorInicioDaSemana,
+            List<Parte> catalogo,
+            Set<LocalDate> datasComProgramacaoExistente,
+            Map<LocalDate, Map<Integer, Parte>> escolhasManuais
+    ) throws IOException {
         Objects.requireNonNull(datasReuniaoPorInicioDaSemana,
                 "Informe explicitamente a data da reunião para cada semana.");
+        Objects.requireNonNull(escolhasManuais, "As escolhas manuais não podem ser nulas.");
         Objects.requireNonNull(catalogo, "O catálogo de partes é obrigatório.");
         Objects.requireNonNull(datasComProgramacaoExistente,
                 "Informe as datas que já possuem programação.");
@@ -74,8 +102,32 @@ public class PreviaImportacaoApostilaService {
             }
 
             List<MapeadorParteApostilaService.ResultadoMapeamento> partes = new ArrayList<>();
+            Set<Integer> idsPartesSelecionadas = new HashSet<>();
+            Map<Integer, Parte> escolhasDaSemana =
+                    escolhasManuais.getOrDefault(semana.dataInicio(), Map.of());
             for (var parte : semana.partes()) {
                 var resultado = mapeador.mapear(parte, catalogo);
+                Parte selecionada = escolhasDaSemana.get(parte.numero());
+                if (selecionada != null) {
+                    try {
+                        resultado = revisaoService.aplicarSelecaoManual(resultado, selecionada);
+                        if (!idsPartesSelecionadas.add(selecionada.getId())) {
+                            erros.add("Semana " + semana.dataInicio() + ": a mesma parte do catálogo foi "
+                                    + "selecionada para mais de uma parte da apostila (ID "
+                                    + selecionada.getId() + ").");
+                        }
+                    } catch (IllegalArgumentException e) {
+                        erros.add("Semana " + semana.dataInicio() + ", parte " + parte.numero()
+                                + ": escolha manual inválida — " + e.getMessage());
+                    }
+                } else if (resultado.possuiCorrespondenciaUnica()) {
+                    Integer id = resultado.candidatos().getFirst().getId();
+                    if (id != null && !idsPartesSelecionadas.add(id)) {
+                        erros.add("Semana " + semana.dataInicio() + ": a mesma parte do catálogo foi "
+                                + "associada automaticamente a mais de uma parte da apostila (ID "
+                                + id + "). Confira o mapeamento.");
+                    }
+                }
                 partes.add(resultado);
                 if (!resultado.possuiCorrespondenciaUnica()) {
                     avisos.add("Semana " + semana.dataInicio() + ", parte "
