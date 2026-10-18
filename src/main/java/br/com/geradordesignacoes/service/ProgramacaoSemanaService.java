@@ -817,6 +817,16 @@ public class ProgramacaoSemanaService {
     }
 
     /**
+     * Retorna as datas já cadastradas no mês sem criar novas programações.
+     */
+    public List<LocalDate> listarDatasProgramadasNoMes(YearMonth mes) {
+        if (mes == null) {
+            throw new IllegalArgumentException("O mês não pode ser nulo.");
+        }
+        return programacaoSemanaDAO.listarDatasEntre(mes.atDay(1), mes.atEndOfMonth());
+    }
+
+    /**
      * Lista todas as reuniões do mês.
      *
      * Um mês pode possuir 4 ou 5 reuniões, conforme o dia habitual configurado.
