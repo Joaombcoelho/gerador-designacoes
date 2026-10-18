@@ -122,7 +122,9 @@ public class EventosEspeciaisView {
         botoes.setAlignment(Pos.CENTER_LEFT);
         VBox formulario = new VBox(12, campos, botoes, status);
         formulario.setPadding(new Insets(0, 0, 18, 0));
-        root.setCenter(formulario);
+        VBox conteudo = new VBox(10, formulario, new Label("Eventos cadastrados"), tabela);
+        VBox.setVgrow(tabela, javafx.scene.layout.Priority.ALWAYS);
+        root.setCenter(conteudo);
     }
 
     private void criarTabela() {
@@ -280,7 +282,9 @@ public class EventosEspeciaisView {
                     .map(EventoEspecialRegistrado::evento)
                     .toList();
             ResultadoResolucaoEventos resultado = resolvedor.resolverSemana(referencia, eventos);
-            escolhaConflito.getItems().setAll(resultado.alternativas());
+            if (!escolhaConflito.getItems().equals(resultado.alternativas())) {
+                escolhaConflito.getItems().setAll(resultado.alternativas());
+            }
             if (!resultado.exigeDecisaoDoUsuario()) {
                 escolhaConflito.setValue(null);
             }
