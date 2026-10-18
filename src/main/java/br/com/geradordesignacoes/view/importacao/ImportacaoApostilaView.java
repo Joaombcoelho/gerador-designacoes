@@ -350,6 +350,16 @@ public class ImportacaoApostilaView {
 
         for (SemanaUi semana : semanasUi) {
             LocalDate data = semana.dataReuniao().get();
+            Map<Integer, Parte> escolhasSemana = new HashMap<>();
+            for (ParteUi parteUi : semana.partes()) {
+                Parte selecionada = parteUi.escolha().getValue();
+                if (selecionada != null) {
+                    escolhasSemana.put(parteUi.numero(), selecionada);
+                }
+            }
+            if (!escolhasSemana.isEmpty()) {
+                escolhasManuais.put(semana.dataInicio(), escolhasSemana);
+            }
             if (data == null) {
                 errosTela.add("Informe a data efetiva da reunião para a semana iniciada em "
                         + semana.dataInicio() + ".");
@@ -591,6 +601,16 @@ public class ImportacaoApostilaView {
         return dialog.showAndWait();
     }
 
-    private record SemanaUi(LocalDate dataInicio, ObjectProperty<LocalDate> dataReuniao) {
+    private record SemanaUi(
+            LocalDate dataInicio,
+            ObjectProperty<LocalDate> dataReuniao,
+            List<ParteUi> partes
+    ) {
+        private SemanaUi {
+            partes = List.copyOf(partes);
+        }
+    }
+
+    private record ParteUi(int numero, ComboBox<Parte> escolha) {
     }
 }
