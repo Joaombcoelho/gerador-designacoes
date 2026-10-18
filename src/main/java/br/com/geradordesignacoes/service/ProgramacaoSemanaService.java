@@ -791,9 +791,9 @@ public class ProgramacaoSemanaService {
             );
         }
 
-        programacaoParteDAO.excluir(
+        programacaoParteDAO.excluirOcorrencia(
                 programacao.id(),
-                parteId
+                programacaoParte.getId()
         );
     }
 
