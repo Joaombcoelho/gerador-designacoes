@@ -16,6 +16,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -112,7 +113,7 @@ public class ImportacaoApostilaView {
         scrollPrincipal.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         root.getChildren().addAll(titulo, instrucao, arquivoLinha, arquivoLabel, semanasContainer,
-                conferirButton, confirmarImportacaoButton, resultadoContainer);
+                conferirButton, resultadoContainer);
     }
 
     public Parent getView() {
@@ -244,14 +245,14 @@ public class ImportacaoApostilaView {
                     + valor(semana.canticos().encerramento()));
 
             ObjectProperty<LocalDate> dataReuniao = new SimpleObjectProperty<>();
-            dataReuniao.addListener((obs, anterior, novaData) -> invalidarPrevia());
             Label dataSelecionada = new Label("Nenhuma data selecionada");
             Button selecionarData = new Button("Selecionar data…");
             selecionarData.setOnAction(_ -> selecionarDataReuniao(
                     semana.dataInicio(), dataReuniao.get()
             ).ifPresent(data -> {
                 dataReuniao.set(data);
-                dataSelecionada.setText(data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                dataSelecionada.setText(data.format(formato));
+                resultadoContainer.getChildren().clear();
             }));
             HBox dataLinha = new HBox(10, new Label("Data efetiva da reunião:"),
                     dataSelecionada, selecionarData);
@@ -348,14 +349,6 @@ public class ImportacaoApostilaView {
         List<String> errosTela = new ArrayList<>();
 
         for (SemanaUi semana : semanasUi) {
-            Map<Integer, Parte> escolhasDaSemana = new HashMap<>();
-            for (ParteUi parteUi : semana.partes()) {
-                Parte selecionada = parteUi.escolha().getValue();
-                if (selecionada != null) {
-                    escolhasDaSemana.put(parteUi.numero(), selecionada);
-                }
-            }
-            escolhasManuais.put(semana.dataInicio(), escolhasDaSemana);
             LocalDate data = semana.dataReuniao().get();
             if (data == null) {
                 errosTela.add("Informe a data efetiva da reunião para a semana iniciada em "
@@ -559,7 +552,8 @@ public class ImportacaoApostilaView {
             }
 
             int deslocamento = mes.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue();
-            for (int dia = 1; dia <= mes.lengthOfMonth(); dia++) {
+            int quantidadeDias = mes.lengthOfMonth();
+            for (int dia = 1; dia <= quantidadeDias; dia++) {
                 int indice = deslocamento + dia - 1;
                 LocalDate data = mes.withDayOfMonth(dia);
                 Button botaoDia = new Button(Integer.toString(dia));
@@ -593,19 +587,10 @@ public class ImportacaoApostilaView {
         dialog.getDialogPane().setContent(conteudo);
         dialog.getDialogPane().setPrefWidth(360);
         renderizarCalendario.run();
+
         return dialog.showAndWait();
     }
 
-    private record SemanaUi(
-            LocalDate dataInicio,
-            ObjectProperty<LocalDate> dataReuniao,
-            List<ParteUi> partes
-    ) {
-        private SemanaUi {
-            partes = List.copyOf(partes);
-        }
-    }
-
-    private record ParteUi(int numero, ComboBox<Parte> escolha) {
+    private record SemanaUi(LocalDate dataInicio, ObjectProperty<LocalDate> dataReuniao) {
     }
 }
