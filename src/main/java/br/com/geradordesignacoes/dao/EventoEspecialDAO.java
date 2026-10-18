@@ -6,7 +6,6 @@ import br.com.geradordesignacoes.model.EventoEspecialRegistrado;
 import br.com.geradordesignacoes.model.TipoEventoEspecial;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -145,8 +144,8 @@ public class EventoEspecialDAO {
             EventoEspecial evento
     ) throws SQLException {
         statement.setString(1, evento.tipo().name());
-        statement.setDate(2, Date.valueOf(evento.dataInicio()));
-        statement.setDate(3, Date.valueOf(evento.dataFim()));
+        statement.setString(2, evento.dataInicio().toString());
+        statement.setString(3, evento.dataFim().toString());
         statement.setString(4, evento.temaDiscurso());
         statement.setString(5, evento.descricao());
     }
