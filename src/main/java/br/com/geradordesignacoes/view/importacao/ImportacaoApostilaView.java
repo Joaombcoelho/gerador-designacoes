@@ -91,13 +91,17 @@ public class ImportacaoApostilaView {
         conferirButton.setDisable(true);
         conferirButton.setOnAction(_ -> conferirPrevia());
 
-        ScrollPane scroll = new ScrollPane(semanasContainer);
-        scroll.setFitToWidth(true);
-        scroll.setPrefViewportHeight(380);
-        VBox.setVgrow(scroll, Priority.ALWAYS);
-
-        root.getChildren().addAll(titulo, instrucao, arquivoLinha, arquivoLabel, scroll,
-                conferirButton, resultadoContainer);
+        // A página inteira precisa rolar: os resultados da prévia podem conter
+        // vários cards e não devem comprimir a área de correção dos mapeamentos.
+        VBox conteudo = new VBox(16, titulo, instrucao, arquivoLinha, arquivoLabel,
+                semanasContainer, conferirButton, resultadoContainer);
+        conteudo.setPadding(new Insets(0));
+        ScrollPane scrollTela = new ScrollPane(conteudo);
+        scrollTela.setFitToWidth(true);
+        scrollTela.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollTela.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(scrollTela, Priority.ALWAYS);
+        root.getChildren().add(scrollTela);
     }
 
     public Parent getView() {
