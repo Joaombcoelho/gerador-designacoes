@@ -114,7 +114,6 @@ public class PreviaImportacaoApostilaService {
                         erros.add("Semana " + semana.dataInicio() + ", parte " + parte.numero()
                                 + ": escolha manual inválida — " + e.getMessage());
                     }
-                } else if (resultado.possuiCorrespondenciaUnica()) {
                 }
                 partes.add(resultado);
                 if (!resultado.possuiCorrespondenciaUnica()) {
