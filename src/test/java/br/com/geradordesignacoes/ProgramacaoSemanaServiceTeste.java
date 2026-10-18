@@ -2,6 +2,7 @@ package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ConfiguracaoSalasDAO;
 import br.com.geradordesignacoes.model.ConfiguracaoSalas;
+import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ProgramacaoParte;
 import br.com.geradordesignacoes.model.ProgramacaoSemana;
 import br.com.geradordesignacoes.model.TipoParte;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProgramacaoSemanaServiceTest extends BaseDAOTest {
@@ -424,6 +426,34 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
                                 null
                         )
         );
+    }
+
+    @Test
+    void devePermitirParteVariavelRepetidaSomenteNaImportacao() {
+        List<Parte> variaveis = service.listarPartesVariaveis();
+        assertTrue(variaveis.size() >= 2, "O catálogo de teste precisa de duas partes variáveis.");
+
+        Parte repetida = variaveis.get(0);
+        Parte outra = variaveis.get(1);
+        List<Parte> selecao = List.of(repetida, repetida, outra);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.validarPartesVariaveis(selecao));
+
+        ProgramacaoSemana programacao = service.montarProgramacaoImportada(
+                LocalDate.of(2026, 11, 4), selecao);
+
+        long ocorrencias = programacao.partes().stream()
+                .filter(item -> item.getParte().getId().equals(repetida.getId()))
+                .count();
+        assertEquals(2, ocorrencias);
+        assertNotEquals(
+                programacao.partes().stream()
+                        .filter(item -> item.getParte().getId().equals(repetida.getId()))
+                        .findFirst().orElseThrow().getOrdem(),
+                programacao.partes().stream()
+                        .filter(item -> item.getParte().getId().equals(repetida.getId()))
+                        .skip(1).findFirst().orElseThrow().getOrdem());
     }
 
     @Test
