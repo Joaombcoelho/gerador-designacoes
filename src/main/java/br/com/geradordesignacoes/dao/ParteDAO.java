@@ -690,11 +690,16 @@ public class ParteDAO {
 
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Erro ao excluir parte.",
-                    e
-            );
+            if (e.getMessage() != null
+                    && e.getMessage().toLowerCase(java.util.Locale.ROOT)
+                            .contains("foreign key constraint failed")) {
+                throw new RuntimeException(
+                        "Não é possível excluir esta parte porque ela está vinculada "
+                                + "a designações, ao histórico ou a programações semanais.",
+                        e
+                );
+            }
+            throw new RuntimeException("Erro ao excluir parte.", e);
         }
     }
 }
