@@ -791,9 +791,11 @@ public class ProgramacaoSemanaService {
             );
         }
 
-        programacaoParteDAO.excluirOcorrencia(
+        // A tela usa um único checkbox por parte do catálogo. Ao desmarcá-lo,
+        // removemos todas as ocorrências dessa parte para manter a interface coerente.
+        programacaoParteDAO.excluir(
                 programacao.id(),
-                programacaoParte.getId()
+                parteId
         );
     }
 
