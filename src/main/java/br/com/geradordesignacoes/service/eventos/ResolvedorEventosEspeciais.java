@@ -157,11 +157,12 @@ public class ResolvedorEventosEspeciais {
             return false;
         }
 
-        LocalDate inicioSobreposicao = visita.dataInicio().isAfter(cancelamento.dataInicio())
-                ? visita.dataInicio() : cancelamento.dataInicio();
-        LocalDate fimSobreposicao = visita.dataFim().isBefore(cancelamento.dataFim())
-                ? visita.dataFim() : cancelamento.dataFim();
-        return !fimSobreposicao.isBefore(inicioSobreposicao);
+        // A precedência automática só é segura quando os dois registros descrevem
+        // exatamente o mesmo período. Uma interseção parcial não prova que os
+        // efeitos dos eventos coincidem durante todo o período considerado;
+        // nesses casos, a resolução semanal deve pedir decisão explícita.
+        return visita.dataInicio().equals(cancelamento.dataInicio())
+                && visita.dataFim().equals(cancelamento.dataFim());
     }
 
     private static AcaoResolucaoEvento acaoParaTipo(TipoEventoEspecial tipo) {
