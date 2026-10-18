@@ -424,6 +424,32 @@ public class ProgramacaoParteDAO {
     }
 
 
+    /**
+     * Exclui uma ocorrência específica da programação, identificada pelo
+     * ID próprio de programacao_parte. Necessário quando a mesma parte do
+     * catálogo aparece mais de uma vez na mesma semana.
+     */
+    public void excluirOcorrencia(
+            int programacaoSemanaId,
+            int programacaoParteId
+    ) {
+        String sql = """
+                DELETE FROM programacao_parte
+                WHERE programacao_semana_id = ?
+                  AND id = ?
+                """;
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, programacaoSemanaId);
+            statement.setInt(2, programacaoParteId);
+            if (statement.executeUpdate() != 1) {
+                throw new RuntimeException("Ocorrência da parte não encontrada na programação semanal.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir ocorrência da parte da programação.", e);
+        }
+    }
+
     public void excluirPorSemana(
             int programacaoSemanaId
     ) {
