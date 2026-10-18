@@ -536,7 +536,11 @@ public class DatabaseInitializer {
              ResultSet rs = st.executeQuery("PRAGMA table_info(parte)")) {
             while (rs.next()) {
                 String coluna = rs.getString("name");
-                if (!"id".equals(coluna) && !"nome".equals(coluna)) {
+                // A ordem padrão da variante canônica é recalculada pelo
+                // inicializador; registros legados podem continuar com 999.
+                if (!"id".equals(coluna)
+                        && !"nome".equals(coluna)
+                        && !"ordem".equals(coluna)) {
                     colunas.add(coluna);
                 }
             }
