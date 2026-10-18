@@ -81,6 +81,19 @@ public class EventosEspeciaisView {
 
     private void criarFormulario() {
         tipo.getItems().setAll(TipoEventoEspecial.values());
+        tipo.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(TipoEventoEspecial valor) {
+                return valor == null ? "" : rotulo(valor);
+            }
+
+            @Override
+            public TipoEventoEspecial fromString(String texto) {
+                return java.util.Arrays.stream(TipoEventoEspecial.values())
+                        .filter(valor -> rotulo(valor).equals(texto))
+                        .findFirst().orElse(null);
+            }
+        });
         tipo.setPromptText("Tipo do evento");
         tipo.setMaxWidth(Double.MAX_VALUE);
         tipo.setOnAction(_ -> atualizarCamposTipo());
@@ -171,6 +184,19 @@ public class EventosEspeciaisView {
         Button atualizar = new Button("Atualizar prévia");
         atualizar.setOnAction(_ -> atualizarPrevia());
 
+        escolhaConflito.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(AcaoResolucaoEvento valor) {
+                return valor == null ? "" : rotulo(valor);
+            }
+
+            @Override
+            public AcaoResolucaoEvento fromString(String texto) {
+                return java.util.Arrays.stream(AcaoResolucaoEvento.values())
+                        .filter(valor -> rotulo(valor).equals(texto))
+                        .findFirst().orElse(null);
+            }
+        });
         escolhaConflito.setPromptText("Escolha uma alternativa para simular");
         escolhaConflito.setMaxWidth(320);
         escolhaConflito.setOnAction(_ -> atualizarPrevia());
