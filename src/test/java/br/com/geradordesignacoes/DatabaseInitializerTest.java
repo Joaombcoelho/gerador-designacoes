@@ -949,6 +949,28 @@ class DatabaseInitializerTest {
         }
     }
 
+
+    @Test
+    void devePreservarOrdemDaVarianteCanonicaAoConsolidar()
+            throws Exception {
+        Path arquivo = diretorioTemporario.resolve("parte-ordem.db");
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:" + arquivo.toAbsolutePath())) {
+            criarEsquemaPartes(connection);
+            inserirParte(connection, 10, "Iniciando Conversas_De casa em casa", "CONFIG");
+            inserirParte(connection, 20, "Iniciando Conversas _ De casa em casa", "CONFIG");
+            try (Statement st = connection.createStatement()) {
+                st.execute("UPDATE parte SET ordem = 999 WHERE id = 10");
+                st.execute("UPDATE parte SET ordem = 7 WHERE id = 20");
+            }
+            DatabaseInitializer.normalizarPartesDuplicadas(connection);
+            assertEquals(7, buscarValor(connection,
+                    "SELECT ordem FROM parte WHERE id = 20"));
+            assertEquals(0, buscarValor(connection,
+                    "SELECT COUNT(*) FROM parte WHERE id = 10"));
+        }
+    }
+
     private void criarEsquemaPartes(Connection connection) throws SQLException {
         try (Statement st = connection.createStatement()) {
             st.execute("PRAGMA foreign_keys = ON");
@@ -956,7 +978,8 @@ class DatabaseInitializerTest {
                     CREATE TABLE parte (
                         id INTEGER PRIMARY KEY,
                         nome TEXT NOT NULL,
-                        tipo TEXT NOT NULL
+                        tipo TEXT NOT NULL,
+                        ordem INTEGER NOT NULL DEFAULT 999
                     )
                     """);
             st.execute("CREATE TABLE pessoa (id INTEGER PRIMARY KEY)");
