@@ -64,6 +64,16 @@ public class ProgramacaoSemanaService {
     }
 
     /**
+     * Consulta uma programação para exibição sem criar nem sincronizar registros.
+     * Se a data ainda não existe no banco, prepara uma programação somente em memória.
+     */
+    public ProgramacaoSemana buscarOuPreparar(LocalDate data) {
+        validarData(data);
+        ProgramacaoSemana existente = programacaoSemanaDAO.buscarPorData(data);
+        return existente != null ? existente : criarProgramacao(data);
+    }
+
+    /**
      * Busca a programação de uma semana já cadastrada.
      *
      * Caso não exista, cria uma nova programação contendo
@@ -809,10 +819,10 @@ public class ProgramacaoSemanaService {
         validarData(data);
 
         ProgramacaoSemana programacao =
-                obterOuCriar(data);
+                programacaoSemanaDAO.buscarPorData(data);
 
-        return programacao
-                .possuiQuantidadeValidaDePartesVariaveis();
+        return programacao != null
+                && programacao.possuiQuantidadeValidaDePartesVariaveis();
     }
 
     /**
@@ -853,12 +863,7 @@ public class ProgramacaoSemanaService {
             if (data.getDayOfWeek()
                     == diaReuniao) {
 
-                ProgramacaoSemana programacao =
-                        obterOuCriar(data);
-
-                if (programacao != null) {
-                    semanas.add(programacao);
-                }
+                semanas.add(buscarOuPreparar(data));
             }
 
             data = data.plusDays(1);
