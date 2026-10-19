@@ -56,6 +56,9 @@ class ImportacaoProgramacaoTransacionalTest {
         LocalDate dataExistente = LocalDate.of(2027, 2, 3);
         LocalDate dataNova = LocalDate.of(2027, 2, 10);
         dao.salvar(new ProgramacaoSemana(dataExistente));
+        // Torna a programação existente não vazia: o DAO pode reutilizar
+        // rascunhos vazios, mas deve recusar datas já configuradas.
+        dao.atualizarDadosS140(dataExistente, null, "Cântico 1", null, null);
 
 // Marca a programação como configurada, impedindo a reutilização
 // como rascunho vazio durante a importação.

@@ -102,28 +102,8 @@ public class PreviaImportacaoApostilaService {
             }
 
             List<MapeadorParteApostilaService.ResultadoMapeamento> partes = new ArrayList<>();
-
             Map<Integer, Parte> escolhasDaSemana =
                     escolhasManuais.getOrDefault(semana.dataInicio(), Map.of());
-
-// Impede que a mesma parte do catálogo seja escolhida
-// para dois números diferentes da mesma semana.
-            Set<Integer> idsPartesManuais = new HashSet<>();
-
-            for (Parte selecionada : escolhasDaSemana.values()) {
-                if (selecionada == null || selecionada.getId() == null) {
-                    continue;
-                }
-
-                if (!idsPartesManuais.add(selecionada.getId())) {
-                    erros.add(
-                            "Semana " + semana.dataInicio()
-                                    + ": a mesma parte do catálogo foi selecionada "
-                                    + "mais de uma vez."
-                    );
-                }
-            }
-
             for (var parte : semana.partes()) {
                 var resultado = mapeador.mapear(parte, catalogo);
                 Parte selecionada = escolhasDaSemana.get(parte.numero());

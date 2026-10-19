@@ -72,8 +72,22 @@ public class MapeadorParteApostilaService {
     ) {
         Objects.requireNonNull(parte, "A parte da apostila é obrigatória.");
         String texto = normalizar(
-                juntar(parte.subtitulo(), parte.descricaoDesignacao())
+                juntar(parte.tema(), parte.subtitulo(), parte.descricaoDesignacao())
         );
+
+        // Na última seção, o tema identifica o Estudo Bíblico e a sequência
+        // da apostila identifica as partes numeradas. O número nunca é ID do banco.
+        if (parte.secao() == SecaoParte.NOSSA_VIDA_CRISTA) {
+            if (contem(texto, "estudo biblico")) {
+                return TipoParte.DIRIGENTE_ESTUDO;
+            }
+            if (parte.numero() == 7) {
+                return TipoParte.PARTE_1;
+            }
+            if (parte.numero() == 8) {
+                return TipoParte.PARTE_2;
+            }
+        }
 
         if (contem(texto, "iniciando conversas")) {
             return TipoParte.INICIANDO_CONVERSAS;
@@ -105,8 +119,9 @@ public class MapeadorParteApostilaService {
         return null;
     }
 
-    private static String juntar(String subtitulo, String descricao) {
-        return (subtitulo == null ? "" : subtitulo) + " "
+    private static String juntar(String tema, String subtitulo, String descricao) {
+        return (tema == null ? "" : tema) + " "
+                + (subtitulo == null ? "" : subtitulo) + " "
                 + (descricao == null ? "" : descricao);
     }
 
