@@ -57,6 +57,16 @@ class ImportacaoProgramacaoTransacionalTest {
         LocalDate dataNova = LocalDate.of(2027, 2, 10);
         dao.salvar(new ProgramacaoSemana(dataExistente));
 
+// Marca a programação como configurada, impedindo a reutilização
+// como rascunho vazio durante a importação.
+        dao.atualizarDadosS140(
+                dataExistente,
+                null,
+                "1",
+                null,
+                null
+        );
+
         assertThrows(IllegalArgumentException.class, () -> dao.salvarTodasNovas(List.of(
                 new ProgramacaoSemana(dataNova),
                 new ProgramacaoSemana(dataExistente)

@@ -1348,15 +1348,15 @@ public class DatabaseInitializer {
 
             /* * Partes do Ministério e as suas variações. * Cada variação possui uma ordem própria. */
             atualizarOrdemPorNome(statement, 6, "Iniciando Conversas");
-            atualizarOrdemPorNome(statement, 7, "Iniciando Conversas_De casa em casa");
-            atualizarOrdemPorNome(statement, 8, "Iniciando Conversas_Testemunho informal");
-            atualizarOrdemPorNome(statement, 9, "Iniciando Conversas_Testemunho público");
+            atualizarOrdemPorNome(statement, 7, "Iniciando conversas_De casa em casa");
+            atualizarOrdemPorNome(statement, 8, "Iniciando conversas_Testemunho informal");
+            atualizarOrdemPorNome(statement, 9, "Iniciando conversas_Testemunho público");
             atualizarOrdemPorNome(statement, 10, "Cultivando Interesse");
-            atualizarOrdemPorNome(statement, 11, "Cultivando Interesse_De casa em casa");
-            atualizarOrdemPorNome(statement, 12, "Cultivando Interesse_Testemunho informal");
-            atualizarOrdemPorNome(statement, 13, "Cultivando Interesse_Testemunho público");
+            atualizarOrdemPorNome(statement, 11, "Cultivando interesse_De casa em casa");
+            atualizarOrdemPorNome(statement, 12, "Cultivando interesse_Testemunho informal");
+            atualizarOrdemPorNome(statement, 13, "Cultivando interesse_Testemunho público");
             atualizarOrdem(statement, 14, TipoParte.O_QUE_VOCE_DIRIA);
-            atualizarOrdemPorNome(statement, 15, "Fazendo Discípulos");
+            atualizarOrdemPorNome(statement, 15, "Fazendo discípulos");
             atualizarOrdemPorNome(statement, 16, "Explicando suas crenças");
             atualizarOrdemPorNome(statement, 17, "Discurso — Ministério");
             atualizarOrdem(statement, 18, TipoParte.PARTE_1);

@@ -1357,7 +1357,7 @@ public class MainView {
         Label nome = new Label("Gerador de Designações");
         nome.getStyleClass().add("page-title");
 
-        Label versao = new Label("Versão 1.2.0");
+        Label versao = new Label("Versão 1.2.5");
         versao.getStyleClass().add("page-subtitle");
 
         Label descricao = new Label(
