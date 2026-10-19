@@ -15,7 +15,7 @@ O projeto reúne em uma única aplicação:
 - backup manual, restauração e backup automático do banco;
 - exportação de designações elegíveis para o formulário PDF S-89;
 - exportação mensal da programação e das designações para um documento Word baseado no modelo S-140.
-- extração, conferência e importação confirmada de apostilas RTF/JSON para novas programações semanais.
+- extração, conferência e importação confirmada de apostilas RTF/JSON para novas programações semanais, com sugestões automáticas de correspondência com o catálogo existente.
 
 As funcionalidades são organizadas em camadas de modelo, acesso a dados, serviços, controladores e views JavaFX. A aplicação é destinada a uso local e não possui backend ou serviço remoto.
 
@@ -56,18 +56,18 @@ Durante a inicialização, a aplicação preenche a ordem padrão apenas para pa
 
 ### Importação de apostilas RTF/JSON
 
-A opção **Importar apostila** permite selecionar uma pasta com arquivos RTF para extrair os dados diretamente na aplicação ou abrir um JSON previamente gerado. O conteúdo extraído é validado e apresentado para conferência antes de qualquer gravação.
+A opção **Importar apostila** permite selecionar uma pasta com arquivos RTF para extrair os dados diretamente na aplicação ou abrir um JSON previamente gerado. O conteúdo extraído é validado e apresentado para conferência antes de qualquer gravação. O mapeador usa o tema, o subtítulo e a descrição da designação para sugerir o tipo da parte quando reconhece um título conhecido. Uma associação só é considerada automática quando existe exatamente uma parte compatível no catálogo; resultados ambíguos, não encontrados ou sem tipo reconhecido exigem revisão.
 
 Fluxo recomendado:
 
 1. Extrair os arquivos RTF ou abrir um JSON compatível.
 2. Conferir temas, duração, leitura bíblica, cânticos e alertas.
 3. Informar explicitamente a data efetiva da reunião de cada semana; as datas de publicação da apostila não são usadas automaticamente como datas de reunião.
-4. Revisar o mapeamento de cada item para uma parte já cadastrada e corrigir manualmente as sugestões quando necessário.
+4. Conferir o mapeamento sugerido para cada item. Quando houver uma única correspondência compatível, ela é pré-selecionada; revise a associação e escolha manualmente uma parte cadastrada nos casos ambíguos, não encontrados ou incorretos.
 5. Executar **Conferir prévia** e revisar o resultado técnico.
 6. Somente quando a prévia estiver válida, usar **Confirmar importação** e confirmar a operação no diálogo.
 
-A importação cria programações somente para datas sem programação existente. A gravação das semanas e de suas partes ocorre em uma única transação: se uma das datas já estiver ocupada ou ocorrer uma falha, a operação inteira é cancelada. A importação não substitui programações existentes nem cria automaticamente novas partes no catálogo. Os mapeamentos precisam apontar para partes já cadastradas e compatíveis com as regras da programação semanal.
+A importação cria programações somente para datas sem programação existente. A gravação das semanas e de suas partes ocorre em uma única transação: se houver conflito com uma programação existente ou ocorrer uma falha durante a gravação, a operação inteira é cancelada, sem deixar semanas parcialmente importadas. A importação não substitui programações existentes nem cria automaticamente novas partes no catálogo. Os mapeamentos precisam apontar para partes já cadastradas e compatíveis com as regras da programação semanal.
 
 A extração, a validação e a prévia são somente de leitura. Nenhuma alteração é gravada antes da confirmação explícita. Para detalhes do formato e das proteções, consulte [docs/importacao-apostilas-json.md](docs/importacao-apostilas-json.md) e [docs/tela-importacao-apostila.md](docs/tela-importacao-apostila.md).
 
@@ -283,15 +283,17 @@ gerador-designacoes/
 └── README.md
 ```
 
-## Estado atual e melhorias futuras
+## Estado atual e limitações conhecidas
 
-O projeto possui uma aplicação desktop para cadastro, programação semanal, geração, edição, persistência e consulta de escalas, com backup local e exportação S-89 e S-140. A exportação S-140 depende de um modelo Word compatível e de programações e escalas previamente salvas.
+O software está organizado como aplicação desktop local, com persistência SQLite, cadastros, programação semanal, geração e edição de escalas, histórico, backup/restauração e exportação dos formulários S-89 e S-140. A importação de apostilas RTF/JSON inclui extração ou leitura de JSON, validação, sugestão de mapeamento para o catálogo existente, revisão manual e confirmação explícita antes de persistir.
 
-O estado atual ainda é direcionado a uso local em Windows.
+As sugestões de mapeamento são assistivas: não substituem a conferência do usuário. A correspondência automática depende de o título ser reconhecido e de haver exatamente uma parte compatível cadastrada. A importação não cria partes no catálogo e não substitui programações existentes. O uso e o armazenamento local são atualmente direcionados ao Windows, e a exportação S-140 depende de um modelo Word compatível fornecido pelo usuário.
 
-Possíveis evoluções, sem compromisso de implementação neste momento:
+O projeto inclui testes automatizados em `src/test/java`. Para validar a versão que será integrada, execute `mvn clean test`; o resultado deve ser conferido no ambiente de desenvolvimento antes do merge.
+
+Possíveis evoluções futuras:
 
 - aprimorar relatórios e filtros de histórico;
 - melhorar a validação e a visualização de conflitos;
 - evoluir a distribuição das designações conforme novas regras confirmadas;
-- importar dados da apostila oficial, com extração estruturada, revisão humana e confirmação antes de persistir no banco;
+- ampliar a cobertura de formatos e variações de apostilas, mantendo revisão humana e confirmação antes de persistir no banco;
