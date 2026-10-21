@@ -96,6 +96,18 @@ class EscalaDAOTest extends BaseDAOTest {
 
 
     @Test
+    void deveLancarExcecaoAoExcluirEscalaInexistente() {
+        RuntimeException excecao = assertThrows(
+                RuntimeException.class,
+                () -> escalaDAO.excluir(999999)
+        );
+
+        assertEquals("Escala não encontrada para exclusão.", excecao.getMessage());
+        assertTrue(escalaDAO.buscarPorId(999999).isEmpty());
+    }
+
+
+    @Test
     void deveSalvarDesignacoesDaEscala() {
 
 
