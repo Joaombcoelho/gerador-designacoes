@@ -15,8 +15,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class PessoaView {
+
+    private static final Logger LOGGER = Logger.getLogger(PessoaView.class.getName());
 
     private final BorderPane root;
 
@@ -376,6 +382,18 @@ public class PessoaView {
     }
 
 
+    private boolean possuiViolacaoChaveEstrangeira(Throwable erro) {
+        for (Throwable atual = erro; atual != null; atual = atual.getCause()) {
+            if (atual instanceof SQLException sqlException
+                    && sqlException.getMessage() != null
+                    && sqlException.getMessage().toLowerCase().contains("foreign key")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     private void abrirFormularioEdicao() {
 
         Pessoa pessoa =
@@ -465,10 +483,20 @@ public class PessoaView {
         painelConfirmacao.setPadding(new Insets(16));
 
         confirmar.setOnAction(_ -> {
-            if (pessoaPendenteExclusao != null) {
+            if (pessoaPendenteExclusao == null) {
+                return;
+            }
+
+            try {
                 pessoaService.excluir(pessoaPendenteExclusao.getId());
                 pessoaPendenteExclusao = null;
                 voltarParaTabela();
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.SEVERE, "Falha ao excluir pessoa.", e);
+                String mensagem = possuiViolacaoChaveEstrangeira(e)
+                        ? "Não foi possível excluir esta pessoa porque ela está vinculada a designações ou ao histórico."
+                        : "Não foi possível excluir a pessoa. Verifique os dados e tente novamente.";
+                mostrarAviso(mensagem);
             }
         });
 
