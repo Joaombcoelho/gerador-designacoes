@@ -493,10 +493,10 @@ public class PessoaView {
                 voltarParaTabela();
             } catch (RuntimeException e) {
                 LOGGER.log(Level.SEVERE, "Falha ao excluir pessoa.", e);
-                String mensagem = possuiViolacaoChaveEstrangeira(e)
+                String mensagemErro = possuiViolacaoChaveEstrangeira(e)
                         ? "Não foi possível excluir esta pessoa porque ela está vinculada a designações ou ao histórico."
                         : "Não foi possível excluir a pessoa. Verifique os dados e tente novamente.";
-                mostrarAviso(mensagem);
+                mostrarAviso(mensagemErro);
             }
         });
 
