@@ -27,6 +27,25 @@ public class ParteService {
     }
 
 
+    public List<Parte> listarAtivos() {
+        return parteDAO.listarAtivos();
+    }
+
+    public List<Parte> listarArquivados() {
+        return parteDAO.listarArquivados();
+    }
+
+    public void arquivar(Integer id) {
+        if (id == null) throw new IllegalArgumentException("O ID não pode ser nulo.");
+        parteDAO.arquivar(id);
+    }
+
+    public void restaurar(Integer id) {
+        if (id == null) throw new IllegalArgumentException("O ID não pode ser nulo.");
+        parteDAO.restaurar(id);
+    }
+
+
     public Optional<Parte> buscarPorId(Integer id) {
 
         if (id == null) {
