@@ -238,8 +238,9 @@ public class ParteView {
     }
 
     private void prepararAlerta(Alert alerta) {
-        alerta.setTitle("Confirmação");
-        alerta.setHeaderText(null);
+        if (alerta.getTitle() == null || alerta.getTitle().isBlank()) {
+            alerta.setTitle("Confirmação");
+        }
         if (root.getScene() != null && root.getScene().getWindow() != null) {
             alerta.initOwner(root.getScene().getWindow());
         }
