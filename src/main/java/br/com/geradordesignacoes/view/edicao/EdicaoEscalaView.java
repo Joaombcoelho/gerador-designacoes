@@ -180,7 +180,7 @@ public class EdicaoEscalaView {
 
     private List<Parte> carregarListaPartes() {
         try {
-            return parteDAO.listarTodos()
+            return parteDAO.listarAtivos()
                     .stream()
                     .sorted(Comparator.comparing(
                             Parte::getNome,
