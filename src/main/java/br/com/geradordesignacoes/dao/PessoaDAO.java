@@ -523,6 +523,7 @@ public class PessoaDAO {
         pessoa.setId(
                 resultSet.getInt("id")
         );
+        pessoa.setArquivado(resultSet.getInt("arquivado") == 1);
 
 
         return pessoa;
