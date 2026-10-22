@@ -23,7 +23,7 @@ public class GeradorEscala {
     }
 
     public ResultadoGeracaoEscala gerarEscala(LocalDate data, List<Parte> partes) {
-        return gerarEscala(data, partes, pessoaService.listarTodas());
+        return gerarEscala(data, partes, pessoaService.listarAtivos());
     }
 
     public ResultadoGeracaoEscala gerarEscala(LocalDate data, List<Parte> partes, List<Pessoa> pessoas) {
@@ -83,7 +83,7 @@ public class GeradorEscala {
         return gerarSemPersistir(
                 data,
                 partes,
-                pessoaService.listarTodas(),
+                pessoaService.listarAtivos(),
                 historico
         );
     }
