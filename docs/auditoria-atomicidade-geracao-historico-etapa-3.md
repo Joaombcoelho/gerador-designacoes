@@ -90,7 +90,7 @@ Cancelar ou abandonar a prévia não persiste a escala, o histórico nem a progr
 1. O método legado `CoordenadorGeracaoSalasService.gerar` persiste histórico diretamente; nenhum chamador de produção foi encontrado na busca atual.
 2. Programações semanais novas são confirmadas separadamente da transação de escala/histórico; podem permanecer se a persistência coordenada falhar depois.
 3. Métodos legados de gravação de histórico por item não são atômicos para lotes, mas não foram encontrados chamadores de produção.
-4. A regra de preservação do histórico quando a lista está vazia evita apagar dados, mas não distingue geração incompleta de uma confirmação intencional sem participações.
+4. A regra de preservação do histórico quando a lista está vazia evita apagar dados, mas não distingue geração incompleta de uma confirmação intencional sem participações. Se houver algumas participações e erros em outras partes, o histórico ainda pode ser substituído por um conjunto parcial; decidir se a confirmação deve ser bloqueada ou se o histórico anterior deve ser preservado.
 
 ### Decisão necessária
 Definir se editar uma escala já persistida deve reescrever `historico_designacoes`, e sob quais condições de data/status. Até essa definição, esta etapa não altera esse fluxo para não mudar silenciosamente o significado do histórico.
