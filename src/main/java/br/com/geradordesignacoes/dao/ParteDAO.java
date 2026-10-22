@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 public class ParteDAO {
 
@@ -179,6 +180,62 @@ public class ParteDAO {
         return partes;
     }
 
+
+    public List<Parte> listarAtivos() {
+        return listarTodos().stream().filter(p -> !p.isArquivado()).toList();
+    }
+
+    public List<Parte> listarArquivados() {
+        return listarTodos().stream().filter(Parte::isArquivado).toList();
+    }
+
+    public void arquivar(Integer id) {
+        if (id == null) throw new IllegalArgumentException("O ID da parte não pode ser nulo.");
+        String sql = """
+                SELECT
+                  EXISTS (SELECT 1 FROM historico_designacoes WHERE parte_id = ? AND date(data) >= date(?))
+                  OR EXISTS (SELECT 1 FROM designacao d JOIN escala e ON e.id = d.escala_id
+                             WHERE d.parte_id = ? AND date(e.data) >= date(?))
+                  OR EXISTS (SELECT 1 FROM programacao_parte pp JOIN programacao_semana ps ON ps.id = pp.programacao_semana_id
+                             WHERE pp.parte_id = ? AND date(ps.data) >= date(?))
+                """;
+        LocalDate hoje = LocalDate.now();
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setInt(1, id); ps.setString(2, hoje.toString());
+                    ps.setInt(3, id); ps.setString(4, hoje.toString());
+                    ps.setInt(5, id); ps.setString(6, hoje.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) != 0) {
+                            throw new IllegalStateException("Não é possível arquivar a parte: há participações hoje ou em datas futuras.");
+                        }
+                    }
+                }
+                try (PreparedStatement ps = connection.prepareStatement("UPDATE parte SET arquivado = 1 WHERE id = ?")) {
+                    ps.setInt(1, id);
+                    if (ps.executeUpdate() != 1) throw new IllegalArgumentException("Parte não encontrada.");
+                }
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback(); throw e;
+            }
+        } catch (SQLException e) { throw new RuntimeException("Erro ao arquivar parte.", e); }
+    }
+
+    public void restaurar(Integer id) {
+        atualizarEstadoArquivamento(id, false);
+    }
+
+    private void atualizarEstadoArquivamento(Integer id, boolean arquivado) {
+        if (id == null) throw new IllegalArgumentException("O ID da parte não pode ser nulo.");
+        try (Connection c = ConnectionFactory.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE parte SET arquivado = ? WHERE id = ?")) {
+            ps.setInt(1, arquivado ? 1 : 0); ps.setInt(2, id);
+            if (ps.executeUpdate() != 1) throw new IllegalArgumentException("Parte não encontrada.");
+        } catch (SQLException e) { throw new RuntimeException("Erro ao atualizar arquivamento da parte.", e); }
+    }
 
     public Optional<Parte> buscarPorId(Integer id) {
 
