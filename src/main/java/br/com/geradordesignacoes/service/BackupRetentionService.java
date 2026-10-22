@@ -1,5 +1,7 @@
 package br.com.geradordesignacoes.service;
 
+import br.com.geradordesignacoes.database.BackupDatabase;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -109,11 +111,39 @@ public class BackupRetentionService {
     }
 
     /**
+     * Remove o marcador automático antes que o usuário grave manualmente
+     * sobre um destino que já foi usado por um backup automático.
+     */
+    public void invalidarMarcadorParaDestinoManual(Path destino) throws IOException {
+        if (destino == null) {
+            throw new IllegalArgumentException("O destino do backup é obrigatório.");
+        }
+
+        Path marcador = caminhoMarcador(destino.toAbsolutePath().normalize());
+        BasicFileAttributes atributos;
+        try {
+            atributos = Files.readAttributes(
+                    marcador, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        } catch (NoSuchFileException ausente) {
+            return;
+        }
+
+        if (!atributos.isRegularFile() || atributos.isSymbolicLink()) {
+            throw new IOException("Não é seguro substituir metadados de backup: " + marcador);
+        }
+        Files.delete(marcador);
+    }
+
+    /**
      * Mantém os 30 backups automáticos mais recentes. A classificação de todos
      * os candidatos termina antes da primeira exclusão; uma falha de leitura
      * ou classificação interrompe a operação sem apagar nenhum arquivo.
      */
     void aplicarRetencao(Path diretorio) throws IOException {
+        BackupDatabase.comBloqueioDeArquivos(() -> aplicarRetencaoComBloqueio(diretorio));
+    }
+
+    private void aplicarRetencaoComBloqueio(Path diretorio) throws IOException {
         if (diretorio == null) {
             throw new IllegalArgumentException("A pasta de backups é obrigatória.");
         }
