@@ -88,7 +88,7 @@ public class PessoaService {
             );
         }
 
-        pessoaDAO.excluir(id);
+        pessoaDAO.arquivar(id);
     }
 
 
