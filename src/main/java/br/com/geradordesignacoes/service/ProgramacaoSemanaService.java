@@ -74,6 +74,70 @@ public class ProgramacaoSemanaService {
     }
 
     /**
+     * Prepara uma programação para geração sem gravar nem sincronizar dados.
+     * Para uma semana existente, inclui em memória as partes fixas que faltam
+     * e aplica o número padrão de leitura somente no objeto preparado.
+     */
+    public ProgramacaoSemana prepararParaGeracao(LocalDate data) {
+        validarData(data);
+        ProgramacaoSemana existente = programacaoSemanaDAO.buscarPorData(data);
+        if (existente == null) {
+            return criarProgramacao(data);
+        }
+
+        ProgramacaoSemana preparada = new ProgramacaoSemana(
+                existente.id(),
+                existente.data(),
+                existente.partes(),
+                existente.salaBHabilitada(),
+                existente.salaCHabilitada(),
+                existente.conselheiroSalaBId(),
+                existente.canticoInicial(),
+                existente.canticoMeio(),
+                existente.canticoFinal()
+        );
+
+        for (Parte parteFixa : listarPartesFixasOrdenadas()) {
+            if (possuiParte(preparada, parteFixa)) {
+                continue;
+            }
+            int ordem = calcularNovaOrdem(preparada, parteFixa);
+            preparada.adicionarParte(criarProgramacaoParte(parteFixa, ordem));
+        }
+
+        for (ProgramacaoParte parte : preparada.partes()) {
+            if (parte.getParte().getTipo() == TipoParte.LEITURA
+                    && parte.getNumeroOficial() == null) {
+                parte.setNumeroOficial(3);
+            }
+        }
+        return preparada;
+    }
+
+    /**
+     * Persiste uma programação preparada em memória somente após a confirmação
+     * da operação que a utiliza. Para uma programação existente, sincroniza
+     * as partes fixas somente no momento da confirmação.
+     */
+    public ProgramacaoSemana persistirSeNova(ProgramacaoSemana programacao) {
+        if (programacao == null) {
+            throw new IllegalArgumentException(
+                    "A programação não pode ser nula."
+            );
+        }
+        if (programacao.id() != null) {
+            return obterOuCriar(programacao.data());
+        }
+        if (programacaoSemanaDAO.buscarPorData(programacao.data()) != null) {
+            throw new IllegalStateException(
+                    "A programação de " + programacao.data()
+                            + " foi criada após a prévia. Gere a escala novamente antes de salvar."
+            );
+        }
+        return programacaoSemanaDAO.salvar(programacao);
+    }
+
+    /**
      * Busca a programação de uma semana já cadastrada.
      *
      * Caso não exista, cria uma nova programação contendo

@@ -15,6 +15,7 @@ import br.com.geradordesignacoes.service.BackupService;
 import br.com.geradordesignacoes.service.GeradorEscala;
 import br.com.geradordesignacoes.service.ParteService;
 import br.com.geradordesignacoes.service.PersistenciaEscalasService;
+import br.com.geradordesignacoes.service.ParticipacoesEscalaMapper;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import br.com.geradordesignacoes.service.RegrasService;
 import br.com.geradordesignacoes.view.escala.EscalaView;
@@ -37,10 +38,10 @@ public class EscalaController {
     private final ProgramacaoSemanaService programacaoSemanaService;
     private final PersistenciaEscalasService persistenciaEscalasService;
     private final Map<LocalDate, ResultadoGeracaoEscala> resultadosGeracao;
+    private final Map<LocalDate, ProgramacaoSemana> programacoesDaGeracao;
 
     private ResultadoGeracaoEscala ultimoResultado;
     private boolean escalaSalva;
-    private boolean geracaoMensalPendente;
 
     public EscalaController(EscalaView view) {
 
@@ -66,6 +67,8 @@ public class EscalaController {
                 new PersistenciaEscalasService();
 
         resultadosGeracao =
+                new LinkedHashMap<>();
+        programacoesDaGeracao =
                 new LinkedHashMap<>();
 
         registrarEventos();
@@ -119,7 +122,7 @@ public class EscalaController {
             );
 
             ProgramacaoSemana semana =
-                    programacaoSemanaService.obterOuCriar(data);
+                    programacaoSemanaService.prepararParaGeracao(data);
 
             List<Parte> partes =
                     obterPartesDaSemana(semana);
@@ -131,15 +134,18 @@ public class EscalaController {
             }
 
             ultimoResultado =
-                    geradorEscala.gerarEscala(
+                    geradorEscala.gerarSemPersistir(
                             data,
-                            partes
+                            partes,
+                            geradorEscala.obterHistorico()
                     );
+            ultimoResultado = sincronizarParticipacoesDaEscala(ultimoResultado);
 
             registrarResultado(
                     data,
                     ultimoResultado
             );
+            programacoesDaGeracao.put(data, semana);
 
             preencherTabela(
                     ultimoResultado
@@ -217,6 +223,7 @@ public class EscalaController {
             ResultadoGeracaoEscala resultado
     ) {
         resultadosGeracao.clear();
+        programacoesDaGeracao.clear();
 
         resultadosGeracao.put(
                 data,
@@ -224,7 +231,6 @@ public class EscalaController {
         );
 
         escalaSalva = false;
-        geracaoMensalPendente = false;
     }
 
     private void preencherTabela(
@@ -394,6 +400,16 @@ public class EscalaController {
                 novaDesignacao
         );
 
+        ultimoResultado = sincronizarParticipacoesDaEscala(
+                new ResultadoGeracaoEscala(
+                        escala,
+                        ParticipacoesEscalaMapper.mapear(escala),
+                        ultimoResultado.erros(),
+                        ultimoResultado.diagnosticos()
+                )
+        );
+        resultadosGeracao.put(escala.getData(), ultimoResultado);
+
         escalaSalva = false;
 
         preencherTabela(
@@ -401,6 +417,20 @@ public class EscalaController {
         );
 
         atualizarResumo();
+    }
+
+    private ResultadoGeracaoEscala sincronizarParticipacoesDaEscala(
+            ResultadoGeracaoEscala resultado
+    ) {
+        return new ResultadoGeracaoEscala(
+                resultado.escala(),
+                ParticipacoesEscalaMapper.mapearPreservandoSalasAuxiliares(
+                        resultado.escala(),
+                        geradorEscala.obterHistorico().participacoes()
+                ),
+                resultado.erros(),
+                resultado.diagnosticos()
+        );
     }
 
     private void validarIndiceDesignacao(
@@ -435,7 +465,7 @@ public class EscalaController {
             );
 
             ProgramacaoSemana semana =
-                    programacaoSemanaService.obterOuCriar(data);
+                    programacaoSemanaService.prepararParaGeracao(data);
 
             List<Parte> partes =
                     obterPartesDaSemana(semana);
@@ -447,15 +477,18 @@ public class EscalaController {
             }
 
             ultimoResultado =
-                    geradorEscala.gerarEscala(
+                    geradorEscala.gerarSemPersistir(
                             data,
-                            partes
+                            partes,
+                            geradorEscala.obterHistorico()
                     );
+            ultimoResultado = sincronizarParticipacoesDaEscala(ultimoResultado);
 
             registrarResultado(
                     data,
                     ultimoResultado
             );
+            programacoesDaGeracao.put(data, semana);
 
             preencherTabela(
                     ultimoResultado
@@ -506,6 +539,8 @@ public class EscalaController {
 
         try {
 
+            persistirProgramacoesPendentes();
+
             int quantidadeSalva =
                     salvarResultadosGeracao();
 
@@ -518,8 +553,6 @@ public class EscalaController {
             backupService.criarBackup();
 
             escalaSalva = true;
-            geracaoMensalPendente = false;
-
             informarSalvamentoSucesso(
                     quantidadeSalva
             );
@@ -538,14 +571,22 @@ public class EscalaController {
 
         int quantidadeSalva = persistenciaEscalasService.salvar(
                 resultadosGeracao,
-                geracaoMensalPendente
+                true
         );
 
-        if (geracaoMensalPendente) {
-            geradorEscala.recarregarHistorico();
-        }
+        // A recarga ocorre somente depois do commit da escala e do histórico.
+        geradorEscala.recarregarHistorico();
 
         return quantidadeSalva;
+    }
+
+    private void persistirProgramacoesPendentes() {
+        for (Map.Entry<LocalDate, ProgramacaoSemana> entrada
+                : new LinkedHashMap<>(programacoesDaGeracao).entrySet()) {
+            ProgramacaoSemana persistida =
+                    programacaoSemanaService.persistirSeNova(entrada.getValue());
+            programacoesDaGeracao.put(entrada.getKey(), persistida);
+        }
     }
 
     private void informarNenhumaEscalaGerada() {
@@ -604,14 +645,21 @@ public class EscalaController {
         try {
 
             resultadosGeracao.clear();
-            geracaoMensalPendente = false;
+            programacoesDaGeracao.clear();
             escalaSalva = false;
 
             List<ProgramacaoSemana> semanas =
                     programacaoSemanaService
-                            .listarSemanasDoMes(mes);
+                            .listarSemanasDoMes(mes)
+                            .stream()
+                            .map(semana ->
+                                    programacaoSemanaService.prepararParaGeracao(semana.data()))
+                            .toList();
+            semanas.forEach(semana ->
+                    programacoesDaGeracao.put(semana.data(), semana));
 
             if (semanas.size() < 4 || semanas.size() > 5) {
+                programacoesDaGeracao.clear();
 
                 view.atualizarStatus(
                         "O mês deve possuir 4 ou 5 programações."
@@ -625,8 +673,6 @@ public class EscalaController {
             );
 
             validarQuantidadeEscalasGeradas();
-
-            geracaoMensalPendente = true;
             escalaSalva = false;
 
             view.exibirEscalas(
@@ -642,8 +688,7 @@ public class EscalaController {
 
         } catch (Exception e) {
             resultadosGeracao.clear();
-            geracaoMensalPendente = false;
-
+            programacoesDaGeracao.clear();
             tratarErroGeracaoMensal(e);
 
             return false;
