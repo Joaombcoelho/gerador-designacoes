@@ -122,7 +122,7 @@ public class EscalaController {
             );
 
             ProgramacaoSemana semana =
-                    programacaoSemanaService.buscarOuPreparar(data);
+                    programacaoSemanaService.prepararParaGeracao(data);
 
             List<Parte> partes =
                     obterPartesDaSemana(semana);
@@ -465,7 +465,7 @@ public class EscalaController {
             );
 
             ProgramacaoSemana semana =
-                    programacaoSemanaService.buscarOuPreparar(data);
+                    programacaoSemanaService.prepararParaGeracao(data);
 
             List<Parte> partes =
                     obterPartesDaSemana(semana);
@@ -650,7 +650,11 @@ public class EscalaController {
 
             List<ProgramacaoSemana> semanas =
                     programacaoSemanaService
-                            .listarSemanasDoMes(mes);
+                            .listarSemanasDoMes(mes)
+                            .stream()
+                            .map(semana ->
+                                    programacaoSemanaService.prepararParaGeracao(semana.data()))
+                            .toList();
             semanas.forEach(semana ->
                     programacoesDaGeracao.put(semana.data(), semana));
 
