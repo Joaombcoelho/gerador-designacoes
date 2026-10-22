@@ -482,7 +482,7 @@ public class PessoaView {
         }
         if (exibindoArquivados) {
             Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Deseja restaurar \\"" + pessoa.getNome() + "\\" para os cadastros ativos?",
+                    "Deseja restaurar a pessoa " + pessoa.getNome() + " para os cadastros ativos?",
                     ButtonType.CANCEL, ButtonType.OK);
             prepararAlerta(confirmacao);
             if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
@@ -503,7 +503,7 @@ public class PessoaView {
 
     private void confirmarExclusao(Pessoa pessoa) {
         Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
-                "Deseja arquivar \\"" + pessoa.getNome() + "\\"? O histórico será preservado.",
+                "Deseja arquivar a pessoa " + pessoa.getNome() + "? O histórico será preservado.",
                 ButtonType.CANCEL, ButtonType.OK);
         prepararAlerta(confirmacao);
         if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
