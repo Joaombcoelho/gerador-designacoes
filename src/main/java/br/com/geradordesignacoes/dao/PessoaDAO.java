@@ -171,6 +171,7 @@ public class PessoaDAO {
                     FROM designacao d
                     JOIN escala e ON e.id = d.escala_id
                     WHERE (d.responsavel_id = ? OR d.ajudante_id = ?)
+                      AND e.status = 'SALVA'
                       AND date(e.data) >= date(?)
                     UNION ALL
                     SELECT 'Programação semanal — conselheiro da Sala B' AS origem,
