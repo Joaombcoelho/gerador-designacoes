@@ -50,42 +50,44 @@ public class BackupService {
     }
 
     public void criarBackup() {
-        final Path arquivoBackup;
         try {
-            Files.createDirectories(pastaBackup);
+            // O mesmo bloqueio protege o arquivo contra restauração, gravação
+            // manual ou outra execução de retenção durante todo o ciclo.
+            BackupDatabase.comBloqueioDeArquivos(() -> {
+                Files.createDirectories(pastaBackup);
 
-            String dataHora = LocalDateTime.now().format(FORMATO_NOME);
-            Path candidato = pastaBackup.resolve(
-                    "gerador-designacoes_" + dataHora + ".db"
-            );
-
-            int sufixo = 1;
-            while (Files.exists(candidato)) {
-                candidato = pastaBackup.resolve(
-                        "gerador-designacoes_" + dataHora + "-" + sufixo + ".db"
+                String dataHora = LocalDateTime.now().format(FORMATO_NOME);
+                Path candidato = pastaBackup.resolve(
+                        "gerador-designacoes_" + dataHora + ".db"
                 );
-                sufixo++;
-            }
 
-            BackupDatabase.criarBackup(candidato);
-            arquivoBackup = candidato;
+                int sufixo = 1;
+                while (Files.exists(candidato)) {
+                    candidato = pastaBackup.resolve(
+                            "gerador-designacoes_" + dataHora + "-" + sufixo + ".db"
+                    );
+                    sufixo++;
+                }
+
+                BackupDatabase.criarBackup(candidato);
+
+                // Retenção é manutenção secundária: falhas nela não invalidam
+                // nem removem o backup recém-criado ou alteram o banco principal.
+                try {
+                    retencaoBackups.registrarBackupAutomatico(candidato, Instant.now());
+                    retencaoBackups.aplicarRetencao(pastaBackup);
+                } catch (Exception e) {
+                    System.err.println(
+                            "Backup criado, mas a manutenção da retenção falhou; "
+                                    + "os arquivos existentes foram preservados quando possível: "
+                                    + e.getMessage()
+                    );
+                }
+            });
         } catch (IOException e) {
             throw new RuntimeException(
                     "Erro ao criar backup do banco.",
                     e
-            );
-        }
-
-        // Retenção é manutenção secundária: falhas nela não invalidam nem
-        // removem o backup recém-criado, nem interferem no banco principal.
-        try {
-            retencaoBackups.registrarBackupAutomatico(arquivoBackup, Instant.now());
-            retencaoBackups.aplicarRetencao(pastaBackup);
-        } catch (Exception e) {
-            System.err.println(
-                    "Backup criado, mas a manutenção da retenção falhou; "
-                            + "os arquivos existentes foram preservados quando possível: "
-                            + e.getMessage()
             );
         }
     }
