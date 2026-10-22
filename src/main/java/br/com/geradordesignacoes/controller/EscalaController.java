@@ -139,6 +139,7 @@ public class EscalaController {
                             partes,
                             geradorEscala.obterHistorico()
                     );
+            ultimoResultado = sincronizarParticipacoesDaEscala(ultimoResultado);
 
             registrarResultado(
                     data,
@@ -399,11 +400,13 @@ public class EscalaController {
                 novaDesignacao
         );
 
-        ultimoResultado = new ResultadoGeracaoEscala(
-                escala,
-                ParticipacoesEscalaMapper.mapear(escala),
-                ultimoResultado.erros(),
-                ultimoResultado.diagnosticos()
+        ultimoResultado = sincronizarParticipacoesDaEscala(
+                new ResultadoGeracaoEscala(
+                        escala,
+                        ParticipacoesEscalaMapper.mapear(escala),
+                        ultimoResultado.erros(),
+                        ultimoResultado.diagnosticos()
+                )
         );
         resultadosGeracao.put(escala.getData(), ultimoResultado);
 
@@ -414,6 +417,20 @@ public class EscalaController {
         );
 
         atualizarResumo();
+    }
+
+    private ResultadoGeracaoEscala sincronizarParticipacoesDaEscala(
+            ResultadoGeracaoEscala resultado
+    ) {
+        return new ResultadoGeracaoEscala(
+                resultado.escala(),
+                ParticipacoesEscalaMapper.mapearPreservandoSalasAuxiliares(
+                        resultado.escala(),
+                        geradorEscala.obterHistorico().participacoes()
+                ),
+                resultado.erros(),
+                resultado.diagnosticos()
+        );
     }
 
     private void validarIndiceDesignacao(
@@ -465,6 +482,7 @@ public class EscalaController {
                             partes,
                             geradorEscala.obterHistorico()
                     );
+            ultimoResultado = sincronizarParticipacoesDaEscala(ultimoResultado);
 
             registrarResultado(
                     data,
@@ -627,6 +645,7 @@ public class EscalaController {
         try {
 
             resultadosGeracao.clear();
+            programacoesDaGeracao.clear();
             escalaSalva = false;
 
             List<ProgramacaoSemana> semanas =
@@ -636,6 +655,7 @@ public class EscalaController {
                     programacoesDaGeracao.put(semana.data(), semana));
 
             if (semanas.size() < 4 || semanas.size() > 5) {
+                programacoesDaGeracao.clear();
 
                 view.atualizarStatus(
                         "O mês deve possuir 4 ou 5 programações."
@@ -664,6 +684,7 @@ public class EscalaController {
 
         } catch (Exception e) {
             resultadosGeracao.clear();
+            programacoesDaGeracao.clear();
             tratarErroGeracaoMensal(e);
 
             return false;
