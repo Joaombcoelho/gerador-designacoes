@@ -108,6 +108,7 @@ Definir se editar uma escala já persistida deve reescrever `historico_designaco
 - `ParticipacoesEscalaMapperTest.mapeiaResponsavelEAjudanteMantendoDataESala`
 - `ParticipacoesEscalaMapperTest.mapeiaDirigenteDoEstudoBiblicoComTipoHistoricoCorreto`
 - `ParticipacoesEscalaMapperTest.substituiSalaPrincipalEPreservaHistoricoDasSalasAuxiliares`
+- `ProgramacaoSemanaServiceTest.prepararParaGeracaoNaoPersisteProgramacaoNova`
 - `ProgramacaoSemanaServiceTest.persistirSeNovaGravaSomenteDepoisDaConfirmacao`
 
 Os testes existentes da PR #85 cobrem rollback de escala/histórico, preservação de outras datas, exclusão de escala e chaves estrangeiras. A classe existente `ProgramacaoSemanaServiceTest.buscarOuPrepararNaoDevePersistirUmaNovaProgramacao` também cobre preparação sem persistência.
@@ -134,5 +135,6 @@ Revisão manual pendente no Windows:
 
 - Branch: `fix/atomicidade-geracao-historico-etapa-3`
 - Base: `main` no commit `ecda056bdd27cd19ac40fcbe48de06227b038f87`
-- PR: a abrir em rascunho para validação local.
+- PR #86: https://github.com/Joaombcoelho/gerador-designacoes/pull/86 (aberta em rascunho).
+- Head atual: `66cdd99de71b69a69a4a629b1e2cf4164eebe21e`.
 - Merge: não realizado.
