@@ -187,4 +187,20 @@ public class ParteDAOTest extends BaseDAOTest {
         }
     }
 
+
+    @Test
+    void deveBloquearArquivamentoParteComHistoricoFuturo() throws Exception {
+        Pessoa pessoa = new PessoaDAO().salvar(new Pessoa("Pessoa data futura", Sexo.MASCULINO, true, true, false, false, false, Privilegio.PUBLICADOR));
+        ParteDAO parteDAO = new ParteDAO();
+        Parte parte = parteDAO.salvar(new Parte("Parte com data futura", TipoParte.LEITURA, Privilegio.PUBLICADOR,
+                false, SexoPermitido.AMBOS, 1, false, List.of(TipoParticipacao.LEITOR)));
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = connection.prepareStatement("INSERT INTO historico_designacoes (data, pessoa_id, parte_id, tipo_participacao) VALUES (?, ?, ?, ?)")) {
+            ps.setString(1, LocalDate.now().plusDays(1).toString());
+            ps.setInt(2, pessoa.getId()); ps.setInt(3, parte.getId()); ps.setString(4, TipoParticipacao.LEITOR.name());
+            ps.executeUpdate();
+        }
+        assertThrows(IllegalStateException.class, () -> parteDAO.arquivar(parte.getId()));
+    }
+
 }
