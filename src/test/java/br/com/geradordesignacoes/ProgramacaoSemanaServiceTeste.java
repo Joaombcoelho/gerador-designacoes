@@ -397,7 +397,7 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
         LocalDate data = LocalDate.of(2026, 12, 9);
         ProgramacaoSemanaService service = new ProgramacaoSemanaService();
 
-        ProgramacaoSemana preparada = service.buscarOuPreparar(data);
+        ProgramacaoSemana preparada = service.prepararParaGeracao(data);
 
         assertNull(preparada.id());
         assertNull(new br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO()
