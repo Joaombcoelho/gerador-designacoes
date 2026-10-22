@@ -1,6 +1,11 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.model.TipoParticipacao;
+import br.com.geradordesignacoes.model.SexoPermitido;
+import br.com.geradordesignacoes.model.TipoParte;
+import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.NivelLeitura;
 import br.com.geradordesignacoes.model.Pessoa;
 import br.com.geradordesignacoes.model.Privilegio;
@@ -403,4 +408,68 @@ public class PessoaDAOTest extends BaseDAOTest {
         assertTrue(recuperada.podeParticiparSalaB());
         assertFalse(recuperada.podeParticiparSalaC());
     }
+
+    @Test
+    void deveArquivarPessoaSemParticipacoesSemApagarCadastro() {
+        PessoaDAO dao = new PessoaDAO();
+        Pessoa pessoa = new Pessoa("Pessoa arquivável", Sexo.MASCULINO, true, true, false, false, false, Privilegio.PUBLICADOR);
+        dao.salvar(pessoa);
+
+        dao.arquivar(pessoa.getId());
+
+        assertTrue(dao.buscarPorId(pessoa.getId()).orElseThrow().isArquivado());
+        assertFalse(dao.listarAtivos().stream().anyMatch(p -> p.getId().equals(pessoa.getId())));
+        assertTrue(dao.listarArquivados().stream().anyMatch(p -> p.getId().equals(pessoa.getId())));
+    }
+
+    @Test
+    void deveBloquearArquivamentoPessoaComHistoricoHoje() throws Exception {
+        PessoaDAO pessoaDAO = new PessoaDAO();
+        Pessoa pessoa = new Pessoa("Pessoa com participação futura", Sexo.MASCULINO, true, true, false, false, false, Privilegio.PUBLICADOR);
+        pessoaDAO.salvar(pessoa);
+        Parte parte = new ParteDAO().salvar(new Parte("Parte teste arquivamento", TipoParte.LEITURA,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS, 1, false, List.of(TipoParticipacao.LEITOR)));
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = connection.prepareStatement("INSERT INTO historico_designacoes (data, pessoa_id, parte_id, tipo_participacao) VALUES (?, ?, ?, ?)")) {
+            ps.setString(1, LocalDate.now().toString());
+            ps.setInt(2, pessoa.getId());
+            ps.setInt(3, parte.getId());
+            ps.setString(4, TipoParticipacao.LEITOR.name());
+            ps.executeUpdate();
+        }
+
+        assertThrows(IllegalStateException.class, () -> pessoaDAO.arquivar(pessoa.getId()));
+        assertFalse(pessoaDAO.buscarPorId(pessoa.getId()).orElseThrow().isArquivado());
+    }
+
+    @Test
+    void devePreservarHistoricoAoArquivarPessoaComParticipacaoPassada() throws Exception {
+        PessoaDAO pessoaDAO = new PessoaDAO();
+        Pessoa pessoa = new Pessoa("Pessoa com histórico passado", Sexo.MASCULINO, true, true, false, false, false, Privilegio.PUBLICADOR);
+        pessoaDAO.salvar(pessoa);
+        Parte parte = new ParteDAO().salvar(new Parte("Parte teste histórico", TipoParte.LEITURA,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS, 1, false, List.of(TipoParticipacao.LEITOR)));
+        LocalDate dataHistorica = LocalDate.now().minusDays(1);
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = connection.prepareStatement("INSERT INTO historico_designacoes (data, pessoa_id, parte_id, tipo_participacao) VALUES (?, ?, ?, ?)")) {
+            ps.setString(1, dataHistorica.toString());
+            ps.setInt(2, pessoa.getId());
+            ps.setInt(3, parte.getId());
+            ps.setString(4, TipoParticipacao.LEITOR.name());
+            ps.executeUpdate();
+        }
+
+        pessoaDAO.arquivar(pessoa.getId());
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM historico_designacoes WHERE pessoa_id = ? AND data = ?")) {
+            ps.setInt(1, pessoa.getId());
+            ps.setString(2, dataHistorica.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(1, rs.getInt(1));
+            }
+        }
+    }
+
 }
