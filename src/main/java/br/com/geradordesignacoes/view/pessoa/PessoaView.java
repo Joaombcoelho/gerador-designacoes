@@ -29,6 +29,13 @@ public class PessoaView {
     private final PessoaService pessoaService;
 
     private final TableView<Pessoa> tabela;
+    private TabPane abas;
+    private Tab abaAtivos;
+    private Tab abaArquivados;
+    private boolean exibindoArquivados;
+    private Button botaoNovo;
+    private Button botaoEditar;
+    private Button botaoArquivar;
 
     private VBox painelConfirmacao;
 
@@ -50,6 +57,7 @@ public class PessoaView {
 
         criarCabecalho();
         criarTabela();
+        criarAbas();
         criarBotoes();
         carregarPessoas();
     }
@@ -206,7 +214,32 @@ public class PessoaView {
 
         tabela.getStyleClass().add("table-view");
 
-        root.setCenter(tabela);
+    }
+
+    private void criarAbas() {
+        abaAtivos = new Tab("Ativos");
+        abaArquivados = new Tab("Arquivados");
+        abaAtivos.setClosable(false);
+        abaArquivados.setClosable(false);
+        abaAtivos.setContent(criarPainelTabela());
+        abas = new TabPane(abaAtivos, abaArquivados);
+        abas.getSelectionModel().selectedItemProperty().addListener((obs, anterior, selecionada) -> {
+            exibindoArquivados = selecionada == abaArquivados;
+            if (anterior != null) anterior.setContent(null);
+            selecionada.setContent(criarPainelTabela());
+            if (botaoNovo != null) botaoNovo.setDisable(exibindoArquivados);
+            if (botaoEditar != null) botaoEditar.setDisable(exibindoArquivados);
+            if (botaoArquivar != null) botaoArquivar.setText(exibindoArquivados ? "Restaurar" : "Arquivar");
+            carregarPessoas();
+        });
+        root.setCenter(abas);
+    }
+
+    private VBox criarPainelTabela() {
+        VBox painel = new VBox(tabela);
+        painel.setSpacing(12);
+        VBox.setVgrow(tabela, Priority.ALWAYS);
+        return painel;
     }
 
 
@@ -216,6 +249,7 @@ public class PessoaView {
                 new Button(
                         "+ Nova Pessoa"
                 );
+        botaoNovo = novo;
 
         novo.getStyleClass().add(
                 "primary-button"
@@ -226,6 +260,7 @@ public class PessoaView {
                 new Button(
                         "Editar"
                 );
+        botaoEditar = editar;
 
         editar.getStyleClass().add(
                 "secondary-button"
@@ -234,8 +269,9 @@ public class PessoaView {
 
         Button excluir =
                 new Button(
-                        "Excluir"
+                        "Arquivar"
                 );
+        botaoArquivar = excluir;
 
         excluir.getStyleClass().add(
                 "danger-button"
@@ -303,7 +339,7 @@ public class PessoaView {
     private void carregarPessoas() {
 
         tabela.getItems().setAll(
-                pessoaService.listarTodas()
+                exibindoArquivados ? pessoaService.listarArquivados() : pessoaService.listarAtivos()
         );
     }
 
@@ -329,9 +365,7 @@ public class PessoaView {
 
         carregarPessoas();
 
-        root.setCenter(
-                tabela
-        );
+        root.setCenter(abas);
     }
 
 
@@ -378,6 +412,9 @@ public class PessoaView {
         );
 
 
+        if (root.getScene() != null && root.getScene().getWindow() != null) {
+            alert.initOwner(root.getScene().getWindow());
+        }
         alert.showAndWait();
     }
 
@@ -438,77 +475,55 @@ public class PessoaView {
 
 
     private void excluirPessoa() {
-
-        Pessoa pessoa =
-                obterPessoaSelecionada();
-
-
+        Pessoa pessoa = obterPessoaSelecionada();
         if (pessoa == null) {
-
-            mostrarAviso(
-                    "Selecione uma pessoa."
-            );
-
+            mostrarAviso("Selecione uma pessoa.");
             return;
         }
-
-
-        confirmarExclusao(
-                pessoa
-        );
+        if (exibindoArquivados) {
+            Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
+                    "Deseja restaurar \\"" + pessoa.getNome() + "\\" para os cadastros ativos?",
+                    ButtonType.CANCEL, ButtonType.OK);
+            prepararAlerta(confirmacao);
+            if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                try {
+                    pessoaService.restaurar(pessoa.getId());
+                    carregarPessoas();
+                } catch (RuntimeException e) {
+                    LOGGER.log(Level.SEVERE, "Falha ao restaurar pessoa.", e);
+                    mostrarAviso("Não foi possível restaurar a pessoa.");
+                }
+            }
+            return;
+        }
+        confirmarExclusao(pessoa);
     }
 
 
 
     private void confirmarExclusao(Pessoa pessoa) {
-
-        pessoaPendenteExclusao = pessoa;
-
-        Label mensagem = new Label(
-                "Deseja realmente excluir \"" + pessoa.getNome() + "\"?"
-        );
-        mensagem.getStyleClass().add("page-subtitle");
-
-        Button confirmar = new Button("Confirmar exclusão");
-        confirmar.getStyleClass().add("danger-button");
-
-        Button cancelar = new Button("Cancelar");
-        cancelar.getStyleClass().add("secondary-button");
-
-        HBox botoes = new HBox(10, confirmar, cancelar);
-        botoes.setAlignment(Pos.CENTER_RIGHT);
-
-        painelConfirmacao = new VBox(12, mensagem, botoes);
-        painelConfirmacao.getStyleClass().add("card");
-        painelConfirmacao.setPadding(new Insets(16));
-
-        confirmar.setOnAction(_ -> {
-            if (pessoaPendenteExclusao == null) {
-                return;
-            }
-
-            try {
-                pessoaService.excluir(pessoaPendenteExclusao.getId());
-                pessoaPendenteExclusao = null;
-                voltarParaTabela();
-            } catch (RuntimeException e) {
-                LOGGER.log(Level.SEVERE, "Falha ao excluir pessoa.", e);
-                String mensagemErro = possuiViolacaoChaveEstrangeira(e)
-                        ? "Não foi possível excluir esta pessoa porque ela está vinculada a designações ou ao histórico."
-                        : "Não foi possível excluir a pessoa. Verifique os dados e tente novamente.";
-                mostrarAviso(mensagemErro);
-            }
-        });
-
-        cancelar.setOnAction(_ -> {
-            pessoaPendenteExclusao = null;
-            voltarParaTabela();
-        });
-
-        VBox conteudo = new VBox(16, tabela, painelConfirmacao);
-        VBox.setVgrow(tabela, Priority.ALWAYS);
-
-        root.setCenter(conteudo);
+        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
+                "Deseja arquivar \\"" + pessoa.getNome() + "\\"? O histórico será preservado.",
+                ButtonType.CANCEL, ButtonType.OK);
+        prepararAlerta(confirmacao);
+        if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+        try {
+            pessoaService.arquivar(pessoa.getId());
+            carregarPessoas();
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Não foi possível arquivar pessoa.", e);
+            String mensagemErro = e instanceof IllegalStateException
+                    ? e.getMessage()
+                    : "Não foi possível arquivar a pessoa. Verifique os dados e tente novamente.";
+            mostrarAviso(mensagemErro);
+        }
     }
 
+    private void prepararAlerta(Alert alerta) {
+        alerta.setTitle("Confirmação");
+        alerta.setHeaderText(null);
+        if (root.getScene() != null && root.getScene().getWindow() != null) {
+            alerta.initOwner(root.getScene().getWindow());
+        }
+    }
 }
