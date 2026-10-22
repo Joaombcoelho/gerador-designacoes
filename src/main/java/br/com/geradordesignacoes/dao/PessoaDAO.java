@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 
 public class PessoaDAO {
@@ -148,6 +149,61 @@ public class PessoaDAO {
         return pessoas;
     }
 
+
+    public List<Pessoa> listarAtivos() {
+        return listarTodos().stream().filter(p -> !p.isArquivado()).toList();
+    }
+
+    public List<Pessoa> listarArquivados() {
+        return listarTodos().stream().filter(Pessoa::isArquivado).toList();
+    }
+
+    public void arquivar(Integer id) {
+        if (id == null) throw new IllegalArgumentException("O ID da pessoa não pode ser nulo.");
+        String sql = """
+                SELECT
+                  EXISTS (SELECT 1 FROM historico_designacoes WHERE pessoa_id = ? AND date(data) >= date(?))
+                  OR EXISTS (SELECT 1 FROM designacao d JOIN escala e ON e.id = d.escala_id
+                             WHERE (d.responsavel_id = ? OR d.ajudante_id = ?) AND date(e.data) >= date(?))
+                  OR EXISTS (SELECT 1 FROM programacao_semana ps WHERE ps.conselheiro_sala_b_id = ? AND date(ps.data) >= date(?))
+                """;
+        LocalDate hoje = LocalDate.now();
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setInt(1, id); ps.setString(2, hoje.toString());
+                    ps.setInt(3, id); ps.setInt(4, id); ps.setString(5, hoje.toString());
+                    ps.setInt(6, id); ps.setString(7, hoje.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) != 0) {
+                            throw new IllegalStateException("Não é possível arquivar a pessoa: há participações hoje ou em datas futuras.");
+                        }
+                    }
+                }
+                try (PreparedStatement ps = connection.prepareStatement("UPDATE pessoa SET arquivado = 1 WHERE id = ?")) {
+                    ps.setInt(1, id);
+                    if (ps.executeUpdate() != 1) throw new IllegalArgumentException("Pessoa não encontrada.");
+                }
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback(); throw e;
+            }
+        } catch (SQLException e) { throw new RuntimeException("Erro ao arquivar pessoa.", e); }
+    }
+
+    public void restaurar(Integer id) {
+        atualizarEstadoArquivamento(id, false);
+    }
+
+    private void atualizarEstadoArquivamento(Integer id, boolean arquivado) {
+        if (id == null) throw new IllegalArgumentException("O ID da pessoa não pode ser nulo.");
+        try (Connection c = ConnectionFactory.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE pessoa SET arquivado = ? WHERE id = ?")) {
+            ps.setInt(1, arquivado ? 1 : 0); ps.setInt(2, id);
+            if (ps.executeUpdate() != 1) throw new IllegalArgumentException("Pessoa não encontrada.");
+        } catch (SQLException e) { throw new RuntimeException("Erro ao atualizar arquivamento da pessoa.", e); }
+    }
 
     public Optional<Pessoa> buscarPorId(Integer id) {
 
