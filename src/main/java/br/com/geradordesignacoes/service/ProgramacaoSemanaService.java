@@ -48,7 +48,7 @@ public class ProgramacaoSemanaService {
      */
     public List<Parte> listarTodas() {
         return ordenarPartes(
-                parteDAO.listarTodos()
+                parteDAO.listarAtivos()
         );
     }
 
@@ -56,7 +56,7 @@ public class ProgramacaoSemanaService {
      * Lista somente as partes variáveis.
      */
     public List<Parte> listarPartesVariaveis() {
-        return parteDAO.listarTodos()
+        return parteDAO.listarAtivos()
                 .stream()
                 .filter(this::ehParteVariavel)
                 .sorted(comparadorDeOrdem())
@@ -411,7 +411,7 @@ public class ProgramacaoSemanaService {
      * Lista todas as partes fixas em sua ordem padrão.
      */
     private List<Parte> listarPartesFixasOrdenadas() {
-        return parteDAO.listarTodos()
+        return parteDAO.listarAtivos()
                 .stream()
                 .filter(this::ehParteFixa)
                 .sorted(comparadorDeOrdem())
