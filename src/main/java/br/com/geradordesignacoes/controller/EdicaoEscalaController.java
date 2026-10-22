@@ -127,7 +127,7 @@ public class EdicaoEscalaController {
 
         LinkedHashSet<Pessoa> pessoas =
                 new LinkedHashSet<>(
-                        pessoaDAO.listarTodos()
+                        pessoaDAO.listarAtivos()
                                 .stream()
                                 .filter(
                                         pessoa ->

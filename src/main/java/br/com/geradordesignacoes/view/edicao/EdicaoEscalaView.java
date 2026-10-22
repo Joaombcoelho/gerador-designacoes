@@ -165,7 +165,7 @@ public class EdicaoEscalaView {
 
     private List<Pessoa> carregarListaPessoas() {
         try {
-            return pessoaDAO.listarTodos()
+            return pessoaDAO.listarAtivos()
                     .stream()
                     .sorted(Comparator.comparing(
                             Pessoa::getNome,
@@ -180,7 +180,7 @@ public class EdicaoEscalaView {
 
     private List<Parte> carregarListaPartes() {
         try {
-            return parteDAO.listarTodos()
+            return parteDAO.listarAtivos()
                     .stream()
                     .sorted(Comparator.comparing(
                             Parte::getNome,

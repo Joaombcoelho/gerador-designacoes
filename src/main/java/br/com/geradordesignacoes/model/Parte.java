@@ -21,6 +21,7 @@ public class Parte {
     private final boolean possuiTema;
     private final int ordem;
     private Integer duracaoPadraoMinutos;
+    private boolean arquivado;
 
     /**
      * Construtor principal.
@@ -326,6 +327,14 @@ public class Parte {
 
     public int getOrdem() {
         return ordem;
+    }
+
+    public boolean isArquivado() {
+        return arquivado;
+    }
+
+    public void setArquivado(boolean arquivado) {
+        this.arquivado = arquivado;
     }
 
     public Integer getDuracaoPadraoMinutos() {

@@ -216,7 +216,7 @@ public class ImportacaoApostilaView {
             var resultado = validador.validar(caminho);
             arquivoSelecionado = caminho;
             validacao = resultado;
-            catalogo = parteDAO.listarTodos();
+            catalogo = parteDAO.listarAtivos();
             arquivoLabel.setText(descricaoArquivo);
             montarSemanas();
             resultadoContainer.getChildren().clear();
