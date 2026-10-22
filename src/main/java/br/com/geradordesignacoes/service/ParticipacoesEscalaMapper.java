@@ -63,12 +63,12 @@ public final class ParticipacoesEscalaMapper {
     ) {
         Objects.requireNonNull(historicoExistente, "O histórico existente não pode ser nulo.");
 
-        List<ParticipacaoDesignacao> participacoes = new ArrayList<>();
+        List<ParticipacaoDesignacao> participacoes =
+                new ArrayList<>(mapear(escala));
         historicoExistente.stream()
                 .filter(p -> p.data().equals(escala.getData()))
                 .filter(p -> p.sala() != SalaDesignacao.PRINCIPAL)
                 .forEach(participacoes::add);
-        participacoes.addAll(mapear(escala));
         return List.copyOf(participacoes);
     }
 
