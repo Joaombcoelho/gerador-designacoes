@@ -201,7 +201,7 @@ public class ParteDAO {
                     SELECT 'Escala salva' AS origem, e.data AS data_participacao
                     FROM designacao d
                     JOIN escala e ON e.id = d.escala_id
-                    WHERE d.parte_id = ? AND date(e.data) >= date(?)
+                    WHERE d.parte_id = ? AND e.status = 'SALVA' AND date(e.data) >= date(?)
                     UNION ALL
                     SELECT 'Programação semanal' AS origem, ps.data AS data_participacao
                     FROM programacao_parte pp
