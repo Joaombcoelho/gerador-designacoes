@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ParteDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.model.*;
 import br.com.geradordesignacoes.database.ConnectionFactory;
 import java.sql.Connection;
