@@ -14,13 +14,24 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ParteView {
+
+    private static final Logger LOGGER = Logger.getLogger(ParteView.class.getName());
 
     private final BorderPane root;
     private final TableView<Parte> tabela;
     private final ParteDAO parteDAO;
     private final ObservableList<Parte> dados;
+    private TabPane abas;
+    private Tab abaAtivos;
+    private Tab abaArquivados;
+    private boolean exibindoArquivados;
+    private Button botaoNovo;
+    private Button botaoEditar;
+    private Button botaoArquivar;
 
     public ParteView() {
         parteDAO = new ParteDAO();
@@ -49,14 +60,17 @@ public class ParteView {
         VBox textos = new VBox(6, titulo, subtitulo);
 
         Button novo = new Button("+ Nova Parte");
+        botaoNovo = novo;
         novo.getStyleClass().add("primary-button");
         novo.setOnAction(_ -> abrirFormulario(null));
 
         Button editar = new Button("Editar");
+        botaoEditar = editar;
         editar.getStyleClass().add("secondary-button");
         editar.setOnAction(_ -> editarSelecionado());
 
-        Button excluir = new Button("Excluir");
+        Button excluir = new Button("Arquivar");
+        botaoArquivar = excluir;
         excluir.getStyleClass().add("danger-button");
         excluir.setOnAction(_ -> excluirSelecionado());
 
@@ -73,7 +87,22 @@ public class ParteView {
         VBox.setVgrow(tabela, Priority.ALWAYS);
 
         root.setTop(cabecalho);
-        root.setCenter(painelTabela);
+        abaAtivos = new Tab("Ativos");
+        abaArquivados = new Tab("Arquivados");
+        abaAtivos.setClosable(false);
+        abaArquivados.setClosable(false);
+        abaAtivos.setContent(painelTabela);
+        abas = new TabPane(abaAtivos, abaArquivados);
+        abas.getSelectionModel().selectedItemProperty().addListener((obs, anterior, selecionada) -> {
+            exibindoArquivados = selecionada == abaArquivados;
+            if (anterior != null) anterior.setContent(null);
+            selecionada.setContent(criarPainelTabela());
+            if (botaoNovo != null) botaoNovo.setDisable(exibindoArquivados);
+            if (botaoEditar != null) botaoEditar.setDisable(exibindoArquivados);
+            if (botaoArquivar != null) botaoArquivar.setText(exibindoArquivados ? "Restaurar" : "Arquivar");
+            carregarDados();
+        });
+        root.setCenter(abas);
     }
 
     private Region criarEspacador() {
@@ -142,7 +171,7 @@ public class ParteView {
     }
 
     private void carregarDados() {
-        dados.setAll(parteDAO.listarTodos());
+        dados.setAll(exibindoArquivados ? parteDAO.listarArquivados() : parteDAO.listarAtivos());
     }
 
     private void abrirFormulario(Parte parte) {
@@ -172,56 +201,27 @@ public class ParteView {
 
     private void excluirSelecionado() {
         Parte selecionada = tabela.getSelectionModel().getSelectedItem();
-
         if (selecionada == null) {
-            mostrarAviso("Selecione uma parte para excluir.");
+            mostrarAviso(exibindoArquivados ? "Selecione uma parte para restaurar." : "Selecione uma parte para arquivar.");
             return;
         }
-
-        VBox painelAtual = (VBox) root.getCenter();
-
-        // Evita exibir mais de uma confirmação.
-        painelAtual.getChildren().removeIf(
-                node -> node.getProperties().containsKey("confirmacao-exclusao")
-        );
-
-        Label mensagem = new Label(
-                "Deseja realmente excluir a parte \""
-                        + selecionada.getNome() + "\"?"
-        );
-        mensagem.getStyleClass().add("page-subtitle");
-
-        Button confirmar = new Button("Confirmar exclusão");
-        confirmar.getStyleClass().add("danger-button");
-
-        Button cancelar = new Button("Cancelar");
-        cancelar.getStyleClass().add("secondary-button");
-
-        HBox botoesConfirmacao = new HBox(10, confirmar, cancelar);
-        botoesConfirmacao.setAlignment(Pos.CENTER_RIGHT);
-
-        VBox confirmacao = new VBox(12, mensagem, botoesConfirmacao);
-        confirmacao.getStyleClass().add("card");
-        confirmacao.setPadding(new Insets(16));
-        confirmacao.getProperties().put("confirmacao-exclusao", true);
-
-        confirmar.setOnAction(_ -> {
-            painelAtual.getChildren().remove(confirmacao);
-            try {
-                parteDAO.excluir(selecionada.getId());
-                carregarDados();
-            } catch (RuntimeException erro) {
-                mostrarAviso(erro.getMessage() == null
-                        ? "Não foi possível excluir a parte."
-                        : erro.getMessage());
-            }
-        });
-
-        cancelar.setOnAction(_ ->
-                painelAtual.getChildren().remove(confirmacao)
-        );
-
-        painelAtual.getChildren().add(confirmacao);
+        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION,
+                exibindoArquivados
+                        ? "Deseja restaurar a parte " + selecionada.getNome() + " para os cadastros ativos?"
+                        : "Deseja arquivar a parte " + selecionada.getNome() + "? O histórico será preservado.",
+                ButtonType.CANCEL, ButtonType.OK);
+        prepararAlerta(confirmacao);
+        if (confirmacao.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+        try {
+            if (exibindoArquivados) parteDAO.restaurar(selecionada.getId());
+            else parteDAO.arquivar(selecionada.getId());
+            carregarDados();
+        } catch (RuntimeException erro) {
+            LOGGER.log(Level.WARNING, "Não foi possível alterar o arquivamento da parte.", erro);
+            mostrarAviso(erro instanceof IllegalStateException && erro.getMessage() != null
+                    ? erro.getMessage()
+                    : "Não foi possível atualizar a parte. Verifique os vínculos e tente novamente.");
+        }
     }
 
     private void mostrarAviso(String mensagem) {
@@ -233,7 +233,16 @@ public class ParteView {
 
         alerta.setTitle("Atenção");
         alerta.setHeaderText(null);
+        prepararAlerta(alerta);
         alerta.showAndWait();
+    }
+
+    private void prepararAlerta(Alert alerta) {
+        alerta.setTitle("Confirmação");
+        alerta.setHeaderText(null);
+        if (root.getScene() != null && root.getScene().getWindow() != null) {
+            alerta.initOwner(root.getScene().getWindow());
+        }
     }
 
     public Parent getView() {
@@ -242,7 +251,7 @@ public class ParteView {
 
     private void voltarParaTabela() {
         carregarDados();
-        root.setCenter(criarPainelTabela());
+        root.setCenter(abas);
     }
 
     private VBox criarPainelTabela() {
