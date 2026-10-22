@@ -5,6 +5,7 @@ import br.com.geradordesignacoes.database.BackupDatabase;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -14,6 +15,7 @@ public class BackupService {
             DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss-SSS");
 
     private final Path pastaBackup;
+    private final BackupRetentionService retencaoBackups;
 
     public BackupService() {
         this(pastaBackupPadrao());
@@ -26,6 +28,7 @@ public class BackupService {
             );
         }
         this.pastaBackup = pastaBackup.toAbsolutePath().normalize();
+        this.retencaoBackups = new BackupRetentionService();
     }
 
     private static Path pastaBackupPadrao() {
@@ -43,27 +46,42 @@ public class BackupService {
     }
 
     public void criarBackup() {
+        final Path arquivoBackup;
         try {
             Files.createDirectories(pastaBackup);
 
             String dataHora = LocalDateTime.now().format(FORMATO_NOME);
-            Path arquivoBackup = pastaBackup.resolve(
+            Path candidato = pastaBackup.resolve(
                     "gerador-designacoes_" + dataHora + ".db"
             );
 
             int sufixo = 1;
-            while (Files.exists(arquivoBackup)) {
-                arquivoBackup = pastaBackup.resolve(
+            while (Files.exists(candidato)) {
+                candidato = pastaBackup.resolve(
                         "gerador-designacoes_" + dataHora + "-" + sufixo + ".db"
                 );
                 sufixo++;
             }
 
-            BackupDatabase.criarBackup(arquivoBackup);
+            BackupDatabase.criarBackup(candidato);
+            arquivoBackup = candidato;
         } catch (IOException e) {
             throw new RuntimeException(
                     "Erro ao criar backup do banco.",
                     e
+            );
+        }
+
+        // Retenção é manutenção secundária: falhas nela não invalidam nem
+        // removem o backup recém-criado, nem interferem no banco principal.
+        try {
+            retencaoBackups.registrarBackupAutomatico(arquivoBackup, Instant.now());
+            retencaoBackups.aplicarRetencao(pastaBackup);
+        } catch (Exception e) {
+            System.err.println(
+                    "Backup criado, mas a manutenção da retenção falhou; "
+                            + "os arquivos existentes foram preservados quando possível: "
+                            + e.getMessage()
             );
         }
     }
