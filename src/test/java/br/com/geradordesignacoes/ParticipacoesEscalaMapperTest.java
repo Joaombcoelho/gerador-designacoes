@@ -69,6 +69,47 @@ class ParticipacoesEscalaMapperTest {
         assertEquals(dirigente, resultado.getFirst().pessoa());
     }
 
+    @Test
+    void substituiSalaPrincipalEPreservaHistoricoDasSalasAuxiliares() {
+        LocalDate data = LocalDate.of(2026, 11, 18);
+        Pessoa participanteAtual = pessoa(4, "Participante atual");
+        Pessoa participanteAntigo = pessoa(5, "Participante antigo");
+        Parte parte = new Parte(
+                "Leitura",
+                TipoParte.LEITURA,
+                Privilegio.BATIZADO,
+                false,
+                SexoPermitido.AMBOS,
+                1,
+                false,
+                List.of(TipoParticipacao.LEITOR)
+        );
+        Escala escala = new Escala(data, List.of(
+                new Designacao(data, parte, participanteAtual, null, SalaDesignacao.PRINCIPAL)
+        ));
+        List<ParticipacaoDesignacao> historicoExistente = List.of(
+                new ParticipacaoDesignacao(data, participanteAntigo, parte,
+                        TipoParticipacao.LEITOR, SalaDesignacao.PRINCIPAL),
+                new ParticipacaoDesignacao(data, participanteAntigo, parte,
+                        TipoParticipacao.LEITOR, SalaDesignacao.B),
+                new ParticipacaoDesignacao(LocalDate.of(2026, 11, 25),
+                        participanteAntigo, parte, TipoParticipacao.LEITOR, SalaDesignacao.C)
+        );
+
+        List<ParticipacaoDesignacao> resultado =
+                ParticipacoesEscalaMapper.mapearPreservandoSalasAuxiliares(
+                        escala,
+                        historicoExistente
+                );
+
+        assertEquals(2, resultado.size());
+        assertEquals(participanteAtual, resultado.get(0).pessoa());
+        assertEquals(SalaDesignacao.PRINCIPAL, resultado.get(0).sala());
+        assertEquals(participanteAntigo, resultado.get(1).pessoa());
+        assertEquals(SalaDesignacao.B, resultado.get(1).sala());
+        assertEquals(data, resultado.get(1).data());
+    }
+
     private Pessoa pessoa(int id, String nome) {
         Pessoa pessoa = new Pessoa(
                 nome,
