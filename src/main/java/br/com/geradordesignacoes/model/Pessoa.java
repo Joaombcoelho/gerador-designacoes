@@ -5,6 +5,7 @@ import java.util.Objects;
 public class Pessoa {
 
     private Integer id;
+    private boolean arquivado;
 
     private final String nome;
     private final Sexo sexo;
@@ -164,6 +165,14 @@ public class Pessoa {
         return sexo;
     }
 
+
+    public boolean isArquivado() {
+        return arquivado;
+    }
+
+    public void setArquivado(boolean arquivado) {
+        this.arquivado = arquivado;
+    }
 
     public boolean isAtivo() {
         return ativo;
