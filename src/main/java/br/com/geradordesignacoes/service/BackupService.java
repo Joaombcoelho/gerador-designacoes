@@ -22,13 +22,17 @@ public class BackupService {
     }
 
     BackupService(Path pastaBackup) {
-        if (pastaBackup == null) {
+        this(pastaBackup, new BackupRetentionService());
+    }
+
+    BackupService(Path pastaBackup, BackupRetentionService retencaoBackups) {
+        if (pastaBackup == null || retencaoBackups == null) {
             throw new IllegalArgumentException(
-                    "A pasta de backup não pode ser nula."
+                    "A pasta de backup e o serviço de retenção são obrigatórios."
             );
         }
         this.pastaBackup = pastaBackup.toAbsolutePath().normalize();
-        this.retencaoBackups = new BackupRetentionService();
+        this.retencaoBackups = retencaoBackups;
     }
 
     private static Path pastaBackupPadrao() {
