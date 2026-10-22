@@ -192,12 +192,24 @@ public class ParteDAO {
     public void arquivar(Integer id) {
         if (id == null) throw new IllegalArgumentException("O ID da parte não pode ser nulo.");
         String sql = """
-                SELECT
-                  EXISTS (SELECT 1 FROM historico_designacoes WHERE parte_id = ? AND date(data) >= date(?))
-                  OR EXISTS (SELECT 1 FROM designacao d JOIN escala e ON e.id = d.escala_id
-                             WHERE d.parte_id = ? AND date(e.data) >= date(?))
-                  OR EXISTS (SELECT 1 FROM programacao_parte pp JOIN programacao_semana ps ON ps.id = pp.programacao_semana_id
-                             WHERE pp.parte_id = ? AND date(ps.data) >= date(?))
+                SELECT origem, data_participacao
+                FROM (
+                    SELECT 'Histórico de designações' AS origem, data AS data_participacao
+                    FROM historico_designacoes
+                    WHERE parte_id = ? AND date(data) >= date(?)
+                    UNION ALL
+                    SELECT 'Escala salva' AS origem, e.data AS data_participacao
+                    FROM designacao d
+                    JOIN escala e ON e.id = d.escala_id
+                    WHERE d.parte_id = ? AND date(e.data) >= date(?)
+                    UNION ALL
+                    SELECT 'Programação semanal' AS origem, ps.data AS data_participacao
+                    FROM programacao_parte pp
+                    JOIN programacao_semana ps ON ps.id = pp.programacao_semana_id
+                    WHERE pp.parte_id = ? AND date(ps.data) >= date(?)
+                )
+                ORDER BY date(data_participacao)
+                LIMIT 1
                 """;
         LocalDate hoje = LocalDate.now();
         try (Connection connection = ConnectionFactory.getConnection()) {
@@ -208,8 +220,13 @@ public class ParteDAO {
                     ps.setInt(3, id); ps.setString(4, hoje.toString());
                     ps.setInt(5, id); ps.setString(6, hoje.toString());
                     try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next() && rs.getInt(1) != 0) {
-                            throw new IllegalStateException("Não é possível arquivar a parte: há participações hoje ou em datas futuras.");
+                        if (rs.next()) {
+                            String origem = rs.getString("origem");
+                            String data = rs.getString("data_participacao");
+                            throw new IllegalStateException(
+                                    "Não é possível arquivar a parte: foi encontrada uma participação em "
+                                            + data + " na fonte "" + origem + "". "
+                                            + "Verifique esse registro antes de tentar novamente.");
                         }
                     }
                 }
