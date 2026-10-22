@@ -496,7 +496,7 @@ public class PessoaDAOTest extends BaseDAOTest {
 
 
     @Test
-    void devePermitirArquivarPessoaComEscalaApenasGeradaSemHistorico() {
+    void devePermitirArquivarPessoaComEscalaApenasGeradaSemHistorico() throws SQLException {
         PessoaDAO pessoaDAO = new PessoaDAO();
         Pessoa pessoa = new Pessoa("Irineu - escala gerada", Sexo.MASCULINO, true, true,
                 false, false, false, Privilegio.PUBLICADOR);
