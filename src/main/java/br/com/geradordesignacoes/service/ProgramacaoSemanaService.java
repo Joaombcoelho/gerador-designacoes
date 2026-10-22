@@ -116,8 +116,8 @@ public class ProgramacaoSemanaService {
 
     /**
      * Persiste uma programação preparada em memória somente após a confirmação
-     * da operação que a utiliza. Programações existentes não são sincronizadas
-     * nem alteradas por este método.
+     * da operação que a utiliza. Para uma programação existente, sincroniza
+     * as partes fixas somente no momento da confirmação.
      */
     public ProgramacaoSemana persistirSeNova(ProgramacaoSemana programacao) {
         if (programacao == null) {
