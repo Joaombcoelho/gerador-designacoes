@@ -249,6 +249,12 @@ public class BackupRetentionService {
             return null;
         }
 
+        // Um marcador muito adiantado em relação ao relógio atual pode indicar
+        // relógio alterado ou metadados indevidos; nesse caso não ordenamos nem apagamos.
+        if (criadoEm.isAfter(Instant.now().plusSeconds(300))) {
+            return null;
+        }
+
         String hashRegistrado = propriedades.getProperty("sha256");
         if (tamanho < 0 || hashRegistrado == null
                 || !hashRegistrado.matches("[0-9a-f]{64}")) {
