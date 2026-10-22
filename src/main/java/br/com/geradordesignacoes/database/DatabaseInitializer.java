@@ -25,7 +25,8 @@ public class DatabaseInitializer {
                 nivel_leitura TEXT NOT NULL DEFAULT 'BASICO',
                 pode_participar_sala_principal INTEGER NOT NULL DEFAULT 1,
                 pode_participar_sala_b INTEGER NOT NULL DEFAULT 1,
-                pode_participar_sala_c INTEGER NOT NULL DEFAULT 1
+                pode_participar_sala_c INTEGER NOT NULL DEFAULT 1,
+                arquivado INTEGER NOT NULL DEFAULT 0
             );
             
             """;
@@ -47,7 +48,8 @@ public class DatabaseInitializer {
                 tipo_variacao TEXT,
                 possui_tema INTEGER NOT NULL DEFAULT 0,
                 ordem INTEGER NOT NULL DEFAULT 999,
-                duracao_padrao_minutos INTEGER
+                duracao_padrao_minutos INTEGER,
+                arquivado INTEGER NOT NULL DEFAULT 0
             );
             
             """;
@@ -221,6 +223,18 @@ public class DatabaseInitializer {
      * ============================================================
      */
 
+    private static void adicionarColunaArquivado(Connection connection, String tabela) throws SQLException {
+        if (!tabela.equals("pessoa") && !tabela.equals("parte")) {
+            throw new IllegalArgumentException("Tabela não permitida para migração de arquivamento.");
+        }
+        if (!colunaExiste(connection, tabela, "arquivado")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("ALTER TABLE " + tabela + " ADD COLUMN arquivado INTEGER NOT NULL DEFAULT 0");
+            }
+        }
+    }
+
+
     public static void initialize() {
 
         try (
@@ -246,6 +260,7 @@ public class DatabaseInitializer {
                     CREATE_TABLE_PESSOA
             );
             adicionarColunasPermissaoSalasPessoa(connection);
+            adicionarColunaArquivado(connection, "pessoa");
 
             /*
              * ----------------------------------------------------
@@ -258,6 +273,7 @@ public class DatabaseInitializer {
             );
             adicionarColunaOrdemParte(connection);
             adicionarColunaDuracaoPadraoParte(connection);
+            adicionarColunaArquivado(connection, "parte");
 
             migrarTipoVariacaoPartes(connection);
             /*
