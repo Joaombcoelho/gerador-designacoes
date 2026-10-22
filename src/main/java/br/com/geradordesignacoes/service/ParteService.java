@@ -86,7 +86,7 @@ public class ParteService {
             );
         }
 
-        parteDAO.excluir(id);
+        parteDAO.arquivar(id);
     }
 
 
