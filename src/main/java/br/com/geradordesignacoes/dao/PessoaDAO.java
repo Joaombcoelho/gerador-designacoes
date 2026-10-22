@@ -195,7 +195,7 @@ public class PessoaDAO {
                             String data = rs.getString("data_participacao");
                             throw new IllegalStateException(
                                     "Não é possível arquivar a pessoa: foi encontrada uma participação em "
-                                            + data + " na fonte "" + origem + "". "
+                                            + data + " na fonte \"" + origem + "\". "
                                             + "Verifique esse registro antes de tentar novamente.");
                         }
                     }
