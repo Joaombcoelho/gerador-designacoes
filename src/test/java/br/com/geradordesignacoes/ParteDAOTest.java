@@ -2,6 +2,11 @@ package br.com.geradordesignacoes;
 
 import br.com.geradordesignacoes.dao.ParteDAO;
 import br.com.geradordesignacoes.model.*;
+import br.com.geradordesignacoes.database.ConnectionFactory;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
