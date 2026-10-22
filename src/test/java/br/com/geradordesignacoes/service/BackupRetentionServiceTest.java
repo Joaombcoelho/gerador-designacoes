@@ -154,6 +154,21 @@ class BackupRetentionServiceTest {
                 "Um hash divergente torna a classificação incerta e cancela a retenção."));
     }
 
+    @Test
+    void deveRemoverClassificacaoAutomaticaAntesDeUmDestinoSerUsadoManualmente()
+            throws Exception {
+        List<Path> backups = criarAutomaticos(31, i -> INICIO.plusSeconds(i));
+        Path destinoManual = backups.get(0);
+
+        retencao.invalidarMarcadorParaDestinoManual(destinoManual);
+        retencao.aplicarRetencao(pasta);
+
+        assertTrue(Files.isRegularFile(destinoManual),
+                "Um arquivo destinado a backup manual deve deixar de ser elegível à retenção.");
+        assertFalse(Files.exists(marcador(destinoManual)));
+        backups.forEach(path -> assertTrue(Files.isRegularFile(path)));
+    }
+
     private List<Path> criarAutomaticos(int quantidade, CriadorData data) throws Exception {
         List<Path> backups = new ArrayList<>();
         for (int i = 0; i < quantidade; i++) {
