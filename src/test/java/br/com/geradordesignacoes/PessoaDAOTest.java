@@ -494,4 +494,59 @@ public class PessoaDAOTest extends BaseDAOTest {
         assertThrows(IllegalStateException.class, () -> pessoaDAO.arquivar(pessoa.getId()));
     }
 
+
+    @Test
+    void devePermitirArquivarPessoaComEscalaApenasGeradaSemHistorico() {
+        PessoaDAO pessoaDAO = new PessoaDAO();
+        Pessoa pessoa = new Pessoa("Irineu - escala gerada", Sexo.MASCULINO, true, true,
+                false, false, false, Privilegio.PUBLICADOR);
+        pessoaDAO.salvar(pessoa);
+        Parte parte = new ParteDAO().salvar(new Parte("Parte escala gerada", TipoParte.LEITURA,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS, 1, false,
+                List.of(TipoParticipacao.LEITOR)));
+        LocalDate data = LocalDate.of(2026, 12, 2);
+        br.com.geradordesignacoes.model.Escala escala =
+                new br.com.geradordesignacoes.model.Escala(data, List.of(
+                        new br.com.geradordesignacoes.model.Designacao(data, parte, pessoa, null)));
+        new br.com.geradordesignacoes.dao.EscalaDAO().salvar(escala);
+
+        assertEquals(br.com.geradordesignacoes.model.StatusEscala.GERADA, escala.getStatus());
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     "SELECT COUNT(*) FROM historico_designacoes WHERE pessoa_id = ? AND data = ?")) {
+            ps.setInt(1, pessoa.getId());
+            ps.setString(2, data.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next());
+                assertEquals(0, rs.getInt(1));
+            }
+        }
+
+        pessoaDAO.arquivar(pessoa.getId());
+
+        assertTrue(pessoaDAO.buscarPorId(pessoa.getId()).orElseThrow().isArquivado());
+    }
+
+    @Test
+    void deveBloquearArquivamentoPessoaComEscalaSalvaMesmoSemHistorico() {
+        PessoaDAO pessoaDAO = new PessoaDAO();
+        Pessoa pessoa = new Pessoa("Pessoa escala salva", Sexo.MASCULINO, true, true,
+                false, false, false, Privilegio.PUBLICADOR);
+        pessoaDAO.salvar(pessoa);
+        Parte parte = new ParteDAO().salvar(new Parte("Parte escala salva", TipoParte.LEITURA,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS, 1, false,
+                List.of(TipoParticipacao.LEITOR)));
+        LocalDate data = LocalDate.now().plusDays(10);
+        br.com.geradordesignacoes.model.Escala escala =
+                new br.com.geradordesignacoes.model.Escala(data, List.of(
+                        new br.com.geradordesignacoes.model.Designacao(data, parte, pessoa, null)));
+        escala.setStatus(br.com.geradordesignacoes.model.StatusEscala.SALVA);
+        new br.com.geradordesignacoes.dao.EscalaDAO().salvar(escala);
+
+        IllegalStateException erro = assertThrows(
+                IllegalStateException.class, () -> pessoaDAO.arquivar(pessoa.getId()));
+        assertTrue(erro.getMessage().contains(data.toString()));
+        assertFalse(pessoaDAO.buscarPorId(pessoa.getId()).orElseThrow().isArquivado());
+    }
+
 }
