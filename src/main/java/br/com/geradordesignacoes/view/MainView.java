@@ -8,6 +8,7 @@ import br.com.geradordesignacoes.dao.PessoaDAO;
 import br.com.geradordesignacoes.database.BackupDatabase;
 import br.com.geradordesignacoes.database.RestaurarDatabase;
 import br.com.geradordesignacoes.service.PessoaService;
+import br.com.geradordesignacoes.service.BackupRetentionService;
 import br.com.geradordesignacoes.view.edicao.EdicaoEscalaView;
 import br.com.geradordesignacoes.view.ConfiguracaoGeralView;
 import br.com.geradordesignacoes.view.escala.EscalaView;
@@ -1172,9 +1173,11 @@ public class MainView {
 
         try {
 
-            BackupDatabase.criarBackup(
-                    arquivo.toPath()
-            );
+            BackupDatabase.comBloqueioDeArquivos(() -> {
+                new BackupRetentionService()
+                        .invalidarMarcadorParaDestinoManual(arquivo.toPath());
+                BackupDatabase.criarBackup(arquivo.toPath());
+            });
 
 
             Alert alerta =
