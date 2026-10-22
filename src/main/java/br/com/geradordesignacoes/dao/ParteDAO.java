@@ -555,6 +555,7 @@ public class ParteDAO {
         parte.setDuracaoPadraoMinutos(
                 (Integer) resultSet.getObject("duracao_padrao_minutos")
         );
+        parte.setArquivado(resultSet.getInt("arquivado") == 1);
         return parte;
     }
 
