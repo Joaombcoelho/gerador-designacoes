@@ -29,6 +29,25 @@ public class PessoaService {
     }
 
 
+    public List<Pessoa> listarAtivos() {
+        return pessoaDAO.listarAtivos();
+    }
+
+    public List<Pessoa> listarArquivados() {
+        return pessoaDAO.listarArquivados();
+    }
+
+    public void arquivar(Integer id) {
+        if (id == null) throw new IllegalArgumentException("O ID não pode ser nulo.");
+        pessoaDAO.arquivar(id);
+    }
+
+    public void restaurar(Integer id) {
+        if (id == null) throw new IllegalArgumentException("O ID não pode ser nulo.");
+        pessoaDAO.restaurar(id);
+    }
+
+
     public Optional<Pessoa> buscarPorId(Integer id) {
 
         if (id == null) {
