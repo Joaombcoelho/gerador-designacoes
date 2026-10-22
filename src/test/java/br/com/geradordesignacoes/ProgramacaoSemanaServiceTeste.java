@@ -381,6 +381,24 @@ class ProgramacaoSemanaServiceTest extends BaseDAOTest {
     }
 
     @Test
+    void persistirSeNovaGravaSomenteDepoisDaConfirmacao() {
+        LocalDate data = LocalDate.of(2026, 12, 9);
+        ProgramacaoSemanaService service = new ProgramacaoSemanaService();
+
+        ProgramacaoSemana preparada = service.buscarOuPreparar(data);
+
+        assertNull(preparada.id());
+        assertNull(new br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO()
+                .buscarPorData(data));
+
+        ProgramacaoSemana persistida = service.persistirSeNova(preparada);
+
+        assertNotNull(persistida.id());
+        assertNotNull(new br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO()
+                .buscarPorData(data));
+    }
+
+    @Test
     void buscarOuPrepararNaoDevePersistirUmaNovaProgramacao() {
         LocalDate data = LocalDate.of(2026, 12, 2);
 
