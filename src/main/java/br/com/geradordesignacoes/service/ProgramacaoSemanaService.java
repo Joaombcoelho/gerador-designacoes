@@ -74,6 +74,29 @@ public class ProgramacaoSemanaService {
     }
 
     /**
+     * Persiste uma programação preparada em memória somente após a confirmação
+     * da operação que a utiliza. Programações existentes não são sincronizadas
+     * nem alteradas por este método.
+     */
+    public ProgramacaoSemana persistirSeNova(ProgramacaoSemana programacao) {
+        if (programacao == null) {
+            throw new IllegalArgumentException(
+                    "A programação não pode ser nula."
+            );
+        }
+        if (programacao.id() != null) {
+            return programacao;
+        }
+        if (programacaoSemanaDAO.buscarPorData(programacao.data()) != null) {
+            throw new IllegalStateException(
+                    "A programação de " + programacao.data()
+                            + " foi criada após a prévia. Gere a escala novamente antes de salvar."
+            );
+        }
+        return programacaoSemanaDAO.salvar(programacao);
+    }
+
+    /**
      * Busca a programação de uma semana já cadastrada.
      *
      * Caso não exista, cria uma nova programação contendo
