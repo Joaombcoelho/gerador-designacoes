@@ -4,6 +4,7 @@ import br.com.geradordesignacoes.model.Designacao;
 import br.com.geradordesignacoes.model.Escala;
 import br.com.geradordesignacoes.model.Parte;
 import br.com.geradordesignacoes.model.ParticipacaoDesignacao;
+import br.com.geradordesignacoes.model.SalaDesignacao;
 import br.com.geradordesignacoes.model.TipoParte;
 import br.com.geradordesignacoes.model.TipoParticipacao;
 
@@ -48,6 +49,26 @@ public final class ParticipacoesEscalaMapper {
             }
         }
 
+        return List.copyOf(participacoes);
+    }
+
+    /**
+     * Substitui as participações da Sala Principal pela escala atual,
+     * preservando as participações já registradas nas salas auxiliares
+     * da mesma data. Histórico de outras datas nunca é incluído no lote.
+     */
+    public static List<ParticipacaoDesignacao> mapearPreservandoSalasAuxiliares(
+            Escala escala,
+            List<ParticipacaoDesignacao> historicoExistente
+    ) {
+        Objects.requireNonNull(historicoExistente, "O histórico existente não pode ser nulo.");
+
+        List<ParticipacaoDesignacao> participacoes = new ArrayList<>();
+        historicoExistente.stream()
+                .filter(p -> p.data().equals(escala.getData()))
+                .filter(p -> p.sala() != SalaDesignacao.PRINCIPAL)
+                .forEach(participacoes::add);
+        participacoes.addAll(mapear(escala));
         return List.copyOf(participacoes);
     }
 
