@@ -204,4 +204,25 @@ public class ParteDAOTest extends BaseDAOTest {
         assertThrows(IllegalStateException.class, () -> parteDAO.arquivar(parte.getId()));
     }
 
+
+    @Test
+    void devePermitirArquivarParteUsadaApenasEmEscalaGeradaSemHistorico() {
+        Pessoa pessoa = new PessoaDAO().salvar(new Pessoa("Pessoa escala não salva", Sexo.MASCULINO,
+                true, true, false, false, false, Privilegio.PUBLICADOR));
+        ParteDAO parteDAO = new ParteDAO();
+        Parte parte = parteDAO.salvar(new Parte("Parte em escala não salva", TipoParte.LEITURA,
+                Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS, 1, false,
+                List.of(TipoParticipacao.LEITOR)));
+        LocalDate data = LocalDate.of(2026, 12, 2);
+        br.com.geradordesignacoes.model.Escala escala =
+                new br.com.geradordesignacoes.model.Escala(data, List.of(
+                        new br.com.geradordesignacoes.model.Designacao(data, parte, pessoa, null)));
+        new br.com.geradordesignacoes.dao.EscalaDAO().salvar(escala);
+
+        assertEquals(br.com.geradordesignacoes.model.StatusEscala.GERADA, escala.getStatus());
+        parteDAO.arquivar(parte.getId());
+
+        assertTrue(parteDAO.buscarPorId(parte.getId()).orElseThrow().isArquivado());
+    }
+
 }
