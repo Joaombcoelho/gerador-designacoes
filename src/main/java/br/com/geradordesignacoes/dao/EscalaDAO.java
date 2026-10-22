@@ -410,7 +410,12 @@ public class EscalaDAO {
 
             statement.setInt(1, escalaId);
 
-            statement.executeUpdate();
+            int linhasAfetadas = statement.executeUpdate();
+            if (linhasAfetadas != 1) {
+                throw new RuntimeException(
+                        "Escala não encontrada para exclusão."
+                );
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(

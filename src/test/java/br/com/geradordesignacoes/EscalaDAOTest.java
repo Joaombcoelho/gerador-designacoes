@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -92,6 +93,63 @@ class EscalaDAOTest extends BaseDAOTest {
                         escala.getId()
                 ).isEmpty()
         );
+    }
+
+
+    @Test
+    void deveLancarExcecaoAoExcluirEscalaInexistente() {
+        RuntimeException excecao = assertThrows(
+                RuntimeException.class,
+                () -> escalaDAO.excluir(999999)
+        );
+
+        assertEquals("Escala não encontrada para exclusão.", excecao.getMessage());
+        assertTrue(escalaDAO.buscarPorId(999999).isEmpty());
+    }
+
+
+    @Test
+    void devePreservarHistoricoAoExcluirEscala() {
+        Pessoa pessoa = criarPessoa();
+        Parte parte = criarParte();
+        LocalDate dataHistorico = LocalDate.of(2026, 9, 2);
+        Escala escala = escalaDAO.salvar(criarEscalaSemDesignacoes());
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement inserir = connection.prepareStatement("""
+                     INSERT INTO historico_designacoes
+                         (data, pessoa_id, parte_id, tipo_participacao, sala)
+                     VALUES (?, ?, ?, ?, ?)
+                     """)) {
+            inserir.setString(1, dataHistorico.toString());
+            inserir.setInt(2, pessoa.getId());
+            inserir.setInt(3, parte.getId());
+            inserir.setString(4, TipoParticipacao.LEITOR.name());
+            inserir.setString(5, SalaDesignacao.PRINCIPAL.name());
+            assertEquals(1, inserir.executeUpdate());
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Falha ao preparar histórico de teste.", e);
+        }
+
+        escalaDAO.excluir(escala.getId());
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement consultar = connection.prepareStatement("""
+                     SELECT COUNT(*)
+                     FROM historico_designacoes
+                     WHERE data = ? AND pessoa_id = ? AND parte_id = ?
+                     """)) {
+            consultar.setString(1, dataHistorico.toString());
+            consultar.setInt(2, pessoa.getId());
+            consultar.setInt(3, parte.getId());
+            try (ResultSet resultado = consultar.executeQuery()) {
+                assertTrue(resultado.next());
+                assertEquals(1, resultado.getInt(1),
+                        "Excluir uma escala não deve remover o histórico de designações.");
+            }
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Falha ao verificar histórico de teste.", e);
+        }
     }
 
 

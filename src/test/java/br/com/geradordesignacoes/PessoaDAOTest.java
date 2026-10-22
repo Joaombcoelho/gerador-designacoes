@@ -268,6 +268,47 @@ public class PessoaDAOTest extends BaseDAOTest {
     }
 
     @Test
+    void devePreservarPessoaQuandoExclusaoFalhaPorChaveEstrangeira() {
+        PessoaDAO pessoaDAO = new PessoaDAO();
+        Pessoa pessoa = new Pessoa(
+                "Pessoa vinculada", Sexo.MASCULINO, true,
+                false, false, false, false, false, false, false,
+                Privilegio.PUBLICADOR, NivelLeitura.BASICO
+        );
+        pessoaDAO.salvar(pessoa);
+
+        br.com.geradordesignacoes.dao.ParteDAO parteDAO =
+                new br.com.geradordesignacoes.dao.ParteDAO();
+        br.com.geradordesignacoes.model.Parte parte = parteDAO.salvar(
+                new br.com.geradordesignacoes.model.Parte(
+                        "Parte vinculada",
+                        br.com.geradordesignacoes.model.TipoParte.LEITURA,
+                        Privilegio.PUBLICADOR, false,
+                        br.com.geradordesignacoes.model.SexoPermitido.AMBOS,
+                        1, false,
+                        java.util.List.of(br.com.geradordesignacoes.model.TipoParticipacao.LEITOR)
+                )
+        );
+        new br.com.geradordesignacoes.dao.EscalaDAO().salvar(
+                new br.com.geradordesignacoes.model.Escala(
+                        java.time.LocalDate.of(2027, 1, 6),
+                        java.util.List.of(new br.com.geradordesignacoes.model.Designacao(
+                                java.time.LocalDate.of(2027, 1, 6), parte, pessoa, null
+                        ))
+                )
+        );
+
+        RuntimeException excecao = assertThrows(
+                RuntimeException.class,
+                () -> pessoaDAO.excluir(pessoa.getId())
+        );
+
+        assertEquals("Erro ao excluir pessoa.", excecao.getMessage());
+        assertTrue(pessoaDAO.buscarPorId(pessoa.getId()).isPresent());
+    }
+
+
+    @Test
     void deveLancarExcecaoAoAtualizarPessoaInexistente() {
 
         PessoaDAO pessoaDAO = new PessoaDAO();

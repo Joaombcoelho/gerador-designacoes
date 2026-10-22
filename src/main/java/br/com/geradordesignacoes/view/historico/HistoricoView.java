@@ -22,8 +22,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HistoricoView {
+
+    private static final Logger LOGGER = Logger.getLogger(HistoricoView.class.getName());
 
     private final BorderPane root;
 
@@ -863,9 +867,21 @@ public class HistoricoView {
             return;
         }
 
-        controller.excluirEscala(escalaPendenteExclusao);
-        tabela.getSelectionModel().clearSelection();
-        tabelaDetalhes.getItems().clear();
-        cancelarExclusao();
+        try {
+            controller.excluirEscala(escalaPendenteExclusao);
+            tabela.getSelectionModel().clearSelection();
+            tabelaDetalhes.getItems().clear();
+            cancelarExclusao();
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Falha ao excluir escala.", e);
+            Alert alerta = new Alert(Alert.AlertType.ERROR);
+            alerta.setTitle("Não foi possível excluir");
+            alerta.setHeaderText("A escala não foi excluída.");
+            alerta.setContentText(e.getMessage() != null
+                    && e.getMessage().contains("não encontrada")
+                    ? "A escala selecionada não existe mais. Atualize o histórico e tente novamente."
+                    : "Ocorreu uma falha ao excluir a escala. Verifique os registros vinculados e tente novamente.");
+            alerta.showAndWait();
+        }
     }
 }
