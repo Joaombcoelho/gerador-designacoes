@@ -13,6 +13,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,6 +126,45 @@ class BackupServiceRetentionFailureTest {
                     "O backup novo deve existir, assim como o arquivo legado preservado.");
         }
 
+        assertEquals("banco-original", consultarValorPrincipal());
+    }
+
+    @Test
+    void backupAutomaticoNovoAcionaRetencaoDosExcedentesIdentificados()
+            throws Exception {
+        BackupRetentionService preparador = new BackupRetentionService();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern(
+                "yyyy-MM-dd_HH-mm-ss-SSS");
+        Instant inicio = Instant.parse("2020-01-01T00:00:00Z");
+        List<Path> anteriores = new ArrayList<>();
+
+        for (int i = 0; i < 31; i++) {
+            LocalDateTime dataNome = LocalDateTime.of(2020, 1, 1, 0, 0)
+                    .plusSeconds(i);
+            Path arquivo = backupDirectory.resolve(
+                    "gerador-designacoes_" + dataNome.format(formato) + ".db");
+            Files.writeString(arquivo, "backup anterior " + i);
+            preparador.registrarBackupAutomatico(arquivo, inicio.plusSeconds(i));
+            anteriores.add(arquivo);
+        }
+
+        new BackupService(backupDirectory).criarBackup();
+
+        assertFalse(Files.exists(anteriores.get(0)));
+        assertFalse(Files.exists(anteriores.get(1)));
+        for (int i = 2; i < anteriores.size(); i++) {
+            assertTrue(Files.isRegularFile(anteriores.get(i)));
+        }
+
+        try (var arquivos = Files.list(backupDirectory)) {
+            long classificados = arquivos
+                    .filter(path -> path.getFileName().toString().endsWith(".db"))
+                    .filter(path -> Files.isRegularFile(
+                            path.resolveSibling(path.getFileName() + ".auto.properties")))
+                    .count();
+            assertEquals(30, classificados,
+                    "A pasta deve manter 30 backups com classificação automática válida.");
+        }
         assertEquals("banco-original", consultarValorPrincipal());
     }
 
