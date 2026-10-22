@@ -225,7 +225,7 @@ public class ParteDAO {
                             String data = rs.getString("data_participacao");
                             throw new IllegalStateException(
                                     "Não é possível arquivar a parte: foi encontrada uma participação em "
-                                            + data + " na fonte "" + origem + "". "
+                                            + data + " na fonte \"" + origem + "\". "
                                             + "Verifique esse registro antes de tentar novamente.");
                         }
                     }
