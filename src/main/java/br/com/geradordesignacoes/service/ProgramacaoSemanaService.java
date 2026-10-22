@@ -610,7 +610,7 @@ public class ProgramacaoSemanaService {
      * Exige pessoa ativa, permissão para a sala e privilégio de servo ministerial ou ancião.
      */
     public List<Pessoa> listarConselheirosSalaB() {
-        return pessoaDAO.listarTodos().stream()
+        return pessoaDAO.listarAtivos().stream()
                 .filter(Pessoa::isAtivo)
                 .filter(Pessoa::podeParticiparSalaB)
                 .filter(pessoa -> pessoa.getPrivilegio().atende(Privilegio.SERVO_MINISTERIAL))
