@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class BackupService {
 
@@ -37,16 +38,30 @@ public class BackupService {
 
     private static Path pastaBackupPadrao() {
         String localAppData = System.getenv("LOCALAPPDATA");
-        if (localAppData == null || localAppData.isBlank()) {
-            throw new IllegalStateException(
-                    "A variável de ambiente LOCALAPPDATA não está disponível."
+        String osName = System.getProperty("os.name", "");
+        Path diretorioDados;
+
+        if (localAppData != null && !localAppData.isBlank()) {
+            // Preserva o local usado pelas instalações existentes no Windows.
+            diretorioDados = Path.of(localAppData, "GeradorDesignacoes");
+        } else if (osName.toLowerCase(Locale.ROOT).contains("win")) {
+            diretorioDados = Path.of(
+                    System.getProperty("user.home", "."),
+                    "AppData", "Local", "GeradorDesignacoes"
             );
+        } else {
+            String xdgDataHome = System.getenv("XDG_DATA_HOME");
+            if (xdgDataHome != null && !xdgDataHome.isBlank()) {
+                diretorioDados = Path.of(xdgDataHome, "GeradorDesignacoes");
+            } else {
+                diretorioDados = Path.of(
+                        System.getProperty("user.home", "."),
+                        ".local", "share", "GeradorDesignacoes"
+                );
+            }
         }
-        return Path.of(
-                localAppData,
-                "GeradorDesignacoes",
-                "backups"
-        );
+
+        return diretorioDados.resolve("backups");
     }
 
     public void criarBackup() {

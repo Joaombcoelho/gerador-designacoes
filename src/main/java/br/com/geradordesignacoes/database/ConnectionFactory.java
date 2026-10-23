@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.Locale;
 
 public class ConnectionFactory {
 
@@ -23,11 +24,6 @@ public class ConnectionFactory {
     private static final ThreadLocal<ProductionContext>
             PRODUCTION_CONTEXT = new ThreadLocal<>();
 
-    private static final Path DATABASE_DIRECTORY =
-            Path.of(System.getenv("LOCALAPPDATA"), "GeradorDesignacoes");
-
-    private static final Path DATABASE_PATH =
-            DATABASE_DIRECTORY.resolve("gerador-designacoes.db");
 
     public static Connection getConnection() throws SQLException {
 
@@ -186,7 +182,38 @@ public class ConnectionFactory {
     }
 
     private static Path productionDatabasePath() {
-        return DATABASE_PATH.toAbsolutePath().normalize();
+        return resolveProductionDatabasePath(
+                System.getenv("LOCALAPPDATA"),
+                System.getenv("XDG_DATA_HOME"),
+                System.getProperty("os.name", ""),
+                System.getProperty("user.home", ".")
+        );
+    }
+
+    static Path resolveProductionDatabasePath(
+            String localAppData,
+            String xdgDataHome,
+            String osName,
+            String userHome
+    ) {
+        Path dataDirectory;
+
+        if (localAppData != null && !localAppData.isBlank()) {
+            // Mantém o caminho utilizado nas instalações existentes do Windows.
+            dataDirectory = Path.of(localAppData).resolve("GeradorDesignacoes");
+        } else if (osName.toLowerCase(Locale.ROOT).contains("win")) {
+            dataDirectory = Path.of(userHome, "AppData", "Local",
+                    "GeradorDesignacoes");
+        } else if (xdgDataHome != null && !xdgDataHome.isBlank()) {
+            dataDirectory = Path.of(xdgDataHome).resolve("GeradorDesignacoes");
+        } else {
+            dataDirectory = Path.of(userHome, ".local", "share",
+                    "GeradorDesignacoes");
+        }
+
+        return dataDirectory.resolve("gerador-designacoes.db")
+                .toAbsolutePath()
+                .normalize();
     }
 
     private static Path normalize(Path path) {
@@ -202,13 +229,28 @@ public class ConnectionFactory {
                 return absolute.toRealPath();
             }
 
-            Path parent = absolute.getParent();
-            if (parent == null) {
+            Path existing = absolute;
+            java.util.ArrayDeque<Path> missingSegments =
+                    new java.util.ArrayDeque<>();
+
+            while (existing != null && !Files.exists(existing)) {
+                Path fileName = existing.getFileName();
+                if (fileName != null) {
+                    missingSegments.push(fileName);
+                }
+                existing = existing.getParent();
+            }
+
+            if (existing == null) {
                 return absolute;
             }
 
-            return parent.toRealPath().resolve(absolute.getFileName())
-                    .normalize();
+            Path resolved = existing.toRealPath();
+            while (!missingSegments.isEmpty()) {
+                resolved = resolved.resolve(missingSegments.pop());
+            }
+
+            return resolved.normalize();
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Não foi possível resolver o caminho do banco.",

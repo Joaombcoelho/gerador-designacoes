@@ -1,0 +1,47 @@
+name: Testes Maven
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maven-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Testes automatizados (Java 22)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 22 e cache do Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "22"
+          cache: maven
+
+      - name: Preparar ambiente gráfico virtual para testes JavaFX
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb
+
+      - name: Exibir versões do Java e Maven
+        run: |
+          java -version
+          mvn --version
+
+      - name: Compilar e executar os testes
+        run: xvfb-run --auto-servernum mvn --batch-mode --no-transfer-progress clean test
