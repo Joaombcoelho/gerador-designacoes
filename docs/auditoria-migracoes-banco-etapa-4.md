@@ -54,3 +54,18 @@ mvn clean verify
 ```
 
 Registrar os resultados reais dos dois comandos antes de tirar a PR do rascunho. Não foram alteradas regras de negócio, esquema de produção, política de backups, instalador ou número de versão.
+
+
+## Revisão complementar — validação final da inicialização
+
+Na revisão baseada em `main` no commit `516c500ea3e6997a23365ddd64502433b1d9eec8`, foram confirmadas as coberturas descritas acima. A lacuna pontual identificada foi que `initialize()` imprimia a mensagem de sucesso sem executar uma verificação referencial final comum a todas as migrações.
+
+A correção proposta adiciona uma validação final na mesma conexão usada pela inicialização: confirma que `PRAGMA foreign_keys` está ativo e executa `PRAGMA foreign_key_check`. Se encontrar uma violação, a inicialização lança `SQLException`, encapsulada pelo erro de inicialização já existente, com tabela, rowid e tabela referenciada para diagnóstico. Um teste em banco temporário injeta deliberadamente uma referência órfã e confirma que a validação a rejeita.
+
+### Garantias e limites
+
+- O esquema legado usado por `DatabaseMigrationCompatibilityTest` é um fixture representativo explícito, não uma matriz numerada de todas as versões históricas do aplicativo. O repositório não possui catálogo formal que permita afirmar compatibilidade universal com versões antigas.
+- As reconstruções transacionais já existentes mantêm seus próprios limites e testes de rollback. Esta alteração não transforma toda a sequência de inicialização em uma transação global.
+- Se uma migração anterior for concluída e uma migração posterior falhar, alterações anteriores fora da unidade transacional que falhou podem permanecer. A aplicação deve tratar a inicialização como falha e não iniciar o fluxo normal; recomenda-se manter backup antes de atualizar um banco real.
+- Não foi adicionada tabela de versão do esquema: a inspeção não demonstrou que ela seja necessária para corrigir a lacuna específica coberta por esta alteração.
+- Esta documentação descreve o código e os testes presentes na PR. Os comandos Maven só devem ser marcados como executados após registro de seus resultados reais.

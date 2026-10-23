@@ -190,6 +190,35 @@ class DatabaseMigrationCompatibilityTest {
         }
     }
 
+    @Test
+    void deveRecusarDeclararIntegridadeValidaQuandoExistirReferenciaOrfa()
+            throws Exception {
+        Path arquivo = diretorioTemporario.resolve("referencia-orfa.db");
+        criarEsquemaHistorico(arquivo, false);
+        contexto = ConnectionFactory.openTestContext(arquivo);
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             Statement statement = connection.createStatement()) {
+            // Injeta uma inconsistência controlada somente no banco temporário.
+            statement.execute("PRAGMA foreign_keys = OFF");
+            statement.executeUpdate("""
+                    INSERT INTO designacao
+                        (id, escala_id, parte_id, responsavel_id, sala)
+                    VALUES (801, 700, 600, 999999, 'PRINCIPAL')
+                    """);
+            statement.execute("PRAGMA foreign_keys = ON");
+
+            SQLException erro = assertThrows(SQLException.class,
+                    () -> DatabaseInitializer.validarIntegridadeReferencial(connection));
+
+            assertTrue(erro.getMessage().contains("designacao"));
+            assertTrue(erro.getMessage().contains("rowid=801"));
+            assertTrue(erro.getMessage().contains("pessoa"));
+        }
+    }
+
     private void criarEsquemaHistorico(Path arquivo, boolean ordensDuplicadas)
             throws SQLException {
         try (Connection connection = DriverManager.getConnection(

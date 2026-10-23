@@ -422,6 +422,10 @@ public class DatabaseInitializer {
                     connection
             );
 
+            // Não declarar sucesso se a conexão estiver sem a proteção de
+            // chaves estrangeiras ou se alguma migração deixou referências órfãs.
+            validarIntegridadeReferencial(connection);
+
             System.out.println(
                     "Inicialização do banco concluída."
             );
@@ -435,6 +439,36 @@ public class DatabaseInitializer {
             );
         }
 
+    }
+
+
+    /**
+     * Valida a conexão usada pela inicialização antes de declarar sucesso.
+     * A inicialização contém unidades transacionais locais; esta verificação
+     * detecta violações remanescentes, mas não transforma todas as migrações
+     * anteriores em uma única transação global.
+     */
+    static void validarIntegridadeReferencial(Connection connection)
+            throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet result = statement.executeQuery("PRAGMA foreign_keys")) {
+            if (!result.next() || result.getInt(1) != 1) {
+                throw new SQLException(
+                        "A inicialização não pode ser concluída: chaves estrangeiras estão desativadas na conexão.");
+            }
+        }
+
+        try (Statement statement = connection.createStatement();
+             ResultSet result = statement.executeQuery("PRAGMA foreign_key_check")) {
+            if (result.next()) {
+                throw new SQLException("A inicialização não pode ser concluída: "
+                        + "violação de chave estrangeira na tabela '"
+                        + result.getString(1) + "' (rowid="
+                        + result.getString(2) + ", tabela referenciada='"
+                        + result.getString(3) + "', restrição="
+                        + result.getInt(4) + ").");
+            }
+        }
     }
 
 
