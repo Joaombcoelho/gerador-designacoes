@@ -987,7 +987,7 @@ public class DatabaseInitializer {
         }
 
         String normalizada = definicao.replaceAll("\\s+", " ").toUpperCase(java.util.Locale.ROOT);
-        if (!normalizada.contains("UNIQUE ( PROGRAMACAO_SEMANA_ID, PARTE_ID )")) {
+        if (!normalizada.matches("(?s).*UNIQUE\\s*\\(\\s*PROGRAMACAO_SEMANA_ID\\s*,\\s*PARTE_ID\\s*\\).*")) {
             return;
         }
 
