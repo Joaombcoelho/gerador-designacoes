@@ -33,10 +33,15 @@ jobs:
           java-version: "22"
           cache: maven
 
+      - name: Preparar ambiente gráfico virtual para testes JavaFX
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb
+
       - name: Exibir versões do Java e Maven
         run: |
           java -version
           mvn --version
 
       - name: Compilar e executar os testes
-        run: mvn --batch-mode --no-transfer-progress clean test
+        run: xvfb-run --auto-servernum mvn --batch-mode --no-transfer-progress clean test
