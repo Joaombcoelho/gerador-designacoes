@@ -421,7 +421,8 @@ public class DatabaseInitializer {
             atualizarOrdensPadraoPartes(
                     connection
             );
-System.out.println(
+
+            System.out.println(
                     "Inicialização do banco concluída."
             );
 
