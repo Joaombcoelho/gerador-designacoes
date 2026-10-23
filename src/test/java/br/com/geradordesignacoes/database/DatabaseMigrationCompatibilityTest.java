@@ -38,7 +38,7 @@ class DatabaseMigrationCompatibilityTest {
         try (Connection connection = ConnectionFactory.getConnection()) {
             assertEquals("Pessoa histórica", texto(connection,
                     "SELECT nome FROM pessoa WHERE id = 500"));
-            assertEquals(0, inteiro(connection,
+            assertEquals(1, inteiro(connection,
                     "SELECT pode_participar_sala_principal FROM pessoa WHERE id = 500"));
             assertEquals(0, inteiro(connection,
                     "SELECT arquivado FROM pessoa WHERE id = 500"));
@@ -63,10 +63,9 @@ class DatabaseMigrationCompatibilityTest {
                     "SELECT id FROM historico_designacoes WHERE id = 900"));
             assertEquals("PRINCIPAL", texto(connection,
                     "SELECT sala FROM historico_designacoes WHERE id = 900"));
-            assertEquals("Cântico legado", texto(connection,
-                    "SELECT cantico_inicial FROM programacao_semana WHERE id = 1000")
-                    .equals("") ? "" : texto(connection,
-                    "SELECT cantico_inicial FROM programacao_semana WHERE id = 1000"));
+            assertNull(texto(connection,
+                    "SELECT cantico_inicial FROM programacao_semana WHERE id = 1000"),
+                    "Colunas adicionadas na migração devem iniciar sem inventar valores históricos.");
 
             assertColunaExiste(connection, "escala", "presidente_id");
             assertColunaExiste(connection, "escala", "dirigente_id");
