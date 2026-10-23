@@ -184,7 +184,7 @@ A restauração real não foi executada nesta revisão. A política de retençã
 
 ## 8. Defeitos, correções e limitações
 
-- Nenhum defeito novo foi reproduzido nesta etapa, pois não foi possível executar a suíte, interface, instalador ou cenário de atualização.
+- Nenhum defeito novo foi relatado durante a validação automatizada mais recente. A suíte foi reportada como aprovada pelo usuário; interface, instalador e cenário de atualização ainda não foram validados nesta revisão.
 - Nenhuma correção de produção foi feita; esta alteração é documental.
 - As PRs #87, #88 e #89 estão integradas no commit avaliado. Permanecem pendentes as validações manuais de interface, backup/restauração, instalador e atualização real.
 - A versão pretendida para a próxima liberação não está definida no repositório inspecionado.
@@ -198,7 +198,7 @@ A restauração real não foi executada nesta revisão. A política de retençã
 
 Condições mínimas para reavaliar:
 
-- [ ] Escolher e registrar o commit exato que contém as alterações aprovadas das etapas anteriores.
+- [x] Registrar o commit exato avaliado: `cbc5858c34171bccdca3573d2b0e1e952d938610`.
 - [x] Integrar as PRs #87 e #88 no conjunto avaliado (merges confirmados em `main`).
 - [x] Executar a suíte completa após a correção de migração — aprovação reportada pelo usuário; anexar a saída detalhada para auditoria.
 - [ ] Executar e registrar `mvn clean verify` com JDK 22.
