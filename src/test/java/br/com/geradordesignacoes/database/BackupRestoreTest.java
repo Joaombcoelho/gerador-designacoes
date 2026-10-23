@@ -132,6 +132,118 @@ class BackupRestoreTest {
     }
 
     @Test
+    void deveRestaurarDadosRelacionadosDaAplicacaoEInicializarBancoRestaurado()
+            throws Exception {
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("""
+                    INSERT INTO pessoa
+                        (id, nome, sexo, ativo, pode_ser_responsavel, pode_ser_ajudante,
+                         pode_fazer_leitura, pode_fazer_discurso, pode_fazer_oracao,
+                         pode_ser_presidente, pode_ser_dirigente, privilegio)
+                    VALUES (901, 'Pessoa do backup', 'M', 1, 1, 1, 1, 1, 1, 1, 1, 'ANCIÃO')
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO parte
+                        (id, nome, tipo, privilegio_minimo, exige_ajudante, sexo_permitido,
+                         quantidade_minima_participantes, gera_formulario)
+                    VALUES (902, 'Parte do backup', 'FIXA', 'PUBLICADOR', 0, 'TODOS', 1, 0)
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO escala (id, data, status, data_geracao)
+                    VALUES (903, '2099-02-04', 'GERADA', '2099-02-01T10:00:00')
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO designacao (id, escala_id, parte_id, responsavel_id)
+                    VALUES (904, 903, 902, 901)
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO historico_designacoes
+                        (id, data, pessoa_id, parte_id, tipo_participacao)
+                    VALUES (905, '2099-02-04', 901, 902, 'RESPONSAVEL')
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO programacao_semana
+                        (id, data, sala_b_habilitada, sala_c_habilitada,
+                         cantico_inicial, cantico_meio, cantico_final)
+                    VALUES (906, '2099-02-04', 1, 0, '12', '34', '56')
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO programacao_parte
+                        (id, programacao_semana_id, parte_id, ordem, tema, numero_oficial, duracao_minutos)
+                    VALUES (907, 906, 902, 1, 'Tema do backup', 10, 8)
+                    """);
+            statement.executeUpdate("""
+                    UPDATE configuracoes_gerais
+                    SET nome_congregacao = 'Congregação do backup',
+                        horario_inicio = '18:45'
+                    WHERE id = 1
+                    """);
+            statement.executeUpdate("""
+                    UPDATE configuracao_salas
+                    SET sala_b_habilitada = 1, sala_c_habilitada = 0
+                    WHERE id = 1
+                    """);
+        }
+
+        Path backup = directory.resolve("backup-dados-relacionados.db");
+        BackupDatabase.criarBackup(backup);
+        DatabaseFileSupport.validateDatabase(backup);
+
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("UPDATE pessoa SET nome = 'Pessoa alterada' WHERE id = 901");
+            statement.executeUpdate("UPDATE parte SET nome = 'Parte alterada' WHERE id = 902");
+            statement.executeUpdate("UPDATE escala SET status = 'ALTERADA' WHERE id = 903");
+            statement.executeUpdate("UPDATE programacao_parte SET tema = 'Tema alterado' WHERE id = 907");
+            statement.executeUpdate("""
+                    UPDATE configuracoes_gerais
+                    SET nome_congregacao = 'Congregação alterada', horario_inicio = '20:00'
+                    WHERE id = 1
+                    """);
+        }
+        fecharConexao();
+
+        RestaurarDatabase.restaurar(backup);
+        DatabaseInitializer.initialize();
+        connection = ConnectionFactory.getConnection();
+
+        assertEquals("Pessoa do backup", texto(connection,
+                "SELECT nome FROM pessoa WHERE id = 901"));
+        assertEquals("Parte do backup", texto(connection,
+                "SELECT nome FROM parte WHERE id = 902"));
+        assertEquals("GERADA", texto(connection,
+                "SELECT status FROM escala WHERE id = 903"));
+        assertEquals(901, contarValor(connection,
+                "SELECT responsavel_id FROM designacao WHERE id = 904"));
+        assertEquals(901, contarValor(connection,
+                "SELECT pessoa_id FROM historico_designacoes WHERE id = 905"));
+        assertEquals("Tema do backup", texto(connection,
+                "SELECT tema FROM programacao_parte WHERE id = 907"));
+        assertEquals("Congregação do backup", texto(connection,
+                "SELECT nome_congregacao FROM configuracoes_gerais WHERE id = 1"));
+        assertEquals("18:45", texto(connection,
+                "SELECT horario_inicio FROM configuracoes_gerais WHERE id = 1"));
+        assertEquals(1, contarValor(connection,
+                "SELECT sala_b_habilitada FROM configuracao_salas WHERE id = 1"));
+        assertIntegridadeValida(connection);
+        assertForeignKeysValidas(connection);
+    }
+
+    @Test
+    void deveRejeitarArquivoInexistenteOuVazioSemAlterarBancoAtivo()
+            throws Exception {
+        Path inexistente = directory.resolve("nao-existe.db");
+        assertThrows(IOException.class, () -> RestaurarDatabase.restaurar(inexistente));
+
+        Path vazio = directory.resolve("vazio.db");
+        Files.createFile(vazio);
+        assertThrows(IOException.class, () -> RestaurarDatabase.restaurar(vazio));
+
+        assertEquals("original", texto(connection,
+                "SELECT valor FROM backup_probe WHERE id = 1"));
+        assertIntegridadeValida(connection);
+    }
+
+    @Test
     void deveRejeitarArquivoInvalidoSemAlterarBancoAtivo()
             throws Exception {
         Path backupInvalido = directory.resolve("arquivo-corrompido.db");
@@ -170,10 +282,10 @@ class BackupRestoreTest {
 
         AtomicBoolean falharPrimeiraMovimentacao = new AtomicBoolean(true);
         RestaurarDatabase.FileMover moverComFalha = (origem, destino) -> {
-            if (falharPrimeiraMovimentacao.compareAndSet(true, false)) {
-                throw new IOException("Falha simulada durante a substituição");
-            }
             DatabaseFileSupport.moveReplacing(origem, destino);
+            if (falharPrimeiraMovimentacao.compareAndSet(true, false)) {
+                throw new IOException("Falha simulada depois da substituição");
+            }
         };
 
         IOException erro = assertThrows(
@@ -234,6 +346,21 @@ class BackupRestoreTest {
              ResultSet result = statement.executeQuery(sql)) {
             assertTrue(result.next());
             return result.getInt(1);
+        }
+    }
+
+    private int contarValor(Connection leitura, String sql) throws Exception {
+        try (Statement statement = leitura.createStatement();
+             ResultSet result = statement.executeQuery(sql)) {
+            assertTrue(result.next());
+            return result.getInt(1);
+        }
+    }
+
+    private void assertForeignKeysValidas(Connection leitura) throws Exception {
+        try (Statement statement = leitura.createStatement();
+             ResultSet result = statement.executeQuery("PRAGMA foreign_key_check")) {
+            assertFalse(result.next(), "O banco restaurado não deve conter violações de chaves estrangeiras.");
         }
     }
 
