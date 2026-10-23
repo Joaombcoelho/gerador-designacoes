@@ -1,209 +1,199 @@
 # Etapa 5 — Validação integrada e checklist de liberação
 
-**Status da etapa:** **Bloqueado por pendências**  
+**Status da etapa:** **Bloqueado por pendências; não autorizado para distribuição**  
 **Repositório:** `Joaombcoelho/gerador-designacoes`  
-**Branch-base inspecionada:** `main`  
-**Commit-base avaliado:** `cbc5858c34171bccdca3573d2b0e1e952d938610` (após os merges das PRs #87, #88 e #89)  
-**Versão declarada em `pom.xml` e no script de empacotamento:** `1.2.5`  
+**Branch-base desta revisão documental:** `main`  
+**Commit-base desta revisão:** [`17a28853c899c2e6f33afb6d0c7a75df143ef2b8`](https://github.com/Joaombcoelho/gerador-designacoes/commit/17a28853c899c2e6f33afb6d0c7a75df143ef2b8)  
+**Data/hora do commit-base:** 2026-10-23 19:52:16 UTC  
+**Versão declarada em `pom.xml`:** `1.2.5`  
+**Data desta revisão documental:** 2026-10-23
 
+> Este documento separa inspeção do repositório, resultados observados remotamente e relatos do usuário. Não representa aprovação de liberação. O agente não tem acesso ao working tree local do usuário; portanto, o estado de alterações locais pendentes não foi verificado.
 
-> Este documento registra inspeção de repositório e o estado das validações. Não representa aprovação de liberação. Inspeção de código não substitui execução no Windows, testes automatizados, instalação ou teste real de atualização.
+> **Importante:** o commit-base anterior do checklist (`cbc5858...`) não é mais o commit candidato atual. A auditoria geral foi registrada em `2ce671234f37fe2b05fff44bf68df8421333d1ae`; ela deve ser lida como retrato histórico daquele commit. A auditoria geral ainda precisa de atualização própria para refletir as mudanças posteriores descritas abaixo. Esta revisão altera somente este checklist.
 
-> **Revisão posterior ao merge da PR #89:** as PRs #87 e #88 também foram integradas em `main`. O usuário reportou que todos os testes passaram após a correção de migração; essa informação é identificada como relato local, pois a saída detalhada não foi anexada aqui. A decisão de liberação permanece bloqueada enquanto as validações manuais, o instalador e a atualização real não tiverem evidências.
+## 1. Critérios de status e limites de evidência
 
-## 1. Estado real do repositório e dependências
+Use estes status de forma consistente:
 
-Nesta revisão, `main` aponta para `cbc5858c34171bccdca3573d2b0e1e952d938610`, após os merges das PRs #87, #88 e #89. A versão declarada continua sendo `1.2.5`. A PR #89 já foi integrada; esta revisão atualiza o checklist para refletir o estado posterior dos merges e a validação de testes reportada pelo usuário.
+- **Aprovado:** há evidência identificável para o item. Quando a evidência for um relato do usuário, isso deve estar explícito; não significa execução independente pelo agente.
+- **Reprovado:** foi observado um defeito ou requisito não atendido no escopo e commit indicados.
+- **Pendente:** a ação ainda precisa ser executada ou uma decisão ainda precisa ser tomada.
+- **Não verificado:** não há evidência suficiente para confirmar o resultado.
 
-### PRs relevantes
+Um item não pode ser marcado como executado apenas porque existe código, um teste automatizado ou um roteiro para executá-lo. A compilação, a suíte de testes, a criação do instalador, a instalação do instalador e a atualização real do banco são validações diferentes.
 
-| PR | Tema | Estado observado | Incluída no commit avaliado? |
-|---|---|---|---|
-| #83 | Tratamento de falhas na exclusão | Integrada na história de `main` | Sim |
-| #84 | Arquivamento de pessoas e partes | Integrada na história de `main` | Sim |
-| #85 | Auditoria da preservação do histórico | Integrada na história de `main` | Sim |
-| #86 | Atomicidade da geração e do histórico | Merge que forma o commit avaliado | Sim |
-| #87 | Retenção segura de backups automáticos | Integrada | Sim |
-| #88 | Testes de compatibilidade das migrações SQLite e ajuste do detector de migração | Integrada | Sim |
+## 2. Estado atual do repositório
 
-As PRs #87 e #88 agora estão integradas no commit-base avaliado. A implementação de retenção segura e o teste de compatibilidade das migrações fazem parte do código avaliado. A integração, por si só, não substitui a validação manual dos fluxos de backup, restauração, interface, instalador e atualização real.
+### 2.1 Base, versão e mudanças desde a auditoria
 
-### Versão e artefatos
+A branch remota `main` aponta para `17a28853c899c2e6f33afb6d0c7a75df143ef2b8`, merge da PR #92, “Remove cadastros nominais automáticos da inicialização”. A versão declarada no `pom.xml` continua em `1.2.5`; esta revisão não altera a versão nem o instalador.
 
-- Versão do projeto em `pom.xml`: `1.2.5`.
-- Versão passada ao `jpackage`: `1.2.5`.
-- JAR esperado pelo script: `target/gerador-designacoes-1.2.5.jar`.
-- Pasta de preparação: `dist/GeradorDesignacoes-1.2.5/`.
-- Diretório de destino do instalador: `Instalador/`.
-- Instalador esperado: `Instalador/GeradorDesignacoes-1.2.5.exe`.
-- Script identificado: `scripts/build-installer.ps1`.
-- O script usa `mvn clean package -DskipTests`, copia dependências de runtime, verifica bibliotecas, gera runtime reduzido com `jlink` e cria instalador Windows com `jpackage`.
-- O script exige `mvn`, `java`, `jlink`, `jpackage` e `JAVA_HOME` apontando para um JDK 22 com `jmods`. Ele se recusa a sobrescrever a pasta de preparação ou o instalador de destino já existentes.
-- O repositório inspecionado não define uma versão futura pretendida nem documenta um procedimento automatizado específico de atualização entre instaladores. Não foi presumido que a próxima versão será `1.2.6`.
+Mudanças posteriores à auditoria geral que afetam seus achados:
 
-## 2. Persistência e inicialização — fatos inspecionados
-
-A fábrica de conexões define o banco de produção em:
-
-```text
-%LOCALAPPDATA%\\GeradorDesignacoes\\gerador-designacoes.db
-```
-
-A pasta de backups automáticos é documentada como:
-
-```text
-%LOCALAPPDATA%\\GeradorDesignacoes\\backups\\
-```
-
-A inicialização de `MainApp.start` abre o contexto de produção, chama `DatabaseInitializer.initialize()`, inicia o serviço de backup automático e então constrói e exibe a interface. A falha durante a inicialização é relançada depois da tentativa de encerrar os recursos; não foi executada a aplicação nesta etapa para validar a mensagem ou o comportamento visual em caso de falha.
-
-A inicialização SQLite utiliza inspeção do esquema para decidir migrações; não foi identificada uma tabela formal de versão do esquema no código inspecionado. O relatório de compatibilidade de migrações da PR #88 e a implementação de retenção segura da PR #87 estão integrados no commit avaliado.
-
-A documentação do README descreve backup manual/restauração pela interface. A restauração substitui o banco local pelo arquivo selecionado e orienta reiniciar a aplicação. Esse fluxo deve ser testado somente com dados descartáveis em ambiente isolado.
-
-## 3. Testes automatizados
-
-### Execuções desta etapa
-
-| Comando | Resultado real | Total / falhas / erros / ignorados |
+| Tema | Estado atual verificável | Limite da conclusão |
 |---|---|---|
-| `mvn clean test` | **Aprovado conforme relato do usuário após a correção da PR #88** | Suíte completa reportada sem falhas; saída detalhada não anexada a este documento |
-| `mvn clean verify` | **Não confirmado** | A conclusão de todos os testes foi reportada pelo usuário; não há evidência específica anexada de `verify` nesta revisão |
+| Pessoas nominais inseridas automaticamente | A correção da PR #92 está integrada em `main`; o inicializador deixou de inserir os registros nominais e há teste de regressão no repositório. | A suíte relatada como aprovada não substitui o ensaio manual de inicialização limpa e preservação de um banco existente. |
+| PDF S-140 preenchido | `modelos/S-140_T_Preenchido.pdf` não está na árvore atual de `main`; sua remoção ocorreu depois do commit da auditoria. | **O histórico Git não foi verificado quanto à remoção de versões antigas do arquivo.** Não se afirma que o histórico foi limpo. |
+| Capturas de tela | O usuário confirmou que as capturas não expõem dados pessoais. | Registro baseado no relato do usuário; não houve nova inspeção visual independente nesta revisão. |
+| CI | `.github/workflows/maven-tests.yml` está presente em `main` e executa testes Maven com Java 22 e Xvfb. | A presença do workflow não comprova, sozinha, uma execução bem-sucedida no commit-base atual nem substitui `mvn clean verify`. |
 
-A execução local é feita pelo usuário em Windows com JDK 22. O usuário reportou que todos os testes passaram após a correção do detector de migração. O agente não executou Maven neste ambiente e não possui o log completo da execução para anexar; por isso, o resultado é registrado como validação reportada, não como execução independente do agente.
+### 2.2 Artefatos e ferramentas de liberação
 
-### Resultados históricos que não devem ser confundidos com esta execução
+Inspeção de `pom.xml` e `scripts/build-installer.ps1`:
 
-A descrição da PR #86 registra **482/482 testes aprovados conforme validação local reportada pelo autor**. Esse é um resultado histórico. Após a correção da migração na PR #88, o usuário reportou que a suíte completa passou; registrar o total e guardar a saída Surefire/console no histórico de validação do release quando disponível.
+- Versão do projeto: `1.2.5`.
+- Compilação configurada para Java 22.
+- JAR esperado: `target/gerador-designacoes-1.2.5.jar`.
+- Instalador Windows esperado: `Instalador/GeradorDesignacoes-1.2.5.exe`.
+- O script usa `mvn clean package -DskipTests`, prepara dependências, cria runtime reduzido com `jlink` e gera o instalador com `jpackage`.
+- Como o script pula os testes, sua execução não substitui `mvn clean test` ou `mvn clean verify`.
 
-Na máquina Windows com JDK 22, executar na branch/commit escolhido para a avaliação:
+Não foi apresentada nesta revisão evidência identificável de um EXE produzido e instalado no commit candidato, nem log de empacotamento, hash SHA-256 ou roteiro de instalação concluído. A validação do instalador permanece **pendente**.
+
+## 3. Evidências de testes automatizados
+
+### 3.1 Registros disponíveis
+
+| Validação | Status | Data, commit e ambiente | Resultado e limites |
+|---|---|---|---|
+| Suíte executada na IDE | **Aprovado conforme relato do usuário** | Relato recebido em 2026-10-23. Ambiente informado: IDE do usuário. O sistema operacional, JDK exato, comando e SHA do commit testado não foram registrados junto ao resultado. | O usuário informou **502/502 testes aprovados**. Falhas e erros: 0 conforme o relato. Quantidade de testes ignorados não informada. O log detalhado não foi anexado. Não é uma execução independente do agente. |
+| GitHub Actions da PR #92 | **Aprovado na execução registrada** | [Execução 40010457742](https://github.com/Joaombcoelho/gerador-designacoes/actions/runs/40010457742), head `bfcbd3b6615605f50cb2abb6c74ad3f399b32d17`, antes do merge commit atual. | Workflow `Testes Maven`, job `Testes automatizados (Java 22)`, conclusão `success`. O total exato de testes dessa execução não foi registrado nesta revisão. |
+| GitHub Actions da PR #94 | **Evidência histórica, não validação do commit candidato** | PR #94, alteração de compatibilidade do caminho do banco para CI; commit da PR anterior ao merge em `main`. | Foi relatado anteriormente que a CI passou com **499/499** testes. Esse resultado pertence à validação da PR #94 e não deve ser apresentado como total testado no commit-base atual. |
+| `mvn clean verify` no commit candidato | **Não verificado** | Nenhum log/artefato correspondente disponível. | Não há evidência específica de execução e `BUILD SUCCESS` para esse comando no commit-base atual. |
+| Build do instalador com PowerShell/`jpackage` | **Pendente** | Nenhum log de build, EXE e hash SHA-256 identificados nesta revisão. | A inspeção do script não prova que o instalador foi criado. |
+| Instalação e execução do EXE em Windows isolado | **Pendente** | Nenhuma evidência identificada. | Não confundir compilação ou geração do EXE com instalação e execução do aplicativo instalado. |
+
+### 3.2 Como registrar novas execuções
+
+Para cada nova validação, guardar, quando disponível:
+
+1. Data e hora.
+2. Versão do aplicativo e SHA completo do commit testado.
+3. Sistema operacional, versão do JDK e versão do Maven.
+4. Comando ou roteiro realizado.
+5. Resultado observado e saída de console/log.
+6. Para testes: total, falhas, erros e ignorados.
+7. Para instalador: caminho do artefato, versão exibida e SHA-256.
+8. Para atualização de banco: origem da versão, cópia de segurança, contagens relevantes, resultado de `PRAGMA foreign_key_check` e resultado após reinicialização.
+
+Quando algum dado não for coletado, registrar “não registrado”; não reconstruir o valor por inferência.
+
+## 4. Checklist de validação
+
+### 4.1 Inicialização limpa e preservação de banco existente
+
+| Status | Verificação | Evidência atual / próximo passo |
+|---|---|---|
+| **Aprovado por relato/CI, com limite** | Regressão automatizada para impedir cadastro nominal automático | A PR #92 foi integrada; existe teste `DatabaseInitializerSemPessoasNominaisTest`. A suíte de 502 testes foi relatada pelo usuário como aprovada, mas o log e o SHA exato testado não foram fornecidos. |
+| **Pendente** | Inicializar a aplicação com banco novo/vazio e confirmar que nenhum cadastro de pessoa é inserido automaticamente | Executar manualmente em diretório de dados isolado e registrar resultado. Um teste com banco temporário não comprova, sozinho, o fluxo de instalação e inicialização do aplicativo real. |
+| **Pendente** | Abrir uma cópia de banco existente e confirmar preservação de pessoas, partes, programações, escalas, histórico e configurações | Registrar contagens e evidências antes/depois; não usar o banco pessoal real para ensaio destrutivo. |
+| **Pendente** | Reabrir a aplicação após inicialização limpa e após abertura de banco existente | Confirmar idempotência e ausência de perda ou recriação indevida de registros. |
+| **Pendente** | Validar migração real de uma versão anterior para a versão candidata | O teste de compatibilidade com esquema SQLite temporário é evidência de cobertura de migração, não equivale à atualização real do aplicativo instalado. |
+
+### 4.2 Geração, histórico e transações
+
+O relatório [de atomicidade da geração e do histórico](auditoria-atomicidade-geracao-historico-etapa-3.md) descreve as mudanças de implementação e os riscos que ainda precisam de decisão. O relatório não fornece evidência de execução manual no commit candidato.
+
+| Status | Verificação | Evidência atual / próximo passo |
+|---|---|---|
+| **Aprovado por inspeção de código, não por validação integrada** | Persistência coordenada de escala e histórico no fluxo de confirmação | A implementação é descrita no relatório de atomicidade. A validação manual no commit candidato não está documentada. |
+| **Pendente** | Gerar escala, cancelar a prévia e confirmar que escala/histórico não foram gravados | Executar no Windows e guardar evidência. |
+| **Pendente** | Gerar, editar a prévia, salvar e comparar escala e histórico | Executar no Windows e guardar evidência. |
+| **Pendente** | Regenerar uma data e confirmar preservação de outras datas e das participações auxiliares | Executar no Windows e guardar evidência. |
+| **Pendente** | Simular falha de persistência e confirmar rollback e mensagem de erro | Executar em banco descartável. |
+| **Pendente — decisão funcional** | Definir se editar uma escala já salva deve alterar o histórico, sobretudo para datas passadas | O relatório de atomicidade registra que essa semântica ainda precisa ser definida pelo responsável. Não alterar o comportamento por inferência. |
+| **Pendente — risco potencial** | Revisar o uso futuro de métodos legados que gravam histórico em transação separada | Não há fluxo de produção confirmado no relatório anterior, mas qualquer novo uso exige revisão de atomicidade. |
+
+### 4.3 Migrações SQLite
+
+O [relatório de migrações da etapa 4](auditoria-migracoes-banco-etapa-4.md) descreve testes com um esquema legado reproduzido e banco temporário. Ele registra que os comandos Maven não foram executados naquele ambiente à época.
+
+| Status | Verificação | Evidência atual / próximo passo |
+|---|---|---|
+| **Aprovado conforme relato do usuário, com limite** | Suíte automatizada que inclui testes de migração | O usuário relatou 502/502 testes aprovados na IDE. O commit exato e o log detalhado não foram registrados; portanto, isso não confirma independentemente todos os cenários de migração. |
+| **Pendente** | Atualização real de banco de uma instalação anterior | Fazer em ambiente isolado e comparar dados antes/depois. |
+| **Pendente** | Confirmar preservação de registros e integridade referencial depois da atualização real | Registrar contagens e `PRAGMA foreign_key_check`. |
+| **Pendente — risco arquitetural** | Avaliar a ausência de versão formal do esquema e a atomicidade global da inicialização | O relatório de migrações descreve migrações condicionais e transações locais. A avaliação completa de todas as versões históricas ainda não está comprovada. |
+
+### 4.4 Backups, retenção e restauração
+
+A política está documentada em [retencao-segura-backups.md](retencao-segura-backups.md). O documento descreve o comportamento esperado, mas não é por si só um log de execução.
+
+| Status | Verificação | Evidência atual / próximo passo |
+|---|---|---|
+| **Aprovado por inspeção de código/documentação** | Política de retenção conservadora para backups automáticos identificáveis | A política documentada preserva backups manuais, arquivos legados/desconhecidos e cancela a limpeza em caso de classificação insegura. |
+| **Pendente** | Criar backup manual e verificar que pode ser aberto como SQLite | Guardar resultado em ambiente de teste. |
+| **Pendente** | Criar backup automático e verificar arquivo e metadados | Guardar log/resultado. |
+| **Pendente** | Criar mais de 30 backups elegíveis e confirmar a retenção prevista | Não marcar como executado apenas porque a implementação está integrada. |
+| **Pendente** | Confirmar preservação de backups manuais, legados e de classificação desconhecida | Executar cenário de retenção e registrar arquivos preservados. |
+| **Pendente** | Simular falhas de criação, leitura/classificação e exclusão | Confirmar que backups anteriores não são removidos indevidamente. |
+| **Pendente** | Restaurar cópia em ambiente isolado, reiniciar e comparar dados | Não executar o ensaio no banco pessoal real. |
+
+### 4.5 Interface e fluxos essenciais
+
+| Status | Verificação | Evidência atual / próximo passo |
+|---|---|---|
+| **Não verificado** | Cadastro/edição de pessoas e partes com persistência após reinício | Nenhuma evidência de roteiro manual vinculada ao commit candidato. |
+| **Não verificado** | Geração, revisão, edição e salvamento de escalas na interface | Nenhuma evidência de roteiro manual vinculada ao commit candidato. |
+| **Não verificado** | Consulta e consistência do histórico na interface | Nenhuma evidência de roteiro manual vinculada ao commit candidato. |
+| **Não verificado** | Tratamento de conflitos e mensagens de falha/sucesso | Nenhuma evidência de roteiro manual vinculada ao commit candidato. |
+| **Não verificado** | Importação de apostila/JSON, prévia, cancelamento e confirmação | Testes automatizados existem, mas não foi registrada validação visual integrada no commit candidato. |
+| **Não verificado** | Configurações persistem após fechar e reabrir a aplicação | Nenhuma evidência de roteiro manual vinculada ao commit candidato. |
+
+### 4.6 Privacidade e arquivos rastreados
+
+| Status | Verificação | Evidência atual / próximo passo |
+|---|---|---|
+| **Aprovado quanto à árvore atual** | PDF S-140 preenchido não está presente na árvore atual de `main` | A remoção ocorreu depois da auditoria geral. O histórico Git **não foi verificado** quanto a cópias antigas; não se afirma que foi limpo. |
+| **Aprovado conforme relato do usuário** | Capturas de tela não expõem dados pessoais | O usuário confirmou essa revisão. Não foram incluídos nomes ou dados pessoais neste documento. |
+| **Pendente** | Avaliar o histórico Git e artefatos publicados em relação ao PDF removido | Fazer revisão separada, sem afirmar que o histórico já foi limpo. |
+| **Não verificado** | Varredura de vulnerabilidades das dependências | Não há relatório de ferramenta disponível nesta revisão. |
+| **Não verificado** | Revisão de licenças e atribuições para distribuição | Não foi realizada avaliação jurídica/licenciamento nesta revisão. |
+
+## 5. CI e comandos recomendados
+
+O workflow `.github/workflows/maven-tests.yml` está presente em `main`. Ele configura Java 22, instala Xvfb e executa:
+
+```bash
+xvfb-run --auto-servernum mvn --batch-mode --no-transfer-progress clean test
+```
+
+O workflow executa `clean test`, não `clean verify`. A execução bem-sucedida da CI na PR #92 e o relato de 502/502 testes na IDE são evidências positivas, mas não devem ser convertidos em afirmação de que `mvn clean verify`, o instalador ou a atualização real foram validados.
+
+Na máquina de validação do release, executar no SHA candidato explicitamente escolhido:
 
 ```powershell
 mvn clean test
 mvn clean verify
 ```
 
-Registrar dos relatórios Surefire o total de testes, falhas, erros e ignorados. Em seguida, confirmar que `mvn clean verify` terminou com `BUILD SUCCESS` e que os artefatos esperados existem. Se um comando falhar, anexar a saída relevante e não declarar a validação concluída.
+Guardar os logs completos e os relatórios Surefire. Registrar separadamente a geração do instalador, a instalação/execução do EXE e a atualização real de banco.
 
-## 4. Checklist manual reproduzível
+## 6. Itens ainda pendentes ou não verificados da auditoria geral
 
-**Legenda:** cada item começa como **Não executado**. Alterar o status somente depois de realizar o passo no ambiente adequado e registrar a evidência. Inspeção do código, por si só, não marca um fluxo visual ou de instalação como aprovado.
+A auditoria geral de 2026-10-23 foi produzida para o commit `2ce671234f37fe2b05fff44bf68df8421333d1ae`, anterior às mudanças integradas depois. Ela ainda contém afirmações históricas que não refletem o estado atual (cadastros nominais automáticos, PDF presente na árvore e ausência de CI). Esta PR não altera aquele relatório.
 
-### 4.1 Inicialização e banco de dados
+Continuam visíveis e não devem ser considerados resolvidos por inferência:
 
-- [x] **executado** — Abrir a aplicação com um banco válido existente e conferir a tela principal.
-- [x] **executado** — Em ambiente isolado, iniciar sem banco existente e confirmar criação e inicialização do banco.
-- [x] **executado** — Atualizar uma cópia de banco antigo e comparar os dados antes/depois.
-- [x] **executado** — Fechar e reabrir a aplicação duas vezes; conferir que a inicialização não duplica estruturas nem apaga dados.
-- [x] **executado** — Executar `PRAGMA foreign_key_check` na cópia de teste e confirmar ausência de violações; verificar `PRAGMA foreign_keys` em novas conexões.
-- [x] **executado** — Conferir que o banco usado pela aplicação está em `%LOCALAPPDATA%\\GeradorDesignacoes\\gerador-designacoes.db`.
-- [x] **executado** — Em ambiente descartável, provocar uma falha de inicialização controlada e confirmar que não é apresentada como sucesso nem deixa a aplicação aparentemente pronta.
+- atualização da auditoria geral para o commit atual e reclassificação dos achados afetados pelas PRs posteriores;
+- instalação limpa e preservação de banco existente verificadas no aplicativo real;
+- `mvn clean verify` no commit candidato, com log e contagens;
+- geração, instalação e execução do instalador Windows, com hash e evidência;
+- atualização real de versão anterior preservando o banco e reinicializando corretamente;
+- validação manual integrada de interface, geração, histórico, backup e restauração;
+- matriz completa de versões históricas do esquema e avaliação da atomicidade global das migrações;
+- decisão funcional sobre a relação entre edição de escalas persistidas e histórico;
+- revisão dos riscos dos métodos legados de persistência de histórico antes de novos usos;
+- análise de vulnerabilidades e revisão de licenças/atribuições;
+- verificação do histórico Git relacionado ao PDF removido.
 
-### 4.2 Escalas e histórico
+A existência do workflow CI já não é uma pendência de ausência de automação; ainda é necessário manter evidência da execução referente ao commit candidato.
 
-- [x] **executado** — Gerar uma escala individual e abandonar/cancelar a prévia; comparar escala, programação e histórico persistidos antes/depois.
-- [x] **executado** — Gerar, revisar, confirmar e salvar uma escala; confirmar designações e histórico correspondentes no banco e na interface.
-- [x] **executado** — Cancelar uma operação sem confirmar e verificar que alterações não confirmadas não foram gravadas.
-- [x] **executado** — Regenerar uma data e verificar que o histórico de outras datas permanece idêntico.
-- [x] **executado** — Simular uma falha de persistência em banco descartável e verificar rollback e mensagens de erro.
-- [x] **executado** — Se salas B/C estiverem habilitadas, validar geração e regeneração sem perda das participações auxiliares existentes.
-- [x] **executado** — Arquivar uma pessoa/parte com histórico passado e confirmar que as referências históricas continuam disponíveis; conferir bloqueio para participações hoje/futuras conforme as regras atuais.
-- [x] **executado** — Conferir que a interface só exibe confirmação de sucesso depois de persistência concluída.
+## 7. Decisão de liberação
 
-### 4.3 Backups
+**Decisão: BLOQUEADO POR PENDÊNCIAS. Não declarar a versão 1.2.5 pronta para distribuição.**
 
-- [x] **executado** — Criar backup manual e confirmar arquivo, tamanho e possibilidade de leitura em ambiente de teste.
-- [x] **executado** — Criar backup automático e confirmar arquivo gerado.
-- [x] **executado** — Criar mais de 30 backups automáticos elegíveis e confirmar retenção dos 30 mais recentes, agora que a implementação da PR #87 está integrada.
-- [x] **executado** — Confirmar que backup manual não é excluído pela retenção.
-- [x] **executado** — Confirmar que backup legado ou de classificação desconhecida é preservado.
-- [x] **executado** — Provocar falha de criação e confirmar que backups anteriores não são removidos indevidamente.
-- [x] **executado** — Provocar falha de exclusão em ambiente descartável e conferir registro/interrupção conforme a implementação.
-- [x] **executado** — Restaurar uma cópia de backup em ambiente isolado, reabrir a aplicação e comparar dados. Nunca usar o banco real para este ensaio.
+A aprovação relatada da suíte de testes e a correção da inicialização nominal são progressos relevantes, mas não comprovam a validação do instalador, a instalação limpa, a atualização real e a preservação do banco existente. Nenhum item manual sem evidência foi marcado como aprovado.
 
-**Nota:** a implementação da PR #87 está incluída no commit avaliado; os cenários manuais de retenção continuam pendentes de execução e evidência.
-
-### 4.4 Interface e funcionalidades essenciais
-
-- [x] **executado** — Cadastrar e editar uma pessoa; fechar e reabrir a tela para conferir persistência.
-- [x] **executado** — Cadastrar e editar uma parte; conferir regras e persistência.
-- [x] **executado** — Gerar, revisar, editar e salvar uma escala.
-- [x] **executado** — Consultar o histórico antes e depois de salvar uma escala.
-- [x] **executado** — Visualizar e tratar um conflito de designação.
-- [x] **executado** — Importar uma apostila/JSON de teste, conferir associações e confirmar importação; verificar que cancelar a prévia não grava dados.
-- [x] **executado** — Alterar configurações, fechar a aplicação e conferir os valores depois de reiniciar.
-- [x] **executado** — Verificar mensagens de erro e confirmação nos fluxos acima, inclusive falhas de persistência.
-
-## 5. Validação do instalador
-
-**Status: executado.**
-
-No Windows de teste, depois de escolher explicitamente o commit a avaliar:
-
-1. Conferir `java -version`, `mvn -version` e se `JAVA_HOME` aponta para JDK 22.
-2. Confirmar que `dist/GeradorDesignacoes-1.2.5` e `Instalador/GeradorDesignacoes-1.2.5.exe` ainda não existem; o script se recusa a sobrescrever esses destinos. Preservar ou arquivar artefatos anteriores em vez de apagá-los sem autorização.
-3. Executar `powershell -ExecutionPolicy Bypass -File .\\scripts\\build-installer.ps1` a partir da raiz do repositório.
-4. Registrar a saída completa e confirmar a existência de `target/gerador-designacoes-1.2.5.jar` e `Instalador/GeradorDesignacoes-1.2.5.exe`.
-5. Conferir propriedades/nome/versão do instalador e registrar hash SHA-256 do artefato testado.
-6. Instalar em máquina virtual ou ambiente Windows descartável, iniciar pelo atalho instalado e testar banco, recursos JavaFX, backup e exportações suportadas.
-7. Registrar resultado, logs e caminho de instalação.
-
-O script usa `mvn clean package -DskipTests`; por isso, o sucesso do script **não substitui** `mvn clean test` e `mvn clean verify`. Não alterar a versão nem distribuir o instalador como parte desta etapa.
-
-## 6. Atualização e preservação do banco
-
-**Status: executado.**
-
-
-Quando houver uma versão anterior e ambiente Windows isolado:
-
-1. Instalar/executar a versão anterior em uma VM ou ambiente descartável.
-2. Criar dados representativos: pessoas ativas/arquivadas, partes ativas/arquivadas, programação semanal, escala, histórico e configurações.
-3. Fechar completamente o aplicativo e registrar a localização do banco e uma cópia de segurança.
-4. Confirmar que a cópia pode ser aberta como SQLite e registrar SHA-256, contagens relevantes e resultados de `PRAGMA foreign_key_check`.
-5. Executar o procedimento real de atualização para a nova versão, sem remover a pasta de dados do usuário.
-6. Iniciar a nova versão e conferir pessoas, partes, programações, escalas, histórico e configurações.
-7. Conferir migrações e integridade referencial no banco de teste.
-8. Fechar e abrir novamente a aplicação; repetir as verificações e comparar com a evidência inicial.
-9. Guardar logs, hashes, contagens e capturas de tela como evidência.
-
-Se não houver versão anterior/instalador ou ambiente isolado, manter este item como **Não executado** e registrar a limitação. Não executar o ensaio destrutivo no banco real.
-
-## 7. Recuperação e restauração
-
-O README descreve backup manual e restauração de arquivo `.db` pela interface, com orientação para reiniciar a aplicação após a restauração. Procedimento prudente para um incidente:
-
-1. Fechar completamente o aplicativo.
-2. Fazer uma cópia separada do banco atual antes de qualquer tentativa de recuperação.
-3. Selecionar um backup conhecido e restaurá-lo pela funcionalidade suportada, preferencialmente primeiro em ambiente isolado.
-4. Reiniciar a aplicação e conferir registros, configurações e histórico.
-5. Manter intactos o banco original e a cópia anterior até verificar que a restauração foi bem-sucedida.
-
-A restauração real não foi executada nesta revisão. A política de retenção da PR #87 está integrada, mas ainda precisa dos testes manuais descritos na seção 4.3.
-
-## 8. Defeitos, correções e limitações
-
-- Nenhum defeito novo foi relatado durante a validação automatizada mais recente. A suíte foi reportada como aprovada pelo usuário; interface, instalador e cenário de atualização ainda não foram validados nesta revisão.
-- Nenhuma correção de produção foi feita; esta alteração é documental.
-- As PRs #87, #88 e #89 estão integradas no commit avaliado. Permanecem pendentes as validações manuais de interface, backup/restauração, instalador e atualização real.
-- A versão pretendida para a próxima liberação não está definida no repositório inspecionado.
-- A validação visual da interface, a geração e execução do instalador, a atualização real e a restauração de backup exigem ambiente Windows e permanecem pendentes.
-- A contagem de 482 testes da PR #86 é histórica. A suíte completa após a correção da PR #88 foi reportada como aprovada pelo usuário; preservar a saída local como evidência de release.
-- `mvn clean test` foi reportado como aprovado pelo usuário após a correção. `mvn clean verify`, empacotamento, instalação, atualização real, restauração e reinicialização ainda precisam de evidência específica.
-
-## 9. Decisão de liberação
-
-**Decisão atual: Bloqueado por pendências.**
-
-Condições mínimas para reavaliar:
-
-- [x] Registrar o commit exato avaliado: `cbc5858c34171bccdca3573d2b0e1e952d938610`.
-- [x] Integrar as PRs #87 e #88 no conjunto avaliado (merges confirmados em `main`).
-- [x] Executar a suíte completa após a correção de migração — aprovação reportada pelo usuário; anexar a saída detalhada para auditoria.
-- [x] Executar e registrar `mvn clean verify` com JDK 22.
-- [x] Preencher os checklists manuais com evidências, sem marcar itens não executados como aprovados.
-- [x] Gerar e executar o instalador em ambiente Windows isolado.
-- [x] Realizar teste real de atualização e reinicialização, ou manter a limitação explicitamente aceita pelo responsável sem alegar validação.
-- [x] Revisar os resultados e decidir formalmente a prontidão para liberação.
-
-Nenhum merge, alteração de versão, publicação ou distribuição foi realizado por esta etapa.
+Esta revisão é documental. Não altera código de produção, banco de dados, versão do aplicativo ou instalador. Não realiza publicação, distribuição ou merge.
