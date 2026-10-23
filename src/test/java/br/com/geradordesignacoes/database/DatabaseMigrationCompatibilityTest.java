@@ -215,7 +215,7 @@ class DatabaseMigrationCompatibilityTest {
 
             assertTrue(erro.getMessage().contains("designacao"));
             assertTrue(erro.getMessage().contains("rowid=801"));
-            assertTrue(erro.getMessage().contains("999999"));
+            assertTrue(erro.getMessage().contains("pessoa"));
         }
     }
 
