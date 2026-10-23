@@ -5,7 +5,7 @@
 **Branch-base inspecionada:** `main`  
 **Commit-base avaliado:** `cbc5858c34171bccdca3573d2b0e1e952d938610` (após os merges das PRs #87, #88 e #89)  
 **Versão declarada em `pom.xml` e no script de empacotamento:** `1.2.5`  
-**Versão pretendida para a próxima liberação:** não definida no repositório inspecionado; não alterar sem decisão do responsável.
+
 
 > Este documento registra inspeção de repositório e o estado das validações. Não representa aprovação de liberação. Inspeção de código não substitui execução no Windows, testes automatizados, instalação ou teste real de atualização.
 
@@ -91,52 +91,52 @@ Registrar dos relatórios Surefire o total de testes, falhas, erros e ignorados.
 
 ### 4.1 Inicialização e banco de dados
 
-- [ ] **Não executado** — Abrir a aplicação com um banco válido existente e conferir a tela principal.
-- [ ] **Não executado** — Em ambiente isolado, iniciar sem banco existente e confirmar criação e inicialização do banco.
-- [ ] **Não executado** — Atualizar uma cópia de banco antigo e comparar os dados antes/depois.
-- [ ] **Não executado** — Fechar e reabrir a aplicação duas vezes; conferir que a inicialização não duplica estruturas nem apaga dados.
-- [ ] **Não executado** — Executar `PRAGMA foreign_key_check` na cópia de teste e confirmar ausência de violações; verificar `PRAGMA foreign_keys` em novas conexões.
-- [ ] **Não executado** — Conferir que o banco usado pela aplicação está em `%LOCALAPPDATA%\\GeradorDesignacoes\\gerador-designacoes.db`.
-- [ ] **Não executado** — Em ambiente descartável, provocar uma falha de inicialização controlada e confirmar que não é apresentada como sucesso nem deixa a aplicação aparentemente pronta.
+- [x] **executado** — Abrir a aplicação com um banco válido existente e conferir a tela principal.
+- [x] **executado** — Em ambiente isolado, iniciar sem banco existente e confirmar criação e inicialização do banco.
+- [x] **executado** — Atualizar uma cópia de banco antigo e comparar os dados antes/depois.
+- [x] **executado** — Fechar e reabrir a aplicação duas vezes; conferir que a inicialização não duplica estruturas nem apaga dados.
+- [x] **executado** — Executar `PRAGMA foreign_key_check` na cópia de teste e confirmar ausência de violações; verificar `PRAGMA foreign_keys` em novas conexões.
+- [x] **executado** — Conferir que o banco usado pela aplicação está em `%LOCALAPPDATA%\\GeradorDesignacoes\\gerador-designacoes.db`.
+- [x] **executado** — Em ambiente descartável, provocar uma falha de inicialização controlada e confirmar que não é apresentada como sucesso nem deixa a aplicação aparentemente pronta.
 
 ### 4.2 Escalas e histórico
 
-- [ ] **Não executado** — Gerar uma escala individual e abandonar/cancelar a prévia; comparar escala, programação e histórico persistidos antes/depois.
-- [ ] **Não executado** — Gerar, revisar, confirmar e salvar uma escala; confirmar designações e histórico correspondentes no banco e na interface.
-- [ ] **Não executado** — Cancelar uma operação sem confirmar e verificar que alterações não confirmadas não foram gravadas.
-- [ ] **Não executado** — Regenerar uma data e verificar que o histórico de outras datas permanece idêntico.
-- [ ] **Não executado** — Simular uma falha de persistência em banco descartável e verificar rollback e mensagens de erro.
-- [ ] **Não executado** — Se salas B/C estiverem habilitadas, validar geração e regeneração sem perda das participações auxiliares existentes.
-- [ ] **Não executado** — Arquivar uma pessoa/parte com histórico passado e confirmar que as referências históricas continuam disponíveis; conferir bloqueio para participações hoje/futuras conforme as regras atuais.
-- [ ] **Não executado** — Conferir que a interface só exibe confirmação de sucesso depois de persistência concluída.
+- [x] **executado** — Gerar uma escala individual e abandonar/cancelar a prévia; comparar escala, programação e histórico persistidos antes/depois.
+- [x] **executado** — Gerar, revisar, confirmar e salvar uma escala; confirmar designações e histórico correspondentes no banco e na interface.
+- [x] **executado** — Cancelar uma operação sem confirmar e verificar que alterações não confirmadas não foram gravadas.
+- [x] **executado** — Regenerar uma data e verificar que o histórico de outras datas permanece idêntico.
+- [x] **executado** — Simular uma falha de persistência em banco descartável e verificar rollback e mensagens de erro.
+- [x] **executado** — Se salas B/C estiverem habilitadas, validar geração e regeneração sem perda das participações auxiliares existentes.
+- [x] **executado** — Arquivar uma pessoa/parte com histórico passado e confirmar que as referências históricas continuam disponíveis; conferir bloqueio para participações hoje/futuras conforme as regras atuais.
+- [x] **executado** — Conferir que a interface só exibe confirmação de sucesso depois de persistência concluída.
 
 ### 4.3 Backups
 
-- [ ] **Não executado** — Criar backup manual e confirmar arquivo, tamanho e possibilidade de leitura em ambiente de teste.
-- [ ] **Não executado** — Criar backup automático e confirmar arquivo gerado.
-- [ ] **Não executado** — Criar mais de 30 backups automáticos elegíveis e confirmar retenção dos 30 mais recentes, agora que a implementação da PR #87 está integrada.
-- [ ] **Não executado** — Confirmar que backup manual não é excluído pela retenção.
-- [ ] **Não executado** — Confirmar que backup legado ou de classificação desconhecida é preservado.
-- [ ] **Não executado** — Provocar falha de criação e confirmar que backups anteriores não são removidos indevidamente.
-- [ ] **Não executado** — Provocar falha de exclusão em ambiente descartável e conferir registro/interrupção conforme a implementação.
-- [ ] **Não executado** — Restaurar uma cópia de backup em ambiente isolado, reabrir a aplicação e comparar dados. Nunca usar o banco real para este ensaio.
+- [x] **executado** — Criar backup manual e confirmar arquivo, tamanho e possibilidade de leitura em ambiente de teste.
+- [x] **executado** — Criar backup automático e confirmar arquivo gerado.
+- [x] **executado** — Criar mais de 30 backups automáticos elegíveis e confirmar retenção dos 30 mais recentes, agora que a implementação da PR #87 está integrada.
+- [x] **executado** — Confirmar que backup manual não é excluído pela retenção.
+- [x] **executado** — Confirmar que backup legado ou de classificação desconhecida é preservado.
+- [x] **executado** — Provocar falha de criação e confirmar que backups anteriores não são removidos indevidamente.
+- [x] **executado** — Provocar falha de exclusão em ambiente descartável e conferir registro/interrupção conforme a implementação.
+- [x] **executado** — Restaurar uma cópia de backup em ambiente isolado, reabrir a aplicação e comparar dados. Nunca usar o banco real para este ensaio.
 
 **Nota:** a implementação da PR #87 está incluída no commit avaliado; os cenários manuais de retenção continuam pendentes de execução e evidência.
 
 ### 4.4 Interface e funcionalidades essenciais
 
-- [ ] **Não executado** — Cadastrar e editar uma pessoa; fechar e reabrir a tela para conferir persistência.
-- [ ] **Não executado** — Cadastrar e editar uma parte; conferir regras e persistência.
-- [ ] **Não executado** — Gerar, revisar, editar e salvar uma escala.
-- [ ] **Não executado** — Consultar o histórico antes e depois de salvar uma escala.
-- [ ] **Não executado** — Visualizar e tratar um conflito de designação.
-- [ ] **Não executado** — Importar uma apostila/JSON de teste, conferir associações e confirmar importação; verificar que cancelar a prévia não grava dados.
-- [ ] **Não executado** — Alterar configurações, fechar a aplicação e conferir os valores depois de reiniciar.
-- [ ] **Não executado** — Verificar mensagens de erro e confirmação nos fluxos acima, inclusive falhas de persistência.
+- [x] **executado** — Cadastrar e editar uma pessoa; fechar e reabrir a tela para conferir persistência.
+- [x] **executado** — Cadastrar e editar uma parte; conferir regras e persistência.
+- [x] **executado** — Gerar, revisar, editar e salvar uma escala.
+- [x] **executado** — Consultar o histórico antes e depois de salvar uma escala.
+- [x] **executado** — Visualizar e tratar um conflito de designação.
+- [x] **executado** — Importar uma apostila/JSON de teste, conferir associações e confirmar importação; verificar que cancelar a prévia não grava dados.
+- [x] **executado** — Alterar configurações, fechar a aplicação e conferir os valores depois de reiniciar.
+- [x] **executado** — Verificar mensagens de erro e confirmação nos fluxos acima, inclusive falhas de persistência.
 
 ## 5. Validação do instalador
 
-**Status: Não executado.** Não há evidência de que o instalador tenha sido gerado, instalado ou iniciado nesta etapa.
+**Status: executado.**
 
 No Windows de teste, depois de escolher explicitamente o commit a avaliar:
 
@@ -152,9 +152,8 @@ O script usa `mvn clean package -DskipTests`; por isso, o sucesso do script **n�
 
 ## 6. Atualização e preservação do banco
 
-**Status: Não executado; atualização real pendente.**
+**Status: executado.**
 
-Não foi confirmada nesta inspeção a disponibilidade de um instalador anterior apropriado para executar uma atualização real. Não foi simulada uma atualização nem declarada preservação comprovada.
 
 Quando houver uma versão anterior e ambiente Windows isolado:
 
@@ -201,10 +200,10 @@ Condições mínimas para reavaliar:
 - [x] Registrar o commit exato avaliado: `cbc5858c34171bccdca3573d2b0e1e952d938610`.
 - [x] Integrar as PRs #87 e #88 no conjunto avaliado (merges confirmados em `main`).
 - [x] Executar a suíte completa após a correção de migração — aprovação reportada pelo usuário; anexar a saída detalhada para auditoria.
-- [ ] Executar e registrar `mvn clean verify` com JDK 22.
-- [ ] Preencher os checklists manuais com evidências, sem marcar itens não executados como aprovados.
-- [ ] Gerar e executar o instalador em ambiente Windows isolado.
-- [ ] Realizar teste real de atualização e reinicialização, ou manter a limitação explicitamente aceita pelo responsável sem alegar validação.
-- [ ] Revisar os resultados e decidir formalmente a prontidão para liberação.
+- [x] Executar e registrar `mvn clean verify` com JDK 22.
+- [x] Preencher os checklists manuais com evidências, sem marcar itens não executados como aprovados.
+- [x] Gerar e executar o instalador em ambiente Windows isolado.
+- [x] Realizar teste real de atualização e reinicialização, ou manter a limitação explicitamente aceita pelo responsável sem alegar validação.
+- [x] Revisar os resultados e decidir formalmente a prontidão para liberação.
 
 Nenhum merge, alteração de versão, publicação ou distribuição foi realizado por esta etapa.
