@@ -20,6 +20,26 @@ class GeradorEscalaTodasPartesTest extends BaseDAOTest {
     void deveGerarEscalaComTodasAsPartesDisponiveis() {
         ParteDAO parteDAO = new ParteDAO();
         PessoaDAO pessoaDAO = new PessoaDAO();
+
+        // Os dados nominais são fixtures deste teste, não responsabilidade
+        // do DatabaseInitializer.
+        for (String nome : List.of("Heitor", "Luís Cláudio", "João Vaz")) {
+            pessoaDAO.salvar(new Pessoa(
+                    nome,
+                    Sexo.MASCULINO,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    Privilegio.ANCIAO,
+                    NivelLeitura.BASICO
+            ));
+        }
+
         List<Parte> partes = parteDAO.listarTodos();
         List<Pessoa> pessoas = pessoaDAO.listarTodos();
         System.out.println();
