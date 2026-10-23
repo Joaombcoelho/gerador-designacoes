@@ -47,8 +47,9 @@ class DatabaseMigrationCompatibilityTest {
                     "SELECT nome FROM parte WHERE id = 600"));
             assertEquals(0, inteiro(connection,
                     "SELECT arquivado FROM parte WHERE id = 600"));
-            assertEquals(5, inteiro(connection,
-                    "SELECT duracao_minutos FROM programacao_parte WHERE id = 1100"));
+            assertNull(texto(connection,
+                    "SELECT CAST(duracao_minutos AS TEXT) FROM programacao_parte WHERE id = 1100"),
+                    "A coluna nova não deve inventar uma duração para um registro antigo.");
             assertEquals("Tema histórico", texto(connection,
                     "SELECT tema FROM programacao_parte WHERE id = 1100"));
 
