@@ -78,6 +78,13 @@ class DatabaseMigrationCompatibilityTest {
 
             assertEquals(1, pragmaInteiro(connection, "PRAGMA foreign_keys"));
             assertForeignKeysValidas(connection);
+            try (Statement statement = connection.createStatement()) {
+                assertThrows(SQLException.class, () -> statement.executeUpdate("""
+                        INSERT INTO historico_designacoes
+                            (data, pessoa_id, parte_id, tipo_participacao, sala)
+                        VALUES ('2026-01-08', 999999, 600, 'RESPONSAVEL', 'PRINCIPAL')
+                        """));
+            }
         }
     }
 
