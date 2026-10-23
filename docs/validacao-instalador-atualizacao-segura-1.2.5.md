@@ -7,7 +7,7 @@
 **Status geral:** **PENDENTE — a distribuição não está validada para lançamento**  
 **Escopo desta alteração:** relatório e roteiro de validação; nenhum código de produção, versão, script de empacotamento ou banco foi alterado.
 
-> Esta revisão foi feita por inspeção do repositório remoto. O agente não dispõe, nesta execução, de um ambiente Windows isolado com JDK 22, Maven e capacidade de executar o instalador `.exe`. Por isso, não foi possível gerar o instalador, instalar, atualizar ou desinstalar o aplicativo. Nenhum desses cenários é declarado aprovado.
+
 
 ## 1. Estado inspecionado
 
