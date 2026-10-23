@@ -301,6 +301,13 @@ class BackupRestoreTest {
                         "SELECT valor FROM backup_probe WHERE id = 1")
         );
         assertIntegridadeValida(connection);
+        try (var arquivos = Files.list(directory)) {
+            assertFalse(arquivos.anyMatch(pathDoArquivo -> {
+                String nome = pathDoArquivo.getFileName().toString();
+                return nome.startsWith(".gerador-restauracao-")
+                        || nome.startsWith(".gerador-recuperacao-");
+            }), "Arquivos temporários de restauração e recuperação devem ser limpos após rollback.");
+        }
     }
 
     @Test
