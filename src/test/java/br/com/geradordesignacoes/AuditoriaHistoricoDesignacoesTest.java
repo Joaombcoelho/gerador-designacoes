@@ -131,6 +131,79 @@ class AuditoriaHistoricoDesignacoesTest extends BaseDAOTest {
         }
     }
 
+    @Test
+    void edicaoManualPersistidaAoReabrirPreservaHistoricoOriginal() {
+        LocalDate data = LocalDate.of(2099, 2, 4);
+        Pessoa pessoaOriginal = salvarPessoa("Pessoa original da escala");
+        Pessoa pessoaEditada = salvarPessoa("Pessoa após edição manual");
+        Parte parte = salvarParte("Parte de edição manual");
+        historicoDAO.salvar(participacao(data, pessoaOriginal, parte));
+
+        Escala escala = escalaDAO.salvar(new Escala(
+                data,
+                List.of(new Designacao(data, parte, pessoaOriginal, null))
+        ));
+        Designacao designacaoSalva = escalaDAO.buscarPorId(escala.getId())
+                .orElseThrow().getDesignacoes().getFirst();
+
+        escalaDAO.atualizarDesignacao(
+                designacaoSalva.id(),
+                pessoaEditada.getId(),
+                null
+        );
+
+        Escala reaberta = escalaDAO.buscarPorId(escala.getId()).orElseThrow();
+        assertEquals(pessoaEditada.getId(),
+                reaberta.getDesignacoes().getFirst().responsavel().getId(),
+                "A edição manual deve continuar persistida após recarregar a escala.");
+
+        List<ParticipacaoDesignacao> historico = historicoDAO.listarTodas();
+        assertEquals(1, historico.stream().filter(p -> p.data().equals(data)).count());
+        assertEquals(pessoaOriginal.getId(), historico.stream()
+                .filter(p -> p.data().equals(data))
+                .findFirst().orElseThrow().pessoa().getId(),
+                "Editar a escala não deve reescrever silenciosamente o histórico separado.");
+    }
+
+    @Test
+    void regenerarDataAlvoPreservaOutrasDatasEContinuaSemDuplicarHistorico() {
+        LocalDate dataAnterior = LocalDate.of(2026, 10, 14);
+        LocalDate dataAlvo = LocalDate.of(2099, 2, 11);
+        Pessoa pessoaHistorica = salvarPessoa("Pessoa do histórico");
+        Pessoa pessoaGerada = salvarPessoa("Pessoa da nova geração");
+        Parte parte = salvarParte("Parte de regeneração");
+
+        historicoDAO.salvar(participacao(dataAnterior, pessoaHistorica, parte));
+        historicoDAO.salvar(participacao(dataAlvo, pessoaHistorica, parte));
+
+        ResultadoGeracaoEscala resultado = new ResultadoGeracaoEscala(
+                new Escala(dataAlvo, List.of(
+                        new Designacao(dataAlvo, parte, pessoaGerada, null)
+                )),
+                List.of(participacao(dataAlvo, pessoaGerada, parte)),
+                List.of(),
+                List.of()
+        );
+        PersistenciaEscalasService service =
+                new PersistenciaEscalasService(escalaDAO, historicoDAO);
+
+        service.salvar(Map.of(dataAlvo, resultado), true);
+        service.salvar(Map.of(dataAlvo, resultado), true);
+
+        List<ParticipacaoDesignacao> historico = historicoDAO.listarTodas();
+        assertEquals(2, historico.size(),
+                "Repetir a persistência da mesma data não deve duplicar participações.");
+        assertTrue(historico.stream().anyMatch(p ->
+                p.data().equals(dataAnterior)
+                        && p.pessoa().getId().equals(pessoaHistorica.getId())),
+                "A regeneração não deve remover o histórico de outra data.");
+        List<ParticipacaoDesignacao> historicoDaDataAlvo = historico.stream()
+                .filter(p -> p.data().equals(dataAlvo))
+                .toList();
+        assertEquals(1, historicoDaDataAlvo.size());
+        assertEquals(pessoaGerada.getId(), historicoDaDataAlvo.getFirst().pessoa().getId());
+    }
+
     private Pessoa salvarPessoa(String nome) {
         return pessoaDAO.salvar(new Pessoa(
                 nome,
