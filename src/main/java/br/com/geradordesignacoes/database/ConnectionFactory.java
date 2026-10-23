@@ -229,13 +229,17 @@ public class ConnectionFactory {
                 return absolute.toRealPath();
             }
 
-            Path parent = absolute.getParent();
-            if (parent == null) {
-                return absolute;
+            Path existing = absolute;
+            java.util.ArrayDeque<Path> missingSegments = new java.util.ArrayDeque<>();
+            while (existing != null && !Files.exists(existing)) {
+                Path fileName = existing.getFileName();
+                if (fileName != null) missingSegments.push(fileName);
+                existing = existing.getParent();
             }
-
-            return parent.toRealPath().resolve(absolute.getFileName())
-                    .normalize();
+            if (existing == null) return absolute;
+            Path resolved = existing.toRealPath();
+            while (!missingSegments.isEmpty()) resolved = resolved.resolve(missingSegments.pop());
+            return resolved.normalize();
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Não foi possível resolver o caminho do banco.",
