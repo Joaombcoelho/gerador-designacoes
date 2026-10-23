@@ -3,15 +3,17 @@
 **Status da etapa:** **Bloqueado por pendências**  
 **Repositório:** `Joaombcoelho/gerador-designacoes`  
 **Branch-base inspecionada:** `main`  
-**Commit-base avaliado:** `d5a051f7973e84e5f5ec12ed2af4f813c3d0af89`  
+**Commit-base avaliado:** `cbc5858c34171bccdca3573d2b0e1e952d938610` (após os merges das PRs #87, #88 e #89)  
 **Versão declarada em `pom.xml` e no script de empacotamento:** `1.2.5`  
 **Versão pretendida para a próxima liberação:** não definida no repositório inspecionado; não alterar sem decisão do responsável.
 
 > Este documento registra inspeção de repositório e o estado das validações. Não representa aprovação de liberação. Inspeção de código não substitui execução no Windows, testes automatizados, instalação ou teste real de atualização.
 
+> **Revisão posterior ao merge da PR #89:** as PRs #87 e #88 também foram integradas em `main`. O usuário reportou que todos os testes passaram após a correção de migração; essa informação é identificada como relato local, pois a saída detalhada não foi anexada aqui. A decisão de liberação permanece bloqueada enquanto as validações manuais, o instalador e a atualização real não tiverem evidências.
+
 ## 1. Estado real do repositório e dependências
 
-Na inspeção, `main` apontava para `d5a051f7973e84e5f5ec12ed2af4f813c3d0af89`, merge da PR #86 (“Corrige atomicidade da geração e do histórico”). A versão declarada é `1.2.5`.
+Nesta revisão, `main` aponta para `cbc5858c34171bccdca3573d2b0e1e952d938610`, após os merges das PRs #87, #88 e #89. A versão declarada continua sendo `1.2.5`. A PR #89 já foi integrada; esta revisão atualiza o checklist para refletir o estado posterior dos merges e a validação de testes reportada pelo usuário.
 
 ### PRs relevantes
 
@@ -21,10 +23,10 @@ Na inspeção, `main` apontava para `d5a051f7973e84e5f5ec12ed2af4f813c3d0af89`, 
 | #84 | Arquivamento de pessoas e partes | Integrada na história de `main` | Sim |
 | #85 | Auditoria da preservação do histórico | Integrada na história de `main` | Sim |
 | #86 | Atomicidade da geração e do histórico | Merge que forma o commit avaliado | Sim |
-| #87 | Retenção segura de backups automáticos | Aberta, em rascunho | **Não** |
-| #88 | Testes de compatibilidade das migrações SQLite | Aberta, em rascunho | **Não** |
+| #87 | Retenção segura de backups automáticos | Integrada | Sim |
+| #88 | Testes de compatibilidade das migrações SQLite e ajuste do detector de migração | Integrada | Sim |
 
-As PRs #87 e #88 não foram integradas automaticamente e suas alterações não estão presentes no commit-base avaliado. São dependências relevantes para concluir a avaliação das alterações de retenção e dos novos testes de migração. Antes de uma decisão de liberação, o responsável deve validar essas PRs e escolher explicitamente o conjunto de commits a avaliar. Este documento não as aprova nem substitui seus testes.
+As PRs #87 e #88 agora estão integradas no commit-base avaliado. A implementação de retenção segura e o teste de compatibilidade das migrações fazem parte do código avaliado. A integração, por si só, não substitui a validação manual dos fluxos de backup, restauração, interface, instalador e atualização real.
 
 ### Versão e artefatos
 
@@ -55,7 +57,7 @@ A pasta de backups automáticos é documentada como:
 
 A inicialização de `MainApp.start` abre o contexto de produção, chama `DatabaseInitializer.initialize()`, inicia o serviço de backup automático e então constrói e exibe a interface. A falha durante a inicialização é relançada depois da tentativa de encerrar os recursos; não foi executada a aplicação nesta etapa para validar a mensagem ou o comportamento visual em caso de falha.
 
-A inicialização SQLite utiliza inspeção do esquema para decidir migrações; não foi identificada uma tabela formal de versão do esquema no código inspecionado. O relatório da Etapa 4 está na PR #88, ainda não integrada no commit avaliado. A retenção segura está descrita na PR #87, também ainda não integrada.
+A inicialização SQLite utiliza inspeção do esquema para decidir migrações; não foi identificada uma tabela formal de versão do esquema no código inspecionado. O relatório de compatibilidade de migrações da PR #88 e a implementação de retenção segura da PR #87 estão integrados no commit avaliado.
 
 A documentação do README descreve backup manual/restauração pela interface. A restauração substitui o banco local pelo arquivo selecionado e orienta reiniciar a aplicação. Esse fluxo deve ser testado somente com dados descartáveis em ambiente isolado.
 
@@ -65,14 +67,14 @@ A documentação do README descreve backup manual/restauração pela interface. 
 
 | Comando | Resultado real | Total / falhas / erros / ignorados |
 |---|---|---|
-| `mvn clean test` | **Não executado pelo agente** | Não disponível |
-| `mvn clean verify` | **Não executado pelo agente** | Não disponível |
+| `mvn clean test` | **Aprovado conforme relato do usuário após a correção da PR #88** | Suíte completa reportada sem falhas; saída detalhada não anexada a este documento |
+| `mvn clean verify` | **Não confirmado** | A conclusão de todos os testes foi reportada pelo usuário; não há evidência específica anexada de `verify` nesta revisão |
 
-O ambiente de trabalho remoto usado para inspecionar e editar o repositório não disponibilizou um checkout executável com Maven e JDK 22. A tentativa anterior de clonar o repositório falhou por resolução DNS de `github.com`; o ambiente observado tinha OpenJDK 21 e não tinha Maven instalado. Portanto, não há evidência de compilação, execução da suíte, empacotamento ou CI para o commit desta etapa.
+A execução local é feita pelo usuário em Windows com JDK 22. O usuário reportou que todos os testes passaram após a correção do detector de migração. O agente não executou Maven neste ambiente e não possui o log completo da execução para anexar; por isso, o resultado é registrado como validação reportada, não como execução independente do agente.
 
 ### Resultados históricos que não devem ser confundidos com esta execução
 
-A descrição da PR #86 registra **482/482 testes aprovados conforme validação local reportada pelo autor**. Esse resultado é evidência histórica reportada para aquela etapa; não é uma execução feita pelo agente nesta etapa e não inclui os testes adicionados nas PRs #87 e #88, que permanecem abertas.
+A descrição da PR #86 registra **482/482 testes aprovados conforme validação local reportada pelo autor**. Esse é um resultado histórico. Após a correção da migração na PR #88, o usuário reportou que a suíte completa passou; registrar o total e guardar a saída Surefire/console no histórico de validação do release quando disponível.
 
 Na máquina Windows com JDK 22, executar na branch/commit escolhido para a avaliação:
 
@@ -112,14 +114,14 @@ Registrar dos relatórios Surefire o total de testes, falhas, erros e ignorados.
 
 - [ ] **Não executado** — Criar backup manual e confirmar arquivo, tamanho e possibilidade de leitura em ambiente de teste.
 - [ ] **Não executado** — Criar backup automático e confirmar arquivo gerado.
-- [ ] **Não executado** — Com a implementação da PR #87 validada e integrada, criar mais de 30 backups automáticos elegíveis e confirmar retenção dos 30 mais recentes.
+- [ ] **Não executado** — Criar mais de 30 backups automáticos elegíveis e confirmar retenção dos 30 mais recentes, agora que a implementação da PR #87 está integrada.
 - [ ] **Não executado** — Confirmar que backup manual não é excluído pela retenção.
 - [ ] **Não executado** — Confirmar que backup legado ou de classificação desconhecida é preservado.
 - [ ] **Não executado** — Provocar falha de criação e confirmar que backups anteriores não são removidos indevidamente.
 - [ ] **Não executado** — Provocar falha de exclusão em ambiente descartável e conferir registro/interrupção conforme a implementação.
 - [ ] **Não executado** — Restaurar uma cópia de backup em ambiente isolado, reabrir a aplicação e comparar dados. Nunca usar o banco real para este ensaio.
 
-**Dependência:** até que a PR #87 seja validada e integrada no conjunto de commits escolhido, o comportamento de retenção proposto por ela não faz parte da versão avaliada.
+**Nota:** a implementação da PR #87 está incluída no commit avaliado; os cenários manuais de retenção continuam pendentes de execução e evidência.
 
 ### 4.4 Interface e funcionalidades essenciais
 
@@ -178,17 +180,17 @@ O README descreve backup manual e restauração de arquivo `.db` pela interface,
 4. Reiniciar a aplicação e conferir registros, configurações e histórico.
 5. Manter intactos o banco original e a cópia anterior até verificar que a restauração foi bem-sucedida.
 
-A restauração real não foi executada nesta etapa. A política proposta de retenção da PR #87 também ainda não está integrada ao commit avaliado.
+A restauração real não foi executada nesta revisão. A política de retenção da PR #87 está integrada, mas ainda precisa dos testes manuais descritos na seção 4.3.
 
 ## 8. Defeitos, correções e limitações
 
 - Nenhum defeito novo foi reproduzido nesta etapa, pois não foi possível executar a suíte, interface, instalador ou cenário de atualização.
 - Nenhuma correção de produção foi feita; esta alteração é documental.
-- Dependências abertas: validação local das PRs #87 e #88 e decisão sobre o conjunto de commits que representará a próxima avaliação.
+- As PRs #87, #88 e #89 estão integradas no commit avaliado. Permanecem pendentes as validações manuais de interface, backup/restauração, instalador e atualização real.
 - A versão pretendida para a próxima liberação não está definida no repositório inspecionado.
 - A validação visual da interface, a geração e execução do instalador, a atualização real e a restauração de backup exigem ambiente Windows e permanecem pendentes.
-- A contagem de 482 testes aprovada na PR #86 é um resultado local reportado naquela PR, não um resultado desta etapa.
-- Não há evidência nesta etapa de execução de `mvn clean test`, `mvn clean verify`, script de empacotamento, instalador, atualização ou reinicialização.
+- A contagem de 482 testes da PR #86 é histórica. A suíte completa após a correção da PR #88 foi reportada como aprovada pelo usuário; preservar a saída local como evidência de release.
+- `mvn clean test` foi reportado como aprovado pelo usuário após a correção. `mvn clean verify`, empacotamento, instalação, atualização real, restauração e reinicialização ainda precisam de evidência específica.
 
 ## 9. Decisão de liberação
 
@@ -197,8 +199,9 @@ A restauração real não foi executada nesta etapa. A política proposta de ret
 Condições mínimas para reavaliar:
 
 - [ ] Escolher e registrar o commit exato que contém as alterações aprovadas das etapas anteriores.
-- [ ] Validar as PRs dependentes #87 e #88 antes de incluí-las no conjunto de avaliação.
-- [ ] Executar e registrar `mvn clean test` e `mvn clean verify` com JDK 22.
+- [x] Integrar as PRs #87 e #88 no conjunto avaliado (merges confirmados em `main`).
+- [x] Executar a suíte completa após a correção de migração — aprovação reportada pelo usuário; anexar a saída detalhada para auditoria.
+- [ ] Executar e registrar `mvn clean verify` com JDK 22.
 - [ ] Preencher os checklists manuais com evidências, sem marcar itens não executados como aprovados.
 - [ ] Gerar e executar o instalador em ambiente Windows isolado.
 - [ ] Realizar teste real de atualização e reinicialização, ou manter a limitação explicitamente aceita pelo responsável sem alegar validação.
