@@ -70,6 +70,11 @@ class BackupRetentionServiceTest {
             manuais.add(manual);
         }
 
+        Path desconhecido = pasta.resolve("arquivo-desconhecido.bin");
+        Path invalido = pasta.resolve("backup-manual-invalido.db");
+        Files.writeString(desconhecido, "conteúdo desconhecido");
+        Files.writeString(invalido, "não é um banco SQLite");
+
         List<Path> legados = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             Path legado = caminhoAutomatico(i + 100);
@@ -83,6 +88,10 @@ class BackupRetentionServiceTest {
         manuais.forEach(path -> assertTrue(Files.isRegularFile(path)));
         legados.forEach(path -> assertTrue(Files.isRegularFile(path),
                 "Nome compatível, sem metadados confiáveis, não autoriza exclusão."));
+        assertTrue(Files.isRegularFile(desconhecido),
+                "Arquivos desconhecidos não devem ser excluídos pela retenção.");
+        assertTrue(Files.isRegularFile(invalido),
+                "Arquivos inválidos sem classificação automática comprovada devem ser preservados.");
     }
 
     @Test

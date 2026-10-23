@@ -130,6 +130,20 @@ class BackupServiceRetentionFailureTest {
     }
 
     @Test
+    void falhaNaCriacaoNaoEhReportadaComoSucessoNemAlteraBancoPrincipal()
+            throws Exception {
+        Path arquivoQueNaoPodeSerDiretorio = directory.resolve("destino-ocupado");
+        Files.writeString(arquivoQueNaoPodeSerDiretorio, "não é uma pasta");
+
+        BackupService service = new BackupService(arquivoQueNaoPodeSerDiretorio);
+
+        assertThrows(RuntimeException.class, service::criarBackup,
+                "Uma falha antes da criação do arquivo não pode ser reportada como sucesso.");
+        assertEquals("não é uma pasta", Files.readString(arquivoQueNaoPodeSerDiretorio));
+        assertEquals("banco-original", consultarValorPrincipal());
+    }
+
+    @Test
     void backupAutomaticoNovoAcionaRetencaoDosExcedentesIdentificados()
             throws Exception {
         BackupRetentionService preparador = new BackupRetentionService();
