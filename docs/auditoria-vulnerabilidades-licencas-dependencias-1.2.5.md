@@ -1,7 +1,7 @@
 # Auditoria de vulnerabilidades e licenças — versão 1.2.5
 
 **Repositório:** `Joaombcoelho/gerador-designacoes`  
-**Commit-base:** `314de245c1f75c9db9511e621defc726559f38f4`  
+**Commit-base:** `5b81961bcc77d1e22b62b1accb2229d95284612c`  
 **Branch:** `audit/dependencias-seguranca-licencas`  
 **Data da pesquisa externa:** 2026-10-23  
 **Status:** **PARCIAL — foram encontrados alertas de versão relevantes; a árvore resolvida, o scanner automatizado e a auditoria integral de licenças ainda precisam ser executados.**  
@@ -149,7 +149,6 @@ Avisos de segurança oficiais:
 - [Jackson — GHSA-q4xh-88c3-wmh7](https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-q4xh-88c3-wmh7)
 - [Jackson — GHSA-wjgm-6hv5-3cvf](https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-wjgm-6hv5-3cvf)
 - [Apache Log4j — Security advisories](https://logging.apache.org/security.html)
-- [NVD/NIST — CVE-2026-24400](https://nvd.nist.gov/vuln/detail/cve-2026-24400) — consultado como parte da busca, mas não atribuído ao SQLite JDBC; não usar esse identificador como evidência de vulnerabilidade do driver.
 
 Licenças e metadados:
 
