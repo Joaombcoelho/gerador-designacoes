@@ -12,6 +12,7 @@ import br.com.geradordesignacoes.service.ExportadorS89Service;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
@@ -26,6 +27,20 @@ class ExportadorS89ServiceTest extends BaseDAOTest {
     private final ParteDAO parteDAO = new ParteDAO();
     private final PessoaDAO pessoaDAO = new PessoaDAO();
     private final EscalaDAO escalaDAO = new EscalaDAO();
+
+    @BeforeEach
+    void cadastrarPessoaDeTeste() {
+        pessoaDAO.salvar(new Pessoa(
+                "Pessoa Sintética Exportação",
+                br.com.geradordesignacoes.model.Sexo.MASCULINO,
+                true,
+                true,
+                true,
+                true,
+                true,
+                br.com.geradordesignacoes.model.Privilegio.BATIZADO
+        ));
+    }
 
     @Test
     void deveExportarDesignacaoSalvaComNumeroOficialSemAlterarModelo()

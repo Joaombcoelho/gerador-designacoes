@@ -2,6 +2,10 @@ package br.com.geradordesignacoes;
 
 
 import br.com.geradordesignacoes.dao.ParteDAO;
+import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.model.Pessoa;
+import br.com.geradordesignacoes.model.Sexo;
+import br.com.geradordesignacoes.model.Privilegio;
 import br.com.geradordesignacoes.dao.ProgramacaoParteDAO;
 import br.com.geradordesignacoes.dao.ProgramacaoSemanaDAO;
 import br.com.geradordesignacoes.service.ProgramacaoSemanaService;
@@ -333,8 +337,18 @@ class ProgramacaoSemanaDAOTest extends BaseDAOTest {
     @Test
     void devePersistirCanticosEConselheiroDaSalaB() {
         LocalDate data = LocalDate.of(2026, 10, 7);
-        int pessoaId = new br.com.geradordesignacoes.dao.PessoaDAO()
-                .listarTodos().getFirst().getId();
+        Pessoa pessoaTeste = new Pessoa(
+                "Conselheiro Sintético Sala B",
+                Sexo.MASCULINO,
+                true,
+                true,
+                true,
+                true,
+                true,
+                Privilegio.BATIZADO
+        );
+        new PessoaDAO().salvar(pessoaTeste);
+        int pessoaId = pessoaTeste.getId();
         ProgramacaoSemana programacao = new ProgramacaoSemana(
                 null,
                 data,

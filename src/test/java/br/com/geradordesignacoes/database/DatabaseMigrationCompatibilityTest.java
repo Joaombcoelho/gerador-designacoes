@@ -38,6 +38,8 @@ class DatabaseMigrationCompatibilityTest {
         try (Connection connection = ConnectionFactory.getConnection()) {
             assertEquals("Pessoa histórica", texto(connection,
                     "SELECT nome FROM pessoa WHERE id = 500"));
+            assertEquals(1, inteiro(connection, "SELECT COUNT(*) FROM pessoa"),
+                    "A migração deve preservar a pessoa existente sem inserir pessoas nominais.");
             assertEquals(1, inteiro(connection,
                     "SELECT pode_participar_sala_principal FROM pessoa WHERE id = 500"));
             assertEquals(0, inteiro(connection,
@@ -112,6 +114,8 @@ class DatabaseMigrationCompatibilityTest {
         int historicoAntes;
         try (Connection connection = ConnectionFactory.getConnection()) {
             pessoasAntes = inteiro(connection, "SELECT COUNT(*) FROM pessoa");
+            assertEquals(1, pessoasAntes,
+                    "O banco legado deve manter somente a pessoa sintética já existente.");
             partesAntes = inteiro(connection, "SELECT COUNT(*) FROM parte");
             historicoAntes = inteiro(connection, "SELECT COUNT(*) FROM historico_designacoes");
         }
