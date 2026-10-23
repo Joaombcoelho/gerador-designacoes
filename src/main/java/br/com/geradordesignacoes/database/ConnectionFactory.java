@@ -230,15 +230,26 @@ public class ConnectionFactory {
             }
 
             Path existing = absolute;
-            java.util.ArrayDeque<Path> missingSegments = new java.util.ArrayDeque<>();
+            java.util.ArrayDeque<Path> missingSegments =
+                    new java.util.ArrayDeque<>();
+
             while (existing != null && !Files.exists(existing)) {
                 Path fileName = existing.getFileName();
-                if (fileName != null) missingSegments.push(fileName);
+                if (fileName != null) {
+                    missingSegments.push(fileName);
+                }
                 existing = existing.getParent();
             }
-            if (existing == null) return absolute;
+
+            if (existing == null) {
+                return absolute;
+            }
+
             Path resolved = existing.toRealPath();
-            while (!missingSegments.isEmpty()) resolved = resolved.resolve(missingSegments.pop());
+            while (!missingSegments.isEmpty()) {
+                resolved = resolved.resolve(missingSegments.pop());
+            }
+
             return resolved.normalize();
         } catch (Exception e) {
             throw new IllegalArgumentException(
