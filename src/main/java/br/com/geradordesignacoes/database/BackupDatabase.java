@@ -9,6 +9,28 @@ public class BackupDatabase {
     private BackupDatabase() {
     }
 
+    /**
+     * Serializa criação, retenção e restauração de arquivos de backup.
+     * O bloqueio é reentrante, então a operação pode chamar criarBackup.
+     */
+    public static void comBloqueioDeArquivos(OperacaoArquivo operacao)
+            throws IOException {
+        if (operacao == null) {
+            throw new IllegalArgumentException("A operação de arquivo é obrigatória.");
+        }
+        DatabaseFileSupport.FILE_OPERATION_LOCK.lock();
+        try {
+            operacao.executar();
+        } finally {
+            DatabaseFileSupport.FILE_OPERATION_LOCK.unlock();
+        }
+    }
+
+    @FunctionalInterface
+    public interface OperacaoArquivo {
+        void executar() throws IOException;
+    }
+
     public static void criarBackup(Path destino) throws IOException {
         if (destino == null) {
             throw new IllegalArgumentException(
