@@ -82,10 +82,10 @@ public class MapeadorParteApostilaService {
                 return TipoParte.DIRIGENTE_ESTUDO;
             }
             if (parte.numero() == 7) {
-                return TipoParte.PARTE_1;
+                return TipoParte.DISCURSO;
             }
             if (parte.numero() == 8) {
-                return TipoParte.PARTE_2;
+                return TipoParte.DISCURSO;
             }
         }
 
