@@ -32,6 +32,35 @@ public class DatabaseInitializer {
             """;
 
 
+    /*
+     * Habilidades individuais: o catálogo é independente dos privilégios
+     * e das regras específicas já armazenadas em pessoa/parte.
+     */
+    private static final String CREATE_TABLE_HABILIDADE_DESIGNACAO = """
+            CREATE TABLE IF NOT EXISTS habilidade_designacao (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                codigo TEXT NOT NULL UNIQUE,
+                nome TEXT NOT NULL,
+                ativa INTEGER NOT NULL DEFAULT 1
+                    CHECK (ativa IN (0, 1))
+            );
+            """;
+
+    private static final String CREATE_TABLE_PESSOA_HABILIDADE = """
+            CREATE TABLE IF NOT EXISTS pessoa_habilidade (
+                pessoa_id INTEGER NOT NULL,
+                habilidade_id INTEGER NOT NULL,
+                PRIMARY KEY (pessoa_id, habilidade_id),
+                FOREIGN KEY (pessoa_id)
+                    REFERENCES pessoa(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (habilidade_id)
+                    REFERENCES habilidade_designacao(id)
+                    ON DELETE RESTRICT
+            );
+            """;
+
+
     private static final String CREATE_TABLE_PARTE = """
             
             CREATE TABLE IF NOT EXISTS parte (
@@ -261,6 +290,18 @@ public class DatabaseInitializer {
             );
             adicionarColunasPermissaoSalasPessoa(connection);
             adicionarColunaArquivado(connection, "pessoa");
+
+            /*
+             * ----------------------------------------------------
+             * HABILIDADES INDIVIDUAIS
+             * ----------------------------------------------------
+             *
+             * A criação é idempotente e não infere habilidades a partir
+             * de sexo ou privilégio. O catálogo será populado e consumido
+             * nas etapas seguintes, após revisão das regras.
+             */
+            statement.execute(CREATE_TABLE_HABILIDADE_DESIGNACAO);
+            statement.execute(CREATE_TABLE_PESSOA_HABILIDADE);
 
             /*
              * ----------------------------------------------------
