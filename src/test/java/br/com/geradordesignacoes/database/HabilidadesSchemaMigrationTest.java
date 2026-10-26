@@ -107,6 +107,37 @@ class HabilidadesSchemaMigrationTest {
         }
     }
 
+
+    @Test
+    void deveNormalizarTiposLegadosDeDiscursoSemExcluirPartesNemAlterarNomes() throws Exception {
+        contexto = ConnectionFactory.openTestContext(
+                diretorioTemporario.resolve("discursos-legados.db"));
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertEquals(0, contar(connection, """
+                    SELECT COUNT(*) FROM parte
+                    WHERE tipo IN ('PARTE_1', 'PARTE_2', 'PARTE_3')
+                    """));
+            assertEquals(3, contar(connection, """
+                    SELECT COUNT(*) FROM parte
+                    WHERE nome IN ('Parte 1', 'Parte 2', 'Parte 3')
+                      AND tipo = 'DISCURSO'
+                    """));
+        }
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertEquals(3, contar(connection, """
+                    SELECT COUNT(*) FROM parte
+                    WHERE nome IN ('Parte 1', 'Parte 2', 'Parte 3')
+                      AND tipo = 'DISCURSO'
+                    """));
+        }
+    }
+
     private boolean tabelaExiste(Connection connection, String tabela) throws SQLException {
         try (var ps = connection.prepareStatement("""
                 SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?
