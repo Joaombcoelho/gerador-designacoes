@@ -13,7 +13,7 @@ Esta etapa integra as mudanças empilhadas nas PRs #101–#107 e registra os cri
 
 ## Importante para cadastros existentes
 
-As habilidades não são inferidas automaticamente a partir de Publicador, Batizado, Servo ministerial ou Ancião. Após a aplicação da pilha completa, pessoas que ainda não tiverem habilidades cadastradas não serão elegíveis para Presidência, Joias espirituais, Tesouros, Necessidades Locais e Discurso até que suas habilidades sejam revisadas no formulário.
+As habilidades não são inferidas automaticamente a partir de Publicador, Batizado, Servo ministerial ou Ancião. A migração adiciona `habilidades_configuradas` com valor padrão falso para preservar a operação durante a revisão gradual. Após a aplicação da pilha completa, cadastros antigos terão uma flag de revisão desligada e continuarão temporariamente usando as regras anteriores até que alguém salve suas habilidades no formulário. Ao salvar, a pessoa passa a usar as habilidades marcadas; se nenhuma for marcada, ela não será elegível para as partes que exigem essas habilidades. Pessoas novas já entram no modo de habilidades configuradas ao salvar o formulário.
 
 Antes de usar a geração de programação, abra os cadastros das pessoas e marque as habilidades que elas já podem exercer. A categoria continua sendo mantida e continua sujeita às regras atuais.
 
