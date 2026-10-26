@@ -302,6 +302,14 @@ public class DatabaseInitializer {
              */
             statement.execute(CREATE_TABLE_HABILIDADE_DESIGNACAO);
             statement.execute(CREATE_TABLE_PESSOA_HABILIDADE);
+            statement.executeUpdate("""
+                    INSERT OR IGNORE INTO habilidade_designacao (codigo, nome) VALUES
+                        ('PRESIDENCIA', 'Presidência'),
+                        ('JOIAS_ESPIRITUAIS', 'Joias espirituais'),
+                        ('TESOUROS', 'Tesouros'),
+                        ('NECESSIDADES_LOCAIS', 'Necessidades Locais'),
+                        ('DISCURSO', 'Discurso')
+                    """);
 
             /*
              * ----------------------------------------------------
