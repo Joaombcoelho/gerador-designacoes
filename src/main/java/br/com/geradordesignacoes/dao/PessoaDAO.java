@@ -544,7 +544,11 @@ public class PessoaDAO {
                 resultSet.getInt("id")
         );
         pessoa.setArquivado(resultSet.getInt("arquivado") == 1);
-
+        pessoa.setHabilidadesDesignacao(
+                java.util.Set.copyOf(
+                        new HabilidadeDesignacaoDAO().listarCodigosPorPessoa(pessoa.getId())
+                )
+        );
 
         return pessoa;
     }
