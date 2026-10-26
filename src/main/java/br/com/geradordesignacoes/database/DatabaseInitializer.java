@@ -471,6 +471,10 @@ public class DatabaseInitializer {
                     connection
             );
 
+            // Unifica o tipo técnico das três ocorrências legadas sem excluir
+            // registros nem alterar IDs, nomes, ordem ou referências históricas.
+            normalizarTiposDiscurso(connection);
+
             // Não declarar sucesso se a conexão estiver sem a proteção de
             // chaves estrangeiras ou se alguma migração deixou referências órfãs.
             validarIntegridadeReferencial(connection);
@@ -1459,6 +1463,16 @@ public class DatabaseInitializer {
             atualizarOrdem(statement, 21, TipoParte.NECESSIDADES_LOCAIS);
             atualizarOrdem(statement, 22, TipoParte.DIRIGENTE_ESTUDO);
             atualizarOrdem(statement, 23, TipoParte.ORACAO_FINAL);
+        }
+    }
+
+    private static void normalizarTiposDiscurso(Connection connection) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                UPDATE parte
+                SET tipo = 'DISCURSO'
+                WHERE tipo IN ('PARTE_1', 'PARTE_2', 'PARTE_3')
+                """)) {
+            statement.executeUpdate();
         }
     }
 
