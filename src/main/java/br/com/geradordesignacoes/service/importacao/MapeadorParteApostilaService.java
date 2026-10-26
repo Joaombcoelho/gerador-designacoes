@@ -32,7 +32,7 @@ public class MapeadorParteApostilaService {
             if (parte == null || parte.getSecao() != parteApostila.secao()) {
                 continue;
             }
-            if (tipoInferido != null && parte.getTipo() != tipoInferido) {
+            if (tipoInferido != null && !tipoCompativel(tipoInferido, parte.getTipo())) {
                 continue;
             }
             candidatos.add(parte);
@@ -117,6 +117,17 @@ public class MapeadorParteApostilaService {
             return TipoParte.NECESSIDADES_LOCAIS;
         }
         return null;
+    }
+
+    private static boolean tipoCompativel(TipoParte inferido, TipoParte cadastrado) {
+        if (inferido == cadastrado) {
+            return true;
+        }
+        // Compatibilidade com catálogos anteriores à unificação de discursos.
+        return inferido == TipoParte.DISCURSO
+                && (cadastrado == TipoParte.PARTE_1
+                || cadastrado == TipoParte.PARTE_2
+                || cadastrado == TipoParte.PARTE_3);
     }
 
     private static String juntar(String tema, String subtitulo, String descricao) {
