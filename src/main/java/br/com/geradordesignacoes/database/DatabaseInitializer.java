@@ -1457,9 +1457,9 @@ public class DatabaseInitializer {
             atualizarOrdemPorNome(statement, 15, "Fazendo discípulos");
             atualizarOrdemPorNome(statement, 16, "Explicando suas crenças");
             atualizarOrdemPorNome(statement, 17, "Discurso — Ministério");
-            atualizarOrdem(statement, 18, TipoParte.PARTE_1);
-            atualizarOrdem(statement, 19, TipoParte.PARTE_2);
-            atualizarOrdem(statement, 20, TipoParte.PARTE_3);
+            atualizarOrdemPorNome(statement, 18, "Parte 1");
+            atualizarOrdemPorNome(statement, 19, "Parte 2");
+            atualizarOrdemPorNome(statement, 20, "Parte 3");
             atualizarOrdem(statement, 21, TipoParte.NECESSIDADES_LOCAIS);
             atualizarOrdem(statement, 22, TipoParte.DIRIGENTE_ESTUDO);
             atualizarOrdem(statement, 23, TipoParte.ORACAO_FINAL);
@@ -1827,7 +1827,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 1",
-                    TipoParte.PARTE_1,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,
@@ -1852,7 +1852,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 2",
-                    TipoParte.PARTE_2,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,
@@ -1877,7 +1877,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 3",
-                    TipoParte.PARTE_3,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,
