@@ -1,11 +1,13 @@
 package br.com.geradordesignacoes.model;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class Pessoa {
 
     private Integer id;
     private boolean arquivado;
+    private Set<String> habilidadesDesignacao = Set.of();
 
     private final String nome;
     private final Sexo sexo;
@@ -145,6 +147,19 @@ public class Pessoa {
         this.podeParticiparSalaC = podeParticiparSalaC;
     }
 
+
+    public Set<String> getHabilidadesDesignacao() {
+        return habilidadesDesignacao;
+    }
+
+    public void setHabilidadesDesignacao(Set<String> habilidades) {
+        Objects.requireNonNull(habilidades, "habilidades não pode ser nulo");
+        this.habilidadesDesignacao = Set.copyOf(habilidades);
+    }
+
+    public boolean possuiHabilidade(String codigo) {
+        return codigo != null && habilidadesDesignacao.contains(codigo);
+    }
 
     public Integer getId() {
         return id;
