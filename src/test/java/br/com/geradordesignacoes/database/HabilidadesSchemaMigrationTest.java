@@ -35,7 +35,7 @@ class HabilidadesSchemaMigrationTest {
         try (Connection connection = ConnectionFactory.getConnection()) {
             assertTrue(tabelaExiste(connection, "habilidade_designacao"));
             assertTrue(tabelaExiste(connection, "pessoa_habilidade"));
-            assertEquals(0, contar(connection, "SELECT COUNT(*) FROM habilidade_designacao"));
+            assertEquals(5, contar(connection, "SELECT COUNT(*) FROM habilidade_designacao"));
             assertEquals(0, contar(connection, "SELECT COUNT(*) FROM pessoa_habilidade"));
         }
 
@@ -68,7 +68,7 @@ class HabilidadesSchemaMigrationTest {
                     """);
             statement.executeUpdate("""
                     INSERT INTO habilidade_designacao (id, codigo, nome)
-                    VALUES (701, 'DISCURSO', 'Discurso')
+                    VALUES (701, 'HABILIDADE_TESTE', 'Habilidade de teste')
                     """);
             statement.executeUpdate("""
                     INSERT INTO pessoa_habilidade (pessoa_id, habilidade_id)
@@ -101,7 +101,7 @@ class HabilidadesSchemaMigrationTest {
             assertEquals(1, contar(connection, """
                     SELECT COUNT(*) FROM pessoa WHERE id = 501
                     """));
-            assertEquals("Discurso", texto(connection, """
+            assertEquals("Habilidade de teste", texto(connection, """
                     SELECT nome FROM habilidade_designacao WHERE id = 701
                     """));
         }
