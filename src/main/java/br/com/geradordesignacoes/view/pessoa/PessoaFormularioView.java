@@ -181,6 +181,7 @@ public class PessoaFormularioView {
         VBox habilidades = criarCartao("Habilidades para designações");
         Label descricaoHabilidades = new Label(
                 "Marque individualmente as atividades para as quais a pessoa já está apta. "
+                        + "Cadastros antigos usam as regras anteriores até que suas habilidades sejam salvas. "
                         + "Essas habilidades não substituem as regras de sexo, privilégio, leitura ou participação.");
         descricaoHabilidades.setWrapText(true);
         descricaoHabilidades.getStyleClass().add("page-subtitle");
