@@ -37,9 +37,10 @@ public class PessoaDAO {
                     nivel_leitura,
                     pode_participar_sala_principal,
                     pode_participar_sala_b,
-                    pode_participar_sala_c
+                    pode_participar_sala_c,
+                    habilidades_configuradas
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
 
@@ -304,7 +305,8 @@ public class PessoaDAO {
                     nivel_leitura = ?,
                     pode_participar_sala_principal = ?,
                     pode_participar_sala_b = ?,
-                    pode_participar_sala_c = ?
+                    pode_participar_sala_c = ?,
+                    habilidades_configuradas = ?
                 WHERE id = ?
                 """;
 
@@ -339,7 +341,7 @@ public class PessoaDAO {
             );
 
             statement.setInt(
-                    16,
+                    17,
                     pessoa.getId()
             );
 
@@ -491,6 +493,11 @@ public class PessoaDAO {
                 15,
                 pessoa.podeParticiparSalaC()
         );
+
+        statement.setBoolean(
+                16,
+                pessoa.isHabilidadesConfiguradas()
+        );
     }
 
 
@@ -544,10 +551,11 @@ public class PessoaDAO {
                 resultSet.getInt("id")
         );
         pessoa.setArquivado(resultSet.getInt("arquivado") == 1);
-        pessoa.setHabilidadesDesignacao(
+        pessoa.definirHabilidadesCarregadas(
                 java.util.Set.copyOf(
                         new HabilidadeDesignacaoDAO().listarCodigosPorPessoa(pessoa.getId())
-                )
+                ),
+                resultSet.getInt("habilidades_configuradas") == 1
         );
 
         return pessoa;
