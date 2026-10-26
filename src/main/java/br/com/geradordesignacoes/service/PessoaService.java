@@ -6,7 +6,6 @@ import br.com.geradordesignacoes.model.Pessoa;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class PessoaService {
 
@@ -30,16 +29,16 @@ public class PessoaService {
 
 
     public List<Pessoa> listarTodas() {
-        return pessoaDAO.listarTodos().stream().map(this::carregarHabilidades).toList();
+        return pessoaDAO.listarTodos();
     }
 
 
     public List<Pessoa> listarAtivos() {
-        return pessoaDAO.listarAtivos().stream().map(this::carregarHabilidades).toList();
+        return pessoaDAO.listarAtivos();
     }
 
     public List<Pessoa> listarArquivados() {
-        return pessoaDAO.listarArquivados().stream().map(this::carregarHabilidades).toList();
+        return pessoaDAO.listarArquivados();
     }
 
     public void arquivar(Integer id) {
@@ -61,7 +60,7 @@ public class PessoaService {
             );
         }
 
-        return pessoaDAO.buscarPorId(id).map(this::carregarHabilidades);
+        return pessoaDAO.buscarPorId(id);
     }
 
 
@@ -97,13 +96,6 @@ public class PessoaService {
         pessoaDAO.arquivar(id);
     }
 
-
-    private Pessoa carregarHabilidades(Pessoa pessoa) {
-        if (pessoa.getId() != null) {
-            pessoa.setHabilidadesDesignacao(Set.copyOf(habilidadeDAO.listarCodigosPorPessoa(pessoa.getId())));
-        }
-        return pessoa;
-    }
 
     private void validarPessoa(Pessoa pessoa) {
 
