@@ -58,6 +58,19 @@ class RegrasServiceHabilidadesTest {
         assertTrue(regras.podeDesignar(pessoa, ministerio, List.of()));
     }
 
+
+    @Test
+    void cadastroAntigoSemRevisaoMantemRegrasLegadasDuranteMigracaoGradual() {
+        Pessoa cadastroAntigo = new Pessoa(
+                "Pessoa antiga", Sexo.MASCULINO, true,
+                true, true, true, true, true, true, true,
+                Privilegio.ANCIAO, NivelLeitura.EXPERIENTE);
+        Parte discurso = parte(TipoParte.DISCURSO, TipoParticipacao.ORADOR);
+
+        assertFalse(cadastroAntigo.isHabilidadesConfiguradas());
+        assertTrue(regras.podeDesignar(cadastroAntigo, discurso, List.of()));
+    }
+
     private static Pessoa pessoa(Set<String> habilidades) {
         Pessoa pessoa = new Pessoa(
                 "João", Sexo.MASCULINO, true,
