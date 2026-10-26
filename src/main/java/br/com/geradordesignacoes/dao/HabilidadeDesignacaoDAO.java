@@ -138,6 +138,61 @@ public class HabilidadeDesignacaoDAO {
         }
     }
 
+
+    public List<String> listarCodigosPorPessoa(Integer pessoaId) {
+        validarId(pessoaId, "pessoa");
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT h.codigo
+                     FROM habilidade_designacao h
+                     JOIN pessoa_habilidade ph ON ph.habilidade_id = h.id
+                     WHERE ph.pessoa_id = ? AND h.ativa = 1
+                     ORDER BY h.codigo
+                     """)) {
+            statement.setInt(1, pessoaId);
+            try (ResultSet rs = statement.executeQuery()) {
+                List<String> codigos = new ArrayList<>();
+                while (rs.next()) {
+                    codigos.add(rs.getString("codigo"));
+                }
+                return List.copyOf(codigos);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar códigos de habilidades da pessoa.", e);
+        }
+    }
+
+    public void substituirCodigos(Integer pessoaId, Collection<String> codigos) {
+        Objects.requireNonNull(codigos, "códigos não pode ser nulo");
+        List<String> codigosUnicos = List.copyOf(codigos);
+        if (codigosUnicos.stream().anyMatch(codigo -> codigo == null || codigo.isBlank())) {
+            throw new IllegalArgumentException("Código de habilidade inválido.");
+        }
+        if (codigosUnicos.stream().distinct().count() != codigosUnicos.size()) {
+            throw new IllegalArgumentException("A lista contém códigos de habilidade duplicados.");
+        }
+
+        List<Integer> ids = new ArrayList<>();
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT id FROM habilidade_designacao
+                     WHERE codigo = ? AND ativa = 1
+                     """)) {
+            for (String codigo : codigosUnicos) {
+                statement.setString(1, codigo);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new IllegalArgumentException("Habilidade inexistente ou inativa: " + codigo);
+                    }
+                    ids.add(rs.getInt("id"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao validar habilidades da pessoa.", e);
+        }
+        substituirHabilidades(pessoaId, ids);
+    }
+
     private List<HabilidadeDesignacao> listar(String sql) {
         try (Connection connection = ConnectionFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
