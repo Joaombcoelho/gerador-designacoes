@@ -19,7 +19,7 @@ Antes de usar a geração de programação, abra os cadastros das pessoas e marq
 
 ## Discurso e dados legados
 
-A importação da apostila passa a inferir o tipo comum `DISCURSO` para as partes numeradas 7 e 8. Os valores `PARTE_1`, `PARTE_2` e `PARTE_3` permanecem no enum nesta etapa para compatibilidade com registros antigos. Não foi executada migração destrutiva de tipos no banco. A normalização física e a resolução automática de múltiplas correspondências exigem validação adicional com dados de exemplo.
+A importação da apostila passa a inferir o tipo comum `DISCURSO` para as partes numeradas 7 e 8 e aceita tipos legados como candidatos compatíveis. A inicialização normaliza `parte.tipo` de `PARTE_1`, `PARTE_2` e `PARTE_3` para `DISCURSO`, mantendo os IDs, nomes, ordens e vínculos históricos das linhas. Os valores antigos permanecem no enum para leitura de dados legados fora do catálogo. Quando várias partes antigas correspondem ao mesmo discurso, o mapeador retorna `AMBIGUO` em vez de escolher uma arbitrariamente; a seleção manual continua necessária.
 
 ## Validação
 
