@@ -39,10 +39,14 @@ class HabilidadesElegibilidadeIntegracaoTest {
         Pessoa salva = pessoas.salvar(pessoa);
 
         Pessoa recarregada = pessoas.buscarPorId(salva.getId()).orElseThrow();
+        Pessoa carregadaDiretamentePeloDAO = new PessoaDAO().listarAtivos().stream()
+                .filter(p -> p.getId().equals(salva.getId())).findFirst().orElseThrow();
         Parte discurso = parte(TipoParte.DISCURSO, SexoPermitido.AMBOS);
         RegrasService regras = new RegrasService();
 
         assertTrue(recarregada.possuiHabilidade("DISCURSO"));
+        assertTrue(carregadaDiretamentePeloDAO.possuiHabilidade("DISCURSO"),
+                "Fluxos que usam PessoaDAO diretamente também devem carregar habilidades.");
         assertTrue(regras.podeDesignar(recarregada, discurso, List.of()));
 
         recarregada.setHabilidadesDesignacao(Set.of());
