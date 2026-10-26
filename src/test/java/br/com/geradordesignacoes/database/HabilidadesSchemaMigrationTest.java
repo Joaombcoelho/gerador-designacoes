@@ -1,0 +1,140 @@
+package br.com.geradordesignacoes.database;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class HabilidadesSchemaMigrationTest {
+
+    @TempDir
+    Path diretorioTemporario;
+
+    private ConnectionFactory.TestContext contexto;
+
+    @AfterEach
+    void fecharContexto() throws Exception {
+        if (contexto != null) {
+            contexto.close();
+        }
+    }
+
+    @Test
+    void deveCriarEstruturaDeHabilidadesEPermitirReinicializacao() throws Exception {
+        contexto = ConnectionFactory.openTestContext(
+                diretorioTemporario.resolve("habilidades-novo.db"));
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertTrue(tabelaExiste(connection, "habilidade_designacao"));
+            assertTrue(tabelaExiste(connection, "pessoa_habilidade"));
+            assertEquals(0, contar(connection, "SELECT COUNT(*) FROM habilidade_designacao"));
+            assertEquals(0, contar(connection, "SELECT COUNT(*) FROM pessoa_habilidade"));
+        }
+
+        DatabaseInitializer.initialize();
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertTrue(tabelaExiste(connection, "habilidade_designacao"));
+            assertTrue(tabelaExiste(connection, "pessoa_habilidade"));
+            assertEquals(1, inteiro(connection, "PRAGMA foreign_keys"));
+        }
+    }
+
+    @Test
+    void devePreservarVinculoEImpedirDuplicidadeOuReferenciaOrfa() throws Exception {
+        contexto = ConnectionFactory.openTestContext(
+                diretorioTemporario.resolve("habilidades-relacoes.db"));
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.executeUpdate("""
+                    INSERT INTO pessoa
+                        (id, nome, sexo, ativo, pode_ser_responsavel,
+                         pode_ser_ajudante, pode_fazer_leitura,
+                         pode_fazer_discurso, privilegio, nivel_leitura)
+                    VALUES (501, 'Pessoa de teste', 'MASCULINO', 1, 0,
+                            0, 0, 0, 'PUBLICADOR', 'BASICO')
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO habilidade_designacao (id, codigo, nome)
+                    VALUES (701, 'DISCURSO', 'Discurso')
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO pessoa_habilidade (pessoa_id, habilidade_id)
+                    VALUES (501, 701)
+                    """);
+
+            assertThrows(SQLException.class, () -> statement.executeUpdate("""
+                    INSERT INTO pessoa_habilidade (pessoa_id, habilidade_id)
+                    VALUES (501, 701)
+                    """), "A chave composta deve impedir habilidades duplicadas.");
+
+            assertThrows(SQLException.class, () -> statement.executeUpdate("""
+                    INSERT INTO pessoa_habilidade (pessoa_id, habilidade_id)
+                    VALUES (999999, 701)
+                    """), "A chave estrangeira deve impedir pessoa inexistente.");
+
+            assertThrows(SQLException.class, () -> statement.executeUpdate("""
+                    INSERT INTO pessoa_habilidade (pessoa_id, habilidade_id)
+                    VALUES (501, 999999)
+                    """), "A chave estrangeira deve impedir habilidade inexistente.");
+        }
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertEquals(1, contar(connection, """
+                    SELECT COUNT(*) FROM pessoa_habilidade
+                    WHERE pessoa_id = 501 AND habilidade_id = 701
+                    """));
+            assertEquals(1, contar(connection, """
+                    SELECT COUNT(*) FROM pessoa WHERE id = 501
+                    """));
+            assertEquals("Discurso", texto(connection, """
+                    SELECT nome FROM habilidade_designacao WHERE id = 701
+                    """));
+        }
+    }
+
+    private boolean tabelaExiste(Connection connection, String tabela) throws SQLException {
+        try (var ps = connection.prepareStatement("""
+                SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?
+                """)) {
+            ps.setString(1, tabela);
+            try (var rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private int contar(Connection connection, String sql) throws SQLException {
+        try (var statement = connection.createStatement();
+             var rs = statement.executeQuery(sql)) {
+            assertTrue(rs.next());
+            return rs.getInt(1);
+        }
+    }
+
+    private int inteiro(Connection connection, String sql) throws SQLException {
+        return contar(connection, sql);
+    }
+
+    private String texto(Connection connection, String sql) throws SQLException {
+        try (var statement = connection.createStatement();
+             var rs = statement.executeQuery(sql)) {
+            assertTrue(rs.next());
+            return rs.getString(1);
+        }
+    }
+}
