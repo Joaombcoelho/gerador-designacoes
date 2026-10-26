@@ -8,6 +8,7 @@ public class Pessoa {
     private Integer id;
     private boolean arquivado;
     private Set<String> habilidadesDesignacao = Set.of();
+    private boolean habilidadesConfiguradas;
 
     private final String nome;
     private final Sexo sexo;
@@ -155,6 +156,17 @@ public class Pessoa {
     public void setHabilidadesDesignacao(Set<String> habilidades) {
         Objects.requireNonNull(habilidades, "habilidades não pode ser nulo");
         this.habilidadesDesignacao = Set.copyOf(habilidades);
+        this.habilidadesConfiguradas = true;
+    }
+
+    public boolean isHabilidadesConfiguradas() {
+        return habilidadesConfiguradas;
+    }
+
+    public void definirHabilidadesCarregadas(Set<String> habilidades, boolean configuradas) {
+        Objects.requireNonNull(habilidades, "habilidades não pode ser nulo");
+        this.habilidadesDesignacao = Set.copyOf(habilidades);
+        this.habilidadesConfiguradas = configuradas;
     }
 
     public boolean possuiHabilidade(String codigo) {
