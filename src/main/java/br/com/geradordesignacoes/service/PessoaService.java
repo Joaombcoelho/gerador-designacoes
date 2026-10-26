@@ -1,14 +1,17 @@
 package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.dao.HabilidadeDesignacaoDAO;
 import br.com.geradordesignacoes.model.Pessoa;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class PessoaService {
 
     private final PessoaDAO pessoaDAO;
+    private final HabilidadeDesignacaoDAO habilidadeDAO = new HabilidadeDesignacaoDAO();
 
 
     public PessoaService(PessoaDAO pessoaDAO) {
@@ -20,21 +23,23 @@ public class PessoaService {
 
         validarPessoa(pessoa);
 
-        return pessoaDAO.salvar(pessoa);
+        Pessoa salva = pessoaDAO.salvar(pessoa);
+        habilidadeDAO.substituirCodigos(salva.getId(), pessoa.getHabilidadesDesignacao());
+        return salva;
     }
 
 
     public List<Pessoa> listarTodas() {
-        return pessoaDAO.listarTodos();
+        return pessoaDAO.listarTodos().stream().map(this::carregarHabilidades).toList();
     }
 
 
     public List<Pessoa> listarAtivos() {
-        return pessoaDAO.listarAtivos();
+        return pessoaDAO.listarAtivos().stream().map(this::carregarHabilidades).toList();
     }
 
     public List<Pessoa> listarArquivados() {
-        return pessoaDAO.listarArquivados();
+        return pessoaDAO.listarArquivados().stream().map(this::carregarHabilidades).toList();
     }
 
     public void arquivar(Integer id) {
@@ -56,7 +61,7 @@ public class PessoaService {
             );
         }
 
-        return pessoaDAO.buscarPorId(id);
+        return pessoaDAO.buscarPorId(id).map(this::carregarHabilidades);
     }
 
 
@@ -77,6 +82,7 @@ public class PessoaService {
         validarPessoa(pessoa);
 
         pessoaDAO.atualizar(pessoa);
+        habilidadeDAO.substituirCodigos(pessoa.getId(), pessoa.getHabilidadesDesignacao());
     }
 
 
@@ -91,6 +97,13 @@ public class PessoaService {
         pessoaDAO.arquivar(id);
     }
 
+
+    private Pessoa carregarHabilidades(Pessoa pessoa) {
+        if (pessoa.getId() != null) {
+            pessoa.setHabilidadesDesignacao(Set.copyOf(habilidadeDAO.listarCodigosPorPessoa(pessoa.getId())));
+        }
+        return pessoa;
+    }
 
     private void validarPessoa(Pessoa pessoa) {
 
