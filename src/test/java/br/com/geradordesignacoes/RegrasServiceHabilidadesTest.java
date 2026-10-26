@@ -32,7 +32,7 @@ class RegrasServiceHabilidadesTest {
 
         Parte leituraExperiente = new Parte(
                 "Leitura", TipoParte.LEITURA, Privilegio.BATIZADO,
-                false, SexoPermitido.MASCULINO, 1, false,
+                false, SexoPermitido.FEMININO, 1, false,
                 NivelLeitura.EXPERIENTE, SecaoParte.TESOUROS_DA_PALAVRA_DE_DEUS,
                 null, false, List.of(TipoParticipacao.LEITOR));
 
