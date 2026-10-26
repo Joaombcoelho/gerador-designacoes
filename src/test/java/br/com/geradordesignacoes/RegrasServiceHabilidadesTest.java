@@ -41,10 +41,13 @@ class RegrasServiceHabilidadesTest {
 
     @Test
     void deveExigirHabilidadeParaPresidenciaSemSubstituirRequisitosDePresidente() {
-        Pessoa comHabilidade = pessoa(Set.of("PRESIDENCIA"));
         Parte presidencia = parte(TipoParte.PRESIDENTE_REUNIAO, TipoParticipacao.PRESIDENTE);
 
-        assertFalse(regras.podeDesignar(comHabilidade, presidencia, List.of()));
+        Pessoa semHabilidade = pessoa(Set.of());
+        assertFalse(regras.podeDesignar(semHabilidade, presidencia, List.of()));
+
+        Pessoa comHabilidade = pessoa(Set.of("PRESIDENCIA"));
+        assertTrue(regras.podeDesignar(comHabilidade, presidencia, List.of()));
     }
 
     @Test
