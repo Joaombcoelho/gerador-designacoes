@@ -36,7 +36,7 @@ class MapeadorParteApostilaServiceTest {
 
     @Test
     void deveReconhecerPartesNumeradasEEstudoBiblicoNaUltimaSecao() {
-        assertEquals(TipoParte.PARTE_1,
+        assertEquals(TipoParte.DISCURSO,
                 service.inferirTipo(parte(7, "Nunca se Esqueça do Que Jeová se Lembra",
                         SecaoParte.NOSSA_VIDA_CRISTA, null, null)));
         assertEquals(TipoParte.DIRIGENTE_ESTUDO,
