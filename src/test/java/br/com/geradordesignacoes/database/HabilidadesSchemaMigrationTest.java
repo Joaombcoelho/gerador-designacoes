@@ -50,6 +50,56 @@ class HabilidadesSchemaMigrationTest {
         }
     }
 
+
+    @Test
+    void deveMigrarBancoExistenteSemColunaHabilidadesConfiguradasPreservandoPessoas() throws Exception {
+        contexto = ConnectionFactory.openTestContext(
+                diretorioTemporario.resolve("habilidades-banco-legado.db"));
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.executeUpdate("""
+                    CREATE TABLE pessoa (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nome TEXT NOT NULL,
+                        sexo TEXT NOT NULL,
+                        ativo INTEGER NOT NULL,
+                        pode_ser_responsavel INTEGER NOT NULL,
+                        pode_ser_ajudante INTEGER NOT NULL,
+                        pode_fazer_leitura INTEGER NOT NULL,
+                        pode_fazer_discurso INTEGER NOT NULL,
+                        privilegio TEXT NOT NULL,
+                        nivel_leitura TEXT NOT NULL DEFAULT 'BASICO'
+                    )
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO pessoa
+                        (id, nome, sexo, ativo, pode_ser_responsavel,
+                         pode_ser_ajudante, pode_fazer_leitura,
+                         pode_fazer_discurso, privilegio, nivel_leitura)
+                    VALUES (901, 'Pessoa legada', 'MASCULINO', 1, 0,
+                            0, 0, 0, 'PUBLICADOR', 'BASICO')
+                    """);
+        }
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertTrue(colunaExiste(connection, "pessoa", "habilidades_configuradas"));
+            assertEquals(0, contar(connection, """
+                    SELECT COUNT(*) FROM pessoa
+                    WHERE id = 901 AND nome = 'Pessoa legada'
+                    """));
+            assertEquals(1, contar(connection, """
+                    SELECT COUNT(*) FROM pessoa
+                    WHERE id = 901 AND nome = 'Pessoa legada'
+                    """));
+            assertEquals(0, contar(connection, """
+                    SELECT habilidades_configuradas FROM pessoa WHERE id = 901
+                    """));
+        }
+    }
+
     @Test
     void devePreservarVinculoEImpedirDuplicidadeOuReferenciaOrfa() throws Exception {
         contexto = ConnectionFactory.openTestContext(
