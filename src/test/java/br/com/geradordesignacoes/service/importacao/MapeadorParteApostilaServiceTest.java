@@ -51,6 +51,24 @@ class MapeadorParteApostilaServiceTest {
     }
 
     @Test
+    void deveReconhecerNecessidadesLocaisMesmoQuandoOcupaAPosicaoSete() {
+        var parteApostila = parte(7, "Necessidades locais",
+                SecaoParte.NOSSA_VIDA_CRISTA, null, null);
+
+        assertEquals(TipoParte.NECESSIDADES_LOCAIS, service.inferirTipo(parteApostila));
+
+        Parte necessidadesLocais = parteCatalogo(
+                "Necessidades locais", TipoParte.NECESSIDADES_LOCAIS, 21);
+        Parte discurso = parteCatalogo("Parte 1", TipoParte.DISCURSO, 18);
+        var resultado = service.mapear(parteApostila, List.of(necessidadesLocais, discurso));
+
+        assertEquals(MapeadorParteApostilaService.SituacaoMapeamento.CORRESPONDENCIA_UNICA,
+                resultado.situacao());
+        assertEquals(List.of("Necessidades locais"),
+                resultado.candidatos().stream().map(Parte::getNome).toList());
+    }
+
+    @Test
     void deveDeixarTipoSemInferenciaQuandoTextoNaoForConhecido() {
         var parte = parte("Discurso", "Considere como aplicar o texto bíblico.");
 
