@@ -35,6 +35,7 @@ class HabilidadesSchemaMigrationTest {
         try (Connection connection = ConnectionFactory.getConnection()) {
             assertTrue(tabelaExiste(connection, "habilidade_designacao"));
             assertTrue(tabelaExiste(connection, "pessoa_habilidade"));
+            assertTrue(colunaExiste(connection, "pessoa", "habilidades_configuradas"));
             assertEquals(5, contar(connection, "SELECT COUNT(*) FROM habilidade_designacao"));
             assertEquals(0, contar(connection, "SELECT COUNT(*) FROM pessoa_habilidade"));
         }
@@ -146,6 +147,18 @@ class HabilidadesSchemaMigrationTest {
             try (var rs = ps.executeQuery()) {
                 return rs.next();
             }
+        }
+    }
+
+    private boolean colunaExiste(Connection connection, String tabela, String coluna) throws SQLException {
+        try (var statement = connection.createStatement();
+             var rs = statement.executeQuery("PRAGMA table_info(" + tabela + ")")) {
+            while (rs.next()) {
+                if (coluna.equals(rs.getString("name"))) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
