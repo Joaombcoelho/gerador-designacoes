@@ -75,6 +75,12 @@ public class MapeadorParteApostilaService {
                 juntar(parte.tema(), parte.subtitulo(), parte.descricaoDesignacao())
         );
 
+        // Temas explícitos têm prioridade sobre a posição na sequência da apostila.
+        // "Necessidades locais" pode ocupar a posição 7 e não deve virar discurso.
+        if (contem(texto, "necessidades locais")) {
+            return TipoParte.NECESSIDADES_LOCAIS;
+        }
+
         // Na última seção, o tema identifica o Estudo Bíblico e a sequência
         // da apostila identifica as partes numeradas. O número nunca é ID do banco.
         if (parte.secao() == SecaoParte.NOSSA_VIDA_CRISTA) {
@@ -112,9 +118,6 @@ public class MapeadorParteApostilaService {
         }
         if (contem(texto, "leitura da biblia")) {
             return TipoParte.LEITURA;
-        }
-        if (contem(texto, "necessidades locais")) {
-            return TipoParte.NECESSIDADES_LOCAIS;
         }
         return null;
     }
