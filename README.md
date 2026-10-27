@@ -44,6 +44,16 @@ Durante a inicialização, a aplicação preenche a ordem padrão apenas para pa
 - Cadastro e edição de partes da reunião.
 - Configuração das participações necessárias, privilégio mínimo, sexo permitido, nível de leitura e necessidade de ajudante de cada parte.
 
+### Habilidades individuais
+
+O cadastro de pessoas permite configurar habilidades individuais usadas na elegibilidade para determinadas partes. O catálogo inicial inclui **Presidência**, **Joias espirituais**, **Tesouros**, **Necessidades Locais** e **Discurso**. As habilidades são persistidas no SQLite e carregadas novamente ao consultar o cadastro.
+
+**Atenção ao atualizar uma instalação existente:** as habilidades não são inferidas automaticamente a partir do sexo ou do privilégio. Para preservar o comportamento dos cadastros antigos, a migração adiciona a indicação de que as habilidades ainda não foram configuradas; enquanto isso, esses cadastros continuam temporariamente usando as regras anteriores. Abra o cadastro de cada pessoa e marque as habilidades apropriadas. Depois de salvar, a elegibilidade passa a considerar as habilidades marcadas; se nenhuma habilidade for marcada, a pessoa não será elegível para as partes que exigem essas habilidades.
+
+A habilidade exigida pela parte é um critério adicional, não um substituto das regras existentes. Restrições de sexo, privilégio mínimo, nível de leitura, participação exigida, disponibilidade e conflitos continuam sendo aplicadas. Partes sem mapeamento de habilidade continuam seguindo as regras atuais.
+
+A inicialização normaliza os tipos legados `PARTE_1`, `PARTE_2` e `PARTE_3` para o tipo comum `DISCURSO`, preservando os registros, IDs, nomes e vínculos existentes. Na importação de apostilas, **Necessidades locais** é reconhecida pelo tema mesmo quando aparece na posição 7; o mapeador não deve confundi-la com um discurso. Se o catálogo contiver vários candidatos compatíveis, a associação permanece ambígua e exige seleção manual.
+
 ### Programação semanal
 
 - Criação e consulta de programações por data.
@@ -237,7 +247,7 @@ O banco é SQLite e é criado automaticamente na primeira inicialização. No Wi
 %LOCALAPPDATA%\GeradorDesignacoes\gerador-designacoes.db
 ```
 
-O inicializador cria ou atualiza a estrutura e cadastra dados iniciais quando necessário. Entre as tabelas utilizadas estão:
+O inicializador cria ou atualiza a estrutura e mantém catálogos técnicos necessários à aplicação. Uma instalação nova não deve receber pessoas nominais pré-cadastradas; migrações de bancos existentes preservam os cadastros já armazenados. Entre as tabelas utilizadas estão:
 
 - `pessoa`;
 - `parte`;
@@ -285,9 +295,9 @@ gerador-designacoes/
 
 ## Estado atual e limitações conhecidas
 
-O software está organizado como aplicação desktop local, com persistência SQLite, cadastros, programação semanal, geração e edição de escalas, histórico, backup/restauração e exportação dos formulários S-89 e S-140. A importação de apostilas RTF/JSON inclui extração ou leitura de JSON, validação, sugestão de mapeamento para o catálogo existente, revisão manual e confirmação explícita antes de persistir.
+O software está organizado como aplicação desktop local, com persistência SQLite, cadastros, habilidades individuais, programação semanal, geração e edição de escalas, histórico, backup/restauração e exportação dos formulários S-89 e S-140. A importação de apostilas RTF/JSON inclui extração ou leitura de JSON, validação, sugestão de mapeamento para o catálogo existente, revisão manual e confirmação explícita antes de persistir. A integração de habilidades individuais e o reconhecimento de Necessidades locais na posição 7 foram integrados à `main` e validados manualmente pelo responsável do projeto.
 
-As sugestões de mapeamento são assistivas: não substituem a conferência do usuário. A correspondência automática depende de o título ser reconhecido e de haver exatamente uma parte compatível cadastrada. A importação não cria partes no catálogo e não substitui programações existentes. O uso e o armazenamento local são atualmente direcionados ao Windows, e a exportação S-140 depende de um modelo Word compatível fornecido pelo usuário.
+As sugestões de mapeamento são assistivas: não substituem a conferência do usuário. A correspondência automática depende de o título ser reconhecido e de haver exatamente uma parte compatível cadastrada. Em cadastros antigos, revise e salve as habilidades individuais de cada pessoa antes de depender dos novos critérios de elegibilidade. A importação não cria partes no catálogo e não substitui programações existentes. O uso e o armazenamento local são atualmente direcionados ao Windows, e a exportação S-140 depende de um modelo Word compatível fornecido pelo usuário.
 
 O projeto inclui testes automatizados em `src/test/java`. Para validar a versão que será integrada, execute `mvn clean test`; o resultado deve ser conferido no ambiente de desenvolvimento antes do merge.
 
