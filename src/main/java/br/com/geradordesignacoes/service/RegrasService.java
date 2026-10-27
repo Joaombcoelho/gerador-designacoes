@@ -9,6 +9,9 @@ import static br.com.geradordesignacoes.model.TipoParticipacao.*;
 
 public class RegrasService {
 
+    private final RequisitoHabilidadeParteService requisitoHabilidadeParteService =
+            new RequisitoHabilidadeParteService();
+
     public boolean podeDesignar(
             Pessoa pessoa,
             Parte parte,
@@ -17,7 +20,8 @@ public class RegrasService {
 
         if (pessoa == null
                 || parte == null
-                || !pessoa.isAtivo()) {
+                || !pessoa.isAtivo()
+                || !possuiHabilidadeExigida(pessoa, parte)) {
 
             return false;
         }
@@ -64,7 +68,8 @@ public class RegrasService {
         if (pessoa == null
                 || parte == null
                 || controle == null
-                || !pessoa.isAtivo()) {
+                || !pessoa.isAtivo()
+                || !possuiHabilidadeExigida(pessoa, parte)) {
 
             return false;
         }
@@ -114,6 +119,23 @@ public class RegrasService {
         );
     }
 
+
+
+    /**
+     * Habilidade individual é um requisito adicional. Os requisitos já
+     * definidos em Parte (sexo, privilégio, leitura e participações) e os
+     * conflitos/regras abaixo continuam sendo avaliados normalmente.
+     */
+    private boolean possuiHabilidadeExigida(Pessoa pessoa, Parte parte) {
+        // Cadastros anteriores ficam no modo legado até o usuário revisar
+        // explicitamente suas habilidades no formulário.
+        if (!pessoa.isHabilidadesConfiguradas()) {
+            return true;
+        }
+        return requisitoHabilidadeParteService.habilidadeExigida(parte.getTipo())
+                .map(habilidade -> pessoa.possuiHabilidade(habilidade.codigo()))
+                .orElse(true);
+    }
 
     /**
      * Impede que a mesma pessoa seja designada
@@ -235,7 +257,8 @@ public class RegrasService {
         if (pessoa == null
                 || parte == null
                 || tipoParticipacao == null
-                || !pessoa.isAtivo()) {
+                || !pessoa.isAtivo()
+                || !possuiHabilidadeExigida(pessoa, parte)) {
 
             return false;
         }
