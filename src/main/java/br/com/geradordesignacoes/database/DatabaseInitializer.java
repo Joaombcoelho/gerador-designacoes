@@ -253,6 +253,20 @@ public class DatabaseInitializer {
      * ============================================================
      */
 
+    private static void adicionarColunaHabilidadesConfiguradas(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(pessoa)")) {
+            while (resultSet.next()) {
+                if ("habilidades_configuradas".equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE pessoa ADD COLUMN habilidades_configuradas INTEGER NOT NULL DEFAULT 0");
+        }
+    }
+
     private static void adicionarColunaArquivado(Connection connection, String tabela) throws SQLException {
         if (!tabela.equals("pessoa") && !tabela.equals("parte")) {
             throw new IllegalArgumentException("Tabela não permitida para migração de arquivamento.");
@@ -303,6 +317,7 @@ public class DatabaseInitializer {
             adicionarColunasPermissaoSalasPessoa(connection);
             adicionarColunaHabilidadesConfiguradas(connection);
             adicionarColunaArquivado(connection, "pessoa");
+            adicionarColunaHabilidadesConfiguradas(connection);
 
             /*
              * ----------------------------------------------------
