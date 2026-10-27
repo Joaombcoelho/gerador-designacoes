@@ -86,10 +86,6 @@ class HabilidadesSchemaMigrationTest {
 
         try (Connection connection = ConnectionFactory.getConnection()) {
             assertTrue(colunaExiste(connection, "pessoa", "habilidades_configuradas"));
-            assertEquals(0, contar(connection, """
-                    SELECT COUNT(*) FROM pessoa
-                    WHERE id = 901 AND nome = 'Pessoa legada'
-                    """));
             assertEquals(1, contar(connection, """
                     SELECT COUNT(*) FROM pessoa
                     WHERE id = 901 AND nome = 'Pessoa legada'
