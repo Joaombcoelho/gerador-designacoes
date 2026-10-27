@@ -26,9 +26,39 @@ public class DatabaseInitializer {
                 pode_participar_sala_principal INTEGER NOT NULL DEFAULT 1,
                 pode_participar_sala_b INTEGER NOT NULL DEFAULT 1,
                 pode_participar_sala_c INTEGER NOT NULL DEFAULT 1,
+                habilidades_configuradas INTEGER NOT NULL DEFAULT 0,
                 arquivado INTEGER NOT NULL DEFAULT 0
             );
             
+            """;
+
+
+    /*
+     * Habilidades individuais: o catálogo é independente dos privilégios
+     * e das regras específicas já armazenadas em pessoa/parte.
+     */
+    private static final String CREATE_TABLE_HABILIDADE_DESIGNACAO = """
+            CREATE TABLE IF NOT EXISTS habilidade_designacao (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                codigo TEXT NOT NULL UNIQUE,
+                nome TEXT NOT NULL,
+                ativa INTEGER NOT NULL DEFAULT 1
+                    CHECK (ativa IN (0, 1))
+            );
+            """;
+
+    private static final String CREATE_TABLE_PESSOA_HABILIDADE = """
+            CREATE TABLE IF NOT EXISTS pessoa_habilidade (
+                pessoa_id INTEGER NOT NULL,
+                habilidade_id INTEGER NOT NULL,
+                PRIMARY KEY (pessoa_id, habilidade_id),
+                FOREIGN KEY (pessoa_id)
+                    REFERENCES pessoa(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (habilidade_id)
+                    REFERENCES habilidade_designacao(id)
+                    ON DELETE RESTRICT
+            );
             """;
 
 
@@ -223,6 +253,20 @@ public class DatabaseInitializer {
      * ============================================================
      */
 
+    private static void adicionarColunaHabilidadesConfiguradas(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(pessoa)")) {
+            while (resultSet.next()) {
+                if ("habilidades_configuradas".equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE pessoa ADD COLUMN habilidades_configuradas INTEGER NOT NULL DEFAULT 0");
+        }
+    }
+
     private static void adicionarColunaArquivado(Connection connection, String tabela) throws SQLException {
         if (!tabela.equals("pessoa") && !tabela.equals("parte")) {
             throw new IllegalArgumentException("Tabela não permitida para migração de arquivamento.");
@@ -261,6 +305,27 @@ public class DatabaseInitializer {
             );
             adicionarColunasPermissaoSalasPessoa(connection);
             adicionarColunaArquivado(connection, "pessoa");
+            adicionarColunaHabilidadesConfiguradas(connection);
+
+            /*
+             * ----------------------------------------------------
+             * HABILIDADES INDIVIDUAIS
+             * ----------------------------------------------------
+             *
+             * A criação é idempotente e não infere habilidades a partir
+             * de sexo ou privilégio. O catálogo será populado e consumido
+             * nas etapas seguintes, após revisão das regras.
+             */
+            statement.execute(CREATE_TABLE_HABILIDADE_DESIGNACAO);
+            statement.execute(CREATE_TABLE_PESSOA_HABILIDADE);
+            statement.executeUpdate("""
+                    INSERT OR IGNORE INTO habilidade_designacao (codigo, nome) VALUES
+                        ('PRESIDENCIA', 'Presidência'),
+                        ('JOIAS_ESPIRITUAIS', 'Joias espirituais'),
+                        ('TESOUROS', 'Tesouros'),
+                        ('NECESSIDADES_LOCAIS', 'Necessidades Locais'),
+                        ('DISCURSO', 'Discurso')
+                    """);
 
             /*
              * ----------------------------------------------------
@@ -421,6 +486,10 @@ public class DatabaseInitializer {
             atualizarOrdensPadraoPartes(
                     connection
             );
+
+            // Unifica o tipo técnico das três ocorrências legadas sem excluir
+            // registros nem alterar IDs, nomes, ordem ou referências históricas.
+            normalizarTiposDiscurso(connection);
 
             // Não declarar sucesso se a conexão estiver sem a proteção de
             // chaves estrangeiras ou se alguma migração deixou referências órfãs.
@@ -1404,12 +1473,22 @@ public class DatabaseInitializer {
             atualizarOrdemPorNome(statement, 15, "Fazendo discípulos");
             atualizarOrdemPorNome(statement, 16, "Explicando suas crenças");
             atualizarOrdemPorNome(statement, 17, "Discurso — Ministério");
-            atualizarOrdem(statement, 18, TipoParte.PARTE_1);
-            atualizarOrdem(statement, 19, TipoParte.PARTE_2);
-            atualizarOrdem(statement, 20, TipoParte.PARTE_3);
+            atualizarOrdemPorNome(statement, 18, "Parte 1");
+            atualizarOrdemPorNome(statement, 19, "Parte 2");
+            atualizarOrdemPorNome(statement, 20, "Parte 3");
             atualizarOrdem(statement, 21, TipoParte.NECESSIDADES_LOCAIS);
             atualizarOrdem(statement, 22, TipoParte.DIRIGENTE_ESTUDO);
             atualizarOrdem(statement, 23, TipoParte.ORACAO_FINAL);
+        }
+    }
+
+    private static void normalizarTiposDiscurso(Connection connection) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                UPDATE parte
+                SET tipo = 'DISCURSO'
+                WHERE tipo IN ('PARTE_1', 'PARTE_2', 'PARTE_3')
+                """)) {
+            statement.executeUpdate();
         }
     }
 
@@ -1764,7 +1843,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 1",
-                    TipoParte.PARTE_1,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,
@@ -1789,7 +1868,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 2",
-                    TipoParte.PARTE_2,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,
@@ -1814,7 +1893,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 3",
-                    TipoParte.PARTE_3,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,

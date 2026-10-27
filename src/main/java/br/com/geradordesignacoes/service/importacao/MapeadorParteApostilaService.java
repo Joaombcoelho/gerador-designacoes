@@ -32,7 +32,7 @@ public class MapeadorParteApostilaService {
             if (parte == null || parte.getSecao() != parteApostila.secao()) {
                 continue;
             }
-            if (tipoInferido != null && parte.getTipo() != tipoInferido) {
+            if (tipoInferido != null && !tipoCompativel(tipoInferido, parte.getTipo())) {
                 continue;
             }
             candidatos.add(parte);
@@ -75,6 +75,12 @@ public class MapeadorParteApostilaService {
                 juntar(parte.tema(), parte.subtitulo(), parte.descricaoDesignacao())
         );
 
+        // Temas explícitos têm prioridade sobre a posição na sequência da apostila.
+        // "Necessidades locais" pode ocupar a posição 7 e não deve virar discurso.
+        if (contem(texto, "necessidades locais")) {
+            return TipoParte.NECESSIDADES_LOCAIS;
+        }
+
         // Na última seção, o tema identifica o Estudo Bíblico e a sequência
         // da apostila identifica as partes numeradas. O número nunca é ID do banco.
         if (parte.secao() == SecaoParte.NOSSA_VIDA_CRISTA) {
@@ -82,10 +88,10 @@ public class MapeadorParteApostilaService {
                 return TipoParte.DIRIGENTE_ESTUDO;
             }
             if (parte.numero() == 7) {
-                return TipoParte.PARTE_1;
+                return TipoParte.DISCURSO;
             }
             if (parte.numero() == 8) {
-                return TipoParte.PARTE_2;
+                return TipoParte.DISCURSO;
             }
         }
 
@@ -113,10 +119,18 @@ public class MapeadorParteApostilaService {
         if (contem(texto, "leitura da biblia")) {
             return TipoParte.LEITURA;
         }
-        if (contem(texto, "necessidades locais")) {
-            return TipoParte.NECESSIDADES_LOCAIS;
-        }
         return null;
+    }
+
+    private static boolean tipoCompativel(TipoParte inferido, TipoParte cadastrado) {
+        if (inferido == cadastrado) {
+            return true;
+        }
+        // Compatibilidade com catálogos anteriores à unificação de discursos.
+        return inferido == TipoParte.DISCURSO
+                && (cadastrado == TipoParte.PARTE_1
+                || cadastrado == TipoParte.PARTE_2
+                || cadastrado == TipoParte.PARTE_3);
     }
 
     private static String juntar(String tema, String subtitulo, String descricao) {
