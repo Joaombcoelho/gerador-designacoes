@@ -26,6 +26,7 @@ public class DatabaseInitializer {
                 pode_participar_sala_principal INTEGER NOT NULL DEFAULT 1,
                 pode_participar_sala_b INTEGER NOT NULL DEFAULT 1,
                 pode_participar_sala_c INTEGER NOT NULL DEFAULT 1,
+                habilidades_configuradas INTEGER NOT NULL DEFAULT 0,
                 arquivado INTEGER NOT NULL DEFAULT 0
             );
             
@@ -252,6 +253,20 @@ public class DatabaseInitializer {
      * ============================================================
      */
 
+    private static void adicionarColunaHabilidadesConfiguradas(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(pessoa)")) {
+            while (resultSet.next()) {
+                if ("habilidades_configuradas".equals(resultSet.getString("name"))) {
+                    return;
+                }
+            }
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE pessoa ADD COLUMN habilidades_configuradas INTEGER NOT NULL DEFAULT 0");
+        }
+    }
+
     private static void adicionarColunaArquivado(Connection connection, String tabela) throws SQLException {
         if (!tabela.equals("pessoa") && !tabela.equals("parte")) {
             throw new IllegalArgumentException("Tabela não permitida para migração de arquivamento.");
@@ -290,6 +305,7 @@ public class DatabaseInitializer {
             );
             adicionarColunasPermissaoSalasPessoa(connection);
             adicionarColunaArquivado(connection, "pessoa");
+            adicionarColunaHabilidadesConfiguradas(connection);
 
             /*
              * ----------------------------------------------------
@@ -302,6 +318,14 @@ public class DatabaseInitializer {
              */
             statement.execute(CREATE_TABLE_HABILIDADE_DESIGNACAO);
             statement.execute(CREATE_TABLE_PESSOA_HABILIDADE);
+            statement.executeUpdate("""
+                    INSERT OR IGNORE INTO habilidade_designacao (codigo, nome) VALUES
+                        ('PRESIDENCIA', 'Presidência'),
+                        ('JOIAS_ESPIRITUAIS', 'Joias espirituais'),
+                        ('TESOUROS', 'Tesouros'),
+                        ('NECESSIDADES_LOCAIS', 'Necessidades Locais'),
+                        ('DISCURSO', 'Discurso')
+                    """);
 
             /*
              * ----------------------------------------------------

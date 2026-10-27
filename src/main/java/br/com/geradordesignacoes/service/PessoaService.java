@@ -1,6 +1,7 @@
 package br.com.geradordesignacoes.service;
 
 import br.com.geradordesignacoes.dao.PessoaDAO;
+import br.com.geradordesignacoes.dao.HabilidadeDesignacaoDAO;
 import br.com.geradordesignacoes.model.Pessoa;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 public class PessoaService {
 
     private final PessoaDAO pessoaDAO;
+    private final HabilidadeDesignacaoDAO habilidadeDAO = new HabilidadeDesignacaoDAO();
 
 
     public PessoaService(PessoaDAO pessoaDAO) {
@@ -20,7 +22,9 @@ public class PessoaService {
 
         validarPessoa(pessoa);
 
-        return pessoaDAO.salvar(pessoa);
+        Pessoa salva = pessoaDAO.salvar(pessoa);
+        habilidadeDAO.substituirCodigos(salva.getId(), pessoa.getHabilidadesDesignacao());
+        return salva;
     }
 
 
@@ -77,6 +81,7 @@ public class PessoaService {
         validarPessoa(pessoa);
 
         pessoaDAO.atualizar(pessoa);
+        habilidadeDAO.substituirCodigos(pessoa.getId(), pessoa.getHabilidadesDesignacao());
     }
 
 

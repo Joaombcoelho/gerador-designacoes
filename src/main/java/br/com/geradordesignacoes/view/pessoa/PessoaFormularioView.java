@@ -8,6 +8,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 import java.util.function.Consumer;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PessoaFormularioView {
 
@@ -29,6 +32,7 @@ public class PessoaFormularioView {
     private final CheckBox checkSalaPrincipal;
     private final CheckBox checkSalaB;
     private final CheckBox checkSalaC;
+    private final Map<HabilidadeDesignacaoCodigo, CheckBox> checkboxesHabilidades = new EnumMap<>(HabilidadeDesignacaoCodigo.class);
 
     private final Consumer<Pessoa> aoSalvar;
     private final Consumer<Pessoa> aoAtualizar;
@@ -94,6 +98,10 @@ public class PessoaFormularioView {
 
         checkSalaC = new CheckBox("Sala C");
         checkSalaC.setSelected(true);
+
+        for (HabilidadeDesignacaoCodigo habilidade : HabilidadeDesignacaoCodigo.values()) {
+            checkboxesHabilidades.put(habilidade, new CheckBox(habilidade.nome()));
+        }
 
         criarLayout();
 
@@ -169,6 +177,24 @@ public class PessoaFormularioView {
                 gradeFuncoes
         );
 
+
+        VBox habilidades = criarCartao("Habilidades para designações");
+        Label descricaoHabilidades = new Label(
+                "Marque individualmente as atividades para as quais a pessoa já está apta. "
+                        + "Cadastros antigos usam as regras anteriores até que suas habilidades sejam salvas. "
+                        + "Essas habilidades não substituem as regras de sexo, privilégio, leitura ou participação.");
+        descricaoHabilidades.setWrapText(true);
+        descricaoHabilidades.getStyleClass().add("page-subtitle");
+        GridPane gradeHabilidades = new GridPane();
+        gradeHabilidades.setHgap(24);
+        gradeHabilidades.setVgap(12);
+        int indiceHabilidade = 0;
+        for (CheckBox checkBox : checkboxesHabilidades.values()) {
+            gradeHabilidades.add(checkBox, indiceHabilidade % 2, indiceHabilidade / 2);
+            indiceHabilidade++;
+        }
+        habilidades.getChildren().addAll(descricaoHabilidades, gradeHabilidades);
+
         VBox status = criarCartao("Status do cadastro");
         status.getChildren().add(checkAtivo);
         VBox salas = criarCartao("Permissões de participação");
@@ -195,6 +221,7 @@ public class PessoaFormularioView {
                 18,
                 dadosPessoais,
                 funcoes,
+                habilidades,
                 salas,
                 status
         );
@@ -339,6 +366,11 @@ public class PessoaFormularioView {
                 checkSalaC.isSelected()
         );
 
+        pessoa.setHabilidadesDesignacao(checkboxesHabilidades.entrySet().stream()
+                .filter(entry -> entry.getValue().isSelected())
+                .map(entry -> entry.getKey().codigo())
+                .collect(Collectors.toSet()));
+
         if (pessoaEdicao != null) {
             pessoa.setId(pessoaEdicao.getId());
             aoAtualizar.accept(pessoa);
@@ -366,6 +398,11 @@ public class PessoaFormularioView {
         checkDirigente.setSelected(pessoaEdicao.podeSerDirigente());
 
         atualizarPermissoesSexo();
+
+        for (HabilidadeDesignacaoCodigo habilidade : HabilidadeDesignacaoCodigo.values()) {
+            checkboxesHabilidades.get(habilidade).setSelected(
+                    pessoaEdicao.possuiHabilidade(habilidade.codigo()));
+        }
 
         checkSalaPrincipal.setSelected(
                 pessoaEdicao.podeParticiparSalaPrincipal()

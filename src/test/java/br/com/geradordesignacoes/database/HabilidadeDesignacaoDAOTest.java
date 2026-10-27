@@ -32,13 +32,13 @@ class HabilidadeDesignacaoDAOTest {
         prepararBanco("habilidades-dao.db");
         HabilidadeDesignacaoDAO dao = new HabilidadeDesignacaoDAO();
         HabilidadeDesignacao discurso = dao.salvar(
-                new HabilidadeDesignacao(null, "DISCURSO", "Discurso", true));
+                new HabilidadeDesignacao(null, "TESTE_DISCURSO", "Discurso", true));
         HabilidadeDesignacao presidencia = dao.salvar(
-                new HabilidadeDesignacao(null, "PRESIDENCIA", "Presidência", true));
+                new HabilidadeDesignacao(null, "TESTE_PRESIDENCIA", "Presidência", true));
 
         dao.substituirHabilidades(501, List.of(discurso.id(), presidencia.id()));
 
-        assertEquals(2, dao.listarAtivas().size());
+        assertEquals(7, dao.listarAtivas().size());
         assertEquals(List.of("Discurso", "Presidência"),
                 dao.listarPorPessoa(501).stream().map(HabilidadeDesignacao::nome).toList());
     }
@@ -48,7 +48,7 @@ class HabilidadeDesignacaoDAOTest {
         prepararBanco("habilidades-rollback.db");
         HabilidadeDesignacaoDAO dao = new HabilidadeDesignacaoDAO();
         HabilidadeDesignacao discurso = dao.salvar(
-                new HabilidadeDesignacao(null, "DISCURSO", "Discurso", true));
+                new HabilidadeDesignacao(null, "TESTE_DISCURSO", "Discurso", true));
         dao.substituirHabilidades(501, List.of(discurso.id()));
 
         assertThrows(RuntimeException.class,
@@ -63,7 +63,7 @@ class HabilidadeDesignacaoDAOTest {
         prepararBanco("habilidades-validacao.db");
         HabilidadeDesignacaoDAO dao = new HabilidadeDesignacaoDAO();
         HabilidadeDesignacao discurso = dao.salvar(
-                new HabilidadeDesignacao(null, "DISCURSO", "Discurso", true));
+                new HabilidadeDesignacao(null, "TESTE_DISCURSO", "Discurso", true));
 
         assertThrows(IllegalArgumentException.class,
                 () -> dao.substituirHabilidades(501, List.of(discurso.id(), discurso.id())));
