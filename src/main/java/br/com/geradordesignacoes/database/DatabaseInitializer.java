@@ -26,6 +26,7 @@ public class DatabaseInitializer {
                 pode_participar_sala_principal INTEGER NOT NULL DEFAULT 1,
                 pode_participar_sala_b INTEGER NOT NULL DEFAULT 1,
                 pode_participar_sala_c INTEGER NOT NULL DEFAULT 1,
+                habilidades_configuradas INTEGER NOT NULL DEFAULT 0,
                 arquivado INTEGER NOT NULL DEFAULT 0
             );
             
@@ -263,6 +264,17 @@ public class DatabaseInitializer {
         }
     }
 
+    private static void adicionarColunaHabilidadesConfiguradas(Connection connection) throws SQLException {
+        if (!colunaExiste(connection, "pessoa", "habilidades_configuradas")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                        ALTER TABLE pessoa
+                        ADD COLUMN habilidades_configuradas INTEGER NOT NULL DEFAULT 0
+                        """);
+            }
+        }
+    }
+
 
     public static void initialize() {
 
@@ -289,6 +301,7 @@ public class DatabaseInitializer {
                     CREATE_TABLE_PESSOA
             );
             adicionarColunasPermissaoSalasPessoa(connection);
+            adicionarColunaHabilidadesConfiguradas(connection);
             adicionarColunaArquivado(connection, "pessoa");
 
             /*
