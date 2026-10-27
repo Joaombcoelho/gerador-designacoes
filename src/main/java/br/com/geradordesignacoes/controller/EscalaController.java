@@ -509,7 +509,29 @@ public class EscalaController {
 
     private boolean salvarEscala() {
 
+        if (!confirmarCorrecaoRetroativa()) {
+            view.atualizarStatus(
+                    "Salvamento cancelado. O histórico não foi alterado."
+            );
+            return false;
+        }
+
         return salvarEscalasGeradas();
+    }
+
+    /**
+     * Solicita autorização explícita antes de salvar resultados de reuniões
+     * anteriores à data atual, pois a confirmação substitui o histórico dessas datas.
+     * Chamadores de interface devem executar esta verificação antes de persistir.
+     */
+    public boolean confirmarCorrecaoRetroativa() {
+        List<LocalDate> datasRetroativas = resultadosGeracao.keySet().stream()
+                .filter(data -> data.isBefore(LocalDate.now()))
+                .sorted()
+                .toList();
+
+        return datasRetroativas.isEmpty()
+                || view.confirmarCorrecaoRetroativa(datasRetroativas);
     }
 
     /**
