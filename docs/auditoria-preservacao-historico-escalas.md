@@ -3,7 +3,7 @@
 **Base inspecionada:** `main` em `314de245c1f75c9db9511e621defc726559f38f4` (merge da PR #96).  
 **Branch de trabalho:** `fix/preservacao-historico-escalas`.  
 **Versão-alvo:** 1.2.5.  
-**Escopo desta PR:** testes de regressão e documentação da política observável; sem alteração de produção porque a regra para regeneração retroativa não está definida com segurança.
+**Escopo desta PR:** confirmação explícita para correção retroativa, testes de regressão existentes e documentação da política escolhida.
 
 ## 1. Fluxos reais verificados
 
@@ -86,7 +86,7 @@ mvn --batch-mode --no-transfer-progress clean verify
 
 Registrar os totais reais (testes, falhas, erros e ignorados). Depois, validar manualmente no IntelliJ/Windows: editar uma designação, salvar, fechar/reabrir a tela; confirmar uma regeneração futura; conferir que uma data histórica diferente permaneceu; e confirmar que os ajustes semanais de duração/tema e as regras de eventos especiais continuam intactos.
 
-**Estado:** auditoria parcial com testes de regressão e documentação adicionados; aguarda execução Maven local e decisão funcional sobre regeneração/correção retroativa. Não marcar a política de reuniões passadas como concluída até essa decisão.
+**Estado:** confirmação explícita implementada nos dois pontos de entrada de salvamento da interface e política documentada. A validação Maven local e a revisão manual no Windows continuam pendentes; a política não deve ser considerada validada até concluir essas verificações.
 
 
 ## 5.1. Implementação da política retroativa
