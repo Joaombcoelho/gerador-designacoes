@@ -278,6 +278,17 @@ public class DatabaseInitializer {
         }
     }
 
+    private static void adicionarColunaHabilidadesConfiguradas(Connection connection) throws SQLException {
+        if (!colunaExiste(connection, "pessoa", "habilidades_configuradas")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                        ALTER TABLE pessoa
+                        ADD COLUMN habilidades_configuradas INTEGER NOT NULL DEFAULT 0
+                        """);
+            }
+        }
+    }
+
 
     public static void initialize() {
 
@@ -304,6 +315,7 @@ public class DatabaseInitializer {
                     CREATE_TABLE_PESSOA
             );
             adicionarColunasPermissaoSalasPessoa(connection);
+            adicionarColunaHabilidadesConfiguradas(connection);
             adicionarColunaArquivado(connection, "pessoa");
             adicionarColunaHabilidadesConfiguradas(connection);
 
@@ -486,6 +498,10 @@ public class DatabaseInitializer {
             atualizarOrdensPadraoPartes(
                     connection
             );
+
+            // Unifica o tipo técnico das três ocorrências legadas sem excluir
+            // registros nem alterar IDs, nomes, ordem ou referências históricas.
+            normalizarTiposDiscurso(connection);
 
             // Não declarar sucesso se a conexão estiver sem a proteção de
             // chaves estrangeiras ou se alguma migração deixou referências órfãs.
@@ -1469,12 +1485,22 @@ public class DatabaseInitializer {
             atualizarOrdemPorNome(statement, 15, "Fazendo discípulos");
             atualizarOrdemPorNome(statement, 16, "Explicando suas crenças");
             atualizarOrdemPorNome(statement, 17, "Discurso — Ministério");
-            atualizarOrdem(statement, 18, TipoParte.PARTE_1);
-            atualizarOrdem(statement, 19, TipoParte.PARTE_2);
-            atualizarOrdem(statement, 20, TipoParte.PARTE_3);
+            atualizarOrdemPorNome(statement, 18, "Parte 1");
+            atualizarOrdemPorNome(statement, 19, "Parte 2");
+            atualizarOrdemPorNome(statement, 20, "Parte 3");
             atualizarOrdem(statement, 21, TipoParte.NECESSIDADES_LOCAIS);
             atualizarOrdem(statement, 22, TipoParte.DIRIGENTE_ESTUDO);
             atualizarOrdem(statement, 23, TipoParte.ORACAO_FINAL);
+        }
+    }
+
+    private static void normalizarTiposDiscurso(Connection connection) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                UPDATE parte
+                SET tipo = 'DISCURSO'
+                WHERE tipo IN ('PARTE_1', 'PARTE_2', 'PARTE_3')
+                """)) {
+            statement.executeUpdate();
         }
     }
 
@@ -1829,7 +1855,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 1",
-                    TipoParte.PARTE_1,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,
@@ -1854,7 +1880,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 2",
-                    TipoParte.PARTE_2,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,
@@ -1879,7 +1905,7 @@ public class DatabaseInitializer {
                     participacao,
 
                     "Parte 3",
-                    TipoParte.PARTE_3,
+                    TipoParte.DISCURSO,
                     Privilegio.SERVO_MINISTERIAL,
                     SexoPermitido.MASCULINO,
                     1,

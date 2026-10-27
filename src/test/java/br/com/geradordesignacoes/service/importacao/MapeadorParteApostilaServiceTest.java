@@ -1,6 +1,12 @@
 package br.com.geradordesignacoes.service.importacao;
 
 import br.com.geradordesignacoes.model.SecaoParte;
+import br.com.geradordesignacoes.model.Parte;
+import br.com.geradordesignacoes.model.Privilegio;
+import br.com.geradordesignacoes.model.SexoPermitido;
+import br.com.geradordesignacoes.model.NivelLeitura;
+import br.com.geradordesignacoes.model.TipoParticipacao;
+import java.util.List;
 import br.com.geradordesignacoes.model.TipoParte;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +42,7 @@ class MapeadorParteApostilaServiceTest {
 
     @Test
     void deveReconhecerPartesNumeradasEEstudoBiblicoNaUltimaSecao() {
-        assertEquals(TipoParte.PARTE_1,
+        assertEquals(TipoParte.DISCURSO,
                 service.inferirTipo(parte(7, "Nunca se Esqueça do Que Jeová se Lembra",
                         SecaoParte.NOSSA_VIDA_CRISTA, null, null)));
         assertEquals(TipoParte.DIRIGENTE_ESTUDO,
@@ -49,6 +55,32 @@ class MapeadorParteApostilaServiceTest {
         var parte = parte("Discurso", "Considere como aplicar o texto bíblico.");
 
         assertNull(service.inferirTipo(parte));
+    }
+
+
+    @Test
+    void deveManterCompatibilidadeComCatalogoDeDiscursosLegadosSemEscolherArbitrariamente() {
+        List<Parte> catalogo = List.of(
+                parteCatalogo("Parte 1", TipoParte.PARTE_1, 18),
+                parteCatalogo("Parte 2", TipoParte.PARTE_2, 19),
+                parteCatalogo("Parte 3", TipoParte.PARTE_3, 20));
+
+        var resultado = service.mapear(
+                parte(7, "Nunca se Esqueça do Que Jeová se Lembra",
+                        SecaoParte.NOSSA_VIDA_CRISTA, null, null),
+                catalogo);
+
+        assertEquals(TipoParte.DISCURSO, resultado.tipoInferido());
+        assertEquals(MapeadorParteApostilaService.SituacaoMapeamento.AMBIGUO,
+                resultado.situacao());
+        assertEquals(3, resultado.candidatos().size());
+    }
+
+    private static Parte parteCatalogo(String nome, TipoParte tipo, int ordem) {
+        return new Parte(
+                nome, tipo, Privilegio.PUBLICADOR, false, SexoPermitido.AMBOS,
+                1, false, NivelLeitura.BASICO, SecaoParte.NOSSA_VIDA_CRISTA,
+                null, false, ordem, List.of(TipoParticipacao.ORADOR));
     }
 
     private static ImportacaoApostilaJsonService.ParteApostila parte(

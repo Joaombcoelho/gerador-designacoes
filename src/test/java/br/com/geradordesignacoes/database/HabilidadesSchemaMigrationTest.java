@@ -35,6 +35,7 @@ class HabilidadesSchemaMigrationTest {
         try (Connection connection = ConnectionFactory.getConnection()) {
             assertTrue(tabelaExiste(connection, "habilidade_designacao"));
             assertTrue(tabelaExiste(connection, "pessoa_habilidade"));
+            assertTrue(colunaExiste(connection, "pessoa", "habilidades_configuradas"));
             assertEquals(5, contar(connection, "SELECT COUNT(*) FROM habilidade_designacao"));
             assertEquals(0, contar(connection, "SELECT COUNT(*) FROM pessoa_habilidade"));
         }
@@ -46,6 +47,52 @@ class HabilidadesSchemaMigrationTest {
             assertTrue(tabelaExiste(connection, "habilidade_designacao"));
             assertTrue(tabelaExiste(connection, "pessoa_habilidade"));
             assertEquals(1, inteiro(connection, "PRAGMA foreign_keys"));
+        }
+    }
+
+
+    @Test
+    void deveMigrarBancoExistenteSemColunaHabilidadesConfiguradasPreservandoPessoas() throws Exception {
+        contexto = ConnectionFactory.openTestContext(
+                diretorioTemporario.resolve("habilidades-banco-legado.db"));
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.executeUpdate("""
+                    CREATE TABLE pessoa (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nome TEXT NOT NULL,
+                        sexo TEXT NOT NULL,
+                        ativo INTEGER NOT NULL,
+                        pode_ser_responsavel INTEGER NOT NULL,
+                        pode_ser_ajudante INTEGER NOT NULL,
+                        pode_fazer_leitura INTEGER NOT NULL,
+                        pode_fazer_discurso INTEGER NOT NULL,
+                        privilegio TEXT NOT NULL,
+                        nivel_leitura TEXT NOT NULL DEFAULT 'BASICO'
+                    )
+                    """);
+            statement.executeUpdate("""
+                    INSERT INTO pessoa
+                        (id, nome, sexo, ativo, pode_ser_responsavel,
+                         pode_ser_ajudante, pode_fazer_leitura,
+                         pode_fazer_discurso, privilegio, nivel_leitura)
+                    VALUES (901, 'Pessoa legada', 'MASCULINO', 1, 0,
+                            0, 0, 0, 'PUBLICADOR', 'BASICO')
+                    """);
+        }
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertTrue(colunaExiste(connection, "pessoa", "habilidades_configuradas"));
+            assertEquals(1, contar(connection, """
+                    SELECT COUNT(*) FROM pessoa
+                    WHERE id = 901 AND nome = 'Pessoa legada'
+                    """));
+            assertEquals(0, contar(connection, """
+                    SELECT habilidades_configuradas FROM pessoa WHERE id = 901
+                    """));
         }
     }
 
@@ -107,6 +154,37 @@ class HabilidadesSchemaMigrationTest {
         }
     }
 
+
+    @Test
+    void deveNormalizarTiposLegadosDeDiscursoSemExcluirPartesNemAlterarNomes() throws Exception {
+        contexto = ConnectionFactory.openTestContext(
+                diretorioTemporario.resolve("discursos-legados.db"));
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertEquals(0, contar(connection, """
+                    SELECT COUNT(*) FROM parte
+                    WHERE tipo IN ('PARTE_1', 'PARTE_2', 'PARTE_3')
+                    """));
+            assertEquals(3, contar(connection, """
+                    SELECT COUNT(*) FROM parte
+                    WHERE nome IN ('Parte 1', 'Parte 2', 'Parte 3')
+                      AND tipo = 'DISCURSO'
+                    """));
+        }
+
+        DatabaseInitializer.initialize();
+
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            assertEquals(3, contar(connection, """
+                    SELECT COUNT(*) FROM parte
+                    WHERE nome IN ('Parte 1', 'Parte 2', 'Parte 3')
+                      AND tipo = 'DISCURSO'
+                    """));
+        }
+    }
+
     private boolean tabelaExiste(Connection connection, String tabela) throws SQLException {
         try (var ps = connection.prepareStatement("""
                 SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?
@@ -115,6 +193,18 @@ class HabilidadesSchemaMigrationTest {
             try (var rs = ps.executeQuery()) {
                 return rs.next();
             }
+        }
+    }
+
+    private boolean colunaExiste(Connection connection, String tabela, String coluna) throws SQLException {
+        try (var statement = connection.createStatement();
+             var rs = statement.executeQuery("PRAGMA table_info(" + tabela + ")")) {
+            while (rs.next()) {
+                if (coluna.equals(rs.getString("name"))) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
