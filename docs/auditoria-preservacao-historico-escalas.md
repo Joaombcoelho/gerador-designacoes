@@ -94,3 +94,36 @@ Registrar os totais reais (testes, falhas, erros e ignorados). Depois, validar m
 A confirmação é acionada pelos dois pontos de entrada da interface que salvam escalas: a tela de geração e a tela de programação. A lista é derivada das datas presentes nos resultados que serão salvos. O cancelamento não chama a persistência; a confirmação prossegue para o serviço transacional existente.
 
 A confirmação visual e o cancelamento ainda exigem validação manual no Windows. Os testes de persistência existentes cobrem rollback, substituição por data e preservação de outras datas, mas não simulam a interação modal da confirmação.
+
+
+## 6. Atualização de validação — 2026-10-28, após merge da PR #112
+
+A política de confirmação explícita para correções retroativas foi integrada em `main` pela [PR #112](https://github.com/Joaombcoelho/gerador-designacoes/pull/112), merge commit [`23f51c7e7561272e173e83edb7bbe9bb1a38e818`](https://github.com/Joaombcoelho/gerador-designacoes/commit/23f51c7e7561272e173e83edb7bbe9bb1a38e818).
+
+### Evidências posteriores
+
+- **Testes direcionados:** o usuário informou que o comando direcionado concluiu com 63 testes aprovados.
+- **Suíte completa:** o usuário informou que `mvn clean test` e `mvn clean verify` concluíram com 530 testes aprovados em cada execução.
+- **Interface Windows:** o usuário confirmou que os testes manuais foram concluídos com sucesso, incluindo os fluxos de confirmação e cancelamento da correção retroativa e a preservação das demais datas históricas.
+- **CI:** os workflows “Testes Maven” e “Auditoria de dependências 1.2.5” consultados para a PR #112 terminaram com conclusão `success`.
+
+Os resultados locais acima são **relatos do usuário**; os logs completos, o total de testes ignorados e o SHA exato de cada execução local não foram anexados. Os workflows de CI são evidência da execução associada à PR #112, não de geração ou instalação do EXE.
+
+### Política retroativa — estado após validação
+
+A PR #112 está mesclada e, conforme o relato do usuário, a validação manual no Windows passou. A interface pede confirmação para as datas passadas listadas, informa que as designações e o histórico dessas datas serão substituídos, não mescla automaticamente edições manuais anteriores e permite cancelar antes de persistir. A preservação das demais datas foi validada pelo usuário.
+
+### Limites e pendências restantes
+
+Esta validação **não** conclui a prontidão de lançamento da versão 1.2.5. Permanecem pendentes, com ambiente descartável e dados fictícios:
+
+- geração real do instalador `GeradorDesignacoes-1.2.5.exe`, registro do log e hash SHA-256;
+- instalação limpa e inicialização do aplicativo empacotado;
+- atualização de uma instalação anterior, verificando a preservação de pessoas, programações, escalas, designações, histórico e configurações;
+- repetição da atualização e validação de integridade referencial;
+- desinstalação/reinstalação e confirmação da preservação do banco e dos backups;
+- ensaio integrado de criação, retenção e restauração de backups;
+- revisão do histórico Git do PDF removido e conclusão das verificações de dependências/licenças ainda abertas na auditoria geral.
+
+**Estado desta auditoria:** política de correção retroativa implementada, mesclada e validada conforme os resultados acima; **lançamento 1.2.5 ainda bloqueado pelas validações de empacotamento e atualização real**.
+
