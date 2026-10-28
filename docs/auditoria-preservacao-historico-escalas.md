@@ -3,7 +3,7 @@
 **Base inspecionada:** `main` em `314de245c1f75c9db9511e621defc726559f38f4` (merge da PR #96).  
 **Branch de trabalho:** `fix/preservacao-historico-escalas`.  
 **Versão-alvo:** 1.2.5.  
-**Escopo desta PR:** testes de regressão e documentação da política observável; sem alteração de produção porque a regra para regeneração retroativa não está definida com segurança.
+**Escopo desta PR:** confirmação explícita para correção retroativa, testes de regressão existentes e documentação da política escolhida.
 
 ## 1. Fluxos reais verificados
 
@@ -44,18 +44,18 @@ A duração semanal é armazenada em `ProgramacaoParte` e usada pelo serviço de
 | Pessoa com histórico passado | Arquivamento lógico preserva a linha de pessoa e as participações históricas | Manter as referências; não excluir dados históricos por cascata |
 | Pessoa com participação hoje/futura | Arquivamento é bloqueado pelo DAO | Manter regra existente |
 | Horários/duração manual de uma programação existente | A preparação para geração lê a programação existente e não substitui seus valores existentes por padrões durante a prévia | Não alterar o fluxo nesta PR; validar também visualmente no Windows |
-| Regenerar reunião passada ou corrigir retroativamente o histórico | A persistência coordenada substitui o histórico da data, sem política uniforme de passado/presente nem autorização específica identificada | **Decisão pendente:** não introduzir bloqueio nem exceção administrativa por suposição |
+| Regenerar reunião passada ou corrigir retroativamente o histórico | A persistência coordenada substitui o histórico da data | **Política definida nesta etapa:** permitir correção retroativa somente após confirmação explícita, mostrando as datas e avisando que as designações atuais e o histórico dessas datas serão substituídos; outras datas permanecem intactas |
 
-### Decisão funcional necessária
+### Decisão funcional e proteção implementada
 
-A implementação distingue edição manual de designação (não reescreve histórico) de regeneração confirmada (substitui histórico da data). Não foi encontrado mecanismo explícito de autorização para corrigir o histórico de uma reunião passada, nem regra que resolva a ambiguidade de uma reunião na data de hoje.
+A política escolhida é permitir correções retroativas explícitas. Antes de salvar pela tela de geração ou pela tela de programação, o sistema identifica as datas anteriores ao dia atual e apresenta uma confirmação específica com a lista das datas afetadas.
 
-Por segurança, esta PR não altera esse comportamento. Antes de uma correção de produção, é necessário decidir se:
-1. regeneração de data passada deve ser recusada;
-2. deve atualizar a escala atual, mas preservar o histórico realizado; ou
-3. deve ser permitida como correção retroativa explícita e atualizar também o histórico.
+A confirmação informa que:
+- as designações geradas agora substituirão as designações e participações históricas dessas datas;
+- edições manuais anteriores não serão mescladas automaticamente;
+- o histórico de outras datas não será alterado.
 
-Não é seguro escolher uma dessas opções apenas pela data do calendário: o sistema não fornece, nos fluxos examinados, um estado de realização/autorizações que permita inferir a intenção administrativa.
+Cancelar a confirmação interrompe o salvamento antes da persistência coordenada. Confirmar segue o fluxo transacional existente para persistir escala e histórico juntos. Datas de hoje ou futuras não acionam este alerta específico. A data, por si só, não prova se uma reunião ocorreu; a confirmação explícita é a salvaguarda escolhida para autorizar a correção.
 
 ## 3. Testes desta PR
 
@@ -86,4 +86,11 @@ mvn --batch-mode --no-transfer-progress clean verify
 
 Registrar os totais reais (testes, falhas, erros e ignorados). Depois, validar manualmente no IntelliJ/Windows: editar uma designação, salvar, fechar/reabrir a tela; confirmar uma regeneração futura; conferir que uma data histórica diferente permaneceu; e confirmar que os ajustes semanais de duração/tema e as regras de eventos especiais continuam intactos.
 
-**Estado:** auditoria parcial com testes de regressão e documentação adicionados; aguarda execução Maven local e decisão funcional sobre regeneração/correção retroativa. Não marcar a política de reuniões passadas como concluída até essa decisão.
+**Estado:** confirmação explícita implementada nos dois pontos de entrada de salvamento da interface e política documentada. A validação Maven local e a revisão manual no Windows continuam pendentes; a política não deve ser considerada validada até concluir essas verificações.
+
+
+## 5.1. Implementação da política retroativa
+
+A confirmação é acionada pelos dois pontos de entrada da interface que salvam escalas: a tela de geração e a tela de programação. A lista é derivada das datas presentes nos resultados que serão salvos. O cancelamento não chama a persistência; a confirmação prossegue para o serviço transacional existente.
+
+A confirmação visual e o cancelamento ainda exigem validação manual no Windows. Os testes de persistência existentes cobrem rollback, substituição por data e preservação de outras datas, mas não simulam a interação modal da confirmação.

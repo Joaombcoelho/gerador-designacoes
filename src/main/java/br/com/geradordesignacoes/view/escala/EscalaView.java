@@ -576,6 +576,44 @@ public class EscalaView {
     }
 
 
+    /**
+     * Confirma uma substituição explícita do histórico de reuniões passadas.
+     * A lista recebida contém somente datas anteriores ao dia atual.
+     */
+    public boolean confirmarCorrecaoRetroativa(List<LocalDate> datas) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String datasFormatadas = String.join(
+                ", ",
+                datas.stream()
+                        .sorted()
+                        .map(data -> data.format(formatter))
+                        .toList()
+        );
+
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+        alerta.setTitle("Confirmar correção retroativa");
+        alerta.setHeaderText(
+                "O histórico de reuniões passadas será atualizado."
+        );
+        alerta.setContentText(
+                "Datas afetadas: " + datasFormatadas + "\n\n"
+                        + "Ao confirmar, as designações geradas agora substituirão "
+                        + "as designações e participações históricas dessas datas. "
+                        + "Edições manuais anteriores dessas designações não serão "
+                        + "mescladas automaticamente. O histórico de outras datas "
+                        + "não será alterado.\n\n"
+                        + "Deseja continuar?"
+        );
+
+        if (root.getScene() != null && root.getScene().getWindow() != null) {
+            alerta.initOwner(root.getScene().getWindow());
+        }
+
+        return alerta.showAndWait()
+                .filter(ButtonType.OK::equals)
+                .isPresent();
+    }
+
     public Parent getView() {
 
         return root;

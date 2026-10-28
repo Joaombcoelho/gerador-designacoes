@@ -1098,6 +1098,13 @@ public class ProgramacaoController {
 
     private void salvarEscalas() {
 
+        if (!escalaController.confirmarCorrecaoRetroativa()) {
+            view.atualizarStatus(
+                    "Salvamento cancelado. O histórico não foi alterado."
+            );
+            return;
+        }
+
         boolean salvou =
                 escalaController.salvarEscalasGeradas();
 
