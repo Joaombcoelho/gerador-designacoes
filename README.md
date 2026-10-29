@@ -229,6 +229,12 @@ mvn javafx:run
 
 O plugin JavaFX está configurado para iniciar `br.com.geradordesignacoes.MainApp`.
 
+## Instalador Windows e atualização
+
+O responsável pelo projeto confirmou que o instalador Windows da versão `1.2.5` foi gerado e que uma atualização de instalação existente funcionou, preservando o banco de dados local. Esse registro corresponde ao cenário testado e relatado; não significa que instalação limpa, restauração de backup ou desinstalação/reinstalação tenham sido validadas.
+
+Antes de atualizar, mantenha um backup recente do banco. No Windows, o banco local utilizado pela aplicação fica em `%LOCALAPPDATA%\\GeradorDesignacoes\\gerador-designacoes.db`; os backups automáticos ficam na subpasta `backups` desse diretório.
+
 ## Testes
 
 Para compilar e executar todos os testes:
