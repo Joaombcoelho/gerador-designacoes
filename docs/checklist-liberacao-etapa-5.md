@@ -1,3 +1,15 @@
+> **Atualização de auditoria — 2026-10-29: histórico Git do PDF S-140 preenchido**
+>
+> | Item | Resultado da revisão | Limite/ação restante |
+> |---|---|---|
+> | Arquivo na árvore atual | Não consta em `main`. | Confirma apenas a árvore atual. |
+> | Histórico do arquivo | Presente no commit `33300ae0a7af3129eec85c18515c18e337b8aee7` (2026-10-09); removido no commit `4eeddd89ddcece218b6a46d9ca7ec5d80b22f156` (2026-10-23). | O blob permanece no histórico Git. |
+> | Conteúdo e privacidade | **Não conclusivo** | A revisão não conseguiu abrir/inspecionar o binário; não se afirma se continha dados pessoais. |
+> | Saneamento do histórico | **Não executado** | Se o arquivo contiver dados reais sensíveis, avaliar reescrita do histórico e as implicações para clones/forks. |
+>
+> A remoção do arquivo da árvore atual é positiva, mas não apaga as versões históricas. Não realizar reescrita destrutiva sem confirmar a necessidade e planejar os efeitos no repositório público.
+>
+> ---
 > **Atualização de estado — 2026-10-29: instalador 1.2.5**
 >
 > O usuário confirmou que gerou o instalador Windows `1.2.5`, executou a atualização de uma instalação existente e verificou que a atualização funcionou e o banco foi preservado.
