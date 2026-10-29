@@ -1,3 +1,27 @@
+> **Atualização de estado — 2026-10-29: tratamento inicial dos alertas do Dependency-Check**
+>
+> A revisão do relatório produzido pelo workflow da PR #114 encontrou 25 ocorrências de CVEs em seis artefatos: Jackson Databind, Jackson Core, Log4j API, SQLite JDBC, Commons Lang e PDFBox. O relatório apontou uma ocorrência crítica, dez altas e quatorze médias. Essas contagens são ocorrências do scanner, não 25 vulnerabilidades independentes nem prova automática de explorabilidade.
+>
+> **Correções de versão aplicadas no `pom.xml` desta branch:**
+>
+> | Artefato | Versão anterior | Versão atualizada | Motivo principal |
+> |---|---:|---:|---|
+> | `com.fasterxml.jackson.core:jackson-databind` | 2.19.2 | 2.21.8 | Corrige o alerta crítico CVE-2026-110879 e inclui correções da série 2.21 para outros avisos do relatório. A versão do core/annotations deve ser confirmada pela árvore Maven resolvida. |
+> | `org.xerial:sqlite-jdbc` | 3.50.3.0 | 3.53.4.0 | Atualiza a biblioteca empacotada e o SQLite nativo; a versão do SQLite 3.53.2 ou posterior contém a correção publicada para CVE-2026-11822 e CVE-2026-11824. |
+> | `org.apache.commons:commons-lang3` (transitiva) | 3.16.0 resolvida no relatório | 3.20.0 fixada diretamente | Está acima da versão 3.18.0 que corrige CVE-2025-48924. |
+> | `org.apache.logging.log4j:log4j-api` (transitiva) | 2.24.3 resolvida no relatório | 2.25.5 fixada diretamente | Inclui a correção de CVE-2026-49844, publicada em Log4j 2.25.5. |
+> | `org.apache.pdfbox:pdfbox` | 3.0.5 | 3.0.8 | Versão corrigida para CVE-2026-33929. O aviso oficial informa que o problema está no módulo de exemplos, não no núcleo da biblioteca; a atualização reduz o alerta, mas a aplicabilidade ao artefato distribuído deve ser reavaliada no relatório novo. |
+>
+> As duas dependências transitivas foram declaradas diretamente para controlar a versão efetivamente resolvida e empacotada. Não houve alteração do esquema SQLite nem das regras de negócio. A atualização do Jackson é uma mudança de versão relevante, ainda que permaneça na linha 2.x; por isso, testes automatizados, árvore Maven, empacotamento Windows e novo scanner são obrigatórios antes de considerar a correção concluída.
+>
+> **Risco e limites da análise:** o programa é uma aplicação desktop local, e o código de importação anteriormente inspecionado usa Jackson para construir uma árvore JSON (`readTree`), sem evidência de configuração de tipagem polimórfica. Isso reduz a evidência de exposição aos cenários de desserialização polimórfica, mas não substitui a correção da biblioteca nem uma revisão do uso completo. O risco do SQLite também depende das funções SQLite habilitadas e de quem consegue influenciar SQL; a atualização foi preferida a depender apenas dessa avaliação contextual. A ocorrência de CVE-2026-34479 atribuída pelo scanner a `log4j-api` precisa ser conferida: o aviso oficial descreve especificamente o bridge Log4j 1-to-2 e `Log4j1XmlLayout`, não apenas a API. Não classificar esse item como corrigido só pela troca da API.
+>
+> **Validação pendente:** o commit que contém essas atualizações precisa concluir `mvn clean test`, `mvn clean verify`, inventário/empacotamento Windows e nova execução do Dependency-Check e do relatório de licenças. O resultado do scanner deve ser comparado CVE por CVE; alertas residuais, mudanças de árvore, compatibilidade e eventuais falsos positivos devem ser registrados com evidência. Até essa revisão, as versões foram atualizadas, mas a auditoria de segurança permanece **em validação**, não aprovada.
+>
+> **Fontes oficiais consultadas:** [Jackson 2.21.8 e correção CVE-2026-110879](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.21.8), [aviso Jackson CVE-2026-110879](https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-m8xf-2cr7-77ph), [vulnerabilidades SQLite](https://www2.sqlite.org/cves.html), [Commons Lang CVE-2025-48924](https://nvd.nist.gov/vuln/detail/cve-2025-48924), [Log4j 2.25.5 release notes](https://logging.apache.org/log4j/2.x/release-notes.html) e [PDFBox security](https://pdfbox.apache.org/security.html).
+>
+> ---
+>
 > **Atualização de estado — 2026-10-29: falha de autenticação no OSS Index e correção preparada**
 >
 > A execução do workflow para o commit `db5da7b0a64f1da43c3dba83ae90ac06cf6ce35e` concluiu os testes Maven, o inventário de empacotamento Windows e o relatório de licenças com sucesso, mas a auditoria falhou: o Dependency-Check 12.1.0 recebeu HTTP `401 Unauthorized` repetidamente no endpoint antigo `ossindex.sonatype.org`. O workflow foi atualizado para usar Dependency-Check 12.2.2, o endpoint `https://api.guide.sonatype.com` e o segredo `SONATYPE_GUIDE_PAT`.
