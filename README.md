@@ -159,17 +159,17 @@ Exemplos de intervalo no campo de data:
 Na primeira exportação pela tela **Geração dos formulários**, o aplicativo solicita a pasta base de saída. A escolha fica registrada nas preferências do usuário e será reutilizada nas próximas execuções. Para trocar a pasta, utilize **Definir pasta de saída…** na mesma tela. O aplicativo cria automaticamente as subpastas por formulário, mês e semana, por exemplo:
 
 ```text
-Pasta escolhida pelo usuário\\
-└── S-89\\
-    └── Outubro 2026\\
-        └── Semana 1 - 07-10-2026\\
+Pasta escolhida pelo usuário\
+└── S-89\
+    └── Outubro 2026\
+        └── Semana 1 - 07-10-2026\
             └── S89_Leitura_Biblia.pdf
 ```
 
 O exportador não sobrescreve arquivos existentes. O caminho do modelo pode ser configurado por propriedade do sistema:
 
 ```text
--Ds89.template=C:\\caminho\\S-89_T.pdf
+-Ds89.template=C:\caminho\S-89_T.pdf
 ```
 
 A propriedade `s89.output.dir` continua disponível para chamadas diretas ao serviço, mas a tela de formulários utiliza a pasta selecionada e salva nas preferências do usuário.
@@ -233,7 +233,7 @@ O plugin JavaFX está configurado para iniciar `br.com.geradordesignacoes.MainAp
 
 O responsável pelo projeto confirmou que o instalador Windows da versão `1.2.5` foi gerado e que uma atualização de instalação existente funcionou, preservando o banco de dados local. Esse registro corresponde ao cenário testado e relatado; não significa que instalação limpa, restauração de backup ou desinstalação/reinstalação tenham sido validadas.
 
-Antes de atualizar, mantenha um backup recente do banco. No Windows, o banco local utilizado pela aplicação fica em `%LOCALAPPDATA%\\GeradorDesignacoes\\gerador-designacoes.db`; os backups automáticos ficam na subpasta `backups` desse diretório.
+Antes de atualizar, mantenha um backup recente do banco. No Windows, o banco local utilizado pela aplicação fica em `%LOCALAPPDATA%\GeradorDesignacoes\gerador-designacoes.db`; os backups automáticos ficam na subpasta `backups` desse diretório.
 
 ## Testes
 
