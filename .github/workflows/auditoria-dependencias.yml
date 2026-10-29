@@ -97,7 +97,7 @@ jobs:
           result=1
           for attempt in 1 2 3; do
             echo "Execução do Dependency-Check: tentativa $attempt de 3"
-            mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.2.2:check -DnvdApiKey="$NVD_API_KEY" -DossIndexAnalyzerUrl=https://api.guide.sonatype.com -DossIndexPassword="$SONATYPE_GUIDE_PAT" -Dformat=ALL -Dodc.outputDirectory=target -DfailBuildOnCVSS=11 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
+            mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.2.2:check -DnvdApiKey="$NVD_API_KEY" -DossIndexAnalyzerUrl=https://api.guide.sonatype.com -DossIndexPassword="$SONATYPE_GUIDE_PAT" -Dformat=ALL -Dodc.outputDirectory=target -DfailBuildOnCVSS=7 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
             result=${PIPESTATUS[0]}
             printf '%s\n' "$result" > "audit-results/dependency-check-attempt-$attempt-exit-code.txt"
             if [ "$result" -eq 0 ]; then
