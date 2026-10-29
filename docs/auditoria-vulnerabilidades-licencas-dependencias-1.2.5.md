@@ -1,3 +1,15 @@
+> **Atualização de estado — 2026-10-29: falha de autenticação no OSS Index e correção preparada**
+>
+> A execução do workflow para o commit `db5da7b0a64f1da43c3dba83ae90ac06cf6ce35e` concluiu os testes Maven, o inventário de empacotamento Windows e o relatório de licenças com sucesso, mas a auditoria falhou: o Dependency-Check 12.1.0 recebeu HTTP `401 Unauthorized` repetidamente no endpoint antigo `ossindex.sonatype.org`. O workflow foi atualizado para usar Dependency-Check 12.2.2, o endpoint `https://api.guide.sonatype.com` e o segredo `SONATYPE_GUIDE_PAT`.
+>
+> **Ação necessária antes de reexecutar:** criar um Personal Access Token em Sonatype Guide e cadastrá-lo nas configurações de Actions do repositório como segredo `SONATYPE_GUIDE_PAT`. O valor não deve ser colocado no código, em logs ou nesta documentação. A chave `NVD_API_KEY` continua separada e é usada para o NVD.
+>
+> A correção ainda precisa ser validada por uma nova execução. Não considerar a auditoria aprovada até o scanner concluir e os relatórios gerados serem revisados.
+>
+> Fonte: [documentação do Dependency-Check sobre o analisador OSS Index](https://dependency-check.github.io/DependencyCheck/analyzers/oss-index-analyzer.html) e [instruções oficiais de token do Sonatype Guide](https://help.sonatype.com/en/using-guide-personal-access-tokens-with-oss-index-api-integrations.html).
+>
+> ---
+
 > **Atualização de estado — 2026-10-29: execução de auditoria na PR #114**
 >
 > No workflow [Auditoria de dependências 1.2.5](https://github.com/Joaombcoelho/gerador-designacoes/actions/runs/40868767172), para o commit `d68db93baa342f8538fbcaf6b7c8ceb732778559`, os estados consultados foram:
