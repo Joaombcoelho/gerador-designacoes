@@ -59,6 +59,14 @@ jobs:
           java-version: "22"
           cache: maven
 
+      - name: Restaurar cache do banco OWASP Dependency-Check
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: dependency-check-data-v12-${{ runner.os }}-${{ hashFiles('pom.xml') }}
+          restore-keys: |
+            dependency-check-data-v12-${{ runner.os }}-
+
       - name: Criar pasta de evidências
         run: mkdir -p audit-results
 
@@ -77,11 +85,13 @@ jobs:
       - name: Scanner OWASP Dependency-Check
         id: dependency_check
         continue-on-error: true
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           set +e
-          mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.1.0:check -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11
+          mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.1.0:check -DnvdApiKey="$NVD_API_KEY" -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11
           result=$?
-          printf '%s\n' "$result" | tee audit-results/dependency-check-exit-code.txt
+          printf '%s\\n' "$result" | tee audit-results/dependency-check-exit-code.txt
           if [ -d target/dependency-check-report ]; then
             cp -a target/dependency-check-report/. audit-results/
           fi
@@ -94,7 +104,7 @@ jobs:
           set +e
           mvn --batch-mode --no-transfer-progress org.codehaus.mojo:license-maven-plugin:2.7.1:aggregate-third-party-report -Dlicense.outputDirectory=audit-results/licenses
           result=$?
-          printf '%s\n' "$result" | tee audit-results/license-report-exit-code.txt
+          printf '%s\\n' "$result" | tee audit-results/license-report-exit-code.txt
           mkdir -p audit-results/licenses
           for path in target/generated-sources/license target/site; do
             if [ -d "$path" ]; then cp -a "$path"/. audit-results/licenses/; fi
@@ -140,25 +150,25 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          & .\scripts\build-installer.ps1 *>&1 | Tee-Object -FilePath audit-results\installer-build.log
+          & .\\scripts\\build-installer.ps1 *>&1 | Tee-Object -FilePath audit-results\\installer-build.log
           $code = $LASTEXITCODE
-          "script_exit_code=$code" | Add-Content audit-results\installer-build-status.txt
-          if (Test-Path "dist\GeradorDesignacoes-1.2.5\app") {
-            Get-ChildItem "dist\GeradorDesignacoes-1.2.5\app" -File -Recurse |
+          "script_exit_code=$code" | Add-Content audit-results\\installer-build-status.txt
+          if (Test-Path "dist\\GeradorDesignacoes-1.2.5\\app") {
+            Get-ChildItem "dist\\GeradorDesignacoes-1.2.5\\app" -File -Recurse |
               Select-Object FullName,Length |
-              Export-Csv -NoTypeInformation -Encoding utf8 audit-results\runtime-jars.csv
+              Export-Csv -NoTypeInformation -Encoding utf8 audit-results\\runtime-jars.csv
           }
-          if (Test-Path "dist\GeradorDesignacoes-1.2.5\runtime\legal") {
-            Get-ChildItem "dist\GeradorDesignacoes-1.2.5\runtime\legal" -File -Recurse |
+          if (Test-Path "dist\\GeradorDesignacoes-1.2.5\\runtime\\legal") {
+            Get-ChildItem "dist\\GeradorDesignacoes-1.2.5\\runtime\\legal" -File -Recurse |
               Select-Object FullName,Length |
-              Export-Csv -NoTypeInformation -Encoding utf8 audit-results\jdk-legal-files.csv
+              Export-Csv -NoTypeInformation -Encoding utf8 audit-results\\jdk-legal-files.csv
           }
-          if (Test-Path "Instalador\GeradorDesignacoes-1.2.5.exe") {
-            Get-Item "Instalador\GeradorDesignacoes-1.2.5.exe" |
+          if (Test-Path "Instalador\\GeradorDesignacoes-1.2.5.exe") {
+            Get-Item "Instalador\\GeradorDesignacoes-1.2.5.exe" |
               Select-Object FullName,Length,LastWriteTimeUtc |
-              Export-Csv -NoTypeInformation -Encoding utf8 audit-results\installer-artifact.csv
-            Get-FileHash "Instalador\GeradorDesignacoes-1.2.5.exe" -Algorithm SHA256 |
-              Format-List | Out-File audit-results\installer-sha256.txt
+              Export-Csv -NoTypeInformation -Encoding utf8 audit-results\\installer-artifact.csv
+            Get-FileHash "Instalador\\GeradorDesignacoes-1.2.5.exe" -Algorithm SHA256 |
+              Format-List | Out-File audit-results\\installer-sha256.txt
           }
           if ($code -ne 0) { exit $code }
 
