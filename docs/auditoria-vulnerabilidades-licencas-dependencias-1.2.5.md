@@ -1,3 +1,17 @@
+> **Atualização de estado — 2026-10-29: execução de auditoria na PR #114**
+>
+> No workflow [Auditoria de dependências 1.2.5](https://github.com/Joaombcoelho/gerador-designacoes/actions/runs/40868767172), para o commit `d68db93baa342f8538fbcaf6b7c8ceb732778559`, os estados consultados foram:
+>
+> - **Testes Maven (Java 22): aprovado** — `clean test` e `clean verify` concluídos com sucesso.
+> - **Inventário do empacotamento Windows: aprovado** — o script oficial `scripts/build-installer.ps1` concluiu com sucesso e o workflow publicou o artefato de evidências `inventario-empacotamento-windows-1.2.5`.
+> - **Árvore completa e árvore runtime: concluídas com sucesso** no job de auditoria.
+> - **OWASP Dependency-Check: em execução na última consulta**; o relatório de licenças transitivas ainda não havia iniciado. Portanto, a análise de CVEs e a auditoria de licenças continuam sem conclusão nesta atualização.
+>
+> O sucesso do empacotamento de CI comprova que o script executou no runner Windows, mas não substitui a validação manual de atualização do usuário nem comprova instalação limpa. Também não significa que o relatório de CVEs esteja limpo: o scanner ainda não havia terminado e o workflow está configurado para publicar relatórios como evidência.
+>
+> **Decisão provisória:** não declarar a auditoria de segurança/licenças integralmente aprovada até a conclusão do scanner, do relatório de licenças e da revisão dos resultados/artifatos.
+>
+> ---
 # Auditoria de vulnerabilidades e licenças — versão 1.2.5
 
 **Repositório:** `Joaombcoelho/gerador-designacoes`  
