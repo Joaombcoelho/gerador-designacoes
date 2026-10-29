@@ -1,3 +1,19 @@
+> **Atualização de estado — 2026-10-28 (após a PR #112)**  
+>  
+> Esta atualização complementa a auditoria histórica abaixo, originalmente referente a 2026-10-23 e ao commit `2ce671234f37fe2b05fff44bf68df8421333d1ae`. A `main` foi verificada em `23f51c7e7561272e173e83edb7bbe9bb1a38e818`, merge da PR #112 (`feat(history): require explicit confirmation for retroactive corrections`).  
+>  
+> **Novas evidências registradas:**  
+> - A PR [#112](https://github.com/Joaombcoelho/gerador-designacoes/pull/112) está mesclada.  
+> - O usuário informou que o teste direcionado executou **63 testes com sucesso**, e que `mvn clean test` e `mvn clean verify` concluíram com **530 testes aprovados**. Estes são resultados relatados pelo usuário; os logs completos, o número de ignorados e a associação exata de cada execução ao SHA não foram anexados a este documento.  
+> - O usuário confirmou a validação manual no Windows dos fluxos de correção retroativa: confirmação, cancelamento sem salvar e preservação das demais datas históricas, incluindo os fluxos testados nas telas de geração e programação. Registro baseado no relato do usuário, não em execução independente do auditor.  
+> - Os workflows do GitHub Actions consultados para o head da PR #112 — **Testes Maven** e **Auditoria de dependências 1.2.5** — terminaram com conclusão `success`. Isso comprova as execuções daquela PR, não uma validação do instalador.  
+>  
+> **Estado atual da liberação:** continua **BLOQUEADO POR PENDÊNCIAS**. Ainda não há evidência registrada de geração e hash do instalador EXE 1.2.5, instalação limpa, atualização real sobre banco fictício de versão anterior, desinstalação/reinstalação, ou ensaio integrado de restauração. Permanecem também as verificações pendentes de histórico Git do PDF removido, dependências/licenças e atualização dos documentos com os resultados dessas etapas.  
+>  
+> Esta atualização não altera o escopo da auditoria histórica nem declara o aplicativo pronto para distribuição.  
+>  
+> ---
+
 # Auditoria Geral de Prontidão para Lançamento — Gerador de Designações
 
 **Data da auditoria:** 2026-10-23  

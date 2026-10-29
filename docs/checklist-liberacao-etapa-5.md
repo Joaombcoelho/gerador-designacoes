@@ -1,3 +1,27 @@
+> **Atualização de estado — 2026-10-28, após merge da PR #112**  
+>  
+> **Commit atual de `main`:** [`23f51c7e7561272e173e83edb7bbe9bb1a38e818`](https://github.com/Joaombcoelho/gerador-designacoes/commit/23f51c7e7561272e173e83edb7bbe9bb1a38e818). A PR [#112](https://github.com/Joaombcoelho/gerador-designacoes/pull/112) está mesclada. Esta atualização complementa o checklist original de 2026-10-23; as seções abaixo ainda registram o retrato histórico do commit então examinado e não devem ser interpretadas isoladamente como estado atual.  
+>  
+> ### Evidências adicionadas desde a revisão anterior  
+>  
+> | Item | Estado em 2026-10-28 | Origem/limite da evidência |  
+> |---|---|---|  
+> | Testes direcionados de histórico | **Aprovado conforme relato do usuário: 63 testes** | O usuário confirmou a execução bem-sucedida do comando direcionado. Log completo e contagem de ignorados não foram anexados. |  
+> | `mvn clean test` | **Aprovado conforme relato do usuário: 530 testes** | Resultado informado pelo usuário; não é execução independente neste documento. |  
+> | `mvn clean verify` | **Aprovado conforme relato do usuário: 530 testes** | Resultado informado pelo usuário; log completo e SHA exato da execução não foram registrados. |  
+> | GitHub Actions da PR #112 | **Aprovado na execução consultada** | Workflows “Testes Maven” e “Auditoria de dependências 1.2.5” concluídos com `success` para o head da PR #112. |  
+> | Correção retroativa pela interface | **Aprovado conforme relato do usuário** | O usuário confirmou teste manual no Windows, incluindo confirmação/cancelamento e preservação de outras datas. |  
+> | Gerar/instalar o EXE 1.2.5 | **Pendente** | Não foi fornecido log de empacotamento, EXE, hash SHA-256 nem evidência de instalação real. |  
+> | Atualização real de instalação anterior e restauração | **Pendente** | Ainda requer ambiente isolado, dados fictícios e registro antes/depois. |  
+>  
+> ### Decisão de liberação atualizada  
+>  
+> **Decisão: BLOQUEADO POR PENDÊNCIAS; não declarar a versão 1.2.5 pronta para distribuição.** O merge da PR #112 e os resultados relatados são progresso verificável, mas não substituem a validação do instalador, da atualização real e da restauração.  
+>  
+> Para concluir a etapa, registrar a geração do EXE e seu SHA-256, validar instalação limpa, atualização sobre banco fictício, preservação de dados/backups e desinstalação/reinstalação em ambiente descartável. Manter separadas as evidências relatadas pelo usuário e as execuções consultadas diretamente.  
+>  
+> ---
+
 # Etapa 5 — Validação integrada e checklist de liberação
 
 **Status da etapa:** **Bloqueado por pendências; não autorizado para distribuição**  
