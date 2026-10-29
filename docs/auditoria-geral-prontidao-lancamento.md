@@ -1,3 +1,10 @@
+> **Atualização de auditoria — 2026-10-29: verificação do histórico Git do PDF S-140 preenchido**
+>
+> A consulta ao histórico por caminho confirmou que `modelos/S-140_T_Preenchido.pdf` estava presente no commit `33300ae0a7af3129eec85c18515c18e337b8aee7` (2026-10-09) e foi removido no commit `4eeddd89ddcece218b6a46d9ca7ec5d80b22f156` (2026-10-23). O arquivo não consta na árvore atual de `main`, mas o objeto binário permanece alcançável pelo histórico Git; a remoção em um commit posterior não equivale à eliminação do histórico.
+>
+> **Limite:** não foi possível inspecionar o conteúdo binário do PDF pelas ferramentas desta revisão. Portanto, não há conclusão sobre a presença/ausência de dados pessoais. A revisão do histórico está concluída quanto à inclusão, remoção e persistência histórica do objeto; a classificação de privacidade do conteúdo e eventual saneamento do histórico permanecem pendentes se o documento continha informações reais. Nenhuma reescrita de histórico foi executada.
+>
+> ---
 > **Atualização de estado — 2026-10-29 (instalador 1.2.5 e atualização de instalação existente)**
 >
 > O responsável pelo projeto informou que gerou o instalador Windows da versão `1.2.5`, executou a atualização e confirmou que o processo funcionou e que o banco de dados existente foi preservado.
