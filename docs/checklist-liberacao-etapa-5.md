@@ -1,3 +1,18 @@
+> **Atualização de estado — 2026-10-29: instalador 1.2.5**
+>
+> O usuário confirmou que gerou o instalador Windows `1.2.5`, executou a atualização de uma instalação existente e verificou que a atualização funcionou e o banco foi preservado.
+>
+> | Item | Estado atualizado | Evidência/limite |
+> |---|---|---|
+> | Geração do instalador `1.2.5` | **Aprovado conforme relato do usuário** | Instalador gerado; log, artefato e hash SHA-256 não foram anexados ao checklist. |
+> | Atualização de instalação existente | **Aprovado conforme relato do usuário** | Atualização executada com sucesso e banco existente preservado, conforme validação manual informada. |
+> | Instalação limpa | **Pendente** | Não foi relatada nem documentada nesta validação. |
+> | Restauração de backup em ensaio integrado | **Pendente** | Não foi relatada nem documentada nesta validação. |
+> | Histórico Git do PDF sinalizado e análise de dependências/licenças | **Pendente** | Exigem evidência própria; não são cobertos pelo teste do instalador. |
+>
+> **Decisão:** o bloqueio específico de falta de evidência sobre geração do instalador e atualização de uma instalação existente foi reduzido pelos resultados relatados. A liberação integral continua condicionada às pendências acima e à revisão das evidências completas.
+>
+> ---
 > **Atualização de estado — 2026-10-28, após merge da PR #112**  
 >  
 > **Commit atual de `main`:** [`23f51c7e7561272e173e83edb7bbe9bb1a38e818`](https://github.com/Joaombcoelho/gerador-designacoes/commit/23f51c7e7561272e173e83edb7bbe9bb1a38e818). A PR [#112](https://github.com/Joaombcoelho/gerador-designacoes/pull/112) está mesclada. Esta atualização complementa o checklist original de 2026-10-23; as seções abaixo ainda registram o retrato histórico do commit então examinado e não devem ser interpretadas isoladamente como estado atual.  
