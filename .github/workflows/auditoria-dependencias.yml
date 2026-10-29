@@ -94,7 +94,7 @@ jobs:
             echo "Execução do Dependency-Check: tentativa $attempt de 3"
             mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.1.0:check -DnvdApiKey="$NVD_API_KEY" -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
             result=${PIPESTATUS[0]}
-            printf '%s\\n' "$result" > "audit-results/dependency-check-attempt-$attempt-exit-code.txt"
+            printf '%s\n' "$result" > "audit-results/dependency-check-attempt-$attempt-exit-code.txt"
             if [ "$result" -eq 0 ]; then
               break
             fi
@@ -104,7 +104,7 @@ jobs:
               sleep "$wait_seconds"
             fi
           done
-          printf '%s\\n' "$result" | tee audit-results/dependency-check-exit-code.txt
+          printf '%s\n' "$result" | tee audit-results/dependency-check-exit-code.txt
           if [ -d target/dependency-check-report ]; then
             cp -a target/dependency-check-report/. audit-results/
           fi
@@ -117,7 +117,7 @@ jobs:
           set +e
           mvn --batch-mode --no-transfer-progress org.codehaus.mojo:license-maven-plugin:2.7.1:aggregate-third-party-report -Dlicense.outputDirectory=audit-results/licenses
           result=$?
-          printf '%s\\n' "$result" | tee audit-results/license-report-exit-code.txt
+          printf '%s\n' "$result" | tee audit-results/license-report-exit-code.txt
           mkdir -p audit-results/licenses
           for path in target/generated-sources/license target/site; do
             if [ -d "$path" ]; then cp -a "$path"/. audit-results/licenses/; fi
