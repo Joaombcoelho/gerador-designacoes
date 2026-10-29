@@ -1,3 +1,11 @@
+## 7. Atualização de estado — instalador 1.2.5 (2026-10-29)
+
+O usuário informou que gerou o instalador Windows `1.2.5`, executou a atualização de uma instalação existente e confirmou que a atualização funcionou e que o banco de dados foi preservado. Este resultado valida, conforme relato do responsável, o cenário de atualização efetivamente testado.
+
+Esta confirmação atualiza a lista de pendências da seção anterior: a geração do instalador e a atualização de instalação existente com preservação do banco não ficam mais pendentes sem validação. O registro é baseado no relato do usuário; não foram anexados log de empacotamento, hash do instalador ou inventário detalhado dos dados antes/depois.
+
+Continuam pendentes a instalação limpa, repetição da atualização, desinstalação/reinstalação, validação detalhada da integridade referencial e ensaio integrado de criação/retenção/restauração de backups, além das verificações de histórico Git do PDF e dependências/licenças. Não se deve interpretar a validação relatada como aprovação automática desses cenários.
+
 # Auditoria — preservação do histórico de designações
 
 **Base inspecionada:** `main` em `314de245c1f75c9db9511e621defc726559f38f4` (merge da PR #96).  
