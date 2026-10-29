@@ -89,8 +89,21 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           set +e
-          mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.1.0:check -DnvdApiKey="$NVD_API_KEY" -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11
-          result=$?
+          result=1
+          for attempt in 1 2 3; do
+            echo "Execução do Dependency-Check: tentativa $attempt de 3"
+            mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.1.0:check -DnvdApiKey="$NVD_API_KEY" -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
+            result=${PIPESTATUS[0]}
+            printf '%s\\n' "$result" > "audit-results/dependency-check-attempt-$attempt-exit-code.txt"
+            if [ "$result" -eq 0 ]; then
+              break
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              wait_seconds=$((attempt * 30))
+              echo "Scanner falhou com código $result; nova tentativa em $wait_seconds segundos."
+              sleep "$wait_seconds"
+            fi
+          done
           printf '%s\\n' "$result" | tee audit-results/dependency-check-exit-code.txt
           if [ -d target/dependency-check-report ]; then
             cp -a target/dependency-check-report/. audit-results/
@@ -119,6 +132,23 @@ jobs:
           path: audit-results/
           if-no-files-found: error
           retention-days: 30
+
+      - name: Exigir conclusão válida dos relatórios
+        if: always()
+        env:
+          DEPENDENCY_CHECK_OUTCOME: ${{ steps.dependency_check.outcome }}
+          LICENSE_REPORT_OUTCOME: ${{ steps.license_report.outcome }}
+        run: |
+          failed=0
+          if [ "$DEPENDENCY_CHECK_OUTCOME" != "success" ]; then
+            echo "::error::Dependency-Check não concluiu com sucesso após as tentativas. A auditoria de vulnerabilidades é inconclusiva."
+            failed=1
+          fi
+          if [ "$LICENSE_REPORT_OUTCOME" != "success" ]; then
+            echo "::error::A geração do relatório de licenças transitivas falhou."
+            failed=1
+          fi
+          exit "$failed"
 
   inventario-empacotamento-windows:
     name: Inventário do empacotamento Windows
