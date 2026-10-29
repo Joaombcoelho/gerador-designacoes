@@ -97,7 +97,7 @@ jobs:
           result=1
           for attempt in 1 2 3; do
             echo "Execução do Dependency-Check: tentativa $attempt de 3"
-            mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.2.2:check -DnvdApiKey="$NVD_API_KEY" -DossIndexAnalyzerUrl=https://api.guide.sonatype.com -DossIndexAnalyzerPassword="$SONATYPE_GUIDE_PAT" -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
+            mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.2.2:check -DnvdApiKey="$NVD_API_KEY" -DossIndexAnalyzerUrl=https://api.guide.sonatype.com -DossIndexPassword="$SONATYPE_GUIDE_PAT" -Dformat=ALL -Dodc.outputDirectory=target -DfailBuildOnCVSS=11 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
             result=${PIPESTATUS[0]}
             printf '%s\n' "$result" > "audit-results/dependency-check-attempt-$attempt-exit-code.txt"
             if [ "$result" -eq 0 ]; then
@@ -110,8 +110,25 @@ jobs:
             fi
           done
           printf '%s\n' "$result" | tee audit-results/dependency-check-exit-code.txt
-          if [ -d target/dependency-check-report ]; then
-            cp -a target/dependency-check-report/. audit-results/
+          report_count=0
+          for report in target/dependency-check-report.*; do
+            [ -f "$report" ] || continue
+            cp "$report" audit-results/
+            report_count=$((report_count + 1))
+          done
+          if [ "$result" -eq 0 ]; then
+            for required_report in audit-results/dependency-check-report.html audit-results/dependency-check-report.json audit-results/dependency-check-report.xml; do
+              if [ ! -s "$required_report" ]; then
+                echo "::error::Relatório obrigatório ausente ou vazio: $required_report"
+                result=3
+              fi
+            done
+          fi
+          printf '%s\\n' "$result" | tee audit-results/dependency-check-exit-code.txt
+          if [ "$report_count" -eq 0 ]; then
+            echo "::error::Nenhum relatório do Dependency-Check foi encontrado em target/dependency-check-report.*."
+            result=3
+            printf '%s\\n' "$result" | tee audit-results/dependency-check-exit-code.txt
           fi
           exit "$result"
 
