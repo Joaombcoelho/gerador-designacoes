@@ -87,12 +87,17 @@ jobs:
         continue-on-error: true
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          SONATYPE_GUIDE_PAT: ${{ secrets.SONATYPE_GUIDE_PAT }}
         run: |
+          if [ -z "$SONATYPE_GUIDE_PAT" ]; then
+            echo "::error::Configure o segredo SONATYPE_GUIDE_PAT com um Personal Access Token do Sonatype Guide para autenticar o OSS Index."
+            exit 2
+          fi
           set +e
           result=1
           for attempt in 1 2 3; do
             echo "Execução do Dependency-Check: tentativa $attempt de 3"
-            mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.1.0:check -DnvdApiKey="$NVD_API_KEY" -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
+            mvn --batch-mode --no-transfer-progress org.owasp:dependency-check-maven:12.2.2:check -DnvdApiKey="$NVD_API_KEY" -DossIndexAnalyzerUrl=https://api.guide.sonatype.com -DossIndexAnalyzerPassword="$SONATYPE_GUIDE_PAT" -Dformat=ALL -DoutputDirectory=target/dependency-check-report -DfailBuildOnCVSS=11 2>&1 | tee "audit-results/dependency-check-attempt-$attempt.log"
             result=${PIPESTATUS[0]}
             printf '%s\n' "$result" > "audit-results/dependency-check-attempt-$attempt-exit-code.txt"
             if [ "$result" -eq 0 ]; then
