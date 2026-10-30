@@ -1,3 +1,19 @@
+> **Atualização de auditoria — 2026-10-29: verificação do histórico Git do PDF S-140 preenchido**
+>
+> A consulta ao histórico por caminho confirmou que `modelos/S-140_T_Preenchido.pdf` estava presente no commit `33300ae0a7af3129eec85c18515c18e337b8aee7` (2026-10-09) e foi removido no commit `4eeddd89ddcece218b6a46d9ca7ec5d80b22f156` (2026-10-23). O arquivo não consta na árvore atual de `main`, mas o objeto binário permanece alcançável pelo histórico Git; a remoção em um commit posterior não equivale à eliminação do histórico.
+>
+> **Limite:** não foi possível inspecionar o conteúdo binário do PDF pelas ferramentas desta revisão. Portanto, não há conclusão sobre a presença/ausência de dados pessoais. A revisão do histórico está concluída quanto à inclusão, remoção e persistência histórica do objeto; a classificação de privacidade do conteúdo e eventual saneamento do histórico permanecem pendentes se o documento continha informações reais. Nenhuma reescrita de histórico foi executada.
+>
+> ---
+> **Atualização de estado — 2026-10-29 (instalador 1.2.5 e atualização de instalação existente)**
+>
+> O responsável pelo projeto informou que gerou o instalador Windows da versão `1.2.5`, executou a atualização e confirmou que o processo funcionou e que o banco de dados existente foi preservado.
+>
+> **Evidência e limites:** este registro é baseado na validação manual relatada pelo usuário; não foram anexados log de empacotamento, arquivo EXE, hash SHA-256, capturas ou inventário antes/depois do banco. A evidência confirma o cenário de atualização relatado, mas não comprova instalação limpa, repetição da atualização, desinstalação/reinstalação, restauração de backup ou validação de todas as tabelas e configurações.
+>
+> **Estado atualizado:** a geração do instalador `1.2.5` e a atualização de uma instalação existente com preservação do banco deixam de ser pendências sem validação e passam a constar como **aprovadas conforme relato do usuário**. Permanecem pendentes os demais itens sem evidência: instalação limpa, ensaio integrado de backup/restauração, revisão do histórico Git do PDF anteriormente sinalizado e conclusão da análise de dependências/licenças. Não declarar o lançamento integralmente liberado apenas com base neste teste.
+>
+> ---
 > **Atualização de estado — 2026-10-28 (após a PR #112)**  
 >  
 > Esta atualização complementa a auditoria histórica abaixo, originalmente referente a 2026-10-23 e ao commit `2ce671234f37fe2b05fff44bf68df8421333d1ae`. A `main` foi verificada em `23f51c7e7561272e173e83edb7bbe9bb1a38e818`, merge da PR #112 (`feat(history): require explicit confirmation for retroactive corrections`).  

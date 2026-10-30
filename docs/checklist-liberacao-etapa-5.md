@@ -1,3 +1,30 @@
+> **Atualização de auditoria — 2026-10-29: histórico Git do PDF S-140 preenchido**
+>
+> | Item | Resultado da revisão | Limite/ação restante |
+> |---|---|---|
+> | Arquivo na árvore atual | Não consta em `main`. | Confirma apenas a árvore atual. |
+> | Histórico do arquivo | Presente no commit `33300ae0a7af3129eec85c18515c18e337b8aee7` (2026-10-09); removido no commit `4eeddd89ddcece218b6a46d9ca7ec5d80b22f156` (2026-10-23). | O blob permanece no histórico Git. |
+> | Conteúdo e privacidade | **Não conclusivo** | A revisão não conseguiu abrir/inspecionar o binário; não se afirma se continha dados pessoais. |
+> | Saneamento do histórico | **Não executado** | Se o arquivo contiver dados reais sensíveis, avaliar reescrita do histórico e as implicações para clones/forks. |
+>
+> A remoção do arquivo da árvore atual é positiva, mas não apaga as versões históricas. Não realizar reescrita destrutiva sem confirmar a necessidade e planejar os efeitos no repositório público.
+>
+> ---
+> **Atualização de estado — 2026-10-29: instalador 1.2.5**
+>
+> O usuário confirmou que gerou o instalador Windows `1.2.5`, executou a atualização de uma instalação existente e verificou que a atualização funcionou e o banco foi preservado.
+>
+> | Item | Estado atualizado | Evidência/limite |
+> |---|---|---|
+> | Geração do instalador `1.2.5` | **Aprovado conforme relato do usuário** | Instalador gerado; log, artefato e hash SHA-256 não foram anexados ao checklist. |
+> | Atualização de instalação existente | **Aprovado conforme relato do usuário** | Atualização executada com sucesso e banco existente preservado, conforme validação manual informada. |
+> | Instalação limpa | **Pendente** | Não foi relatada nem documentada nesta validação. |
+> | Restauração de backup em ensaio integrado | **Pendente** | Não foi relatada nem documentada nesta validação. |
+> | Histórico Git do PDF sinalizado e análise de dependências/licenças | **Pendente** | Exigem evidência própria; não são cobertos pelo teste do instalador. |
+>
+> **Decisão:** o bloqueio específico de falta de evidência sobre geração do instalador e atualização de uma instalação existente foi reduzido pelos resultados relatados. A liberação integral continua condicionada às pendências acima e à revisão das evidências completas.
+>
+> ---
 > **Atualização de estado — 2026-10-28, após merge da PR #112**  
 >  
 > **Commit atual de `main`:** [`23f51c7e7561272e173e83edb7bbe9bb1a38e818`](https://github.com/Joaombcoelho/gerador-designacoes/commit/23f51c7e7561272e173e83edb7bbe9bb1a38e818). A PR [#112](https://github.com/Joaombcoelho/gerador-designacoes/pull/112) está mesclada. Esta atualização complementa o checklist original de 2026-10-23; as seções abaixo ainda registram o retrato histórico do commit então examinado e não devem ser interpretadas isoladamente como estado atual.  
