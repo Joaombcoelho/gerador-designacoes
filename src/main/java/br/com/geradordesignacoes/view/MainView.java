@@ -25,6 +25,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -114,9 +115,16 @@ public class MainView {
 
     private void criarLayout() {
 
-        root.setLeft(
-                criarMenuLateral()
-        );
+        ScrollPane menuRolavel = new ScrollPane(criarMenuLateral());
+        menuRolavel.setFitToWidth(true);
+        menuRolavel.setFitToHeight(false);
+        menuRolavel.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        menuRolavel.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        menuRolavel.setMinWidth(230);
+        menuRolavel.setPrefWidth(250);
+        menuRolavel.getStyleClass().add("sidebar-scroll");
+
+        root.setLeft(menuRolavel);
 
         root.setTop(
                 criarBarraSuperior()
@@ -132,6 +140,9 @@ public class MainView {
         sidebar.getStyleClass().add(
                 "sidebar"
         );
+        sidebar.setMinWidth(230);
+        sidebar.setPrefWidth(250);
+        sidebar.setFillWidth(true);
 
 
         Label titulo =

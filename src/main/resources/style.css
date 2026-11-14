@@ -31,6 +31,22 @@
    BARRA LATERAL
    ============================================================ */
 
+.sidebar-scroll {
+    -fx-background-color: #111317;
+    -fx-background: #111317;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.sidebar-scroll > .viewport {
+    -fx-background-color: #111317;
+}
+
+.sidebar-scroll > .corner {
+    -fx-background-color: #111317;
+}
+
+
 .sidebar {
     -fx-background-color: #111317;
 
